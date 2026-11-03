@@ -10,6 +10,8 @@ import { SessionExpirationService } from '../infrastructure/session/session-expi
 import { RequestPasswordResetCommand } from '../domain/model/commands/request-password-reset.command';
 import { ResetPasswordCommand } from '../domain/model/commands/reset-password.command';
 import { UserRole } from '../domain/model/value-objects/user-role';
+import { SessionParticipant } from './session-participant';
+export type { SessionParticipant } from './session-participant';
 
 export type IamError =
   | 'INVALID_CREDENTIALS'
@@ -22,13 +24,6 @@ export type PasswordRecoveryError =
   'INVALID_LINK' | 'RATE_LIMITED' | 'CONNECTION_ERROR' | 'REQUEST_REJECTED' | 'UNEXPECTED_ERROR';
 
 type IamOperation = 'sign-in' | 'sign-up';
-
-export interface SessionParticipant {
-  readonly id: number;
-  readonly displayName: string;
-  readonly experience: UserRole;
-  readonly initialRoute: string;
-}
 
 const ROLE_PRIORITY: readonly UserRole[] = ['COOPERATIVE_DIRECTOR', 'AGRONOMIST', 'FARMER'];
 
