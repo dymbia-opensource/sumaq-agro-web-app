@@ -12,7 +12,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslateService, TranslatePipe } from '@ngx-translate/core';
 import { CropHealthStore } from '../../../application/crop-health.store';
 import { CropPlotSelector } from '../../components/plot-selector/plot-selector';
-import { observationImage } from '../../utils/observation-image';
+import { observationImage } from '../../../infrastructure/observation-image';
 import * as L from 'leaflet';
 
 @Component({

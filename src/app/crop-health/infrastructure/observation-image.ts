@@ -1,5 +1,5 @@
-import { FieldPlot } from '../../../field-management/domain/model/entities/field-plot.entity';
-import { SatelliteObservation } from '../../domain/model/entities/satellite-observation.entity';
+import { FieldPlot } from '../../field-management/domain/model/entities/field-plot.entity';
+import { SatelliteObservation } from '../domain/model/entities/satellite-observation.entity';
 
 /** Creates a branded PNG from the recorded observation, without changing its values. */
 export async function observationImage(plot: FieldPlot, observation: SatelliteObservation, labels: Record<string, string>, locale: string): Promise<Blob> {
