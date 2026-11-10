@@ -1,7 +1,7 @@
 import { Routes } from '@angular/router';
+import { SubscriptionsShell } from './presentation/components/subscriptions-shell/subscriptions-shell';
 
-/** Lazy-loaded routes for the Subscriptions and Payments context. */
-export const subscriptionsRoutes: Routes = [
+const subscriptionPages: Routes = [
   {
     path: 'plans',
     loadComponent: () =>
@@ -25,4 +25,13 @@ export const subscriptionsRoutes: Routes = [
     title: 'Suscripción y pagos | SumaqAgro',
   },
   { path: '', redirectTo: 'plans', pathMatch: 'full' },
+];
+
+/** Lazy-loaded routes for the Subscriptions and Payments context. */
+export const subscriptionsRoutes: Routes = [
+  {
+    path: '',
+    component: SubscriptionsShell,
+    children: subscriptionPages,
+  },
 ];

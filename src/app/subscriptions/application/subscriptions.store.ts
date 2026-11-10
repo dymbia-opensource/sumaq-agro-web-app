@@ -1,4 +1,5 @@
-import { computed, inject, Injectable, Signal, signal } from '@angular/core';
+import { computed, DestroyRef, inject, Injectable, Signal, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { forkJoin, map, Observable, of, switchMap } from 'rxjs';
 import { Money } from '../../shared/domain/model/money';
 import { FileDownloader } from '../../shared/infrastructure/file-downloader';
@@ -28,11 +29,11 @@ export interface AppliedCoupon {
  * @remarks
  * The views send commands and read signals. Every change is applied to a copy
  * of the subscription; the shown state is only updated when the API confirms.
- * Other contexts (Field Management, IAM) read this store, never its API.
  * Policy P2 belongs to the backend; it is simulated here until the RESTful API exists.
  */
-@Injectable({ providedIn: 'root' })
+@Injectable()
 export class SubscriptionsStore {
+  private readonly destroyRef = inject(DestroyRef);
   private readonly subscriptionsApi = inject(SubscriptionsApi);
   private readonly fileDownloader = inject(FileDownloader);
 
@@ -102,13 +103,16 @@ export class SubscriptionsStore {
   /** Loads the plans of the catalog. */
   loadPlans = (): void => {
     this.startLoading();
-    this.subscriptionsApi.getPlans().subscribe({
-      next: (plans) => {
-        this.plansSignal.set(plans);
-        this.loadingSignal.set(false);
-      },
-      error: (error) => this.fail(error, 'subscriptions.errors.load-plans'),
-    });
+    this.subscriptionsApi
+      .getPlans()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (plans) => {
+          this.plansSignal.set(plans);
+          this.loadingSignal.set(false);
+        },
+        error: (error) => this.fail(error, 'subscriptions.errors.load-plans'),
+      });
   };
 
   /**
@@ -130,6 +134,7 @@ export class SubscriptionsStore {
             : of([]);
           return payments$.pipe(map((payments) => ({ plans, ready, payments })));
         }),
+        takeUntilDestroyed(this.destroyRef),
       )
       .subscribe({
         next: ({ plans, ready, payments }) => {
@@ -173,17 +178,20 @@ export class SubscriptionsStore {
   applyCoupon = (command: ApplyCouponCommand): void => {
     if (!this.selectedPlanSignal()) return;
     this.errorSignal.set(null);
-    this.subscriptionsApi.getCouponDiscount(command.couponCode).subscribe({
-      next: (discountPercent) => {
-        if (discountPercent === null) {
-          this.couponSignal.set(null);
-          this.errorSignal.set('subscriptions.errors.invalid-coupon');
-          return;
-        }
-        this.couponSignal.set({ code: command.couponCode.trim().toUpperCase(), discountPercent });
-      },
-      error: (error) => this.fail(error, 'subscriptions.errors.invalid-coupon'),
-    });
+    this.subscriptionsApi
+      .getCouponDiscount(command.couponCode)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (discountPercent) => {
+          if (discountPercent === null) {
+            this.couponSignal.set(null);
+            this.errorSignal.set('subscriptions.errors.invalid-coupon');
+            return;
+          }
+          this.couponSignal.set({ code: command.couponCode.trim().toUpperCase(), discountPercent });
+        },
+        error: (error) => this.fail(error, 'subscriptions.errors.invalid-coupon'),
+      });
   };
 
   /**
@@ -213,23 +221,25 @@ export class SubscriptionsStore {
     this.processingSignal.set(true);
     this.errorSignal.set(null);
 
-    this.chargeAndActivate(userId, plan, current, command, status).subscribe({
-      next: ({ subscription, payment }) => {
-        if (subscription) {
-          subscription.plan = plan;
-          this.subscriptionSignal.set(subscription);
-          this.selectedPlanSignal.set(null);
-          this.couponSignal.set(null);
-        }
-        if (payment) this.paymentsSignal.update((payments) => [payment, ...payments]);
-        this.paymentResultSignal.set(status);
-        this.processingSignal.set(false);
-      },
-      error: (error) => {
-        this.processingSignal.set(false);
-        this.fail(error, 'subscriptions.errors.payment');
-      },
-    });
+    this.chargeAndActivate(userId, plan, current, command, status)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: ({ subscription, payment }) => {
+          if (subscription) {
+            subscription.plan = plan;
+            this.subscriptionSignal.set(subscription);
+            this.selectedPlanSignal.set(null);
+            this.couponSignal.set(null);
+          }
+          if (payment) this.paymentsSignal.update((payments) => [payment, ...payments]);
+          this.paymentResultSignal.set(status);
+          this.processingSignal.set(false);
+        },
+        error: (error) => {
+          this.processingSignal.set(false);
+          this.fail(error, 'subscriptions.errors.payment');
+        },
+      });
   };
 
   /**
@@ -250,17 +260,20 @@ export class SubscriptionsStore {
     }
     this.processingSignal.set(true);
     this.errorSignal.set(null);
-    this.subscriptionsApi.updateSubscription(cancelled).subscribe({
-      next: (saved) => {
-        saved.plan = subscription.plan;
-        this.subscriptionSignal.set(saved);
-        this.processingSignal.set(false);
-      },
-      error: (error) => {
-        this.processingSignal.set(false);
-        this.fail(error, 'subscriptions.errors.cancel');
-      },
-    });
+    this.subscriptionsApi
+      .updateSubscription(cancelled)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (saved) => {
+          saved.plan = subscription.plan;
+          this.subscriptionSignal.set(saved);
+          this.processingSignal.set(false);
+        },
+        error: (error) => {
+          this.processingSignal.set(false);
+          this.fail(error, 'subscriptions.errors.cancel');
+        },
+      });
   };
 
   /**
