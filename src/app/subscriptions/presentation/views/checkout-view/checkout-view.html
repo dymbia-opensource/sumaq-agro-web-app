@@ -72,12 +72,21 @@
 
     <section class="payment-panel">
       <h2>{{ 'subscriptions.checkout.payment-title' | translate }}</h2>
-      <app-coupon-form [disabled]="processing()" (apply)="onApplyCoupon($event)" />
+      @if (demoPaymentsEnabled) {
+        <app-coupon-form [disabled]="processing()" (apply)="onApplyCoupon($event)" />
+      }
 
       <mat-card appearance="outlined" class="demo-notice">
         <mat-card-content>
           <mat-icon aria-hidden="true">info</mat-icon>
-          <p>{{ 'subscriptions.checkout.demo-notice' | translate }}</p>
+          <p>
+            {{
+              (demoPaymentsEnabled
+                ? 'subscriptions.checkout.demo-notice'
+                : 'subscriptions.checkout.unavailable'
+              ) | translate
+            }}
+          </p>
         </mat-card-content>
       </mat-card>
 
@@ -85,7 +94,7 @@
         <button mat-stroked-button type="button" [disabled]="processing()" (click)="onReturnToCatalog()">
           {{ 'subscriptions.checkout.back' | translate }}
         </button>
-        @if (paymentResult() !== paymentStatuses.COMPLETED) {
+        @if (demoPaymentsEnabled && paymentResult() !== paymentStatuses.COMPLETED) {
           <div class="demo-payment-actions">
             <button
               mat-stroked-button

@@ -5,6 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { Router, RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
+import { environment } from '../../../../../environments/environment';
 import { Breadcrumb, PageHeader } from '../../../../shared/presentation/components/page-header/page-header';
 import { MessageCard } from '../../../../shared/presentation/components/message-card/message-card';
 import { SubscriptionsStore } from '../../../application/subscriptions.store';
@@ -50,6 +51,7 @@ export class CheckoutView {
   readonly error = this.store.error;
 
   protected readonly paymentStatuses = PaymentStatus;
+  protected readonly demoPaymentsEnabled = environment.useMockSubscriptionPayments;
   protected readonly breadcrumbs: Breadcrumb[] = [
     { label: 'subscriptions.catalog.title', link: '/subscriptions/plans' },
     { label: 'subscriptions.checkout.title' },
@@ -78,6 +80,8 @@ export class CheckoutView {
 
   /** Submits a demo payment using the current session identity. */
   onPay(status: PaymentStatus.COMPLETED | PaymentStatus.REJECTED): void {
+    if (!this.demoPaymentsEnabled) return;
+
     const amount = this.amount();
     const userId = this.iamStore.activeUser()?.id ?? null;
 
@@ -93,7 +97,6 @@ export class CheckoutView {
     this.store.submitPayment(
       new SubmitPaymentCommand({
         subscriptionId: this.subscriptionId(),
-        cardToken: 'demo-payment-token',
         amount,
         simulatedStatus: status,
       }),

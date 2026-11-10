@@ -30,7 +30,6 @@ export interface AppliedCoupon {
  * @remarks
  * The views send commands and read signals. Every change is applied to a copy
  * of the subscription; the shown state is only updated when the API confirms.
- * Policy P2 belongs to the backend; it is simulated here until the RESTful API exists.
  */
 @Injectable()
 export class SubscriptionsStore {
@@ -196,15 +195,7 @@ export class SubscriptionsStore {
   };
 
   /**
-   * Sends the payment of the selected plan.
-   *
-   * @remarks
-   * The first approved payment creates the subscription; later ones change the
-   * plan of the existing one. A rejected payment never changes the plan, and
-   * it is only saved in the history when the user already has a subscription.
-   * The card number never arrives here, only its token.
-   * Temporary, until the backend exists: it simulates P2 (an approved payment
-   * activates the plan) because Niubiz confirms it on the server.
+   * Submits checkout and applies the result returned by the API.
    * @param userId - Current user identifier supplied by the container view.
    */
   submitPayment = (command: SubmitPaymentCommand, userId: number): void => {
@@ -218,14 +209,20 @@ export class SubscriptionsStore {
     if (current && current.userId !== userId) return;
     if (command.subscriptionId !== (current?.id ?? null)) return;
 
-    const status: PaymentResult = command.simulatedStatus ?? PaymentStatus.COMPLETED;
     this.processingSignal.set(true);
     this.errorSignal.set(null);
 
-    this.chargeAndActivate(userId, plan, current, command, status)
+    this.subscriptionsApi
+      .submitCheckout({
+        userId,
+        plan,
+        billingCycle: this.billingCycleSignal(),
+        currentSubscription: current,
+        command,
+      })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: ({ subscription, payment }) => {
+        next: ({ status, subscription, payment }) => {
           if (subscription) {
             subscription.plan = plan;
             this.subscriptionSignal.set(subscription);
@@ -300,55 +297,6 @@ export class SubscriptionsStore {
   };
 
   // Private helpers
-
-  /**
-   * Activates the plan when the payment is approved and saves the payment.
-   * The subscription is saved first because the payment needs its id.
-   */
-  private chargeAndActivate(
-    userId: number,
-    plan: Plan,
-    current: Subscription | null,
-    command: SubmitPaymentCommand,
-    status: PaymentResult,
-  ): Observable<{ subscription: Subscription | null; payment: Payment | null }> {
-    if (status === PaymentStatus.REJECTED) {
-      if (!current) return of({ subscription: null, payment: null });
-      return this.subscriptionsApi
-        .createPayment(this.newPayment(current.id as number, command.amount, status))
-        .pipe(map((payment) => ({ subscription: null, payment })));
-    }
-
-    const today = new Date();
-    const cycle = this.billingCycleSignal();
-    let subscription$: Observable<Subscription>;
-    if (current) {
-      const renewed = current.copy();
-      renewed.changePlan(plan, cycle, today);
-      subscription$ = this.subscriptionsApi.updateSubscription(renewed);
-    } else {
-      const created = Subscription.start({ userId, plan, billingCycle: cycle, startDate: today });
-      subscription$ = this.subscriptionsApi.createSubscription(created);
-    }
-    return subscription$.pipe(
-      switchMap((subscription) =>
-        this.subscriptionsApi
-          .createPayment(this.newPayment(subscription.id as number, command.amount, status))
-          .pipe(map((payment) => ({ subscription, payment }))),
-      ),
-    );
-  }
-
-  private newPayment(subscriptionId: number, amount: Money, status: PaymentResult): Payment {
-    return new Payment({
-      id: 0,
-      subscriptionId,
-      amount,
-      transactionToken: `demo-tx-${Date.now()}`,
-      status,
-      paidAt: new Date(),
-    });
-  }
 
   /** Completes the plan of a subscription from the catalog. */
   private withPlan(subscription: Subscription, plans: Plan[]): Subscription {
