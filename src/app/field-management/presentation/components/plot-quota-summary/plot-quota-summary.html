@@ -32,13 +32,13 @@
   } @else {
     <p role="status">
       {{
-        (store.loading()
+        (store.loading() || checkingPlan()
           ? 'field-management.plots.quota-checking'
           : 'field-management.errors.quota-unavailable'
         ) | translate
       }}
     </p>
-    @if (!store.loading() && store.currentUserId() !== null) {
+    @if (!store.loading() && !checkingPlan() && store.currentUserId() !== null) {
       <button mat-stroked-button (click)="refresh()">{{ 'common.retry' | translate }}</button>
     }
   }

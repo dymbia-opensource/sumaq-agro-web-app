@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { iamGuard } from './iam/infrastructure/iam.guard';
+import { activeSubscriptionGuard } from './subscriptions/presentation/active-subscription.guard';
 
 const layout = () => import('./shared/presentation/components/layout/layout').then((m) => m.Layout);
 
@@ -54,10 +55,16 @@ export const routes: Routes = [
     canActivate: [iamGuard],
     canActivateChild: [iamGuard],
     children: [
-      { path: 'field-management', loadChildren: fieldManagementRoutes },
-      { path: 'crop-health', loadChildren: cropHealthRoutes },
-      { path: 'profiles', loadChildren: profilesRoutes },
-      { path: 'harvest-certification', loadChildren: harvestCertificationRoutes },
+      {
+        path: '',
+        canActivateChild: [activeSubscriptionGuard],
+        children: [
+          { path: 'field-management', loadChildren: fieldManagementRoutes },
+          { path: 'crop-health', loadChildren: cropHealthRoutes },
+          { path: 'profiles', loadChildren: profilesRoutes },
+          { path: 'harvest-certification', loadChildren: harvestCertificationRoutes },
+        ],
+      },
       { path: 'subscriptions', loadChildren: subscriptionsRoutes },
       { path: '**', loadComponent: pageNotFound, title: `${baseTitle} - Page Not Found` },
     ],

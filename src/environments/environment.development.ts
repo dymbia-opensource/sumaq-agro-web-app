@@ -21,6 +21,7 @@ export const environment = {
   platformProviderAgronomistAssignmentsEndpointPath: '/agronomist-assignments',
 
   // Subscriptions and Payments
+  useMockSubscriptionPayments: true,
   platformProviderPlansEndpointPath: '/plans',
   platformProviderSubscriptionsEndpointPath: '/subscriptions',
   platformProviderPaymentsEndpointPath: '/payments',

@@ -10,6 +10,7 @@ import { Breadcrumb, PageHeader } from '../../../../shared/presentation/componen
 import { MessageCard } from '../../../../shared/presentation/components/message-card/message-card';
 import { SubscriptionsStore } from '../../../application/subscriptions.store';
 import { CancelSubscriptionCommand } from '../../../domain/model/commands/cancel-subscription.command';
+import { IamStore } from '../../../../iam/application/iam.store';
 
 /** Current subscription and payment history of the signed-in user. */
 @Component({
@@ -30,6 +31,7 @@ import { CancelSubscriptionCommand } from '../../../domain/model/commands/cancel
 })
 export class BillingHistoryView {
   private readonly store = inject(SubscriptionsStore);
+  private readonly iamStore = inject(IamStore);
 
   readonly subscription = this.store.subscription;
   readonly payments = this.store.payments;
@@ -46,8 +48,11 @@ export class BillingHistoryView {
   ];
 
   constructor() {
-    const userId = this.store.currentUserId();
-    if (userId !== null) this.store.loadMySubscription(userId);
+    const userId = this.iamStore.activeUser()?.id ?? null;
+
+    if (userId !== null) {
+      this.store.loadMySubscription(userId);
+    }
   }
 
   /** Cancels renewal only after the user confirms the action. */

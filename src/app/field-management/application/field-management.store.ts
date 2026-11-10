@@ -1,28 +1,5 @@
-import {
-  computed,
-  DestroyRef,
-  effect,
-  inject,
-  Injectable,
-  Signal,
-  signal,
-  untracked,
-} from '@angular/core';
-import {
-  catchError,
-  tap,
-  concatMap,
-  forkJoin,
-  from,
-  map,
-  Observable,
-  of,
-  retry,
-  Subscription,
-  switchMap,
-  throwError,
-  toArray,
-} from 'rxjs';
+import { computed, DestroyRef, effect, inject, Injectable, Signal, signal, untracked, } from '@angular/core';
+import { catchError, tap, concatMap, forkJoin, from, map, Observable, of, retry, Subscription, switchMap, throwError, toArray, } from 'rxjs';
 import { IamStore } from '../../iam/application/iam.store';
 import { OfflineSync } from '../infrastructure/offline/offline-sync';
 import { PendingOperationType } from '../infrastructure/offline/pending-operation';
@@ -45,21 +22,11 @@ import { CampaignStatus, CropCampaign, CropType } from '../domain/model/entities
 import { ExpenseCategory, ExpenseEntry } from '../domain/model/entities/expense-entry.entity';
 import { FieldPlot, SoilBaseline } from '../domain/model/entities/field-plot.entity';
 import { FieldManagementApi } from '../infrastructure/field-management-api';
-import {
-  ExpenseCommand,
-  PendingExpenseAssembler,
-  PendingExpensePayload,
-} from '../infrastructure/assemblers/pending-expense-assembler';
+import { ExpenseCommand, PendingExpenseAssembler, PendingExpensePayload, } from '../infrastructure/assemblers/pending-expense-assembler';
 import { FileDownloader } from '../../shared/infrastructure/file-downloader';
+import { NumberLiteralType } from 'typescript';
 
-/**
- * Plots included in the Seed plan (demo quota until subscriptions are implemented).
- *
- * @remarks
- * The quota belongs to Subscriptions and Payments; with the RESTful API,
- * Field Management asks for it before registering a plot.
- */
-export const SEED_PLAN_PLOT_QUOTA = 4;
+
 
 /** Any of the three expenses of the cost ledger (US-37 to US-39). */
 export type RecordExpenseCommand = ExpenseCommand;
@@ -114,6 +81,7 @@ export class FieldManagementStore {
   private readonly quotaLoaded = signal(false);
   private readonly plotMutationBusy = signal(false);
   private readonly registrationIncompleteSignal = signal(false);
+  private readonly planPlotQuota = signal<{ ownerUserId: number; limit: number } | null>(null);
   private ledgersLoad?: Subscription;
 
   /** Plots of the producer. */
@@ -149,17 +117,29 @@ export class FieldManagementStore {
   /** Number of plots of the producer. */
   readonly plotCount = computed(() => this.plots().length);
 
-  /** Plots allowed by the plan of the producer. */
-  readonly plotQuota = signal(SEED_PLAN_PLOT_QUOTA).asReadonly();
+  /** Stores the plan limit for the current producer. */
+  setPlanPlotQuota(ownerUserId: number, limit: number | null): void {
+    if (ownerUserId !== this.currentUserId()) return;
 
-  /** Quota is known only after a successful read for the currently selected producer. */
-  readonly plotQuotaReady = computed(
+    this.planPlotQuota.set(
+      limit !== null && Number.isSafeInteger(limit) && limit > 0 ? { ownerUserId, limit } : null,
+    );
+  }
+
+  readonly plotQuota = computed(() => {
+    const quota = this.planPlotQuota();
+    return quota && quota.ownerUserId === this.currentUserId() ? quota.limit : 0;
+  });
+
+  readonly ownedPlotsReady = computed(
     () =>
       this.currentUserId() !== null &&
       this.quotaOwner() === this.currentUserId() &&
       this.quotaLoaded() &&
       !this.plotsLoading(),
   );
+
+  readonly plotQuotaReady = computed(() => this.ownedPlotsReady() && this.plotQuota() > 0);
 
   /** Remaining slots never become negative, including legacy accounts above the quota. */
   readonly remainingPlotSlots = computed(() => Math.max(0, this.plotQuota() - this.plotCount()));
@@ -522,7 +502,7 @@ export class FieldManagementStore {
     const plot = this.findPlot(id);
     if (
       ownerUserId === null ||
-      !this.plotQuotaReady() ||
+      !this.ownedPlotsReady() ||
       !plot ||
       plot.ownerUserId !== ownerUserId
     ) {
@@ -988,6 +968,7 @@ export class FieldManagementStore {
     this.plotMutationBusy.set(false);
     this.quotaLoaded.set(false);
     this.quotaOwner.set(null);
+    this.planPlotQuota.set(null);
     this.registrationIncompleteSignal.set(false);
     this.plotsLoadingSignal.set(false);
     this.plotsLoad?.unsubscribe();

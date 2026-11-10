@@ -10,6 +10,12 @@
 
 @if (error(); as error) {
   <app-message-card icon="error" [message]="error | translate" [alert]="true" />
+} @else if (accessCheckFailed()) {
+  <app-message-card
+    icon="warning"
+    [message]="'subscriptions.errors.load-subscription' | translate"
+    [alert]="true"
+  />
 }
 
 <section class="cycle-picker" [attr.aria-label]="'subscriptions.catalog.billing-cycle' | translate">
