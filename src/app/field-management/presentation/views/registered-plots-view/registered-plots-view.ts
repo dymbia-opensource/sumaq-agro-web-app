@@ -48,6 +48,7 @@ export class RegisteredPlotsView {
   readonly plotQuota = this.fieldManagementStore.plotQuota;
   readonly canRegisterPlot = this.fieldManagementStore.canRegisterPlot;
   readonly plotQuotaReady = this.fieldManagementStore.plotQuotaReady;
+  readonly ownedPlotsReady = this.fieldManagementStore.ownedPlotsReady;
   readonly plotQuotaReached = this.fieldManagementStore.plotQuotaReached;
   readonly registrationIncomplete = this.fieldManagementStore.registrationIncomplete;
 

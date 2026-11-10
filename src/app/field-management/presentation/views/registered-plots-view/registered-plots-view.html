@@ -24,7 +24,7 @@
       [plot]="plot"
       [campaign]="campaigns().get(plot.id)"
       [position]="index + 1"
-      [deletionDisabled]="loading() || !plotQuotaReady()"
+      [deletionDisabled]="loading() || !ownedPlotsReady()"
       (viewOnDashboard)="onSelectPlot($event)"
       (viewMonitoring)="onViewMonitoring($event)"
       (delineate)="onDelineate($event)"
@@ -40,14 +40,16 @@
   }
 </section>
 
-<mat-divider />
+@if (plotQuotaReady()) {
+  <mat-divider />
 
-<mat-card appearance="outlined" class="plan-card">
-  <mat-card-header>
-    <mat-icon mat-card-avatar>workspace_premium</mat-icon>
-    <mat-card-title>{{ 'field-management.plots.plan-title' | translate }}</mat-card-title>
-    <mat-card-subtitle>
-      {{ 'field-management.plots.plan-text' | translate: { quota: plotQuota() } }}
-    </mat-card-subtitle>
-  </mat-card-header>
-</mat-card>
+  <mat-card appearance="outlined" class="plan-card">
+    <mat-card-header>
+      <mat-icon mat-card-avatar>workspace_premium</mat-icon>
+      <mat-card-title>{{ 'field-management.plots.plan-title' | translate }}</mat-card-title>
+      <mat-card-subtitle>
+        {{ 'field-management.plots.plan-text' | translate: { quota: plotQuota() } }}
+      </mat-card-subtitle>
+    </mat-card-header>
+  </mat-card>
+}
