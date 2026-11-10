@@ -1,6 +1,5 @@
 import { computed, inject, Injectable, Signal, signal } from '@angular/core';
 import { forkJoin, map, Observable, of, switchMap } from 'rxjs';
-import { IamStore } from '../../iam/application/iam.store';
 import { Money } from '../../shared/domain/model/money';
 import { FileDownloader } from '../../shared/infrastructure/file-downloader';
 import { ApplyCouponCommand } from '../domain/model/commands/apply-coupon.command';
@@ -35,7 +34,6 @@ export interface AppliedCoupon {
 @Injectable({ providedIn: 'root' })
 export class SubscriptionsStore {
   private readonly subscriptionsApi = inject(SubscriptionsApi);
-  private readonly session = inject(IamStore);
   private readonly fileDownloader = inject(FileDownloader);
 
   // Store state
@@ -74,7 +72,6 @@ export class SubscriptionsStore {
   /** i18n key of the last error, or `null`. */
   readonly error = this.errorSignal.asReadonly();
   /** Signed-in user who owns the subscription. */
-  readonly currentUserId = computed(() => this.session.activeUser()?.id ?? null);
   /** `true` when the user has a paid plan with access (active, or cancelled but not yet expired). */
   readonly hasActivePlan = computed(() => this.subscriptionSignal()?.hasAccess() ?? false);
   /** Plan the user can use now, or `null` when the user has not paid or the plan expired. */
@@ -152,7 +149,7 @@ export class SubscriptionsStore {
    */
   selectPlan = (command: SelectSubscriptionPlanCommand): void => {
     const plan = this.plansSignal().find((candidate) => candidate.code === command.planCode);
-    if (!plan || command.userId !== this.currentUserId()) {
+    if (!plan || !Number.isSafeInteger(command.userId) || command.userId <= 0) {
       this.errorSignal.set('subscriptions.errors.select-plan');
       return;
     }
@@ -199,13 +196,17 @@ export class SubscriptionsStore {
    * The card number never arrives here, only its token.
    * Temporary, until the backend exists: it simulates P2 (an approved payment
    * activates the plan) because Niubiz confirms it on the server.
-   * @param command - Subscription (or `null` for the first payment), card token and amount.
+   * @param userId - Current user identifier supplied by the container view.
    */
-  submitPayment = (command: SubmitPaymentCommand): void => {
+  submitPayment = (command: SubmitPaymentCommand, userId: number): void => {
     const plan = this.selectedPlanSignal();
-    const userId = this.currentUserId();
     const current = this.subscriptionSignal();
-    if (!plan || userId === null || this.processingSignal()) return;
+
+    if (!plan || !Number.isSafeInteger(userId) || userId <= 0 || this.processingSignal()) {
+      return;
+    }
+
+    if (current && current.userId !== userId) return;
     if (command.subscriptionId !== (current?.id ?? null)) return;
 
     const status: PaymentResult = command.simulatedStatus ?? PaymentStatus.COMPLETED;

@@ -12,6 +12,7 @@ import { ApplyCouponCommand } from '../../../domain/model/commands/apply-coupon.
 import { SubmitPaymentCommand } from '../../../domain/model/commands/submit-payment.command';
 import { PaymentStatus } from '../../../domain/model/entities/payment-status';
 import { CouponForm } from '../../components/coupon-form/coupon-form';
+import { IamStore } from '../../../../iam/application/iam.store';
 
 /** Checkout summary and demo payment flow for a selected plan. */
 @Component({
@@ -33,6 +34,7 @@ import { CouponForm } from '../../components/coupon-form/coupon-form';
 export class CheckoutView {
   private readonly router = inject(Router);
   private readonly store = inject(SubscriptionsStore);
+  private readonly iamStore = inject(IamStore);
 
   readonly selectedPlan = this.store.selectedPlan;
   readonly cycle = this.store.billingCycle;
@@ -70,10 +72,19 @@ export class CheckoutView {
     );
   }
 
-  /** Submits a demo payment without collecting card details. */
+  /** Submits a demo payment using the current session identity. */
   onPay(status: PaymentStatus.COMPLETED | PaymentStatus.REJECTED): void {
     const amount = this.amount();
-    if (!amount || !this.selectedPlan() || this.processing()) return;
+    const userId = this.iamStore.activeUser()?.id ?? null;
+
+    if (
+      userId === null ||
+      !amount ||
+      !this.selectedPlan() ||
+      this.processing()
+    ) {
+      return;
+    }
 
     this.store.submitPayment(
       new SubmitPaymentCommand({
@@ -82,6 +93,7 @@ export class CheckoutView {
         amount,
         simulatedStatus: status,
       }),
+      userId,
     );
   }
 

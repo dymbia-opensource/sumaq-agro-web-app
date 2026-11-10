@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject,computed  } from '@angular/core';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { Router } from '@angular/router';
@@ -10,6 +10,7 @@ import { SelectSubscriptionPlanCommand } from '../../../domain/model/commands/se
 import { BillingCycle } from '../../../domain/model/entities/billing-cycle';
 import { Plan } from '../../../domain/model/entities/plan.entity';
 import { PlanCard } from '../../components/plan-card/plan-card';
+import { IamStore } from '../../../../iam/application/iam.store';
 
 /** Catalog of available subscription plans and their billing cycles. */
 @Component({
@@ -28,11 +29,12 @@ import { PlanCard } from '../../components/plan-card/plan-card';
 export class PlansCatalogView {
   private readonly router = inject(Router);
   private readonly store = inject(SubscriptionsStore);
+  private readonly iamStore = inject(IamStore);
 
   readonly plans = this.store.plans;
   readonly subscription = this.store.subscription;
   readonly selectedPlan = this.store.selectedPlan;
-  readonly currentUserId = this.store.currentUserId;
+  readonly currentUserId = computed(() => this.iamStore.activeUser()?.id ?? null);
   readonly cycle = this.store.billingCycle;
   readonly loading = this.store.loading;
   readonly error = this.store.error;
