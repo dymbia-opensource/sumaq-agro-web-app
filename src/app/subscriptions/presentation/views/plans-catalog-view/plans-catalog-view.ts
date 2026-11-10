@@ -11,6 +11,16 @@ import { BillingCycle } from '../../../domain/model/entities/billing-cycle';
 import { Plan } from '../../../domain/model/entities/plan.entity';
 import { PlanCard } from '../../components/plan-card/plan-card';
 import { IamStore } from '../../../../iam/application/iam.store';
+import type { UserRole } from '../../../../iam/domain/model/value-objects/user-role';
+import { planForSegment, type SubscriptionSegment, } from '../../../domain/model/value-objects/subscription-segment';
+
+
+/** Mapping of user roles to subscription segments. */
+const SEGMENT_BY_ROLE: Readonly<Record<UserRole, SubscriptionSegment>> = {
+  FARMER: 'INDEPENDENT_FARMER',
+  COOPERATIVE_DIRECTOR: 'COOPERATIVE',
+  AGRONOMIST: 'TECHNICAL_ADVISOR',
+};
 
 /** Catalog of available subscription plans and their billing cycles. */
 @Component({
@@ -31,7 +41,13 @@ export class PlansCatalogView {
   private readonly store = inject(SubscriptionsStore);
   private readonly iamStore = inject(IamStore);
 
-  readonly plans = this.store.plans;
+  readonly plans = computed(() => {
+    const user = this.iamStore.activeUser();
+    if (!user) return [];
+
+    const allowedPlanCode = planForSegment(SEGMENT_BY_ROLE[user.experience]);
+    return this.store.plans().filter((plan) => plan.code === allowedPlanCode);
+  });
   readonly subscription = this.store.subscription;
   readonly selectedPlan = this.store.selectedPlan;
   readonly currentUserId = computed(() => this.iamStore.activeUser()?.id ?? null);
@@ -56,19 +72,21 @@ export class PlansCatalogView {
     if (cycle !== this.cycle()) this.store.toggleBillingCycle();
   }
 
-  /** Creates the selection command for the signed-in user. */
+  /** Requests checkout for the plan chosen in the catalog. */
   onSelectPlan(plan: Plan): void {
-    const userId = this.currentUserId();
-    if (userId === null) return;
+    const user = this.iamStore.activeUser();
+    if (!user) return;
 
-    this.store.selectPlan(
+    const accepted = this.store.selectPlan(
       new SelectSubscriptionPlanCommand({
-        userId,
+        userId: user.id,
         planCode: plan.code,
         billingCycle: this.cycle(),
       }),
+      SEGMENT_BY_ROLE[user.experience],
     );
-    if (this.store.selectedPlan()?.code === plan.code) {
+
+    if (accepted) {
       void this.router.navigate(['/subscriptions/checkout']);
     }
   }

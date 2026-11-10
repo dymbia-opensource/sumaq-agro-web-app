@@ -13,6 +13,7 @@ import { PaymentStatus } from '../domain/model/entities/payment-status';
 import { Plan } from '../domain/model/entities/plan.entity';
 import { Subscription } from '../domain/model/entities/subscription.entity';
 import { SubscriptionsApi } from '../infrastructure/subscriptions-api';
+import { planForSegment, type SubscriptionSegment, } from '../domain/model/value-objects/subscription-segment';
 
 /** Result of the last payment attempt, shown in the last step of the checkout. */
 export type PaymentResult = PaymentStatus.COMPLETED | PaymentStatus.REJECTED;
@@ -148,21 +149,21 @@ export class SubscriptionsStore {
       });
   };
 
-  /**
-   * Chooses a plan and a cycle to go to the payment.
-   * @param command - Plan and billing cycle chosen by the user.
-   */
-  selectPlan = (command: SelectSubscriptionPlanCommand): void => {
+  /** Selects an eligible plan and returns whether checkout can continue. */
+  selectPlan = (command: SelectSubscriptionPlanCommand, segment: SubscriptionSegment): boolean => {
     const plan = this.plansSignal().find((candidate) => candidate.code === command.planCode);
-    if (!plan || !Number.isSafeInteger(command.userId) || command.userId <= 0) {
+
+    if (!plan || plan.code !== planForSegment(segment) || !Number.isSafeInteger(command.userId) || command.userId <= 0) {
       this.errorSignal.set('subscriptions.errors.select-plan');
-      return;
+      return false;
     }
+
     this.errorSignal.set(null);
     this.paymentResultSignal.set(null);
     this.couponSignal.set(null);
     this.billingCycleSignal.set(command.billingCycle);
     this.selectedPlanSignal.set(plan);
+    return true;
   };
 
   /** Switches the catalog between monthly and annual prices. */
