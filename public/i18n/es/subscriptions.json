@@ -92,6 +92,7 @@
       "payment-approved": "Pago de demostración aprobado. Tu plan se actualizó.",
       "payment-rejected": "El pago de demostración fue rechazado. Tu plan no cambió.",
       "view-billing": "Ver suscripción y pagos",
+      "go-to-dashboard": "Ir a mi panel",
       "simulate-rejection": "Simular pago rechazado",
       "no-plan": "Primero elige un plan para continuar.",
       "choose-plan": "Ver planes"

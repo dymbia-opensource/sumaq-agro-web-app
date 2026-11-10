@@ -92,6 +92,7 @@
       "payment-approved": "Demo payment approved. Your plan has been updated.",
       "payment-rejected": "Demo payment rejected. Your plan was not changed.",
       "view-billing": "View subscription and payments",
+      "go-to-dashboard": "Go to my dashboard",
       "simulate-rejection": "Simulate rejected payment",
       "no-plan": "Choose a plan before continuing.",
       "choose-plan": "Browse plans"

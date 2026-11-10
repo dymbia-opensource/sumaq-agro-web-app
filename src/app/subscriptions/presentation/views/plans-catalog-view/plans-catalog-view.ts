@@ -1,7 +1,9 @@
-import { Component, inject,computed  } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { map } from 'rxjs';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Breadcrumb, PageHeader } from '../../../../shared/presentation/components/page-header/page-header';
 import { MessageCard } from '../../../../shared/presentation/components/message-card/message-card';
@@ -54,6 +56,11 @@ export class PlansCatalogView {
   readonly cycle = this.store.billingCycle;
   readonly loading = this.store.loading;
   readonly error = this.store.error;
+
+  protected readonly accessCheckFailed = toSignal(
+    inject(ActivatedRoute).queryParamMap.pipe(map((params) => params.get('accessCheck') === 'failed')),
+    { initialValue: false },
+  );
 
   /** Billing cycles offered by the catalog toggle. */
   protected readonly cycles = BillingCycle;

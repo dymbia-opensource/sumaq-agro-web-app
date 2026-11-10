@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -35,6 +35,10 @@ export class CheckoutView {
   private readonly router = inject(Router);
   private readonly store = inject(SubscriptionsStore);
   private readonly iamStore = inject(IamStore);
+
+  protected readonly dashboardRoute = computed(
+    () => this.iamStore.activeUser()?.initialRoute ?? null,
+  );
 
   readonly selectedPlan = this.store.selectedPlan;
   readonly cycle = this.store.billingCycle;
