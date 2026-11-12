@@ -6,6 +6,11 @@
       "COOPERATIVE_PRO": "Cooperative Pro",
       "TECHNICAL_ADVISOR": "Technical Advisor"
     },
+    "segment": {
+      "SEED": "For independent farmers",
+      "COOPERATIVE_PRO": "For cooperatives",
+      "TECHNICAL_ADVISOR": "For technical advisors"
+    },
     "billing-cycle": {
       "MONTHLY": "Monthly",
       "ANNUAL": "Annual"
@@ -43,18 +48,14 @@
       "cancel-note": "Cancel anytime. You keep access until the end of the paid period."
     },
     "catalog": {
-      "eyebrow": "Last step",
       "title": "Activate your plan",
       "subtitle": "You need an active plan to start using SumaqAgro. Choose how you'd like to pay.",
       "billing-cycle": "Billing cycle",
       "empty": "No plans are available right now.",
+      "eyebrow": "Last step",
       "back": "Back to my subscription",
-      "annual-tag": "Save"
-    },
-    "segment": {
-      "SEED": "For independent farmers",
-      "COOPERATIVE_PRO": "For cooperatives",
-      "TECHNICAL_ADVISOR": "For technical advisors"
+      "annual-tag": "Save",
+      "breadcrumb": "Plans"
     },
     "billing": {
       "title": "Subscription and payments",
@@ -95,14 +96,15 @@
       "apply-coupon": "Apply coupon",
       "total": "Total due",
       "payment-title": "Payment",
-      "demo-notice": "You will not be charged.",
+      "demo-notice": "Demo payment. You will not be charged.",
       "unavailable": "Demo payments are disabled.",
       "back": "Back to plans",
-      "confirm-subscription": "Confirm subscription",
-      "payment-approved": "Your subscription is active.",
-      "payment-rejected": "Your subscription could not be activated. Try again.",
+      "simulate-payment": "Simulate approved payment",
+      "payment-approved": "Demo payment approved. Your plan has been updated.",
+      "payment-rejected": "Demo payment rejected. Your plan was not changed.",
       "view-billing": "View subscription and payments",
       "go-to-dashboard": "Go to my dashboard",
+      "simulate-rejection": "Simulate rejected payment",
       "no-plan": "Choose a plan before continuing.",
       "choose-plan": "Browse plans"
     },

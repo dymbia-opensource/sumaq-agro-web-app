@@ -6,6 +6,11 @@
       "COOPERATIVE_PRO": "Cooperativa Pro",
       "TECHNICAL_ADVISOR": "Asesor Técnico"
     },
+    "segment": {
+      "SEED": "Para agricultores independientes",
+      "COOPERATIVE_PRO": "Para cooperativas",
+      "TECHNICAL_ADVISOR": "Para asesores técnicos"
+    },
     "billing-cycle": {
       "MONTHLY": "Mensual",
       "ANNUAL": "Anual"
@@ -42,19 +47,15 @@
       "choose": "Continuar al pago",
       "cancel-note": "Cancela cuando quieras. Conservas el acceso hasta el final del período pagado."
     },
-    "segment": {
-      "SEED": "Para agricultores independientes",
-      "COOPERATIVE_PRO": "Para cooperativas",
-      "TECHNICAL_ADVISOR": "Para asesores técnicos"
-    },
     "catalog": {
-      "eyebrow": "Último paso",
       "title": "Activa tu plan",
       "subtitle": "Para empezar a usar SumaqAgro necesitas un plan activo. Elige cómo prefieres pagar.",
       "billing-cycle": "Frecuencia de pago",
       "empty": "No hay planes disponibles en este momento.",
+      "eyebrow": "Último paso",
       "back": "Volver a mi suscripción",
-      "annual-tag": "Ahorra"
+      "annual-tag": "Ahorra",
+      "breadcrumb": "Planes"
     },
     "billing": {
       "title": "Suscripción y pagos",
@@ -95,14 +96,15 @@
       "apply-coupon": "Aplicar cupón",
       "total": "Total a pagar",
       "payment-title": "Pago",
-      "demo-notice": "No se realizará ningún cargo.",
+      "demo-notice": "Pago de demostración. No se realizará ningún cobro.",
       "unavailable": "El pago de demostración no está habilitado.",
       "back": "Volver a los planes",
-      "confirm-subscription": "Confirmar suscripción",
-      "payment-approved": "Tu suscripción está activa.",
-      "payment-rejected": "No se pudo activar la suscripción. Inténtalo de nuevo.",
+      "simulate-payment": "Simular pago aprobado",
+      "payment-approved": "Pago de demostración aprobado. Tu plan se actualizó.",
+      "payment-rejected": "El pago de demostración fue rechazado. Tu plan no cambió.",
       "view-billing": "Ver suscripción y pagos",
       "go-to-dashboard": "Ir a mi panel",
+      "simulate-rejection": "Simular pago rechazado",
       "no-plan": "Primero elige un plan para continuar.",
       "choose-plan": "Ver planes"
     },
