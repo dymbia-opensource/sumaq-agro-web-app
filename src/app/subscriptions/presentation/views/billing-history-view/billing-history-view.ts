@@ -26,6 +26,7 @@ import { IamStore } from '../../../../iam/application/iam.store';
     RouterLink,
     TranslatePipe,
   ],
+  providers: [SubscriptionsStore],
   templateUrl: './billing-history-view.html',
   styleUrl: './billing-history-view.css',
 })

@@ -97,21 +97,13 @@
         @if (demoPaymentsEnabled && paymentResult() !== paymentStatuses.COMPLETED) {
           <div class="demo-payment-actions">
             <button
-              mat-stroked-button
-              type="button"
-              [disabled]="processing() || !amount()"
-              (click)="onPay(paymentStatuses.REJECTED)"
-            >
-              {{ 'subscriptions.checkout.simulate-rejection' | translate }}
-            </button>
-            <button
               mat-flat-button
               type="button"
               [disabled]="processing() || !amount()"
               (click)="onPay(paymentStatuses.COMPLETED)"
             >
               <mat-icon>lock</mat-icon>
-              {{ 'subscriptions.checkout.simulate-payment' | translate }}
+              {{ 'subscriptions.checkout.confirm-subscription' | translate }}
             </button>
           </div>
         }

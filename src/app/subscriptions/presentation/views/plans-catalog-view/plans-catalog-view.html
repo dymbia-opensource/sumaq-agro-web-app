@@ -20,17 +20,9 @@
 
 <section class="cycle-picker" [attr.aria-label]="'subscriptions.catalog.billing-cycle' | translate">
   <span>{{ 'subscriptions.catalog.billing-cycle' | translate }}</span>
-  <mat-button-toggle-group
-    [value]="cycle()"
-    (valueChange)="onCycleChange($event)"
-    aria-label="Billing cycle"
-  >
-    <mat-button-toggle [value]="cycles.MONTHLY">
-      {{ 'subscriptions.billing-cycle.MONTHLY' | translate }}
-    </mat-button-toggle>
-    <mat-button-toggle [value]="cycles.ANNUAL">
-      {{ 'subscriptions.billing-cycle.ANNUAL' | translate }}
-    </mat-button-toggle>
+  <mat-button-toggle-group [value]="cycle()" (valueChange)="onCycleChange($event)" aria-label="Billing cycle">
+    <mat-button-toggle [value]="cycles.MONTHLY">{{ 'subscriptions.billing-cycle.MONTHLY' | translate }}</mat-button-toggle>
+    <mat-button-toggle [value]="cycles.ANNUAL">{{ 'subscriptions.billing-cycle.ANNUAL' | translate }}</mat-button-toggle>
   </mat-button-toggle-group>
 </section>
 
