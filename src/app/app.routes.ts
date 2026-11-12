@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { iamGuard } from './iam/infrastructure/iam.guard';
-import { activeSubscriptionGuard } from './subscriptions/presentation/active-subscription.guard';
+import {activeSubscriptionGuard} from './subscriptions/infrastructure/active-subscription.guard';
 
 const layout = () => import('./shared/presentation/components/layout/layout').then((m) => m.Layout);
 

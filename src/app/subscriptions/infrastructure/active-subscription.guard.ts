@@ -2,7 +2,7 @@ import { inject } from '@angular/core';
 import { CanActivateChildFn, Router } from '@angular/router';
 import { catchError, map, of } from 'rxjs';
 import { IamStore } from '../../iam/application/iam.store';
-import { SubscriptionsApi } from '../infrastructure/subscriptions-api';
+import { SubscriptionsApi } from './subscriptions-api';
 
 /** Checks the current subscription before entering the workspace. */
 export const activeSubscriptionGuard: CanActivateChildFn = (_route, state) => {
