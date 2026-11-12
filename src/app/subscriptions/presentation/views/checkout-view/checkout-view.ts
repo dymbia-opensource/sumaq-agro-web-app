@@ -1,19 +1,17 @@
 import { Component, computed, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { Router, RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { environment } from '../../../../../environments/environment';
-import { Breadcrumb, PageHeader } from '../../../../shared/presentation/components/page-header/page-header';
+import { IamStore } from '../../../../iam/application/iam.store';
 import { MessageCard } from '../../../../shared/presentation/components/message-card/message-card';
 import { SubscriptionsStore } from '../../../application/subscriptions.store';
 import { ApplyCouponCommand } from '../../../domain/model/commands/apply-coupon.command';
 import { SubmitPaymentCommand } from '../../../domain/model/commands/submit-payment.command';
 import { PaymentStatus } from '../../../domain/model/entities/payment-status';
 import { CouponForm } from '../../components/coupon-form/coupon-form';
-import { IamStore } from '../../../../iam/application/iam.store';
 
 /** Checkout summary and demo payment flow for a selected plan. */
 @Component({
@@ -21,11 +19,9 @@ import { IamStore } from '../../../../iam/application/iam.store';
   imports: [
     CouponForm,
     MatButtonModule,
-    MatCardModule,
     MatIconModule,
     MatProgressBarModule,
     MessageCard,
-    PageHeader,
     RouterLink,
     TranslatePipe,
   ],
@@ -52,10 +48,6 @@ export class CheckoutView {
 
   protected readonly paymentStatuses = PaymentStatus;
   protected readonly demoPaymentsEnabled = environment.useMockSubscriptionPayments;
-  protected readonly breadcrumbs: Breadcrumb[] = [
-    { label: 'subscriptions.catalog.title', link: '/subscriptions/plans' },
-    { label: 'subscriptions.checkout.title' },
-  ];
 
   /** Returns a numeric subscription id expected by the payment commands. */
   private subscriptionId(): number | null {
@@ -85,12 +77,7 @@ export class CheckoutView {
     const amount = this.amount();
     const userId = this.iamStore.activeUser()?.id ?? null;
 
-    if (
-      userId === null ||
-      !amount ||
-      !this.selectedPlan() ||
-      this.processing()
-    ) {
+    if (userId === null || !amount || !this.selectedPlan() || this.processing()) {
       return;
     }
 

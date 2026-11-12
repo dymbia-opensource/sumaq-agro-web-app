@@ -4,6 +4,29 @@
   gap: 24px;
 }
 
+.back {
+  align-self: flex-start;
+}
+
+.intro {
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+  text-align: center;
+}
+
+h1 {
+  margin: 0;
+  font: var(--mat-sys-display-small);
+  font-weight: 700;
+}
+
+.subtitle {
+  margin: 0;
+  font: var(--mat-sys-body-large);
+  color: var(--mat-sys-on-surface-variant);
+}
+
 .checkout-grid {
   display: grid;
   grid-template-columns: minmax(260px, 0.8fr) minmax(320px, 1.2fr);
@@ -11,18 +34,58 @@
   gap: 24px;
 }
 
-.summary-card,
-.demo-notice {
-  border-radius: 16px;
+.panel {
+  display: grid;
+  gap: 20px;
+  padding: 28px;
+  border-radius: 24px;
+  border: 1px solid var(--mat-sys-outline-variant);
+  background: var(--mat-sys-surface);
+  box-shadow: var(--mat-sys-level1);
 }
 
-.summary-card mat-card-avatar {
+.panel-title {
+  margin: 0;
+  font: var(--mat-sys-title-large);
+  font-weight: 600;
+}
+
+/* Resumen */
+.plan-line {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.plan-icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: var(--mat-sys-surface-container-high);
   color: var(--mat-sys-primary);
+}
+
+.plan-name {
+  margin: 0;
+  font: var(--mat-sys-title-medium);
+  font-weight: 700;
+}
+
+.plan-audience {
+  margin: 2px 0 0;
+  font: var(--mat-sys-body-small);
+  color: var(--mat-sys-on-surface-variant);
 }
 
 dl {
   display: grid;
-  gap: 16px;
+  gap: 14px;
+  margin: 0;
+  padding-top: 20px;
+  border-top: 1px solid var(--mat-sys-outline-variant);
 }
 
 dl div {
@@ -41,51 +104,113 @@ dd {
   font-weight: 600;
 }
 
-.total-label {
-  margin: 28px 0 4px;
+.total-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 20px;
+  border-top: 1px solid var(--mat-sys-outline-variant);
+  font: var(--mat-sys-title-medium);
 }
 
 .total {
-  margin: 0;
-  font-size: 2rem;
+  font: var(--mat-sys-headline-medium);
   font-weight: 700;
 }
 
-.payment-panel {
-  display: grid;
-  gap: 16px;
-}
-
-.payment-panel h2 {
-  margin: 0;
-}
-
-.demo-notice mat-card-content {
+/* Pago */
+.notice {
   display: flex;
-  align-items: start;
+  align-items: flex-start;
   gap: 12px;
+  margin: 0;
+  padding: 12px 16px;
+  border-radius: 16px;
+  background: var(--mat-sys-surface-container-low);
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-body-medium);
 }
 
-.demo-notice mat-icon {
+.notice mat-icon {
   flex: none;
   color: var(--mat-sys-primary);
 }
 
-.demo-notice p {
+.actions {
+  display: grid;
+  gap: 8px;
+}
+
+.cta {
+  width: 100%;
+  height: 52px;
+  --mat-button-filled-container-shape: 999px;
+}
+
+/* Pago aprobado */
+.success {
+  display: grid;
+  justify-items: center;
+  gap: 20px;
+  width: 100%;
+  max-width: 480px;
+  margin: 48px auto 0;
+  padding: 40px 32px;
+  border-radius: 28px;
+  border: 1px solid var(--mat-sys-outline-variant);
+  background: var(--mat-sys-surface);
+  box-shadow: var(--mat-sys-level1);
+  text-align: center;
+}
+
+.success-icon {
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--mat-sys-secondary-container);
+  color: var(--mat-sys-on-secondary-container);
+}
+
+.success-icon mat-icon {
+  font-size: 40px;
+  width: 40px;
+  height: 40px;
+}
+
+.success h1 {
+  font: var(--mat-sys-headline-small);
+  font-weight: 700;
+}
+
+.success-actions {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+}
+
+/* Sin plan seleccionado */
+.empty {
+  display: grid;
+  justify-items: center;
+  gap: 16px;
+  max-width: 420px;
+  margin: 32px auto 0;
+  text-align: center;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.empty mat-icon {
+  font-size: 40px;
+  width: 40px;
+  height: 40px;
+  color: var(--mat-sys-primary);
+}
+
+.empty p {
   margin: 0;
-}
-
-.payment-actions {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.demo-payment-actions {
-  display: flex;
-  justify-content: end;
-  flex-wrap: wrap;
-  gap: 12px;
 }
 
 @media (max-width: 760px) {
@@ -93,11 +218,7 @@ dd {
     grid-template-columns: 1fr;
   }
 
-  .payment-actions {
-    flex-direction: column-reverse;
-  }
-
-  .demo-payment-actions {
-    flex-direction: column-reverse;
+  .panel {
+    padding: 20px;
   }
 }
