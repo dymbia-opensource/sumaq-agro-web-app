@@ -40,6 +40,7 @@ export class SessionStorageService {
           user: {
             id: user.id,
             email: user.email,
+            fullName: user.fullName,
             roles: user.roles,
             token: user.token,
           },
@@ -106,6 +107,7 @@ export class SessionStorageService {
         user: new AuthenticatedUser({
           id: account['id'],
           email: account['email'],
+          fullName: typeof account['fullName'] === 'string' ? account['fullName'] : undefined,
           roles: account['roles'],
           token: account['token'],
         }),

@@ -73,7 +73,7 @@ export class IamStore {
 
     return {
       id,
-      displayName: user.email,
+      displayName: user.fullName,
       experience,
       initialRoute: INITIAL_ROUTES[experience],
     };

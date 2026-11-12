@@ -1,6 +1,7 @@
 {
   "field-management": {
     "dashboard": {
+      "welcome": "Welcome!",
       "good-morning": "Good morning, {{ name }}!",
       "good-afternoon": "Good afternoon, {{ name }}!",
       "good-evening": "Good evening, {{ name }}!",

@@ -1,6 +1,7 @@
 {
   "field-management": {
     "dashboard": {
+      "welcome": "¡Te damos la bienvenida!",
       "good-morning": "¡Buen día, {{ name }}!",
       "good-afternoon": "¡Buenas tardes, {{ name }}!",
       "good-evening": "¡Buenas noches, {{ name }}!",

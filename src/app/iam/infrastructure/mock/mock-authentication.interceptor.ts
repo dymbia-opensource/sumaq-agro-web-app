@@ -134,6 +134,9 @@ export const mockAuthenticationInterceptor: HttpInterceptorFn = (request, next) 
 
           const response: SignInResponse = {
             ...account.user,
+            fullName: account.profile
+              ? [account.profile.firstName, account.profile.lastName].join(' ')
+              : undefined,
             token: `mock-session-${crypto.randomUUID()}`,
           };
 

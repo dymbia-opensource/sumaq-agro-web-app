@@ -31,8 +31,8 @@
       <mat-icon>account_circle</mat-icon>
       <div>
         <h2>{{ 'profiles.settings.profile-title' | translate }}</h2>
-        @if (profile()?.fullName) {
-          <p class="profile-name">{{ profile()?.fullName }}</p>
+        @if (profile()?.fullName || session.activeUser()?.displayName; as name) {
+          <p class="profile-name">{{ name }}</p>
         }
         <p>{{ session.currentUser()?.email }}</p>
         <span>{{ 'profiles.settings.farmer-role' | translate }}</span>
