@@ -26,11 +26,6 @@ export class LanguageSwitcher {
   /** Language currently in use (reactive). */
   readonly currentLang = this.translate.currentLang;
 
-  constructor() {
-    this.translate.addLangs(this.languages);
-    this.translate.use('en');
-  }
-
   /**
    * Changes the language for the current visit.
    * @param language - Language code (`es` or `en`).

@@ -51,9 +51,14 @@ export class SignUpForm {
   protected readonly hidePassword = signal(true);
   protected readonly hideConfirmPassword = signal(true);
 
+  protected readonly fieldErrorMatcher: ErrorStateMatcher = {
+    isErrorState: (control, form) =>
+      !!control?.invalid && (!!form?.submitted || (control.dirty && control.touched)),
+  };
+
   protected readonly confirmationErrorMatcher: ErrorStateMatcher = {
     isErrorState: (control, form) => {
-      const interacted = !!(control?.dirty || control?.touched || form?.submitted);
+      const interacted = !!(form?.submitted || (control?.dirty && control.touched));
 
       const invalid = !!(control?.invalid || control?.parent?.hasError('passwordMismatch'));
 

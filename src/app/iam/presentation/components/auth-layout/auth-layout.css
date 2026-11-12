@@ -20,11 +20,22 @@
   width: 100%;
   max-width: 460px;
 }
+.auth-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 38px;
+}
+.auth-language {
+  flex: 0 0 132px;
+  margin-inline-start: auto;
+}
 .auth-brand {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 38px;
 }
 .auth-logo {
   display: block;
@@ -150,7 +161,7 @@
 .auth-layout-compact .auth-content {
   max-width: 560px;
 }
-.auth-layout-compact .auth-brand {
+.auth-layout-compact .auth-header {
   margin-bottom: 16px;
 }
 .auth-layout-compact .auth-logo {
@@ -193,7 +204,7 @@
     align-items: flex-start;
     padding: 24px 20px;
   }
-  .auth-brand {
+  .auth-header {
     margin-bottom: 28px;
   }
   .auth-logo {
