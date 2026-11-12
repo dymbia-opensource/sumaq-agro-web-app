@@ -39,13 +39,22 @@
       "selected": "Plan selected",
       "annual-savings": "Save {{amount}} per year",
       "plot-quota": "Up to {{quota}} plots",
-      "choose": "Choose plan"
+      "choose": "Continue to payment",
+      "cancel-note": "Cancel anytime. You keep access until the end of the paid period."
     },
     "catalog": {
-      "title": "Plans",
-      "subtitle": "Choose the plan that best fits your work.",
+      "eyebrow": "Last step",
+      "title": "Activate your plan",
+      "subtitle": "You need an active plan to start using SumaqAgro. Choose how you'd like to pay.",
       "billing-cycle": "Billing cycle",
-      "empty": "No plans are available right now."
+      "empty": "No plans are available right now.",
+      "back": "Back to my subscription",
+      "annual-tag": "Save"
+    },
+    "segment": {
+      "SEED": "For independent farmers",
+      "COOPERATIVE_PRO": "For cooperatives",
+      "TECHNICAL_ADVISOR": "For technical advisors"
     },
     "billing": {
       "title": "Subscription and payments",
