@@ -11,7 +11,7 @@
   "
 />
 
-<app-plot-quota-summary />
+<app-plot-quota-summary [showRefresh]="false" />
 
 @if (error(); as error) {
   <app-message-card icon="error" [message]="error | translate" [alert]="true" />
@@ -39,17 +39,3 @@
     <app-plot-slot-card [position]="number" (register)="onRegisterNewPlot()" />
   }
 </section>
-
-@if (plotQuotaReady()) {
-  <mat-divider />
-
-  <mat-card appearance="outlined" class="plan-card">
-    <mat-card-header>
-      <mat-icon mat-card-avatar>workspace_premium</mat-icon>
-      <mat-card-title>{{ 'field-management.plots.plan-title' | translate }}</mat-card-title>
-      <mat-card-subtitle>
-        {{ 'field-management.plots.plan-text' | translate: { quota: plotQuota() } }}
-      </mat-card-subtitle>
-    </mat-card-header>
-  </mat-card>
-}

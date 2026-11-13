@@ -1,181 +1,194 @@
-@if (store.canReport()) {
-  <app-crop-plot-selector
-    [plots]="store.plots()"
-    [selectedPlotId]="store.selectedPlot()?.id"
-    [disabled]="store.scopeLoading()"
-    (plotSelected)="store.selectPlot(+$event)"
-  />
-  @if (store.selectedPlot(); as plot) {
-    <app-farmer-advisory-panel [plotId]="+plot.id" />
-  }
-}
-<header class="view-header">
-  <span class="breadcrumb">{{ 'crop-health.clinical-eyebrow' | translate }}</span>
-  <h1>{{ 'crop-health.inbox-title' | translate }}</h1>
-</header>
-<nav>
-  @if (store.canPrescribe()) {
-    <a mat-stroked-button routerLink="/crop-health/assigned-plots">{{
-      'crop-health.advisor.plots' | translate
-    }}</a>
-  }
-  <button mat-button (click)="reload()" [disabled]="store.loading() || store.saving()">
-    {{ 'crop-health.advisor.refresh' | translate }}
-  </button>
+<app-page-header
+  [title]="(store.canReport() ? 'crop-health.consult-title' : 'crop-health.inbox-title') | translate"
+  [subtitle]="(store.canReport() ? 'crop-health.consult-subtitle' : 'crop-health.inbox-subtitle') | translate"
+>
   @if (store.canReport()) {
-    <a mat-flat-button routerLink="/crop-health/report-pest"
-      ><mat-icon>add</mat-icon>{{ 'crop-health.new-report' | translate }}</a
-    >
+    <a mat-flat-button routerLink="/crop-health/report-pest">
+      <mat-icon aria-hidden="true">add</mat-icon>{{ 'crop-health.new-report' | translate }}
+    </a>
   }
-  <a mat-stroked-button routerLink="/crop-health/inspections">{{
-    'crop-health.inspections-title' | translate
-  }}</a>
-  <a mat-stroked-button routerLink="/crop-health/prescriptions">{{
-    'crop-health.history-title' | translate
-  }}</a>
-</nav>
-@if (store.writeError(); as error) {
-  <p role="alert">{{ error | translate }}</p>
-}
-@if (store.clinicalLoading() || store.saving()) {
-  <mat-progress-bar mode="indeterminate" [attr.aria-label]="'common.loading' | translate" />
-}
-@if (store.clinicalError(); as error) {
-  <mat-card appearance="outlined" role="alert"
-    ><mat-card-content
-      ><p>{{ error | translate }}</p></mat-card-content
-    ></mat-card
-  >
-}
-@if (!store.clinicalLoading() && !store.clinicalError()) {
-  <section class="filters" [attr.aria-label]="'crop-health.advisor.filters' | translate">
-    <mat-form-field appearance="outline"
-      ><mat-label>{{ 'crop-health.advisor.plot' | translate }}</mat-label>
-      <mat-select [ngModel]="plotFilter()" (ngModelChange)="plotFilter.set($event)">
-        <mat-option [value]="0">{{ 'crop-health.advisor.all' | translate }}</mat-option>
-        @for (plot of store.plots(); track plot.id) {
-          <mat-option [value]="+plot.id">{{ plot.name }}</mat-option>
+</app-page-header>
+
+<div class="workspace" [class.with-advisor]="store.canReport()">
+  <section class="inbox" aria-labelledby="reports-title">
+    <div class="inbox-toolbar">
+      <h2 id="reports-title">{{ 'option.diagnosis-inbox' | translate }}</h2>
+      <div class="workspace-actions">
+        @if (store.canPrescribe()) {
+          <a mat-stroked-button routerLink="/crop-health/assigned-plots">{{
+            'crop-health.advisor.plots' | translate
+          }}</a>
         }
-      </mat-select>
-    </mat-form-field>
-    <mat-form-field appearance="outline"
-      ><mat-label>{{ 'crop-health.form-severity' | translate }}</mat-label>
-      <mat-select [ngModel]="severityFilter()" (ngModelChange)="severityFilter.set($event)">
-        <mat-option value="ALL">{{ 'crop-health.advisor.all' | translate }}</mat-option>
-        @for (severity of ['LOW', 'MEDIUM', 'HIGH', 'SEVERE']; track severity) {
-          <mat-option [value]="severity">{{
-            'crop-health.severities.' + severity | translate
-          }}</mat-option>
-        }
-      </mat-select>
-    </mat-form-field>
-    <mat-form-field appearance="outline"
-      ><mat-label>{{ 'crop-health.advisor.status' | translate }}</mat-label>
-      <mat-select [ngModel]="statusFilter()" (ngModelChange)="statusFilter.set($event)">
-        <mat-option value="ALL">{{ 'crop-health.advisor.all' | translate }}</mat-option>
-        @for (status of ['PENDING', 'INSPECTED', 'RESOLVED']; track status) {
-          <mat-option [value]="status">{{
-            'crop-health.report-statuses.' + status | translate
-          }}</mat-option>
-        }
-      </mat-select>
-    </mat-form-field>
-    <button mat-button (click)="resetFilters()">
-      {{ 'crop-health.advisor.clear-filters' | translate }}
-    </button>
-  </section>
-  <p role="status">
-    {{ 'crop-health.advisor.results' | translate }}: {{ reports().length }} /
-    {{ store.pestReports().length }}
-  </p>
-  <div class="inbox-list">
-    @for (report of reports(); track report.id) {
-      <mat-card appearance="outlined" class="report-card" [attr.data-status]="report.status">
-        <div class="report-row">
-          <div class="report-details">
-            <mat-card-header>
-              <mat-icon mat-card-avatar>pest_control</mat-icon>
-              <mat-card-title>{{ store.reportLabel(+report.id) }}</mat-card-title>
-              <mat-card-subtitle
-                ><span class="status-badge">{{
-                  'crop-health.report-statuses.' + report.status | translate
-                }}</span></mat-card-subtitle
-              >
-            </mat-card-header>
-            <mat-card-content>
-              <p>
-                {{ 'crop-health.advisor.producer' | translate }}:
-                {{ store.producerName(report.reporterId) }} · #{{ report.reporterId }}
-              </p>
-              <p class="description">{{ report.description }}</p>
-              <p>
-                {{ 'crop-health.form-severity' | translate }}:
-                {{ 'crop-health.severities.' + report.severity | translate }}
-              </p>
-              @if (report.photo) {
-                <a [href]="report.photo" target="_blank" rel="noopener noreferrer">{{
-                  'crop-health.view-photo' | translate
-                }}</a>
-              }
-            </mat-card-content>
-          </div>
-          <mat-card-actions>
-            <a mat-stroked-button [routerLink]="['/crop-health/reports', report.id]">{{
-              'crop-health.case.open' | translate
-            }}</a>
-            @if (store.canDeleteReport(+report.id)) {
-              @if (deletingId() === +report.id) {
-                <span role="alert">{{ 'crop-health.delete-confirm' | translate }}</span>
-                <button mat-flat-button [disabled]="store.saving()" (click)="remove(+report.id)">
-                  {{ 'crop-health.delete-report' | translate }}
-                </button>
-                <button mat-button [disabled]="store.saving()" (click)="deletingId.set(null)">
-                  {{ 'crop-health.cancel' | translate }}
-                </button>
-              } @else {
-                <button
-                  mat-stroked-button
-                  [disabled]="store.saving()"
-                  (click)="deletingId.set(+report.id)"
-                >
-                  <mat-icon>delete_outline</mat-icon>{{ 'crop-health.delete-report' | translate }}
-                </button>
-              }
-            }
-            @if (store.canSchedule() && report.status === 'PENDING') {
-              <a
-                mat-flat-button
-                routerLink="/crop-health/inspections"
-                [queryParams]="{ reportId: report.id }"
-                >{{ 'crop-health.schedule-inspection' | translate }}</a
-              >
-            }
-            @if (store.canPrescribe() && report.status === 'INSPECTED') {
-              <a
-                mat-stroked-button
-                routerLink="/crop-health/prescribe"
-                [queryParams]="{ reportId: report.id }"
-                >{{ 'crop-health.btn-prescribe' | translate }}</a
-              >
-            }
-            @if (store.canAssess(+report.id)) {
-              <a
-                mat-stroked-button
-                [routerLink]="['/crop-health/reports', report.id]"
-                fragment="assessment"
-                >{{ 'crop-health.advisor.evaluate' | translate }}</a
-              >
-            }
-          </mat-card-actions>
-        </div>
-      </mat-card>
-    } @empty {
-      <mat-card appearance="outlined" class="empty-card"
+        <button mat-button (click)="reload()" [disabled]="store.loading() || store.saving()">
+          {{ 'crop-health.advisor.refresh' | translate }}
+        </button>
+        <a mat-stroked-button routerLink="/crop-health/inspections">{{
+          'crop-health.inspections-title' | translate
+        }}</a>
+        <a mat-stroked-button routerLink="/crop-health/prescriptions">{{
+          'crop-health.history-title' | translate
+        }}</a>
+      </div>
+    </div>
+    @if (store.writeError(); as error) {
+      <p role="alert">{{ error | translate }}</p>
+    }
+    @if (store.clinicalLoading() || store.saving()) {
+      <mat-progress-bar mode="indeterminate" [attr.aria-label]="'common.loading' | translate" />
+    }
+    @if (store.clinicalError(); as error) {
+      <mat-card appearance="outlined" role="alert"
         ><mat-card-content
-          ><mat-icon>pest_control</mat-icon>
-          <p>{{ 'crop-health.advisor.no-results' | translate }}</p></mat-card-content
+          ><p>{{ error | translate }}</p></mat-card-content
         ></mat-card
       >
     }
-  </div>
-}
+    @if (!store.clinicalLoading() && !store.clinicalError()) {
+      <section class="filters" [attr.aria-label]="'crop-health.advisor.filters' | translate">
+        <mat-form-field appearance="outline"
+          ><mat-label>{{ 'crop-health.advisor.plot' | translate }}</mat-label>
+          <mat-select [ngModel]="plotFilter()" (ngModelChange)="plotFilter.set($event)">
+            <mat-option [value]="0">{{ 'crop-health.advisor.all' | translate }}</mat-option>
+            @for (plot of store.plots(); track plot.id) {
+              <mat-option [value]="+plot.id">{{ plot.name }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline"
+          ><mat-label>{{ 'crop-health.form-severity' | translate }}</mat-label>
+          <mat-select [ngModel]="severityFilter()" (ngModelChange)="severityFilter.set($event)">
+            <mat-option value="ALL">{{ 'crop-health.advisor.all' | translate }}</mat-option>
+            @for (severity of ['LOW', 'MEDIUM', 'HIGH', 'SEVERE']; track severity) {
+              <mat-option [value]="severity">{{
+                'crop-health.severities.' + severity | translate
+              }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline"
+          ><mat-label>{{ 'crop-health.advisor.status' | translate }}</mat-label>
+          <mat-select [ngModel]="statusFilter()" (ngModelChange)="statusFilter.set($event)">
+            <mat-option value="ALL">{{ 'crop-health.advisor.all' | translate }}</mat-option>
+            @for (status of ['PENDING', 'INSPECTED', 'RESOLVED']; track status) {
+              <mat-option [value]="status">{{
+                'crop-health.report-statuses.' + status | translate
+              }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <button mat-button (click)="resetFilters()">
+          {{ 'crop-health.advisor.clear-filters' | translate }}
+        </button>
+      </section>
+      <p role="status">
+        {{ 'crop-health.advisor.results' | translate }}: {{ reports().length }} /
+        {{ store.pestReports().length }}
+      </p>
+      <div class="inbox-list">
+        @for (report of reports(); track report.id) {
+          <mat-card appearance="outlined" class="report-card" [attr.data-status]="report.status">
+            <div class="report-row">
+              <div class="report-details">
+                <mat-card-header>
+                  <mat-icon mat-card-avatar>pest_control</mat-icon>
+                  <mat-card-title>{{ store.reportLabel(+report.id) }}</mat-card-title>
+                  <mat-card-subtitle
+                    ><span class="status-badge">{{
+                      'crop-health.report-statuses.' + report.status | translate
+                    }}</span></mat-card-subtitle
+                  >
+                </mat-card-header>
+                <mat-card-content>
+                  <p>
+                    {{ 'crop-health.advisor.producer' | translate }}:
+                    {{ store.producerName(report.reporterId) }} · #{{ report.reporterId }}
+                  </p>
+                  <p class="description">{{ report.description }}</p>
+                  <p>
+                    {{ 'crop-health.form-severity' | translate }}:
+                    {{ 'crop-health.severities.' + report.severity | translate }}
+                  </p>
+                  @if (report.photo) {
+                    <a [href]="report.photo" target="_blank" rel="noopener noreferrer">{{
+                      'crop-health.view-photo' | translate
+                    }}</a>
+                  }
+                </mat-card-content>
+              </div>
+              <mat-card-actions>
+                <a mat-stroked-button [routerLink]="['/crop-health/reports', report.id]">{{
+                  'crop-health.case.open' | translate
+                }}</a>
+                @if (store.canDeleteReport(+report.id)) {
+                  @if (deletingId() === +report.id) {
+                    <span role="alert">{{ 'crop-health.delete-confirm' | translate }}</span>
+                    <button mat-flat-button [disabled]="store.saving()" (click)="remove(+report.id)">
+                      {{ 'crop-health.delete-report' | translate }}
+                    </button>
+                    <button mat-button [disabled]="store.saving()" (click)="deletingId.set(null)">
+                      {{ 'crop-health.cancel' | translate }}
+                    </button>
+                  } @else {
+                    <button
+                      mat-stroked-button
+                      [disabled]="store.saving()"
+                      (click)="deletingId.set(+report.id)"
+                    >
+                      <mat-icon>delete_outline</mat-icon>{{ 'crop-health.delete-report' | translate }}
+                    </button>
+                  }
+                }
+                @if (store.canSchedule() && report.status === 'PENDING') {
+                  <a
+                    mat-flat-button
+                    routerLink="/crop-health/inspections"
+                    [queryParams]="{ reportId: report.id }"
+                    >{{ 'crop-health.schedule-inspection' | translate }}</a
+                  >
+                }
+                @if (store.canPrescribe() && report.status === 'INSPECTED') {
+                  <a
+                    mat-stroked-button
+                    routerLink="/crop-health/prescribe"
+                    [queryParams]="{ reportId: report.id }"
+                    >{{ 'crop-health.btn-prescribe' | translate }}</a
+                  >
+                }
+                @if (store.canAssess(+report.id)) {
+                  <a
+                    mat-stroked-button
+                    [routerLink]="['/crop-health/reports', report.id]"
+                    fragment="assessment"
+                    >{{ 'crop-health.advisor.evaluate' | translate }}</a
+                  >
+                }
+              </mat-card-actions>
+            </div>
+          </mat-card>
+        } @empty {
+          <mat-card appearance="outlined" class="empty-card"
+            ><mat-card-content
+              ><mat-icon>pest_control</mat-icon>
+              <p>{{ 'crop-health.advisor.no-results' | translate }}</p></mat-card-content
+            ></mat-card
+          >
+        }
+      </div>
+    }
+  </section>
+  @if (store.canReport()) {
+    <aside class="advisor-column">
+      <div class="plot-panel">
+        <app-crop-plot-selector
+          [plots]="store.plots()"
+          [selectedPlotId]="store.selectedPlot()?.id"
+          [disabled]="store.scopeLoading()"
+          (plotSelected)="store.selectPlot(+$event)"
+        />
+      </div>
+      @if (store.selectedPlot(); as plot) {
+        <app-farmer-advisory-panel [plotId]="+plot.id" />
+      }
+    </aside>
+  }
+</div>

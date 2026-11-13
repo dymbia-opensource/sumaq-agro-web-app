@@ -1,74 +1,167 @@
 :host {
+  --surface: #ffffff;
+  --surface-subtle: #f4f6f2;
+  --frame-border: #c8cec4;
+  --inner-border: #dce1d8;
+  --text-main: #18221e;
+  --text-muted: #5c6862;
+
+  --brand-dark: #00423b;
+  --brand-green: #1a7f37;
+  --brand-tint: #e3f0e4;
+  --brand-tint-border: #c3dfc6;
+
   display: block;
-  min-width: 0;
+  height: 100%;
 }
 
-/* Registered plot: same dark green as the dashboard KPI cards. */
-.plot-card {
-  --mat-card-elevated-container-color: var(--mat-sys-on-tertiary-fixed-variant);
-  --mat-card-subtitle-text-color: var(--mat-sys-on-tertiary);
-  --mat-divider-color: color-mix(in srgb, var(--mat-sys-on-tertiary) 40%, transparent);
-  color: var(--mat-sys-on-tertiary);
-  border-radius: 20px;
+/* Tarjeta principal con marco gris definido */
+mat-card.plot-card {
+  height: 100%;
   display: flex;
   flex-direction: column;
-  height: 100%;
-  min-height: 300px;
+  justify-content: space-between;
+  background-color: var(--surface) !important;
+  border: 1.5px solid var(--frame-border) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 2px 6px rgba(24, 34, 30, 0.05) !important;
+  overflow: hidden;
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.plot-card mat-card-header {
+mat-card.plot-card:hover {
+  transform: translateY(-2px);
+  border-color: #aeb7a8 !important;
+  box-shadow: 0 8px 18px rgba(24, 34, 30, 0.08) !important;
+}
+
+/* Cabecera: Número de parcela a la izquierda y botón de menú a la derecha */
+mat-card.plot-card mat-card-header {
+  display: flex;
   align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 0.75rem 0.75rem 1.25rem !important;
+  background: var(--surface-subtle);
+  border-bottom: 1px solid var(--inner-border);
 }
 
-.plot-card mat-card-content {
-  flex: 1;
-}
-
-.plot-card mat-card-actions {
-  padding: 16px;
+/* Evita que Angular Material reserve espacio vacío si no hay avatar/título */
+mat-card.plot-card ::ng-deep .mat-mdc-card-header-text {
+  margin: 0;
 }
 
 .plot-number {
-  font: var(--mat-sys-title-small);
-  font-weight: 700;
+  margin: 0 !important;
+  font-size: 0.78rem !important;
+  font-weight: 700 !important;
   text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted) !important;
 }
 
 .plot-menu {
+  color: var(--text-muted) !important;
   margin-left: auto;
-  color: var(--mat-sys-on-tertiary);
 }
 
-.status-chip {
-  --mat-chip-outline-width: 0;
-  --mat-chip-elevated-container-color: var(--mat-sys-secondary-container);
-  --mat-chip-label-text-color: var(--mat-sys-on-secondary-container);
-  --mat-chip-with-icon-icon-color: var(--mat-sys-on-secondary-container);
+.plot-menu:hover {
+  background: var(--brand-tint) !important;
+  color: var(--brand-dark) !important;
+}
+
+/* Contenido de la tarjeta */
+mat-card.plot-card mat-card-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  padding: 1.25rem !important;
 }
 
 .plot-name {
-  margin: 12px 0;
-  font: var(--mat-sys-title-large);
-  font-weight: 600;
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--brand-dark);
+  line-height: 1.3;
 }
 
+/* Chip de estado */
+mat-chip-set {
+  margin: 0;
+}
+
+mat-chip.status-chip {
+  --mdc-chip-elevated-container-color: var(--brand-tint);
+  --mdc-chip-label-text-color: var(--brand-green);
+  --mdc-chip-outline-color: var(--brand-tint-border);
+  border: 1px solid var(--brand-tint-border) !important;
+  font-weight: 600 !important;
+  font-size: 0.78rem !important;
+  height: 28px !important;
+}
+
+mat-chip.status-chip mat-icon {
+  color: var(--brand-green) !important;
+  font-size: 16px !important;
+  width: 16px !important;
+  height: 16px !important;
+}
+
+/* Divisor */
+mat-divider {
+  border-top-color: var(--inner-border) !important;
+  margin: 0.15rem 0 !important;
+}
+
+/* Lista de metadatos (Cultivo, Área, Ubicación) */
 .plot-data {
   display: grid;
   grid-template-columns: auto 1fr;
-  gap: 8px;
-  margin: 16px 0 0;
+  gap: 0.55rem 0.75rem;
+  margin: 0;
+  padding: 0.85rem 1rem;
+  background: var(--surface-subtle);
+  border: 1px solid var(--inner-border);
+  border-radius: 12px;
+  font-size: 0.86rem;
 }
 
 .plot-data dt {
-  font-weight: 600;
+  color: var(--text-muted);
+  font-weight: 500;
 }
 
 .plot-data dd {
   margin: 0;
+  text-align: right;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+/* Pie de tarjeta y CTA */
+mat-card.plot-card mat-card-actions {
+  padding: 0.85rem 1.25rem 1.25rem !important;
+  margin: 0 !important;
 }
 
 .card-action {
   width: 100%;
-  --mat-button-filled-container-color: var(--mat-sys-surface);
-  --mat-button-filled-label-text-color: var(--mat-sys-on-surface);
+  height: 40px;
+  background-color: var(--brand-dark) !important;
+  color: #ffffff !important;
+  border-radius: 999px !important;
+  font-size: 0.86rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.01em;
+}
+
+.card-action:hover {
+  background-color: #00574e !important;
+}
+
+.card-action mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
 }

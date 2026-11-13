@@ -1,30 +1,11 @@
 :host {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 1.5rem;
 }
 
 .plot-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
   gap: 24px;
-}
-
-.plan-card {
-  border-radius: 16px;
-  max-width: 560px;
-  --mat-card-outlined-container-color: var(--mat-sys-secondary-container);
-  --mat-card-title-text-color: var(--mat-sys-on-secondary-container);
-  --mat-card-subtitle-text-color: var(--mat-sys-on-secondary-container);
-}
-
-.plan-card [mat-card-avatar] {
-  color: var(--mat-sys-primary);
-  font-size: 32px;
-  width: 32px;
-  height: 32px;
-}
-
-.plan-card mat-card-header {
-  padding-bottom: 16px;
 }

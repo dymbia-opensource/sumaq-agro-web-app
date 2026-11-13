@@ -13,9 +13,56 @@
 }
 
 .search {
-  flex: 0 1 640px;
+  display: flex;
+  flex: 1 1 30rem;
+  align-items: center;
+  gap: 0.625rem;
   min-width: 0;
+  max-width: 30rem;
+  min-height: 44px;
+  padding-inline: 0.875rem;
+  border: 1px solid #c8cec4;
+  border-radius: 12px;
+  background: #fff;
+  color: #286643;
+}
+
+.search:hover {
+  border-color: #789486;
+}
+
+.search:focus-within {
+  border-color: #286643;
+  box-shadow: 0 0 0 2px #286643;
+}
+
+.search mat-icon {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  font-size: 20px;
+}
+
+.search input {
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  padding: 0.5rem 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #18221e;
   font: var(--mat-sys-body-medium);
+}
+
+.search input::placeholder {
+  color: #5c6862;
+}
+
+@media (max-width: 599px) {
+  .topbar { gap: 6px; padding-inline: 8px; }
+  .search { gap: 0.375rem; padding-inline: 0.625rem; }
+  .search input { font-size: 1rem; }
 }
 
 .connection {

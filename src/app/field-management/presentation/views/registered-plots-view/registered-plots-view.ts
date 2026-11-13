@@ -1,8 +1,5 @@
 import { PlotQuotaSummary } from '../../components/plot-quota-summary/plot-quota-summary';
 import { Component, computed, inject, Signal } from '@angular/core';
-import { MatCardModule } from '@angular/material/card';
-import { MatDividerModule } from '@angular/material/divider';
-import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { Router } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -21,9 +18,6 @@ import { PlotSlotCard } from '../../components/plot-slot-card/plot-slot-card';
   selector: 'app-registered-plots-view',
   imports: [
     PlotQuotaSummary,
-    MatCardModule,
-    MatDividerModule,
-    MatIconModule,
     MatProgressBarModule,
     TranslatePipe,
     PageHeader,

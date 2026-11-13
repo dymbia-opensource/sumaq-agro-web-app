@@ -9,10 +9,14 @@
     </button>
   }
 
-  <mat-form-field class="search" appearance="outline" subscriptSizing="dynamic">
-    <mat-icon matPrefix>search</mat-icon>
-    <input matInput type="search" [placeholder]="'layout.search' | translate" />
-  </mat-form-field>
+  <label class="search">
+    <mat-icon aria-hidden="true">search</mat-icon>
+    <input
+      type="search"
+      [attr.aria-label]="'layout.search' | translate"
+      [placeholder]="'layout.search' | translate"
+    />
+  </label>
 
   <span class="spacer"></span>
 
@@ -22,21 +26,6 @@
       {{ (layout.isOnline() ? 'layout.connected' : 'layout.disconnected') | translate }}
     </mat-chip>
   </mat-chip-set>
-
-  <button
-    mat-icon-button
-    [matTooltip]="'layout.notifications' | translate"
-    [attr.aria-label]="'layout.notifications' | translate"
-  >
-    <mat-icon
-      aria-hidden="false"
-      [matBadge]="notificationCount()"
-      [matBadgeHidden]="notificationCount() === 0"
-      matBadgeColor="warn"
-      matBadgeSize="small"
-      >notifications</mat-icon
-    >
-  </button>
 
   <button mat-button class="user-button" [matMenuTriggerFor]="userMenu">
     <mat-icon class="avatar">account_circle</mat-icon>
