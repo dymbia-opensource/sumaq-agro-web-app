@@ -3,24 +3,23 @@
   flex-direction: column;
   gap: 24px;
 }
-.view-header {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+.workspace { display: grid; gap: 1.5rem; align-items: start; }
+.workspace.with-advisor { grid-template-columns: minmax(0, 1fr) minmax(240px, 300px); }
+.advisor-column { grid-column: 2; grid-row: 1; display: grid; gap: 1rem; }
+.inbox { grid-column: 1; grid-row: 1; min-width: 0; }
+.inbox-toolbar, .workspace-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem; }
+.inbox-toolbar { justify-content: space-between; margin-bottom: 1rem; }
+.inbox-toolbar h2 { margin: 0; font-size: 1.15rem; font-weight: 700; }
+.plot-panel, .inbox {
+  padding: clamp(1rem, 2vw, 1.5rem);
+  border: 1.5px solid #c8cec4;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 2px 6px rgb(24 34 30 / 5%);
 }
-.breadcrumb {
-  font: var(--mat-sys-title-small);
-  color: var(--mat-sys-primary);
-}
-.view-header h1 {
-  font: var(--mat-sys-display-small);
-  font-weight: 700;
-  margin: 0;
-}
-nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
+@media (max-width: 1050px) {
+  .workspace.with-advisor { grid-template-columns: minmax(0, 1fr); }
+  .advisor-column, .inbox { grid-column: auto; grid-row: auto; }
 }
 .inbox-list {
   display: flex;

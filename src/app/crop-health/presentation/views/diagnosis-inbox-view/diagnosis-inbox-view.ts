@@ -11,6 +11,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslateService, TranslatePipe } from '@ngx-translate/core';
+import { PageHeader } from '../../../../shared/presentation/components/page-header/page-header';
 import { CropHealthStore } from '../../../application/crop-health.store';
 
 @Component({
@@ -21,6 +22,7 @@ import { CropHealthStore } from '../../../application/crop-health.store';
     MatSelectModule,
     FarmerAdvisoryPanel,
     CropPlotSelector,
+    PageHeader,
     RouterLink,
     TranslatePipe,
     MatButtonModule,
