@@ -108,6 +108,16 @@
       "fullName": "Rosa Melgar",
       "active": true,
       "userId": 2
+    },
+    {
+      "fullName": "Raul",
+      "dni": "60463463",
+      "phone": "95912593",
+      "community": "Villa El Mar",
+      "cooperativeId": 1,
+      "active": true,
+      "plots": [],
+      "id": 12
     }
   ],
   "cooperative-dashboards": [
