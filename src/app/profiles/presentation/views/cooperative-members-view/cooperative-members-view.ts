@@ -1,4 +1,4 @@
-import { DatePipe } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { MatTabsModule } from '@angular/material/tabs';
 import { HarvestCertificationStore } from '../../../../harvest-certification/application/harvest-certification.store';
 import { CooperativeMember } from '../../../domain/model/entities/cooperative-member.entity';
@@ -20,7 +20,7 @@ import { ProfilesApi } from '../../../infrastructure/profiles-api';
 
 @Component({
   selector: 'app-cooperative-members-view',
-  imports: [DatePipe, MatTabsModule, ReactiveFormsModule, MatIconModule, MatButtonModule, MatProgressBarModule, RouterLink, TranslatePipe, PageHeader],
+  imports: [DatePipe, DecimalPipe, MatTabsModule, ReactiveFormsModule, MatIconModule, MatButtonModule, MatProgressBarModule, RouterLink, TranslatePipe, PageHeader],
   templateUrl: './cooperative-members-view.html',
   styleUrl: './cooperative-members-view.css',
 })
@@ -177,13 +177,21 @@ export class CooperativeMembersView {
   }
 
   protected readonly harvest = inject(HarvestCertificationStore);
-  protected readonly issuedCertificates = computed(() => {
+  protected readonly memberBatches = computed(() => {
     const member = this.selected();
     if (!member || this.harvest.cooperativeId() !== member.cooperativeId) return [];
 
-    const batches = new Map(this.harvest.batches()
+    return this.harvest.batches()
       .filter(({ data }) => data.memberId === member.id && data.cooperativeId === member.cooperativeId)
-      .map((batch) => [batch.id, batch.data]));
+      .sort((a, b) => b.data.collectedAt.localeCompare(a.data.collectedAt));
+  });
+
+  protected readonly collectedKg = computed(() =>
+    this.memberBatches().reduce((total, batch) => total + batch.netKg, 0),
+  );
+
+  protected readonly issuedCertificates = computed(() => {
+    const batches = new Map(this.memberBatches().map((batch) => [batch.id, batch.data]));
     return this.harvest.certificates().flatMap(({ data }) => {
       const batch = batches.get(data.harvestBatchId);
       return batch ? [{ certificate: data, batch }] : [];

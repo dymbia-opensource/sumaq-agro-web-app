@@ -109,6 +109,38 @@
                 </div>
             </div>
           </mat-tab>
+          <mat-tab [label]="'profiles.cooperative.members.collection' | translate">
+            <ng-template matTabContent>
+              <div class="tab-content">
+                @if (harvest.loading()) {
+                  <mat-progress-bar mode="indeterminate" [attr.aria-label]="'common.loading' | translate" />
+                } @else if (harvest.error(); as error) {
+                  <p role="alert">{{ error | translate }}</p>
+                  <button mat-stroked-button type="button" (click)="harvest.load()">
+                    {{ 'common.retry' | translate }}
+                  </button>
+                } @else if (harvest.notice(); as notice) {
+                  <p role="status">{{ notice | translate }}</p>
+                } @else if (memberBatches().length) {
+                  <p class="collection-total">
+                    {{ 'profiles.cooperative.members.net-total' | translate }}
+                    <strong>{{ collectedKg() | number: '1.0-2' }} kg</strong>
+                  </p>
+                  <div class="plot-grid">
+                    @for (batch of memberBatches(); track batch.id) {
+                      <section class="plot">
+                        <h4>{{ batch.data.code }} · {{ batch.data.plotName }}</h4>
+                        <p>{{ batch.data.variety }} · {{ batch.data.collectedAt | date: 'mediumDate' }}</p>
+                        <p>{{ 'profiles.cooperative.members.net-weight' | translate }} <strong>{{ batch.netKg | number: '1.0-2' }} kg</strong></p>
+                      </section>
+                    }
+                  </div>
+                } @else {
+                  <p>{{ 'profiles.cooperative.members.no-collection' | translate }}</p>
+                }
+              </div>
+            </ng-template>
+          </mat-tab>
           <mat-tab [label]="'profiles.cooperative.members.certificates' | translate">
             <ng-template matTabContent>
               <div class="tab-content">

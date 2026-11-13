@@ -2,6 +2,10 @@
   "profiles": {
     "cooperative": {
       "members": {
+        "collection": "Historial de acopio",
+        "net-total": "Peso neto acumulado",
+        "net-weight": "Peso neto",
+        "no-collection": "Este socio todavía no tiene lotes de acopio registrados.",
         "certificates": "Certificados emitidos",
         "no-certificates": "Este socio todavía no tiene certificados emitidos.",
         "verify-certificate": "Verificar certificado",

@@ -2,6 +2,10 @@
   "profiles": {
     "cooperative": {
       "members": {
+        "collection": "Collection history",
+        "net-total": "Total net weight",
+        "net-weight": "Net weight",
+        "no-collection": "No collection batches have been recorded for this member yet.",
         "certificates": "Issued certificates",
         "no-certificates": "No certificates have been issued for this member yet.",
         "verify-certificate": "Verify certificate",
