@@ -55,7 +55,7 @@ export class PlotDetailView {
 
   // UI state
   protected readonly breadcrumbs: Breadcrumb[] = [
-    { label: 'option.my-plot', link: '/field-management/dashboard' },
+    { label: 'option.my-plot', link: '/dashboard' },
     { label: 'field-management.plots.manage', link: '/field-management/plots' },
     { label: 'field-management.plot-detail.title' },
   ];
@@ -63,6 +63,6 @@ export class PlotDetailView {
   // Actions
   onViewOnDashboard() {
     this.store.selectPlot(this.id());
-    this.router.navigate(['/field-management/dashboard']).then();
+    this.router.navigate(['/dashboard']).then();
   }
 }

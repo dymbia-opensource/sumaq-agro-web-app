@@ -48,7 +48,7 @@ export class RegisteredPlotsView {
 
   // UI state
   protected readonly breadcrumbs: Breadcrumb[] = [
-    { label: 'option.my-plot', link: '/field-management/dashboard' },
+    { label: 'option.my-plot', link: '/dashboard' },
     { label: 'field-management.plots.manage' },
   ];
 
@@ -81,7 +81,7 @@ export class RegisteredPlotsView {
 
   onSelectPlot(plot: FieldPlot) {
     this.fieldManagementStore.selectPlot(plot.id as number);
-    this.router.navigate(['field-management/dashboard']).then();
+    this.router.navigate(['dashboard']).then();
   }
 
   onViewMonitoring(plot: FieldPlot) {

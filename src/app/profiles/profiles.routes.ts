@@ -1,12 +1,11 @@
 import { iamGuard } from '../iam/infrastructure/iam.guard';
 import { Routes } from '@angular/router';
-import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 
 const farmerSettingsView = () =>
   import('./presentation/views/farmer-settings-view/farmer-settings-view').then(
     (module) => module.FarmerSettingsView,
   );
-const cooperativeDashboardView = () => import('./presentation/views/cooperative-dashboard-view/cooperative-dashboard-view').then((module) => module.CooperativeDashboardView);
+export const cooperativeDashboardView = () => import('./presentation/views/cooperative-dashboard-view/cooperative-dashboard-view').then((module) => module.CooperativeDashboardView);
 const cooperativeSettingsView = () => import('./presentation/views/cooperative-settings-view/cooperative-settings-view').then((module) => module.CooperativeSettingsView);
 
 /** Routes owned by the Profiles bounded context. */
@@ -16,12 +15,7 @@ export const profilesRoutes: Routes = [
     loadComponent: farmerSettingsView,
     title: 'Configuración y ayuda | SumaqAgro',
   },
-  {
-    path: 'cooperative/dashboard',
-    providers: [provideCharts(withDefaultRegisterables())],
-    loadComponent: cooperativeDashboardView,
-    title: 'Dashboard institucional | SumaqAgro',
-  },
+  { path: 'cooperative/dashboard', redirectTo: '/cooperative/dashboard', pathMatch: 'full' },
   {
     path: 'cooperative/registration',
     canActivate: [iamGuard],
@@ -49,5 +43,5 @@ export const profilesRoutes: Routes = [
     title: 'Expediente del socio | SumaqAgro',
   },
   { path: 'cooperative/settings', loadComponent: cooperativeSettingsView, title: 'Configuración institucional | SumaqAgro' },
-  { path: '', redirectTo: 'cooperative/dashboard', pathMatch: 'full' },
+  { path: '', redirectTo: '/cooperative/dashboard', pathMatch: 'full' },
 ];

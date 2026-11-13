@@ -1,3 +1,4 @@
+import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 import { Routes } from '@angular/router';
 import { iamRoutes } from './iam/iam.routes';
 import { iamGuard } from './iam/infrastructure/iam.guard';
@@ -86,6 +87,18 @@ export const routes: Routes = [
           { path: 'certificates', loadChildren: harvestCertificationRoutes },
           { path: 'harvest-certification/certificates', redirectTo: '/certificates', pathMatch: 'full' },
           { path: 'harvest-certification', redirectTo: '/certificates', pathMatch: 'full' },
+          {
+            path: 'dashboard',
+            providers: [provideCharts(withDefaultRegisterables())],
+            loadComponent: () => import('./field-management/field-management.routes').then((m) => m.myPlotDashboardView()),
+            title: 'Mi parcela | SumaqAgro',
+          },
+          {
+            path: 'cooperative/dashboard',
+            providers: [provideCharts(withDefaultRegisterables())],
+            loadComponent: () => import('./profiles/profiles.routes').then((m) => m.cooperativeDashboardView()),
+            title: 'Dashboard institucional | SumaqAgro',
+          },
           { path: 'field-management', loadChildren: fieldManagementRoutes },
           { path: 'crop-health', loadChildren: cropHealthRoutes },
           { path: 'profiles', loadChildren: profilesRoutes },

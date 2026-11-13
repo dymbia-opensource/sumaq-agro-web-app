@@ -55,7 +55,7 @@ export class PlotRegistrationView {
   readonly slotNumber = computed(() => this.fieldManagementStore.plotCount() + 1);
 
   protected readonly breadcrumbs: Breadcrumb[] = [
-    { label: 'option.my-plot', link: '/field-management/dashboard' },
+    { label: 'option.my-plot', link: '/dashboard' },
     { label: 'field-management.plots.manage', link: '/field-management/plots' },
     { label: 'field-management.steps.crop-data' },
   ];

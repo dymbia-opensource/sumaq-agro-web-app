@@ -71,7 +71,7 @@ export class PlotBoundaryMapView {
   });
 
   protected readonly breadcrumbs: Breadcrumb[] = [
-    { label: 'option.my-plot', link: '/field-management/dashboard' },
+    { label: 'option.my-plot', link: '/dashboard' },
     { label: 'field-management.plots.manage', link: '/field-management/plots' },
     { label: 'field-management.steps.crop-data' },
     { label: 'field-management.steps.map-title' },

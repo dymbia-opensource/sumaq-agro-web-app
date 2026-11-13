@@ -2,7 +2,7 @@ import { Routes } from '@angular/router';
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 import { ExpenseCategory } from './domain/model/entities/expense-entry.entity';
 
-const myPlotDashboardView = () =>
+export const myPlotDashboardView = () =>
   import('./presentation/views/my-plot-dashboard-view/my-plot-dashboard-view').then(
     (m) => m.MyPlotDashboardView,
   );
@@ -61,11 +61,7 @@ export const fieldManagementRoutes: Routes = [
     path: '',
     providers: [provideCharts(withDefaultRegisterables())],
     children: [
-      {
-        path: 'dashboard',
-        loadComponent: myPlotDashboardView,
-        title: `My Plot – ${baseTitle} | Crop Monitoring and Management Dashboard`,
-      },
+      { path: 'dashboard', redirectTo: '/dashboard', pathMatch: 'full' },
       { path: 'plots', loadComponent: registeredPlotsView, title: `My Plots – ${baseTitle}` },
       {
         path: 'plots/new',
@@ -115,7 +111,7 @@ export const fieldManagementRoutes: Routes = [
         title: `Register a Freight Expense – ${baseTitle}`,
       },
       { path: 'finances/expenses/new', redirectTo: 'finances/expenses/new/inputs', pathMatch: 'full' },
-      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
     ],
   },
 ];

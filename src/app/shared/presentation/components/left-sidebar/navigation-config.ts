@@ -18,7 +18,7 @@ import { UserRole } from '../../../../iam/domain/model/value-objects/user-role';
 export const farmerNavigationSections: NavigationSection[] = [
   {
     title: 'section.major',
-    options: [{ link: '/field-management/dashboard', label: 'option.my-plot', icon: 'home' }],
+    options: [{ link: '/dashboard', label: 'option.my-plot', icon: 'home' }],
   },
   {
     title: 'section.agricultural-operation',
@@ -49,7 +49,7 @@ export const cooperativeDirectorNavigationSections: NavigationSection[] = [
     title: 'section.institutional-management',
     options: [
       {
-        link: '/profiles/cooperative/dashboard',
+        link: '/cooperative/dashboard',
         label: 'option.cooperative-dashboard',
         icon: 'home',
       },

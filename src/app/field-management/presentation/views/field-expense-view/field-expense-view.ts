@@ -58,7 +58,7 @@ export class FieldExpenseView {
 
   // UI state
   protected readonly breadcrumbs: Breadcrumb[] = [
-    { label: 'option.my-plot', link: '/field-management/dashboard' },
+    { label: 'option.my-plot', link: '/dashboard' },
     { label: 'option.expenses', link: FINANCES_ROUTE },
     { label: 'field-management.finances.register-expense' },
   ];

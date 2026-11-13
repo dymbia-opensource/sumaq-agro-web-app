@@ -55,7 +55,7 @@ export class CooperativeRegistrationView {
     ).subscribe({
       next: () => {
         if (this.session.activeUser()?.id === director.id) {
-          void this.router.navigate(['/profiles/cooperative/dashboard']);
+          void this.router.navigate(['/cooperative/dashboard']);
         }
       },
       error: () => this.error.set('profiles.cooperative.registration.error'),

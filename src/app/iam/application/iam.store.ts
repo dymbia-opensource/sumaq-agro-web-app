@@ -33,8 +33,8 @@ export interface SessionParticipant {
 const ROLE_PRIORITY: readonly UserRole[] = ['COOPERATIVE_DIRECTOR', 'AGRONOMIST', 'FARMER'];
 
 const INITIAL_ROUTES: Record<UserRole, string> = {
-  FARMER: '/field-management/dashboard',
-  COOPERATIVE_DIRECTOR: '/profiles/cooperative/dashboard',
+  FARMER: '/dashboard',
+  COOPERATIVE_DIRECTOR: '/cooperative/dashboard',
   AGRONOMIST: '/crop-health/inbox',
 };
 /**
