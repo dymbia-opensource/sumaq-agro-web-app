@@ -17,7 +17,7 @@ export class AuthNavigationService {
 
   destination(returnUrl: string | null): UrlTree {
     const fallback = this.router.parseUrl(
-      this.session.activeUser()?.initialRoute ?? '/iam/sign-in',
+      this.session.activeUser()?.initialRoute ?? '/sign-in',
     );
 
     if (
@@ -60,7 +60,7 @@ export class AuthNavigationService {
   signOut(): void {
     this.session.signOut();
 
-    void this.router.navigateByUrl('/iam/sign-in', {
+    void this.router.navigateByUrl('/sign-in', {
       replaceUrl: true,
     });
   }

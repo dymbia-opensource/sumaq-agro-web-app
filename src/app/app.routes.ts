@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { iamRoutes } from './iam/iam.routes';
 import { iamGuard } from './iam/infrastructure/iam.guard';
 import {activeSubscriptionGuard} from './subscriptions/infrastructure/active-subscription.guard';
 
@@ -40,18 +41,18 @@ const baseTitle = 'SumaqAgro';
  *
  * Subscriptions is outside the shell on purpose: plan selection and checkout
  * use their own minimal shell (`SubscriptionsShell`, no side menu), while
- * `subscriptions/billing` opens the app shell from its own routes. It must be
+ * `subscriptions` opens the app shell from its own routes. It must be
  * declared before the `Layout` route, whose `**` would otherwise match it.
  */
 export const routes: Routes = [
   // Pages without the shell
-  { path: 'iam', loadChildren: () => import('./iam/iam.routes').then((m) => m.iamRoutes) },
+  ...iamRoutes,
   {
     path: 'verify/:token',
     loadComponent: publicTraceabilityView,
     title: `Verificar certificado | ${baseTitle}`,
   },
-  { path: '', redirectTo: '/iam/sign-in', pathMatch: 'full' },
+  { path: '', redirectTo: '/sign-in', pathMatch: 'full' },
 
   // Subscriptions: each of its pages chooses its own layout
   {
@@ -72,10 +73,22 @@ export const routes: Routes = [
         path: '',
         canActivateChild: [activeSubscriptionGuard],
         children: [
+          {
+            path: 'advisor',
+            loadComponent: () => import('./crop-health/crop-health.routes').then((m) => m.diagnosisInboxView()),
+            title: 'Consultar al asesor | SumaqAgro',
+          },
+          {
+            path: 'alerts',
+            loadComponent: () => import('./crop-health/crop-health.routes').then((m) => m.agriculturalAlertsView()),
+            title: 'Alertas agrícolas | SumaqAgro',
+          },
+          { path: 'certificates', loadChildren: harvestCertificationRoutes },
+          { path: 'harvest-certification/certificates', redirectTo: '/certificates', pathMatch: 'full' },
+          { path: 'harvest-certification', redirectTo: '/certificates', pathMatch: 'full' },
           { path: 'field-management', loadChildren: fieldManagementRoutes },
           { path: 'crop-health', loadChildren: cropHealthRoutes },
           { path: 'profiles', loadChildren: profilesRoutes },
-          { path: 'harvest-certification', loadChildren: harvestCertificationRoutes },
         ],
       },
       { path: '**', loadComponent: pageNotFound, title: `${baseTitle} - Page Not Found` },

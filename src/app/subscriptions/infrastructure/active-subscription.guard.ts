@@ -11,7 +11,7 @@ export const activeSubscriptionGuard: CanActivateChildFn = (_route, state) => {
   const subscriptionsApi = inject(SubscriptionsApi);
 
   const signIn = () =>
-    router.createUrlTree(['/iam/sign-in'], {
+    router.createUrlTree(['/sign-in'], {
       queryParams: { returnUrl: state.url },
     });
 

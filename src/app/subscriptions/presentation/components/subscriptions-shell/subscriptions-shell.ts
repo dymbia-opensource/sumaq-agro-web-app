@@ -38,7 +38,7 @@ export class SubscriptionsShell {
       untracked(() => {
         if (this.router.currentNavigation()) return;
 
-        void this.router.navigate(['/iam/sign-in'], {
+        void this.router.navigate(['/sign-in'], {
           queryParams: { returnUrl: this.router.url },
           replaceUrl: true,
         });

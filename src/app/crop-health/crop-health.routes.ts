@@ -4,12 +4,12 @@ import { Routes } from '@angular/router';
 const cropHealthView = () =>
   import('./presentation/views/crop-health-view/crop-health-view').then((m) => m.CropHealthView);
 
-const agriculturalAlertsView = () =>
+export const agriculturalAlertsView = () =>
   import('./presentation/views/agricultural-alerts-view/agricultural-alerts-view').then(
     (m) => m.AgriculturalAlertsView,
   );
 
-const diagnosisInboxView = () =>
+export const diagnosisInboxView = () =>
   import('./presentation/views/diagnosis-inbox-view/diagnosis-inbox-view').then(
     (m) => m.DiagnosisInboxView,
   );
@@ -55,16 +55,8 @@ export const cropHealthRoutes: Routes = [
         loadComponent: cropHealthView,
         title: 'Crop Health – SumaqAgro | Multispectral Satellite Viewer',
       },
-      {
-        path: 'alerts',
-        loadComponent: agriculturalAlertsView,
-        title: 'Agroclimatic Alerts – SumaqAgro',
-      },
-      {
-        path: 'advisor',
-        loadComponent: diagnosisInboxView,
-        title: 'Crop Health Advisor – SumaqAgro',
-      },
+      { path: 'alerts', redirectTo: '/alerts', pathMatch: 'full' },
+      { path: 'advisor', redirectTo: '/advisor', pathMatch: 'full' },
       {
         path: 'inbox',
         loadComponent: diagnosisInboxView,

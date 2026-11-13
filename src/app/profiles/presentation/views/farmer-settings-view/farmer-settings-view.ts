@@ -57,7 +57,7 @@ export class FarmerSettingsView {
     campaigns: '/field-management/campaigns',
     expenses: '/field-management/finances',
     health: '/crop-health/monitoring',
-    certificates: '/harvest-certification/certificates',
+    certificates: '/certificates',
     offline: '/field-management/finances',
   };
   readonly icons: Record<string, string> = {

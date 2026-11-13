@@ -29,9 +29,4 @@ export const iamRoutes: Routes = [
       import('./presentation/views/sign-up-form/sign-up-form').then((m) => m.SignUpForm),
     title: 'Crear cuenta | SumaqAgro',
   },
-  {
-    path: '',
-    redirectTo: 'sign-in',
-    pathMatch: 'full',
-  },
 ];

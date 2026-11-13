@@ -25,9 +25,9 @@ export const farmerNavigationSections: NavigationSection[] = [
     options: [
       { link: '/crop-health/monitoring', label: 'option.crop-health', icon: 'eco' },
       { link: '/field-management/finances', label: 'option.expenses', icon: 'payments' },
-      { link: '/crop-health/advisor', label: 'option.advisor', icon: 'forum' },
+      { link: '/advisor', label: 'option.advisor', icon: 'forum' },
       {
-        link: '/harvest-certification/certificates',
+        link: '/certificates',
         label: 'option.harvest-certificates',
         icon: 'workspace_premium',
       },
@@ -36,8 +36,8 @@ export const farmerNavigationSections: NavigationSection[] = [
   {
     title: 'section.system',
     options: [
-      { link: '/crop-health/alerts', label: 'option.alerts', icon: 'notification_important' },
-      { link: '/subscriptions/billing', label: 'subscriptions.nav-title', icon: 'credit_card' },
+      { link: '/alerts', label: 'option.alerts', icon: 'notification_important' },
+      { link: '/subscriptions', label: 'subscriptions.nav-title', icon: 'credit_card' },
       { link: '/profiles/settings', label: 'option.settings', icon: 'settings' },
     ],
   },
@@ -65,18 +65,18 @@ export const cooperativeDirectorNavigationSections: NavigationSection[] = [
         icon: 'calendar_month',
       },
       {
-        link: '/harvest-certification/certificates',
+        link: '/certificates',
         label: 'option.cooperative-certificates',
         icon: 'calendar_month',
       },
-      { link: '/crop-health/alerts', label: 'option.cooperative-alerts', icon: 'calendar_month' },
+      { link: '/alerts', label: 'option.cooperative-alerts', icon: 'calendar_month' },
       { link: '/crop-health/inbox', label: 'option.diagnosis-inbox', icon: 'pest_control' },
     ],
   },
   {
     title: 'section.system',
     options: [
-      { link: '/subscriptions/billing', label: 'subscriptions.nav-title', icon: 'credit_card' },
+      { link: '/subscriptions', label: 'subscriptions.nav-title', icon: 'credit_card' },
       {
         link: '/profiles/cooperative/settings',
         label: 'option.cooperative-settings',
@@ -99,13 +99,13 @@ export const agronomistNavigationSections: NavigationSection[] = [
       },
       { link: '/crop-health/prescriptions', label: 'option.prescriptions', icon: 'medication' },
       { link: '/crop-health/monitoring', label: 'option.crop-health', icon: 'eco' },
-      { link: '/crop-health/alerts', label: 'option.alerts', icon: 'warning' },
+      { link: '/alerts', label: 'option.alerts', icon: 'warning' },
     ],
   },
   {
     title: 'section.system',
     options: [
-      { link: '/subscriptions/billing', label: 'subscriptions.nav-title', icon: 'credit_card' },
+      { link: '/subscriptions', label: 'subscriptions.nav-title', icon: 'credit_card' },
     ],
   },
 ];

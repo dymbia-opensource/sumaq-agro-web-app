@@ -1059,6 +1059,16 @@
       "startDate": "2026-11-13",
       "endDate": "2026-12-13",
       "autoRenew": true
+    },
+    {
+      "id": 13,
+      "userId": 1794612777995,
+      "planId": 1,
+      "status": "ACTIVE",
+      "billingCycle": "MONTHLY",
+      "startDate": "2026-11-13",
+      "endDate": "2026-12-13",
+      "autoRenew": true
     }
   ],
   "payments": [
@@ -1187,6 +1197,15 @@
       "transactionToken": "demo-tx-8145c692-302e-463e-a250-dcb35e8eefe2",
       "status": "COMPLETED",
       "paidAt": "2026-11-13T18:10:14.408Z"
+    },
+    {
+      "id": 15,
+      "subscriptionId": 13,
+      "amount": 49,
+      "currency": "PEN",
+      "transactionToken": "demo-tx-11642b15-4b9e-47ca-acd8-5f706116353b",
+      "status": "COMPLETED",
+      "paidAt": "2026-11-13T23:33:48.051Z"
     }
   ]
 }
