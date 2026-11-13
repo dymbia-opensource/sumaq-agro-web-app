@@ -2,6 +2,7 @@
   "profiles": {
     "cooperative": {
       "members": {
+        "edit": "Editar datos del socio",
         "link-plot": "Añadir lote",
         "no-linkable-plots": "No hay parcelas delimitadas disponibles para vincular.",
         "link-error": "No se pudo vincular la parcela. Comprueba que tenga una campaña activa de papa o café.",

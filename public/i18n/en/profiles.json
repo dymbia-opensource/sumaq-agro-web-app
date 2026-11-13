@@ -2,6 +2,7 @@
   "profiles": {
     "cooperative": {
       "members": {
+        "edit": "Edit member details",
         "link-plot": "Add plot",
         "no-linkable-plots": "No plots with saved boundaries are available to link.",
         "link-error": "The plot could not be linked. Check that it has an active potato or coffee campaign.",

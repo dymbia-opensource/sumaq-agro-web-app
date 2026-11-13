@@ -1,3 +1,4 @@
+import { CooperativeMemberDetails } from './responses/cooperative-member.response';
 import { HttpClient } from '@angular/common/http';
 import { inject, Service } from '@angular/core';
 import { map, Observable } from 'rxjs';
@@ -52,8 +53,12 @@ export class ProfilesApi extends BaseApi {
     return this.cooperativesEndpoint.update(cooperative, cooperative.id);
   }
 
-  addCooperativeMember(cooperativeId: number, member: { fullName: string; dni: string; phone: string; community: string }): Observable<CooperativeMember> {
+  addCooperativeMember(cooperativeId: number, member: CooperativeMemberDetails): Observable<CooperativeMember> {
     return this.cooperativeMembersEndpoint.add(cooperativeId, member);
+  }
+
+  updateCooperativeMember(id: number | string, details: CooperativeMemberDetails): Observable<CooperativeMember> {
+    return this.cooperativeMembersEndpoint.updateDetails(id, details);
   }
 
   linkMemberPlot(member: CooperativeMember, plot: MemberPlot): Observable<CooperativeMember> {

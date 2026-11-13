@@ -1,3 +1,4 @@
+import { CooperativeMember } from '../../../domain/model/entities/cooperative-member.entity';
 import { FieldManagementApi } from '../../../../field-management/infrastructure/field-management-api';
 import { FieldPlot } from '../../../../field-management/domain/model/entities/field-plot.entity';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -31,6 +32,29 @@ export class CooperativeMembersView {
 
   private readonly destroyRef = inject(DestroyRef);
   protected readonly adding = signal(false);
+  private readonly editingMember = signal<CooperativeMember | null>(null);
+  protected readonly editing = computed(() => {
+    const member = this.editingMember();
+    return member !== null && this.selected() === member;
+  });
+
+  protected editMember(member: CooperativeMember): void {
+    this.error.set('');
+    this.form.reset({
+      fullName: member.fullName,
+      dni: member.dni,
+      phone: member.phone,
+      community: member.community,
+    });
+    this.editingMember.set(member);
+  }
+
+  protected closeForm(): void {
+    this.editingMember.set(null);
+    this.adding.set(false);
+    this.form.reset();
+    this.error.set('');
+  }
   protected readonly saving = signal(false);
   protected readonly error = signal('');
   private readonly router = inject(Router);
@@ -160,28 +184,37 @@ export class CooperativeMembersView {
   protected save(): void {
     const state = this.state();
     if (state?.status !== 'ready' || state.directorId !== this.session.activeUser()?.id || this.saving()) return;
+    const editing = this.editing() ? this.editingMember() : null;
+    if (!editing && (!this.adding() || this.memberId() !== null)) return;
     this.form.markAllAsTouched();
     if (this.form.invalid) return;
     const { fullName, dni, phone, community } = this.form.getRawValue();
-    if (state.members.some((member) => member.dni === dni)) {
+    if (state.members.some((member) => member.dni === dni && member.id !== editing?.id)) {
       this.error.set('profiles.cooperative.members.duplicate');
       return;
     }
     this.error.set('');
     this.saving.set(true);
-    this.api.addCooperativeMember(state.cooperativeId, {
+    const details = {
       fullName: fullName.trim(),
       dni,
       phone: phone.trim(),
       community: community.trim(),
-    }).pipe(
+    };
+    const request = editing
+      ? this.api.updateCooperativeMember(editing.id, details)
+      : this.api.addCooperativeMember(state.cooperativeId, details);
+    request.pipe(
       takeUntilDestroyed(this.destroyRef),
       finalize(() => this.saving.set(false)),
     ).subscribe({
       next: (member) => {
         if (state.directorId !== this.session.activeUser()?.id) return;
-        this.adding.set(false);
-        this.form.reset();
+        this.closeForm();
+        if (editing) {
+          this.retry();
+          return;
+        }
         void this.router.navigate(['/profiles/cooperative/members', member.id], {
           state: { memberSearch: this.query() },
         });

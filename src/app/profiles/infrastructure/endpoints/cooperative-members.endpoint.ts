@@ -1,3 +1,4 @@
+import { CooperativeMemberDetails } from '../responses/cooperative-member.response';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { catchError, map, Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
@@ -24,13 +25,20 @@ export class CooperativeMembersApiEndpoint extends BaseApiEndpoint<
     );
   }
 
-  add(cooperativeId: number, member: { fullName: string; dni: string; phone: string; community: string }): Observable<CooperativeMember> {
+  add(cooperativeId: number, member: CooperativeMemberDetails): Observable<CooperativeMember> {
     return this.http.post<CooperativeMemberResource>(this.endpointUrl, {
       ...member,
       cooperativeId,
       active: true,
       plots: [],
     }).pipe(map((resource) => this.assembler.toEntityFromResource(resource)));
+  }
+
+  updateDetails(id: number | string, details: CooperativeMemberDetails): Observable<CooperativeMember> {
+    return this.http.patch<CooperativeMemberResource>(
+      this.endpointUrl + '/' + encodeURIComponent(id),
+      details,
+    ).pipe(map((resource) => this.assembler.toEntityFromResource(resource)));
   }
 
   linkPlot(member: CooperativeMember, plot: MemberPlot): Observable<CooperativeMember> {

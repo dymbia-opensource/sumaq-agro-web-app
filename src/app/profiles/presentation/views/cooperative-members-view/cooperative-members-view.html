@@ -30,9 +30,9 @@
     </div>
   }
   @case ('ready') {
-    @if (adding()) {
+    @if ((adding() && memberId() === null) || editing()) {
       <form class="panel member-form" [formGroup]="form" (ngSubmit)="save()" [attr.aria-busy]="saving()">
-        <h2>{{ 'profiles.cooperative.members.new-title' | translate }}</h2>
+        <h2>{{ (editing() ? 'profiles.cooperative.members.edit' : 'profiles.cooperative.members.new-title') | translate }}</h2>
         <div class="fields">
           <label>{{ 'profiles.cooperative.members.name' | translate }}
             <input formControlName="fullName" autocomplete="name" required />
@@ -52,7 +52,7 @@
         }
         @if (error()) { <p role="alert">{{ error() | translate }}</p> }
         <div class="actions">
-          <button mat-button type="button" [disabled]="saving()" (click)="adding.set(false); form.reset()">
+          <button mat-button type="button" [disabled]="saving()" (click)="closeForm()">
             {{ 'crop-health.cancel' | translate }}
           </button>
           <button mat-flat-button type="submit" [disabled]="saving()">
@@ -69,6 +69,10 @@
         @if (member.dni) { <p>DNI · {{ member.dni }}</p> }
         @if (member.phone) { <p>{{ 'profiles.cooperative.members.phone' | translate }} · {{ member.phone }}</p> }
         @if (member.community) { <p>{{ 'profiles.cooperative.members.community' | translate }} · {{ member.community }}</p> }
+        <button mat-flat-button type="button" [disabled]="linking() || saving()" (click)="editMember(member)">
+          <mat-icon aria-hidden="true">edit</mat-icon>
+          {{ 'profiles.cooperative.members.edit' | translate }}
+        </button>
         <h3>{{ 'profiles.cooperative.members.plots' | translate }}</h3>
         @if (member.userId) {
           <button mat-stroked-button type="button" [disabled]="linking()" (click)="loadPlots()">

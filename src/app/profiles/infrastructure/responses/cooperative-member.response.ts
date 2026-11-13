@@ -16,6 +16,13 @@ export interface CooperativeMemberResource extends BaseResource {
   plots?: MemberPlot[];
 }
 
+export interface CooperativeMemberDetails {
+  fullName: string;
+  dni: string;
+  phone: string;
+  community: string;
+}
+
 /** API response used by the production service when it wraps members. */
 export interface CooperativeMembersResponse extends BaseResponse {
   members: CooperativeMemberResource[];
