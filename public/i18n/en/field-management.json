@@ -47,6 +47,7 @@
     },
     "plot-status": {
       "WITHOUT_POLYGON": "Without polygon",
+      "BOUNDARY_SAVED": "Boundary saved · No monitoring",
       "ACTIVE_MONITORING": "Active monitoring"
     },
     "crop-type": {

@@ -5,7 +5,9 @@
     <mat-chip-set class="status">
       <mat-chip [disableRipple]="true" [highlighted]="plot().isMonitored()">
         <mat-icon matChipAvatar>{{ plot().isMonitored() ? 'satellite_alt' : 'pending' }}</mat-icon>
-        {{ 'field-management.plot-status.' + plot().status | translate }}
+        {{ (plot().hasPolygon() && !plot().isMonitored()
+          ? 'field-management.plot-status.BOUNDARY_SAVED'
+          : 'field-management.plot-status.' + plot().status) | translate }}
       </mat-chip>
     </mat-chip-set>
   </mat-card-header>

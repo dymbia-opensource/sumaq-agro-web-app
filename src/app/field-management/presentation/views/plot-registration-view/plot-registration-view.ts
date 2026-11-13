@@ -1,4 +1,3 @@
-import { PlotQuotaSummary } from '../../components/plot-quota-summary/plot-quota-summary';
 import { Component, computed, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
@@ -27,7 +26,6 @@ import { RegistrationSteps } from '../../components/registration-steps/registrat
 @Component({
   selector: 'app-plot-registration-view',
   imports: [
-    PlotQuotaSummary,
     MatButtonModule,
     MatProgressBarModule,
     TranslatePipe,
