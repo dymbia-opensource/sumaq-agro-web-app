@@ -61,6 +61,10 @@ export class ProfilesApi extends BaseApi {
     return this.cooperativeMembersEndpoint.updateDetails(id, details);
   }
 
+  linkMemberAccount(memberId: number | string, userId: number): Observable<CooperativeMember> {
+    return this.cooperativeMembersEndpoint.linkAccount(memberId, userId);
+  }
+
   linkMemberPlot(member: CooperativeMember, plot: MemberPlot): Observable<CooperativeMember> {
     return this.cooperativeMembersEndpoint.linkPlot(member, plot);
   }

@@ -107,7 +107,10 @@
       ],
       "fullName": "Rosa Melgar",
       "active": true,
-      "userId": 2
+      "userId": 2,
+      "dni": "36434663",
+      "phone": "74567753",
+      "community": "Lima"
     },
     {
       "fullName": "Raul",

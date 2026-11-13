@@ -2,6 +2,9 @@
   "profiles": {
     "cooperative": {
       "members": {
+        "demo-account": "Demo farmer account",
+        "link-account": "Link account",
+        "link-account-error": "Could not link the account. Check whether another member of the cooperative already uses it.",
         "collection": "Collection history",
         "net-total": "Total net weight",
         "net-weight": "Net weight",

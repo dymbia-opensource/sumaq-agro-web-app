@@ -2,6 +2,9 @@
   "profiles": {
     "cooperative": {
       "members": {
+        "demo-account": "Cuenta de agricultor de prueba",
+        "link-account": "Vincular cuenta",
+        "link-account-error": "No se pudo vincular la cuenta. Verifica que no esté vinculada a otro socio de la cooperativa.",
         "collection": "Historial de acopio",
         "net-total": "Peso neto acumulado",
         "net-weight": "Peso neto",

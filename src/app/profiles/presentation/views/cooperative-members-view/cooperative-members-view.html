@@ -96,6 +96,23 @@
                   }
                 } @else {
                   <p>{{ 'profiles.cooperative.members.link-account-first' | translate }}</p>
+                  @if (member.active && demoFarmers.length) {
+                    <label>
+                      {{ 'profiles.cooperative.members.demo-account' | translate }}
+                      <select #account [disabled]="accountBusy()">
+                        @for (farmer of demoFarmers; track farmer.id) {
+                          <option [value]="farmer.id">{{ farmer.email }}</option>
+                        }
+                      </select>
+                    </label>
+                    <button mat-stroked-button type="button" [disabled]="accountBusy()"
+                      (click)="linkAccount(+account.value)">
+                      {{ 'profiles.cooperative.members.link-account' | translate }}
+                    </button>
+                    @if (accountError()) {
+                      <p role="alert">{{ 'profiles.cooperative.members.link-account-error' | translate }}</p>
+                    }
+                  }
                 }
                 <div class="plot-grid">
                   @for (plot of member.plots; track plot.id) {

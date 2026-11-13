@@ -1,3 +1,4 @@
+import { getDevelopmentDemoAccounts } from '../../../../iam/infrastructure/mock/development-demo-accounts';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { MatTabsModule } from '@angular/material/tabs';
 import { HarvestCertificationStore } from '../../../../harvest-certification/application/harvest-certification.store';
@@ -116,6 +117,40 @@ export class CooperativeMembersView {
   });
   protected readonly plotError = signal(false);
   protected readonly linking = signal(false);
+
+  protected readonly demoFarmers = getDevelopmentDemoAccounts()
+    .filter(({ role }) => role === 'FARMER')
+    .map(({ id, email }) => ({ id, email }));
+  protected readonly accountError = signal(false);
+  protected readonly accountBusy = signal(false);
+
+  protected linkAccount(userId: number): void {
+    const member = this.selected();
+    const state = this.state();
+    if (!member || member.userId || !member.active || state?.status !== 'ready' ||
+        this.accountBusy() || !this.demoFarmers.some((account) => account.id === userId)) return;
+
+    this.accountError.set(false);
+    this.accountBusy.set(true);
+    this.api.getCooperativeMembers(state.cooperativeId).pipe(
+      switchMap((members) => {
+        if (this.selected() !== member) return of(null);
+        const current = members.find((item) => item.id === member.id);
+        if (!current?.active || current.userId || members.some((item) => item.userId === userId)) {
+          this.accountError.set(true);
+          return of(null);
+        }
+        return this.api.linkMemberAccount(member.id, userId);
+      }),
+      takeUntilDestroyed(this.destroyRef),
+      finalize(() => this.accountBusy.set(false)),
+    ).subscribe({
+      next: (updated) => {
+        if (updated && this.selected() === member) this.retry();
+      },
+      error: () => this.accountError.set(true),
+    });
+  }
 
   protected loadPlots(): void {
     const member = this.selected();

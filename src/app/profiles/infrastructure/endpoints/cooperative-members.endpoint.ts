@@ -41,6 +41,13 @@ export class CooperativeMembersApiEndpoint extends BaseApiEndpoint<
     ).pipe(map((resource) => this.assembler.toEntityFromResource(resource)));
   }
 
+  linkAccount(memberId: number | string, userId: number): Observable<CooperativeMember> {
+    return this.http.patch<CooperativeMemberResource>(
+      this.endpointUrl + '/' + encodeURIComponent(memberId),
+      { userId },
+    ).pipe(map((resource) => this.assembler.toEntityFromResource(resource)));
+  }
+
   linkPlot(member: CooperativeMember, plot: MemberPlot): Observable<CooperativeMember> {
     return this.http.patch<CooperativeMemberResource>(
       this.endpointUrl + '/' + encodeURIComponent(member.id),
