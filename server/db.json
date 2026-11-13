@@ -532,6 +532,33 @@
   ],
   "harvest-batches": [
     {
+      "id": 5,
+      "code": "BATCH-DEMO-PENDING",
+      "cooperativeId": 1,
+      "memberId": 11,
+      "memberName": "Guillermo",
+      "plotId": 1,
+      "plotName": "Fundo Los Pinos",
+      "plotRegion": "Junín - Valle del Mantaro",
+      "coordinates": "-12.0712, -75.2135",
+      "campaignId": 2,
+      "cropType": "ANDEAN_POTATO",
+      "variety": "Papa Canchan",
+      "collectedAt": "2026-11-12",
+      "grossKg": 1240,
+      "tareKg": 40,
+      "sampleKg": 10,
+      "potatoGrading": {
+        "firstPercentage": 72,
+        "secondPercentage": 20,
+        "thirdPercentage": 8,
+        "weevilDamagePercentage": 1.2
+      },
+      "coffeeCupping": null,
+      "qualityCategory": "PREMIUM_GOLD",
+      "status": "GRADED"
+    },
+    {
       "id": 1,
       "code": "BATCH-2026-08",
       "cooperativeId": 1,
