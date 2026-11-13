@@ -2,6 +2,10 @@
   "profiles": {
     "cooperative": {
       "members": {
+        "link-plot": "Añadir lote",
+        "no-linkable-plots": "No hay parcelas delimitadas disponibles para vincular.",
+        "link-error": "No se pudo vincular la parcela. Comprueba que tenga una campaña activa de papa o café.",
+        "link-account-first": "El socio necesita una cuenta vinculada para incorporar sus parcelas.",
         "not-found": "No encontramos ese socio en el padrón de tu cooperativa.",
         "title": "Padrón de socios",
         "subtitle": "Consulta los socios y las parcelas vinculadas a tu cooperativa.",

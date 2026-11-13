@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Service } from '@angular/core';
 import { map, Observable } from 'rxjs';
 import { BaseApi } from '../../shared/infrastructure/base-api';
-import { CooperativeMember } from '../domain/model/entities/cooperative-member.entity';
+import { CooperativeMember, MemberPlot } from '../domain/model/entities/cooperative-member.entity';
 import { Cooperative } from '../domain/model/entities/cooperative.entity';
 import { CooperativeDashboard } from '../domain/model/entities/cooperative-dashboard.entity';
 import { FarmerProfile } from '../domain/model/entities/farmer-profile.entity';
@@ -54,6 +54,10 @@ export class ProfilesApi extends BaseApi {
 
   addCooperativeMember(cooperativeId: number, member: { fullName: string; dni: string; phone: string; community: string }): Observable<CooperativeMember> {
     return this.cooperativeMembersEndpoint.add(cooperativeId, member);
+  }
+
+  linkMemberPlot(member: CooperativeMember, plot: MemberPlot): Observable<CooperativeMember> {
+    return this.cooperativeMembersEndpoint.linkPlot(member, plot);
   }
 
   getCooperativeMembers(cooperativeId: number): Observable<CooperativeMember[]> {

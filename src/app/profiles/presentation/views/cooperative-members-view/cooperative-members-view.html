@@ -70,6 +70,27 @@
         @if (member.phone) { <p>{{ 'profiles.cooperative.members.phone' | translate }} · {{ member.phone }}</p> }
         @if (member.community) { <p>{{ 'profiles.cooperative.members.community' | translate }} · {{ member.community }}</p> }
         <h3>{{ 'profiles.cooperative.members.plots' | translate }}</h3>
+        @if (member.userId) {
+          <button mat-stroked-button type="button" [disabled]="linking()" (click)="loadPlots()">
+            {{ 'profiles.cooperative.members.link-plot' | translate }}
+          </button>
+          @if (plotOptions(); as options) {
+            <ul>
+              @for (plot of options; track plot.id) {
+                <li><button mat-button type="button" [disabled]="linking()" (click)="linkPlot(plot)">
+                  {{ plot.name }} · {{ plot.region }}
+                </button></li>
+              } @empty {
+                <li>{{ 'profiles.cooperative.members.no-linkable-plots' | translate }}</li>
+              }
+            </ul>
+          }
+          @if (plotError()) {
+            <p role="alert">{{ 'profiles.cooperative.members.link-error' | translate }}</p>
+          }
+        } @else {
+          <p>{{ 'profiles.cooperative.members.link-account-first' | translate }}</p>
+        }
         <div class="plot-grid">
           @for (plot of member.plots; track plot.id) {
             <section class="plot">

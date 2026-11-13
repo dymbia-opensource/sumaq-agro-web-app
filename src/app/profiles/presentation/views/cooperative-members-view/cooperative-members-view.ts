@@ -1,3 +1,5 @@
+import { FieldManagementApi } from '../../../../field-management/infrastructure/field-management-api';
+import { FieldPlot } from '../../../../field-management/domain/model/entities/field-plot.entity';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { Location } from '@angular/common';
@@ -78,6 +80,74 @@ export class CooperativeMembersView {
     if (state?.status !== 'ready' || id === null || state.directorId !== this.session.activeUser()?.id) return null;
     return state.members.find((member) => String(member.id) === id) ?? null;
   });
+
+  private readonly fields = inject(FieldManagementApi);
+  private readonly plotSelection = signal<{ memberId: string; options: FieldPlot[] } | null>(null);
+  protected readonly plotOptions = computed(() => {
+    const selection = this.plotSelection();
+    return selection && selection.memberId === this.memberId() ? selection.options : null;
+  });
+  protected readonly plotError = signal(false);
+  protected readonly linking = signal(false);
+
+  protected loadPlots(): void {
+    const member = this.selected();
+    if (!member?.userId || this.linking()) return;
+    this.plotError.set(false);
+    this.linking.set(true);
+    this.fields.getPlotsByOwner(member.userId).pipe(
+      takeUntilDestroyed(this.destroyRef),
+      finalize(() => this.linking.set(false)),
+    ).subscribe({
+      next: (plots) => {
+        if (this.selected() !== member) return;
+        this.plotSelection.set({
+          memberId: String(member.id),
+          options: plots.filter((plot) =>
+            plot.hasPolygon() && !member.plots.some((linked) => linked.id === Number(plot.id)),
+          ),
+        });
+      },
+      error: () => this.plotError.set(true),
+    });
+  }
+
+  protected linkPlot(plot: FieldPlot): void {
+    const member = this.selected();
+    const point = plot.boundary[0];
+    if (!member || !point || this.linking() || !this.plotOptions()?.includes(plot)) return;
+    this.plotError.set(false);
+    this.linking.set(true);
+    this.fields.getCampaignsByPlot(Number(plot.id)).pipe(
+      switchMap((campaigns) => {
+        if (this.selected() !== member) return of(null);
+        const campaign = campaigns.find((item) => item.isActive());
+        const cropType = campaign?.cropType;
+        if (!campaign || (cropType !== 'ANDEAN_POTATO' && cropType !== 'SPECIALTY_COFFEE')) {
+          this.plotError.set(true);
+          return of(null);
+        }
+        return this.api.linkMemberPlot(member, {
+          id: Number(plot.id),
+          name: plot.name,
+          region: plot.region,
+          coordinates: point.latitude + ', ' + point.longitude,
+          campaignId: Number(campaign.id),
+          variety: campaign.seedVariety,
+          cropType,
+        });
+      }),
+      takeUntilDestroyed(this.destroyRef),
+      finalize(() => this.linking.set(false)),
+    ).subscribe({
+      next: (updated) => {
+        if (!updated || this.selected() !== member) return;
+        this.plotSelection.set(null);
+        this.retry();
+      },
+      error: () => this.plotError.set(true),
+    });
+  }
 
   protected readonly visibleMembers = computed(() => {
     const state = this.state();

@@ -2,6 +2,10 @@
   "profiles": {
     "cooperative": {
       "members": {
+        "link-plot": "Add plot",
+        "no-linkable-plots": "No plots with saved boundaries are available to link.",
+        "link-error": "The plot could not be linked. Check that it has an active potato or coffee campaign.",
+        "link-account-first": "The member needs a linked account before their plots can be added.",
         "not-found": "This member could not be found in your cooperative directory.",
         "title": "Member directory",
         "subtitle": "View the members and plots linked to your cooperative.",

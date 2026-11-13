@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { catchError, map, Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { BaseApiEndpoint } from '../../../shared/infrastructure/base-api-endpoint';
-import { CooperativeMember } from '../../domain/model/entities/cooperative-member.entity';
+import { CooperativeMember, MemberPlot } from '../../domain/model/entities/cooperative-member.entity';
 import { CooperativeMemberAssembler } from '../assemblers/cooperative-member.assembler';
 import {
   CooperativeMemberResource,
@@ -31,6 +31,13 @@ export class CooperativeMembersApiEndpoint extends BaseApiEndpoint<
       active: true,
       plots: [],
     }).pipe(map((resource) => this.assembler.toEntityFromResource(resource)));
+  }
+
+  linkPlot(member: CooperativeMember, plot: MemberPlot): Observable<CooperativeMember> {
+    return this.http.patch<CooperativeMemberResource>(
+      this.endpointUrl + '/' + encodeURIComponent(member.id),
+      { plots: [...member.plots, plot] },
+    ).pipe(map((resource) => this.assembler.toEntityFromResource(resource)));
   }
 
   getByCooperative(cooperativeId: number): Observable<CooperativeMember[]> {
