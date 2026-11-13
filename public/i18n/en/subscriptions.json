@@ -81,7 +81,14 @@
       "status": "Status",
       "transaction": "Transaction token",
       "no-payments": "There are no payments recorded yet.",
-      "download-receipt": "Download receipt"
+      "download-receipt": "Download receipt",
+      "receipt": "Receipt",
+      "next-renewal": "Next renewal",
+      "access-until": "Access until",
+      "expired-on": "Expired on",
+      "expired-badge": "Expired",
+      "period-progress": "Billing period progress",
+      "reactivate": "Reactivate subscription"
     },
     "checkout": {
       "title": "Confirm your plan",

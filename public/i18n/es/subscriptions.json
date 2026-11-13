@@ -81,7 +81,14 @@
       "status": "Estado",
       "transaction": "Token de transacción",
       "no-payments": "Aún no hay pagos registrados.",
-      "download-receipt": "Descargar comprobante"
+      "download-receipt": "Descargar comprobante",
+      "receipt": "Comprobante",
+      "next-renewal": "Próxima renovación",
+      "access-until": "Acceso hasta",
+      "expired-on": "Venció el",
+      "expired-badge": "Vencida",
+      "period-progress": "Progreso del período de facturación",
+      "reactivate": "Reactivar suscripción"
     },
     "checkout": {
       "title": "Confirmar plan",
