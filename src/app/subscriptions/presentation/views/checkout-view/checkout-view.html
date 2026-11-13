@@ -2,128 +2,138 @@
   <mat-progress-bar mode="indeterminate" [attr.aria-label]="'common.loading' | translate" />
 }
 
-<app-page-header
-  [breadcrumbs]="breadcrumbs"
-  [title]="'subscriptions.checkout.title' | translate"
-  [subtitle]="'subscriptions.checkout.subtitle' | translate"
-/>
+@if (paymentResult() !== paymentStatuses.COMPLETED) {
+  <button
+    mat-button
+    type="button"
+    class="back"
+    [disabled]="processing()"
+    (click)="onReturnToCatalog()"
+  >
+    <mat-icon>arrow_back</mat-icon>
+    {{ 'subscriptions.checkout.back' | translate }}
+  </button>
+
+  <header class="intro">
+    <h1>{{ 'subscriptions.checkout.title' | translate }}</h1>
+    <p class="subtitle">{{ 'subscriptions.checkout.subtitle' | translate }}</p>
+  </header>
+}
 
 @if (error(); as error) {
   <app-message-card icon="error" [message]="error | translate" [alert]="true" />
 }
 
-@if (paymentResult(); as result) {
+@if (paymentResult() === paymentStatuses.REJECTED) {
   <app-message-card
-    [icon]="result === paymentStatuses.COMPLETED ? 'check_circle' : 'warning'"
-    [message]="
-      (result === paymentStatuses.COMPLETED
-        ? 'subscriptions.checkout.payment-approved'
-        : 'subscriptions.checkout.payment-rejected') | translate
-    "
-    [alert]="result === paymentStatuses.REJECTED"
-  >
-    @if (result === paymentStatuses.COMPLETED) {
-      <mat-card-actions align="end">
-        @if (dashboardRoute(); as route) {
-          <a mat-flat-button [routerLink]="route">
-            {{ 'subscriptions.checkout.go-to-dashboard' | translate }}
-          </a>
-        }
-        <a mat-flat-button routerLink="/subscriptions/billing">
-          {{ 'subscriptions.checkout.view-billing' | translate }}
-        </a>
-      </mat-card-actions>
-    }
-  </app-message-card>
+    icon="warning"
+    [message]="'subscriptions.checkout.payment-rejected' | translate"
+    [alert]="true"
+  />
 }
 
-@if (selectedPlan(); as plan) {
+@if (paymentResult() === paymentStatuses.COMPLETED) {
+  <section class="success" role="status">
+    <span class="success-icon" aria-hidden="true"><mat-icon>check</mat-icon></span>
+    <h1>{{ 'subscriptions.checkout.payment-approved' | translate }}</h1>
+    <div class="success-actions">
+      @if (dashboardRoute(); as route) {
+        <a mat-flat-button class="cta" [routerLink]="route">
+          {{ 'subscriptions.checkout.go-to-dashboard' | translate }}
+        </a>
+      }
+      <a mat-button routerLink="/subscriptions/billing">
+        {{ 'subscriptions.checkout.view-billing' | translate }}
+      </a>
+    </div>
+  </section>
+} @else if (selectedPlan(); as plan) {
   <div class="checkout-grid">
-    <mat-card appearance="outlined" class="summary-card">
-      <mat-card-header>
-        <mat-icon mat-card-avatar>workspace_premium</mat-icon>
-        <mat-card-title>{{ 'subscriptions.checkout.summary' | translate }}</mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <dl>
-          <div>
-            <dt>{{ 'subscriptions.checkout.plan' | translate }}</dt>
-            <dd>{{ 'subscriptions.plan-code.' + plan.code | translate }}</dd>
-          </div>
-          <div>
-            <dt>{{ 'subscriptions.checkout.billing-cycle' | translate }}</dt>
-            <dd>{{ ('subscriptions.billing-cycle.' + cycle()) | translate }}</dd>
-          </div>
-          <div>
-            <dt>{{ 'subscriptions.checkout.plot-quota' | translate }}</dt>
-            <dd>{{ 'subscriptions.plans.plot-quota' | translate: { quota: plan.plotQuota } }}</dd>
-          </div>
-          @if (coupon(); as applied) {
-            <div>
-              <dt>{{ 'subscriptions.checkout.coupon' | translate }}</dt>
-              <dd>{{ applied.code }} (−{{ applied.discountPercent }}%)</dd>
-            </div>
-          }
-        </dl>
-        <p class="total-label">{{ 'subscriptions.checkout.total' | translate }}</p>
-        <p class="total">{{ amount()?.format() }}</p>
-      </mat-card-content>
-    </mat-card>
+    <section class="panel summary" aria-labelledby="summary-title">
+      <h2 id="summary-title" class="panel-title">
+        {{ 'subscriptions.checkout.summary' | translate }}
+      </h2>
 
-    <section class="payment-panel">
-      <h2>{{ 'subscriptions.checkout.payment-title' | translate }}</h2>
+      <div class="plan-line">
+        <span class="plan-icon" aria-hidden="true"><mat-icon>workspace_premium</mat-icon></span>
+        <div>
+          <p class="plan-name">{{ 'subscriptions.plan-code.' + plan.code | translate }}</p>
+          <p class="plan-audience">{{ 'subscriptions.segment.' + plan.code | translate }}</p>
+        </div>
+      </div>
+
+      <dl>
+        <div>
+          <dt>{{ 'subscriptions.checkout.billing-cycle' | translate }}</dt>
+          <dd>{{ ('subscriptions.billing-cycle.' + cycle()) | translate }}</dd>
+        </div>
+        <div>
+          <dt>{{ 'subscriptions.checkout.plot-quota' | translate }}</dt>
+          <dd>{{ 'subscriptions.plans.plot-quota' | translate: { quota: plan.plotQuota } }}</dd>
+        </div>
+        @if (coupon(); as applied) {
+          <div>
+            <dt>{{ 'subscriptions.checkout.coupon' | translate }}</dt>
+            <dd>{{ applied.code }} (−{{ applied.discountPercent }}%)</dd>
+          </div>
+        }
+      </dl>
+
+      <div class="total-row">
+        <span>{{ 'subscriptions.checkout.total' | translate }}</span>
+        <strong class="total">{{ amount()?.format() }}</strong>
+      </div>
+    </section>
+
+    <section class="panel payment" aria-labelledby="payment-title">
+      <h2 id="payment-title" class="panel-title">
+        {{ 'subscriptions.checkout.payment-title' | translate }}
+      </h2>
+
       @if (demoPaymentsEnabled) {
         <app-coupon-form [disabled]="processing()" (apply)="onApplyCoupon($event)" />
       }
 
-      <mat-card appearance="outlined" class="demo-notice">
-        <mat-card-content>
-          <mat-icon aria-hidden="true">info</mat-icon>
-          <p>
-            {{
-              (demoPaymentsEnabled
-                ? 'subscriptions.checkout.demo-notice'
-                : 'subscriptions.checkout.unavailable'
-              ) | translate
-            }}
-          </p>
-        </mat-card-content>
-      </mat-card>
+      <p class="notice">
+        <mat-icon aria-hidden="true">info</mat-icon>
+        {{
+          (demoPaymentsEnabled
+              ? 'subscriptions.checkout.demo-notice'
+              : 'subscriptions.checkout.unavailable'
+          ) | translate
+        }}
+      </p>
 
-      <div class="payment-actions">
-        <button mat-stroked-button type="button" [disabled]="processing()" (click)="onReturnToCatalog()">
-          {{ 'subscriptions.checkout.back' | translate }}
-        </button>
-        @if (demoPaymentsEnabled && paymentResult() !== paymentStatuses.COMPLETED) {
-          <div class="demo-payment-actions">
-            <button
-              mat-stroked-button
-              type="button"
-              [disabled]="processing() || !amount()"
-              (click)="onPay(paymentStatuses.REJECTED)"
-            >
-              {{ 'subscriptions.checkout.simulate-rejection' | translate }}
-            </button>
-            <button
-              mat-flat-button
-              type="button"
-              [disabled]="processing() || !amount()"
-              (click)="onPay(paymentStatuses.COMPLETED)"
-            >
-              <mat-icon>lock</mat-icon>
-              {{ 'subscriptions.checkout.simulate-payment' | translate }}
-            </button>
-          </div>
-        }
-      </div>
+      @if (demoPaymentsEnabled) {
+        <div class="actions">
+          <button
+            mat-flat-button
+            class="cta"
+            type="button"
+            [disabled]="processing() || !amount()"
+            (click)="onPay(paymentStatuses.COMPLETED)"
+          >
+            <mat-icon>lock</mat-icon>
+            {{ 'subscriptions.checkout.simulate-payment' | translate }}
+          </button>
+          <button
+            mat-button
+            type="button"
+            [disabled]="processing() || !amount()"
+            (click)="onPay(paymentStatuses.REJECTED)"
+          >
+            {{ 'subscriptions.checkout.simulate-rejection' | translate }}
+          </button>
+        </div>
+      }
     </section>
   </div>
-} @else if (paymentResult() !== paymentStatuses.COMPLETED) {
-  <app-message-card icon="shopping_cart" [message]="'subscriptions.checkout.no-plan' | translate">
-    <mat-card-actions align="end">
-      <button mat-flat-button type="button" (click)="onReturnToCatalog()">
-        {{ 'subscriptions.checkout.choose-plan' | translate }}
-      </button>
-    </mat-card-actions>
-  </app-message-card>
+} @else {
+  <section class="empty">
+    <mat-icon aria-hidden="true">shopping_cart</mat-icon>
+    <p>{{ 'subscriptions.checkout.no-plan' | translate }}</p>
+    <button mat-flat-button class="cta" type="button" (click)="onReturnToCatalog()">
+      {{ 'subscriptions.checkout.choose-plan' | translate }}
+    </button>
+  </section>
 }

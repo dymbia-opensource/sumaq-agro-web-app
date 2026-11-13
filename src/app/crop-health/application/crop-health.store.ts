@@ -813,8 +813,8 @@ export class CropHealthStore {
   }
   advisorName(id: number): string {
     return (
-      this.advisors().find((item) => item.userId === id)?.name ??
-      (this.session.activeUser()?.id === id ? this.session.activeUser()?.displayName : undefined) ??
+      this.advisors().find((item) => item.userId === id)?.name ||
+      (this.session.activeUser()?.id === id ? this.session.activeUser()?.displayName : undefined) ||
       '#' + id
     );
   }

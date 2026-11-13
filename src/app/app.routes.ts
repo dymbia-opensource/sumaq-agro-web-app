@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { iamGuard } from './iam/infrastructure/iam.guard';
-import { activeSubscriptionGuard } from './subscriptions/presentation/active-subscription.guard';
+import {activeSubscriptionGuard} from './subscriptions/infrastructure/active-subscription.guard';
 
 const layout = () => import('./shared/presentation/components/layout/layout').then((m) => m.Layout);
 
@@ -34,9 +34,14 @@ const baseTitle = 'SumaqAgro';
  * Root routes. Each bounded context adds its own `*.routes.ts` with lazy loading.
  *
  * @remarks
- * The private pages are children of the shell (`Layout`: side menu and top
- * bar) and require authentication on entry and child navigation. IAM views and
- * public QR verification are shown without the shell.
+ * The private pages of the workspace are children of the shell (`Layout`: side
+ * menu and top bar) and require authentication on entry and child navigation.
+ * IAM views and public QR verification are shown without the shell.
+ *
+ * Subscriptions is outside the shell on purpose: plan selection and checkout
+ * use their own minimal shell (`SubscriptionsShell`, no side menu), while
+ * `subscriptions/billing` opens the app shell from its own routes. It must be
+ * declared before the `Layout` route, whose `**` would otherwise match it.
  */
 export const routes: Routes = [
   // Pages without the shell
@@ -47,6 +52,14 @@ export const routes: Routes = [
     title: `Verificar certificado | ${baseTitle}`,
   },
   { path: '', redirectTo: '/iam/sign-in', pathMatch: 'full' },
+
+  // Subscriptions: each of its pages chooses its own layout
+  {
+    path: 'subscriptions',
+    canActivate: [iamGuard],
+    canActivateChild: [iamGuard],
+    loadChildren: subscriptionsRoutes,
+  },
 
   // Pages inside the shell
   {
@@ -65,7 +78,6 @@ export const routes: Routes = [
           { path: 'harvest-certification', loadChildren: harvestCertificationRoutes },
         ],
       },
-      { path: 'subscriptions', loadChildren: subscriptionsRoutes },
       { path: '**', loadComponent: pageNotFound, title: `${baseTitle} - Page Not Found` },
     ],
   },

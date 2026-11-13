@@ -1,13 +1,18 @@
 <div class="auth-layout" [class.auth-layout-compact]="compact()">
   <main class="auth-main">
     <div class="auth-content">
-      <div class="auth-brand">
-        <img class="auth-logo" src="/images/logo-sumaqagro.png" alt="" width="64" height="64" />
-        <div>
-          <span class="brand-name">Sumaq<span>Agro</span></span>
-          <span class="brand-caption">{{ 'iam.layout.brandCaption' | translate }}</span>
+      <header class="auth-header">
+        <div class="auth-brand">
+          <img class="auth-logo" src="/images/logo-sumaqagro.png" alt="" width="64" height="64" />
+          <div>
+            <span class="brand-name">Sumaq<span>Agro</span></span>
+            <span class="brand-caption">{{ 'iam.layout.brandCaption' | translate }}</span>
+          </div>
         </div>
-      </div>
+        @if (showLanguageSwitcher()) {
+          <app-language-switcher class="auth-language" />
+        }
+      </header>
 
       <ng-content />
 

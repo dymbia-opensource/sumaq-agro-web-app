@@ -1,21 +1,24 @@
 import { Component, computed, inject } from '@angular/core';
-import { MatButtonToggleModule } from '@angular/material/button-toggle';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { ActivatedRoute, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { map } from 'rxjs';
+import { MatButtonModule } from '@angular/material/button';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
-import { Breadcrumb, PageHeader } from '../../../../shared/presentation/components/page-header/page-header';
+import { map } from 'rxjs';
+import { IamStore } from '../../../../iam/application/iam.store';
+import type { UserRole } from '../../../../iam/domain/model/value-objects/user-role';
 import { MessageCard } from '../../../../shared/presentation/components/message-card/message-card';
 import { SubscriptionsStore } from '../../../application/subscriptions.store';
 import { SelectSubscriptionPlanCommand } from '../../../domain/model/commands/select-subscription-plan.command';
 import { BillingCycle } from '../../../domain/model/entities/billing-cycle';
 import { Plan } from '../../../domain/model/entities/plan.entity';
+import {
+  planForSegment,
+  type SubscriptionSegment,
+} from '../../../domain/model/value-objects/subscription-segment';
 import { PlanCard } from '../../components/plan-card/plan-card';
-import { IamStore } from '../../../../iam/application/iam.store';
-import type { UserRole } from '../../../../iam/domain/model/value-objects/user-role';
-import { planForSegment, type SubscriptionSegment, } from '../../../domain/model/value-objects/subscription-segment';
-
 
 /** Mapping of user roles to subscription segments. */
 const SEGMENT_BY_ROLE: Readonly<Record<UserRole, SubscriptionSegment>> = {
@@ -28,11 +31,13 @@ const SEGMENT_BY_ROLE: Readonly<Record<UserRole, SubscriptionSegment>> = {
 @Component({
   selector: 'app-plans-catalog-view',
   imports: [
+    MatButtonModule,
     MatButtonToggleModule,
+    MatIconModule,
     MatProgressBarModule,
     MessageCard,
-    PageHeader,
     PlanCard,
+    RouterLink,
     TranslatePipe,
   ],
   templateUrl: './plans-catalog-view.html',
@@ -58,15 +63,19 @@ export class PlansCatalogView {
   readonly error = this.store.error;
 
   protected readonly accessCheckFailed = toSignal(
-    inject(ActivatedRoute).queryParamMap.pipe(map((params) => params.get('accessCheck') === 'failed')),
+    inject(ActivatedRoute).queryParamMap.pipe(
+      map((params) => params.get('accessCheck') === 'failed'),
+    ),
     { initialValue: false },
   );
 
   /** Billing cycles offered by the catalog toggle. */
   protected readonly cycles = BillingCycle;
 
-  /** Breadcrumb path for the catalog page. */
-  protected readonly breadcrumbs: Breadcrumb[] = [{ label: 'subscriptions.catalog.title' }];
+  /** `true` when the plan has a saving to advertise on the Annual option. */
+  protected readonly hasAnnualSavings = computed(
+    () => (this.plans()[0]?.annualSavings().amount ?? 0) > 0,
+  );
 
   constructor() {
     const userId = this.currentUserId();
