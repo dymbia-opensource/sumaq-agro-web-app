@@ -60,12 +60,14 @@
     [attr.aria-label]="'field-management.finances.summary' | translate"
   />
 
-  <app-expense-category-filter
-    [selected]="categoryFilter()"
-    (selectedChange)="categoryFilter.set($event)"
-  />
   <div class="finances-grid">
-    <app-expense-list [entries]="expenseHistory()" />
+    <div class="expense-history">
+      <app-expense-category-filter
+        [selected]="categoryFilter()"
+        (selectedChange)="categoryFilter.set($event)"
+      />
+      <app-expense-list [entries]="expenseHistory()" />
+    </div>
     <app-breakeven-panel
       [ledger]="ledger"
       [saving]="loading()"

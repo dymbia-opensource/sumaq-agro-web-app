@@ -1,72 +1,57 @@
-:host {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
+:host { display: block; min-width: 0; }
 
 .list-card {
-  flex: 1;
-  width: 100%;
-  min-width: 0;
-  border-radius: 20px;
+  --mat-card-outlined-outline-color: #c8cec4;
+  --mat-card-outlined-container-color: #fff;
+  border-radius: 16px;
   overflow: hidden;
+  box-shadow: 0 2px 6px rgb(24 34 30 / 5%);
 }
 
-.list-card mat-card-header {
-  padding-bottom: 12px;
-}
+.list-card mat-card-header { padding: 1rem 1.25rem; }
+.list-card mat-card-title { font-size: 1.15rem; font-weight: 700; }
 
-/* On phones the table scrolls sideways instead of the page. */
-.table-scroll {
-  overflow-x: auto;
-  width: 100%;
-}
+.table-scroll { overflow-x: auto; }
+.table-scroll:focus-visible { outline: 2px solid #286643; outline-offset: -2px; }
 
-table {
-  width: 100%;
-  min-width: 560px;
+table { width: 100%; min-width: 640px; background: #fff; }
+th.mat-mdc-header-cell {
+  background: #eaf0ea;
+  color: #344d40;
+  font-size: 0.8rem;
+  font-weight: 700;
 }
+td.mat-mdc-cell {
+  padding-block: 0.625rem;
+  color: #18221e;
+  font-size: 0.9rem;
+}
+th.mat-mdc-header-cell, td.mat-mdc-cell { border-bottom-color: #e3e8e1; }
+tr.mat-mdc-row:nth-of-type(even) { background: #f7f9f6; }
+tr.mat-mdc-row:hover { background: #edf4ec; }
 
-.number {
-  white-space: nowrap;
-  text-align: right;
-}
-
-.total {
-  font-weight: 600;
-}
+.number { white-space: nowrap; text-align: end; font-variant-numeric: tabular-nums; }
+td.total { color: #00423b; font-weight: 700; }
+.mat-column-description { min-width: 10rem; overflow-wrap: anywhere; }
+.mat-column-date { white-space: nowrap; }
 
 .category {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 0.375rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: 999px;
+  background: #e3f0e4;
+  color: #00423b;
+  font-size: 0.8rem;
+  font-weight: 600;
 }
-
-.category mat-icon {
-  font-size: 18px;
-  width: 18px;
-  height: 18px;
-  color: var(--mat-sys-primary);
-}
+.category mat-icon { flex: none; width: 16px; height: 16px; font-size: 16px; }
 
 .empty {
-  margin: 0 0 8px;
-  color: var(--mat-sys-on-surface-variant);
-}
-
-.mat-column-description {
-  overflow-wrap: anywhere;
-  min-width: 140px;
-}
-.mat-column-date {
-  white-space: nowrap;
-}
-th.mat-mdc-header-cell {
-  background: var(--mat-sys-surface-container-low);
-}
-tr.mat-mdc-row:hover {
-  background: var(--mat-sys-surface-container-low);
-}
-.empty {
-  padding-top: 12px;
+  margin: 0 0 1rem;
+  padding: 1rem;
+  border-radius: 12px;
+  background: #f4f6f2;
+  color: #5c6862;
 }

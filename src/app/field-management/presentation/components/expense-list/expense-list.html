@@ -1,6 +1,6 @@
 <mat-card appearance="outlined" class="list-card">
   <mat-card-header>
-    <mat-card-title>{{ 'field-management.finances.expenses' | translate }}</mat-card-title>
+    <mat-card-title id="expense-history-title">{{ 'field-management.finances.expenses' | translate }}</mat-card-title>
   </mat-card-header>
 
   @if (entries().length === 0) {
@@ -8,17 +8,17 @@
       <p class="empty">{{ 'field-management.finances.no-expenses' | translate }}</p>
     </mat-card-content>
   } @else {
-    <div class="table-scroll">
-      <table mat-table [dataSource]="entries()">
+    <div class="table-scroll" tabindex="0" role="region" aria-labelledby="expense-history-title">
+      <table mat-table [dataSource]="entries()" aria-labelledby="expense-history-title">
         <ng-container matColumnDef="date">
-          <th mat-header-cell *matHeaderCellDef>
+          <th mat-header-cell scope="col" *matHeaderCellDef>
             {{ 'field-management.finances.col-date' | translate }}
           </th>
           <td mat-cell *matCellDef="let entry">{{ entry.expenseDate | date: 'mediumDate' }}</td>
         </ng-container>
 
         <ng-container matColumnDef="category">
-          <th mat-header-cell *matHeaderCellDef>
+          <th mat-header-cell scope="col" *matHeaderCellDef>
             {{ 'field-management.finances.col-category' | translate }}
           </th>
           <td mat-cell *matCellDef="let entry">
@@ -30,28 +30,28 @@
         </ng-container>
 
         <ng-container matColumnDef="description">
-          <th mat-header-cell *matHeaderCellDef>
+          <th mat-header-cell scope="col" *matHeaderCellDef>
             {{ 'field-management.finances.col-description' | translate }}
           </th>
           <td mat-cell *matCellDef="let entry">{{ entry.description }}</td>
         </ng-container>
 
         <ng-container matColumnDef="quantity">
-          <th mat-header-cell *matHeaderCellDef class="number">
+          <th mat-header-cell scope="col" *matHeaderCellDef class="number">
             {{ 'field-management.finances.col-quantity' | translate }}
           </th>
           <td mat-cell *matCellDef="let entry" class="number">{{ entry.quantity }}</td>
         </ng-container>
 
         <ng-container matColumnDef="unitPrice">
-          <th mat-header-cell *matHeaderCellDef class="number">
+          <th mat-header-cell scope="col" *matHeaderCellDef class="number">
             {{ 'field-management.finances.col-unit-price' | translate }}
           </th>
           <td mat-cell *matCellDef="let entry" class="number">{{ entry.unitPrice.format() }}</td>
         </ng-container>
 
         <ng-container matColumnDef="total">
-          <th mat-header-cell *matHeaderCellDef class="number">
+          <th mat-header-cell scope="col" *matHeaderCellDef class="number">
             {{ 'field-management.finances.col-total' | translate }}
           </th>
           <td mat-cell *matCellDef="let entry" class="number total">
