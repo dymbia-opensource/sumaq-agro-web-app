@@ -2,6 +2,7 @@
   "profiles": {
     "cooperative": {
       "members": {
+        "not-found": "This member could not be found in your cooperative directory.",
         "title": "Member directory",
         "subtitle": "View the members and plots linked to your cooperative.",
         "search": "Search by name, ID or code",

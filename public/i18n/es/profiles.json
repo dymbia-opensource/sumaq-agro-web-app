@@ -2,6 +2,7 @@
   "profiles": {
     "cooperative": {
       "members": {
+        "not-found": "No encontramos ese socio en el padrón de tu cooperativa.",
         "title": "Padrón de socios",
         "subtitle": "Consulta los socios y las parcelas vinculadas a tu cooperativa.",
         "search": "Buscar por nombre, DNI o código",

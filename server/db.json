@@ -118,6 +118,16 @@
       "active": true,
       "plots": [],
       "id": 12
+    },
+    {
+      "fullName": "Jose",
+      "dni": "60773535",
+      "phone": "959524315",
+      "community": "Villa El Mar",
+      "cooperativeId": 1,
+      "active": true,
+      "plots": [],
+      "id": 13
     }
   ],
   "cooperative-dashboards": [

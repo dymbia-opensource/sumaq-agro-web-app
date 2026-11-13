@@ -1,8 +1,8 @@
 <app-page-header
-  [title]="'profiles.cooperative.members.title' | translate"
-  [subtitle]="'profiles.cooperative.members.subtitle' | translate"
+  [title]="(memberId() === null ? 'profiles.cooperative.members.title' : 'profiles.cooperative.members.dossier') | translate"
+  [subtitle]="memberId() === null ? ('profiles.cooperative.members.subtitle' | translate) : selected()?.fullName"
 >
-  @if (state()?.status === 'ready' && !adding() && !selected()) {
+  @if (state()?.status === 'ready' && !adding() && memberId() === null) {
     <button mat-flat-button type="button" (click)="adding.set(true); error.set('')">
       <mat-icon aria-hidden="true">person_add</mat-icon>
       {{ 'profiles.cooperative.members.add' | translate }}
@@ -62,9 +62,9 @@
       </form>
     } @else if (selected(); as member) {
       <article class="panel dossier">
-        <button mat-button type="button" (click)="selected.set(null)">
+        <a mat-button routerLink="/profiles/cooperative/members" [state]="{ memberSearch: query() }">
           {{ 'profiles.cooperative.members.back' | translate }}
-        </button>
+        </a>
         <h2>{{ 'profiles.cooperative.members.dossier' | translate }} · {{ member.fullName }}</h2>
         @if (member.dni) { <p>DNI · {{ member.dni }}</p> }
         @if (member.phone) { <p>{{ 'profiles.cooperative.members.phone' | translate }} · {{ member.phone }}</p> }
@@ -81,11 +81,18 @@
           }
         </div>
       </article>
+    } @else if (memberId() !== null) {
+      <div class="panel" role="status">
+        <p>{{ 'profiles.cooperative.members.not-found' | translate }}</p>
+        <a mat-button routerLink="/profiles/cooperative/members" [state]="{ memberSearch: query() }">
+          {{ 'profiles.cooperative.members.back' | translate }}
+        </a>
+      </div>
     } @else {
     <section class="panel" [attr.aria-label]="'profiles.cooperative.members.title' | translate">
       @if (current?.members?.length) {
         <label for="member-search">{{ 'profiles.cooperative.members.search' | translate }}</label>
-        <input id="member-search" type="search" [value]="query()" (input)="query.set($event.target.value)" />
+        <input id="member-search" type="search" [value]="query()" (input)="search($event.target.value)" />
       }
       @if (visibleMembers().length) {
         <div class="table-scroll">
@@ -108,9 +115,9 @@
                 </span></td>
                 <td>{{ member.dni || '—' }}</td>
                 <td>{{ member.plots.length }}</td>
-                <td><button mat-stroked-button type="button" (click)="selected.set(member)">
+                <td><a mat-stroked-button [routerLink]="[member.id]" [state]="{ memberSearch: query() }">
                   {{ 'profiles.cooperative.members.view' | translate }}
-                </button></td>
+                </a></td>
               </tr>
             }
           </tbody>

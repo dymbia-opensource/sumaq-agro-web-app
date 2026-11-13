@@ -1,11 +1,11 @@
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
-import { CooperativeMember } from '../../../domain/model/entities/cooperative-member.entity';
+import { Location } from '@angular/common';
 import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { catchError, finalize, map, of, startWith, switchMap } from 'rxjs';
 import { IamStore } from '../../../../iam/application/iam.store';
@@ -31,7 +31,12 @@ export class CooperativeMembersView {
   protected readonly adding = signal(false);
   protected readonly saving = signal(false);
   protected readonly error = signal('');
-  protected readonly selected = signal<CooperativeMember | null>(null);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
+  private readonly location = inject(Location);
+  protected readonly memberId = toSignal(this.route.paramMap.pipe(map((params) => params.get('id'))), {
+    initialValue: this.route.snapshot.paramMap.get('id'),
+  });
   protected readonly form = inject(FormBuilder).nonNullable.group({
     fullName: ['', [Validators.required, Validators.pattern(/\S/), Validators.maxLength(200)]],
     dni: ['', [Validators.required, Validators.pattern(/^\d{8}$/)]],
@@ -39,7 +44,20 @@ export class CooperativeMembersView {
     community: ['', Validators.maxLength(100)],
   });
 
-  protected readonly query = signal('');
+  protected readonly query = signal(this.readSearch());
+
+  private readSearch(): string {
+    const state = this.location.getState() as { memberSearch?: unknown } | null;
+    return typeof state?.memberSearch === 'string' ? state.memberSearch : '';
+  }
+
+  protected search(value: string): void {
+    this.query.set(value);
+    this.location.replaceState(this.router.url, '', {
+      ...(this.location.getState() as object),
+      memberSearch: value,
+    });
+  }
   protected readonly state = toSignal(toObservable(this.request).pipe(
     switchMap(({ user }) => {
       if (user?.experience !== 'COOPERATIVE_DIRECTOR') return of({ status: 'idle' } as const);
@@ -54,9 +72,16 @@ export class CooperativeMembersView {
       );
     }),
   ));
+  protected readonly selected = computed(() => {
+    const state = this.state();
+    const id = this.memberId();
+    if (state?.status !== 'ready' || id === null || state.directorId !== this.session.activeUser()?.id) return null;
+    return state.members.find((member) => String(member.id) === id) ?? null;
+  });
+
   protected readonly visibleMembers = computed(() => {
     const state = this.state();
-    if (state?.status !== 'ready') return [];
+    if (state?.status !== 'ready' || state.directorId !== this.session.activeUser()?.id) return [];
     const normalize = (value: string) => value.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
     const query = normalize(this.query().trim());
     return state.members.filter((member) => [member.fullName, member.dni, String(member.id)].some((value) => normalize(value).includes(query)));
@@ -83,11 +108,13 @@ export class CooperativeMembersView {
       takeUntilDestroyed(this.destroyRef),
       finalize(() => this.saving.set(false)),
     ).subscribe({
-      next: () => {
+      next: (member) => {
+        if (state.directorId !== this.session.activeUser()?.id) return;
         this.adding.set(false);
         this.form.reset();
-        this.query.set('');
-        this.retry();
+        void this.router.navigate(['/profiles/cooperative/members', member.id], {
+          state: { memberSearch: this.query() },
+        });
       },
       error: () => this.error.set('profiles.cooperative.members.save-error'),
     });

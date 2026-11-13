@@ -347,7 +347,7 @@ tbody td button[mat-stroked-button]:hover {
 /* =========================================================
    EXPEDIENTE / DOSSIER DEL SOCIO (.dossier)
    ========================================================= */
-.dossier > button[mat-button] {
+.dossier > a[mat-button] {
   margin-bottom: 1rem;
   padding: 0 1rem !important;
   border: 1px solid var(--frame-border) !important;
