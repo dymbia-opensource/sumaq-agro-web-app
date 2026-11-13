@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { Component, DestroyRef, inject, input, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
@@ -16,6 +16,7 @@ import { FieldManagementStore } from '../../../application/field-management.stor
   styleUrl: './plot-quota-summary.css',
 })
 export class PlotQuotaSummary {
+  readonly showRefresh = input(true);
   readonly store = inject(FieldManagementStore);
   private readonly subscriptionsApi = inject(SubscriptionsApi);
   private readonly destroyRef = inject(DestroyRef);

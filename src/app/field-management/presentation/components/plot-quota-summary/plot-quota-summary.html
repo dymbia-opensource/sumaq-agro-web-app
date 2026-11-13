@@ -26,9 +26,11 @@
         {{ 'field-management.plots.plan-full' | translate: { quota: store.plotQuota() } }}
       </p>
     }
-    <button mat-button (click)="refresh()" [disabled]="store.loading()">
-      {{ 'field-management.plots.quota-refresh' | translate }}
-    </button>
+    @if (showRefresh()) {
+      <button mat-button (click)="refresh()" [disabled]="store.loading()">
+        {{ 'field-management.plots.quota-refresh' | translate }}
+      </button>
+    }
   } @else {
     <p role="status">
       {{

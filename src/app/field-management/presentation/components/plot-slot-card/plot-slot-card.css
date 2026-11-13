@@ -4,7 +4,9 @@
 }
 
 .slot-card {
-  border-radius: 20px;
+  border: 1.5px dashed #a7b9aa;
+  border-radius: 16px;
+  background: #f4f6f2;
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -30,7 +32,7 @@
 }
 
 .plot-number {
-  font: var(--mat-sys-title-small);
+  font: var(--mat-sys-label-medium);
   font-weight: 700;
   text-transform: uppercase;
 }
@@ -40,4 +42,10 @@
   --mat-chip-elevated-container-color: var(--mat-sys-secondary-container);
   --mat-chip-label-text-color: var(--mat-sys-on-secondary-container);
   --mat-chip-with-icon-icon-color: var(--mat-sys-on-secondary-container);
+}
+
+.slot-card mat-card-actions button {
+  width: 100%;
+  min-height: 44px;
+  --mat-button-outlined-container-shape: 12px;
 }
