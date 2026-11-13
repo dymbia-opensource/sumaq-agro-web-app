@@ -7,15 +7,11 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { TranslatePipe } from '@ngx-translate/core';
 import { IamStore } from '../../../../iam/application/iam.store';
 import { HarvestCertificationStore } from '../../../application/harvest-certification.store';
-import {
-  HarvestBatch,
-  HarvestBatchProps,
-  HarvestCropType,
-  QualityCategory,
-} from '../../../domain/model/entities/harvest-batch.entity';
+import { HarvestBatch, HarvestBatchProps, HarvestCropType, QualityCategory, } from '../../../domain/model/entities/harvest-batch.entity';
 import { QualityCertificate } from '../../../domain/model/entities/quality-certificate.entity';
 import { HarvestBatchRegistrationView } from '../harvest-batch-registration-view/harvest-batch-registration-view';
 import { HarvestGradingSheetView } from '../harvest-grading-sheet-view/harvest-grading-sheet-view';
+import { PageHeader } from '../../../../shared/presentation/components/page-header/page-header';
 
 @Component({
   selector: 'app-harvest-certificates-view',
@@ -29,6 +25,7 @@ import { HarvestGradingSheetView } from '../harvest-grading-sheet-view/harvest-g
     MatProgressBarModule,
     HarvestBatchRegistrationView,
     HarvestGradingSheetView,
+    PageHeader,
   ],
   templateUrl: './harvest-certificates-view.html',
   styleUrl: './harvest-certificates-view.css',

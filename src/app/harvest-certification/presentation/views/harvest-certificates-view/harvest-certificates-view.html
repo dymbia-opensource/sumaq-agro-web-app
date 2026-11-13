@@ -16,11 +16,13 @@
 }
 
 @if (isFarmer()) {
+
   <div class="farmer-certificates">
-    <header class="farmer-header">
-      <h1>{{ 'harvest-certification.farmer.title' | translate }}</h1>
-      <p>{{ 'harvest-certification.farmer.subtitle' | translate }}</p>
-    </header>
+    <app-page-header
+      class="farmer-header"
+      [title]="'harvest-certification.farmer.title' | translate"
+      [subtitle]="'harvest-certification.farmer.subtitle' | translate"
+    />
 
     @if (store.error(); as error) {
       <div class="error-banner" role="alert">
