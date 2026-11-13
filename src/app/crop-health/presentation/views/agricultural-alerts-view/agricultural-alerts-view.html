@@ -1,51 +1,95 @@
-@if (store.alertsLoading()) {
-  <mat-progress-bar mode="indeterminate" [attr.aria-label]="'common.loading' | translate" />
-}
+<app-page-header
+  [title]="'crop-health.alerts-title' | translate"
+  [subtitle]="'crop-health.alerts-subtitle' | translate"
+/>
 
-<header class="view-header">
-  <span class="breadcrumb">{{ 'crop-health.eyebrow' | translate }}</span>
-  <h1>{{ 'crop-health.alerts-title' | translate }}</h1>
-<app-crop-plot-selector
+<section class="plot-panel" [attr.aria-label]="'crop-health.plot-selector' | translate">
+  <app-crop-plot-selector
     [plots]="store.plots()"
     [selectedPlotId]="store.selectedPlot()?.id"
     [disabled]="store.scopeLoading()"
     (plotSelected)="store.selectPlot(+$event)"
   />
-  <p>{{ store.selectedPlot()?.region }}</p>
-</header>
 
-@if (store.alertsError(); as error) {
-  <mat-card appearance="outlined" role="alert">
-    <mat-card-content><p>{{ error | translate }}</p></mat-card-content>
-  </mat-card>
-} @else if (!store.alertsLoading() && store.selectedPlot()) {
-<div class="alerts-list">
-  @for (alert of store.alerts(); track alert.id) {
-    <mat-card appearance="outlined" class="alert-card" [ngClass]="alert.severity.toLowerCase()">
-      <mat-card-header>
-        <mat-icon mat-card-avatar>warning</mat-icon>
-        <mat-card-title>{{ alert.title }}</mat-card-title>
-        <mat-card-subtitle>
-          {{ alert.issuedAt | date: 'mediumDate' }} · {{ alert.source }}
-        </mat-card-subtitle>
-      </mat-card-header>
-      <mat-card-content>
-        <p>{{ alert.description }}</p>
-        <p class="region-row">
-          <mat-icon>location_on</mat-icon>
-          {{ 'crop-health.region' | translate }}: {{ alert.region }}
-        </p>
-      </mat-card-content>
-    </mat-card>
-  } @empty {
-    <mat-card appearance="outlined" class="empty-card">
-      <mat-card-content>
-        <mat-icon>check_circle</mat-icon>
-        <p>{{ 'crop-health.no-alerts' | translate }}</p>
-      </mat-card-content>
-    </mat-card>
+  @if (store.selectedPlot(); as plot) {
+    <div class="plot-badge">
+      <mat-icon aria-hidden="true">location_on</mat-icon>
+      <span>{{ 'crop-health.region' | translate }}: <strong>{{ plot.region }}</strong></span>
+    </div>
   }
-</div>
+</section>
+
+@if (store.scopeLoading() || store.alertsLoading()) {
+  <mat-progress-bar
+    mode="indeterminate"
+    [attr.aria-label]="'common.loading' | translate"
+  />
 }
 
-@if (!store.alertsLoading() && !store.alertsError() && !store.selectedPlot()) { <p>{{ 'crop-health.no-plots' | translate }}</p> }
+@if (store.alertsError(); as error) {
+  <div class="feedback error" role="alert">
+    <mat-icon aria-hidden="true">error_outline</mat-icon>
+    <p>{{ error | translate }}</p>
+    <button mat-stroked-button type="button" (click)="reloadAlerts()">
+      {{ 'common.retry' | translate }}
+    </button>
+  </div>
+} @else if (!store.scopeLoading() && !store.alertsLoading()) {
+  @if (store.selectedPlot()) {
+    <section class="alerts-section" aria-labelledby="alerts-heading">
+      <h2 id="alerts-heading" class="sr-only">
+        {{ 'crop-health.alerts-title' | translate }}
+      </h2>
+
+      <div class="alerts-list">
+        @for (alert of store.alerts(); track alert.id) {
+          <article
+            class="alert-card"
+            [attr.data-severity]="alert.severity.toLowerCase()"
+          >
+            <header class="alert-header">
+              <div class="alert-heading">
+                <h3>{{ alert.title }}</h3>
+                <p class="metadata">
+                  <time [attr.datetime]="alert.issuedAt">
+                    {{ alert.issuedAt | date: 'mediumDate' }}
+                  </time>
+                  @if (alert.source) {
+                    <span aria-hidden="true"> · </span>
+                    <span>{{ alert.source }}</span>
+                  }
+                </p>
+              </div>
+
+              <span class="severity">
+                <mat-icon aria-hidden="true">
+                  {{ alert.severity === 'LOW' ? 'info' : 'warning' }}
+                </mat-icon>
+                {{ ('crop-health.severity-' + alert.severity.toLowerCase()) | translate }}
+              </span>
+            </header>
+
+            <p class="description">{{ alert.description }}</p>
+
+            <footer class="alert-footer">
+              <span class="metadata alert-region">
+                <mat-icon aria-hidden="true">location_on</mat-icon>
+                {{ 'crop-health.region' | translate }}: {{ alert.region }}
+              </span>
+            </footer>
+          </article>
+        } @empty {
+          <div class="feedback success" role="status">
+            <mat-icon aria-hidden="true">check_circle</mat-icon>
+            <p>{{ 'crop-health.no-alerts' | translate }}</p>
+          </div>
+        }
+      </div>
+    </section>
+  } @else {
+    <div class="feedback neutral" role="status">
+      <mat-icon aria-hidden="true">location_off</mat-icon>
+      <p>{{ 'crop-health.no-plots' | translate }}</p>
+    </div>
+  }
+}
