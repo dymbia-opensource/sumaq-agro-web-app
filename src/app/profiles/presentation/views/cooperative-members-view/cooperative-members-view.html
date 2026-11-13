@@ -73,38 +73,79 @@
           <mat-icon aria-hidden="true">edit</mat-icon>
           {{ 'profiles.cooperative.members.edit' | translate }}
         </button>
-        <h3>{{ 'profiles.cooperative.members.plots' | translate }}</h3>
-        @if (member.userId) {
-          <button mat-stroked-button type="button" [disabled]="linking()" (click)="loadPlots()">
-            {{ 'profiles.cooperative.members.link-plot' | translate }}
-          </button>
-          @if (plotOptions(); as options) {
-            <ul>
-              @for (plot of options; track plot.id) {
-                <li><button mat-button type="button" [disabled]="linking()" (click)="linkPlot(plot)">
-                  {{ plot.name }} · {{ plot.region }}
-                </button></li>
-              } @empty {
-                <li>{{ 'profiles.cooperative.members.no-linkable-plots' | translate }}</li>
-              }
-            </ul>
-          }
-          @if (plotError()) {
-            <p role="alert">{{ 'profiles.cooperative.members.link-error' | translate }}</p>
-          }
-        } @else {
-          <p>{{ 'profiles.cooperative.members.link-account-first' | translate }}</p>
-        }
-        <div class="plot-grid">
-          @for (plot of member.plots; track plot.id) {
-            <section class="plot">
-              <h4>{{ plot.name }}</h4>
-              <p>{{ plot.region }} · {{ plot.variety }}</p>
-            </section>
-          } @empty {
-            <p>{{ 'profiles.cooperative.members.no-plots' | translate }}</p>
-          }
-        </div>
+        <mat-tab-group class="dossier-tabs">
+          <mat-tab [label]="'profiles.cooperative.members.plots' | translate">
+            <div class="tab-content">
+                @if (member.userId) {
+                  <button mat-stroked-button type="button" [disabled]="linking()" (click)="loadPlots()">
+                    {{ 'profiles.cooperative.members.link-plot' | translate }}
+                  </button>
+                  @if (plotOptions(); as options) {
+                    <ul>
+                      @for (plot of options; track plot.id) {
+                        <li><button mat-button type="button" [disabled]="linking()" (click)="linkPlot(plot)">
+                          {{ plot.name }} · {{ plot.region }}
+                        </button></li>
+                      } @empty {
+                        <li>{{ 'profiles.cooperative.members.no-linkable-plots' | translate }}</li>
+                      }
+                    </ul>
+                  }
+                  @if (plotError()) {
+                    <p role="alert">{{ 'profiles.cooperative.members.link-error' | translate }}</p>
+                  }
+                } @else {
+                  <p>{{ 'profiles.cooperative.members.link-account-first' | translate }}</p>
+                }
+                <div class="plot-grid">
+                  @for (plot of member.plots; track plot.id) {
+                    <section class="plot">
+                      <h4>{{ plot.name }}</h4>
+                      <p>{{ plot.region }} · {{ plot.variety }}</p>
+                    </section>
+                  } @empty {
+                    <p>{{ 'profiles.cooperative.members.no-plots' | translate }}</p>
+                  }
+                </div>
+            </div>
+          </mat-tab>
+          <mat-tab [label]="'profiles.cooperative.members.certificates' | translate">
+            <ng-template matTabContent>
+              <div class="tab-content">
+                @if (harvest.loading()) {
+                  <mat-progress-bar mode="indeterminate" [attr.aria-label]="'common.loading' | translate" />
+                } @else if (harvest.error(); as error) {
+                  <p role="alert">{{ error | translate }}</p>
+                  <button mat-stroked-button type="button" (click)="harvest.load()">
+                    {{ 'common.retry' | translate }}
+                  </button>
+                } @else if (harvest.notice(); as notice) {
+                  <p role="status">{{ notice | translate }}</p>
+                } @else {
+                  <div class="plot-grid">
+                    @for (item of issuedCertificates(); track item.certificate.id) {
+                      <section class="plot">
+                        <h4>{{ item.certificate.certificateNumber }}</h4>
+                        <p>{{ item.batch.code }} · {{ item.batch.plotName }}</p>
+                        <p>
+                          {{ item.certificate.issuedAt | date: 'mediumDate' }} ·
+                          {{ ('profiles.cooperative.members.certificate-' + item.certificate.status) | translate }}
+                        </p>
+                        @if (item.certificate.verificationToken) {
+                          <a mat-stroked-button [routerLink]="['/verify', item.certificate.verificationToken]">
+                            {{ 'profiles.cooperative.members.verify-certificate' | translate }}
+                          </a>
+                        }
+                      </section>
+                    } @empty {
+                      <p>{{ 'profiles.cooperative.members.no-certificates' | translate }}</p>
+                    }
+                  </div>
+                }
+              </div>
+            </ng-template>
+          </mat-tab>
+        </mat-tab-group>
       </article>
     } @else if (memberId() !== null) {
       <div class="panel" role="status">

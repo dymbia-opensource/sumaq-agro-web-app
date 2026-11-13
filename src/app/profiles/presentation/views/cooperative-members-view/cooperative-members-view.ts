@@ -1,3 +1,6 @@
+import { DatePipe } from '@angular/common';
+import { MatTabsModule } from '@angular/material/tabs';
+import { HarvestCertificationStore } from '../../../../harvest-certification/application/harvest-certification.store';
 import { CooperativeMember } from '../../../domain/model/entities/cooperative-member.entity';
 import { FieldManagementApi } from '../../../../field-management/infrastructure/field-management-api';
 import { FieldPlot } from '../../../../field-management/domain/model/entities/field-plot.entity';
@@ -17,7 +20,7 @@ import { ProfilesApi } from '../../../infrastructure/profiles-api';
 
 @Component({
   selector: 'app-cooperative-members-view',
-  imports: [ReactiveFormsModule, MatIconModule, MatButtonModule, MatProgressBarModule, RouterLink, TranslatePipe, PageHeader],
+  imports: [DatePipe, MatTabsModule, ReactiveFormsModule, MatIconModule, MatButtonModule, MatProgressBarModule, RouterLink, TranslatePipe, PageHeader],
   templateUrl: './cooperative-members-view.html',
   styleUrl: './cooperative-members-view.css',
 })
@@ -172,6 +175,20 @@ export class CooperativeMembersView {
       error: () => this.plotError.set(true),
     });
   }
+
+  protected readonly harvest = inject(HarvestCertificationStore);
+  protected readonly issuedCertificates = computed(() => {
+    const member = this.selected();
+    if (!member || this.harvest.cooperativeId() !== member.cooperativeId) return [];
+
+    const batches = new Map(this.harvest.batches()
+      .filter(({ data }) => data.memberId === member.id && data.cooperativeId === member.cooperativeId)
+      .map((batch) => [batch.id, batch.data]));
+    return this.harvest.certificates().flatMap(({ data }) => {
+      const batch = batches.get(data.harvestBatchId);
+      return batch ? [{ certificate: data, batch }] : [];
+    }).sort((a, b) => b.certificate.issuedAt.localeCompare(a.certificate.issuedAt));
+  });
 
   protected readonly visibleMembers = computed(() => {
     const state = this.state();

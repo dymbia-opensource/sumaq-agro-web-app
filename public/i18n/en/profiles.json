@@ -2,6 +2,11 @@
   "profiles": {
     "cooperative": {
       "members": {
+        "certificates": "Issued certificates",
+        "no-certificates": "No certificates have been issued for this member yet.",
+        "verify-certificate": "Verify certificate",
+        "certificate-ACTIVE": "Active",
+        "certificate-REVOKED": "Revoked",
         "edit": "Edit member details",
         "link-plot": "Add plot",
         "no-linkable-plots": "No plots with saved boundaries are available to link.",

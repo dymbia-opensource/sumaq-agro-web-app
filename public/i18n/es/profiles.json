@@ -2,6 +2,11 @@
   "profiles": {
     "cooperative": {
       "members": {
+        "certificates": "Certificados emitidos",
+        "no-certificates": "Este socio todavía no tiene certificados emitidos.",
+        "verify-certificate": "Verificar certificado",
+        "certificate-ACTIVE": "Vigente",
+        "certificate-REVOKED": "Revocado",
         "edit": "Editar datos del socio",
         "link-plot": "Añadir lote",
         "no-linkable-plots": "No hay parcelas delimitadas disponibles para vincular.",
