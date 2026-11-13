@@ -20,6 +20,17 @@
       "ruc": "20612345678",
       "headquartersAddress": "Av. Ferrocarril 123, Huancayo",
       "switchboardPhone": "+51 64 555 200"
+    },
+    {
+      "directorUserId": 1794593329152,
+      "legalName": "BenjaCorp",
+      "ruc": "14125512513",
+      "region": "Lima",
+      "institutionalEmail": "",
+      "legalRepresentative": "",
+      "headquartersAddress": "",
+      "switchboardPhone": "",
+      "id": 2
     }
   ],
   "agronomist-assignments": [
@@ -988,6 +999,16 @@
       "startDate": "2026-11-13",
       "endDate": "2026-12-13",
       "autoRenew": true
+    },
+    {
+      "id": 12,
+      "userId": 1794593329152,
+      "planId": 2,
+      "status": "ACTIVE",
+      "billingCycle": "MONTHLY",
+      "startDate": "2026-11-13",
+      "endDate": "2026-12-13",
+      "autoRenew": true
     }
   ],
   "payments": [
@@ -1107,6 +1128,15 @@
       "transactionToken": "demo-tx-5edb00a1-4199-4ef5-93bb-644d3b869f77",
       "status": "COMPLETED",
       "paidAt": "2026-11-13T17:31:17.393Z"
+    },
+    {
+      "id": 14,
+      "subscriptionId": 12,
+      "amount": 189,
+      "currency": "PEN",
+      "transactionToken": "demo-tx-8145c692-302e-463e-a250-dcb35e8eefe2",
+      "status": "COMPLETED",
+      "paidAt": "2026-11-13T18:10:14.408Z"
     }
   ]
 }

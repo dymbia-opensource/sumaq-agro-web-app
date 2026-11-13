@@ -111,15 +111,17 @@ export class ProfilesStore {
   loadCooperativeDashboard(directorUserId: number): void {
     this.loadingSignal.set(true);
     this.errorSignal.set(null);
-    this.profilesApi.getInstitutionalDashboard(directorUserId).subscribe({
-      next: (dashboard) => {
-        this.dashboardSignal.set(dashboard);
-        this.loadingSignal.set(false);
-      },
-      error: (error: Error) => {
-        this.errorSignal.set(error.message);
-        this.loadingSignal.set(false);
-      },
+    this.dashboardSignal.set(null);
+    this.cooperativeSignal.set(null);
+    this.profilesApi.getCooperativeByDirector(directorUserId).pipe(
+      switchMap((cooperative) => {
+        this.cooperativeSignal.set(cooperative);
+        return cooperative ? this.profilesApi.getInstitutionalDashboard(directorUserId) : of(null);
+      }),
+      finalize(() => this.loadingSignal.set(false)),
+    ).subscribe({
+      next: (dashboard) => this.dashboardSignal.set(dashboard),
+      error: (error: Error) => this.errorSignal.set(error.message),
     });
   }
 

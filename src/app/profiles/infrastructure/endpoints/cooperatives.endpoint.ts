@@ -17,6 +17,19 @@ export class CooperativesApiEndpoint extends BaseApiEndpoint<
     super(http, `${environment.platformProviderApiBaseUrl}${environment.platformProviderCooperativesEndpointPath}`, new CooperativeAssembler());
   }
 
+  register(directorUserId: number, legalName: string, ruc: string, region: string): Observable<unknown> {
+    return this.http.post(this.endpointUrl, {
+      directorUserId,
+      legalName,
+      ruc,
+      region,
+      institutionalEmail: '',
+      legalRepresentative: '',
+      headquartersAddress: '',
+      switchboardPhone: '',
+    });
+  }
+
   getByDirector(userId: number): Observable<Cooperative | null> {
     const params = new HttpParams().set('directorUserId', userId);
     return this.http.get<CooperativeResource[]>(this.endpointUrl, { params }).pipe(

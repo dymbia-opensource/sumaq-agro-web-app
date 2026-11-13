@@ -44,6 +44,10 @@ export class ProfilesApi extends BaseApi {
     return this.cooperativesEndpoint.getByDirector(userId);
   }
 
+  registerCooperative(directorUserId: number, legalName: string, ruc: string, region: string): Observable<unknown> {
+    return this.cooperativesEndpoint.register(directorUserId, legalName, ruc, region);
+  }
+
   updateCooperative(cooperative: Cooperative): Observable<Cooperative> {
     return this.cooperativesEndpoint.update(cooperative, cooperative.id);
   }

@@ -14,6 +14,8 @@
         "address": "Headquarters address"
       },
       "registration": {
+        "existing": "Your account already has a registered cooperative.",
+        "error": "Registration could not be completed. Try again.",
         "back": "Back to dashboard",
         "title": "Register cooperative",
         "subtitle": "Complete the organization's institutional details.",
@@ -32,6 +34,7 @@
         "saving": "Registering..."
       },
       "dashboard": {
+        "no-metrics": "There are no metrics for this cooperative yet.",
         "breadcrumb": "Dashboard",
         "title": "Control Panel - {{ cooperative }}",
         "subtitle": "Oversight of {{ members }} active members | {{ hectares }} hectares under satellite monitoring",

@@ -14,6 +14,8 @@
         "address": "Dirección de sede central"
       },
       "registration": {
+        "existing": "Tu cuenta ya tiene una cooperativa registrada.",
+        "error": "No pudimos completar el registro. Inténtalo de nuevo.",
         "back": "Volver al dashboard",
         "title": "Registrar cooperativa",
         "subtitle": "Completa los datos institucionales de la organización.",
@@ -32,6 +34,7 @@
         "saving": "Registrando..."
       },
       "dashboard": {
+        "no-metrics": "Todavía no hay indicadores para esta cooperativa.",
         "breadcrumb": "Dashboard",
         "title": "Panel de Control - {{ cooperative }}",
         "subtitle": "Supervisión de {{ members }} socios activos | {{ hectares }} Hectáreas bajo monitoreo satelital",

@@ -20,7 +20,19 @@
     <mat-card class="trend-card"><mat-card-content><h2>{{ 'profiles.cooperative.dashboard.ndvi-title' | translate }}</h2><div class="filters"><button mat-stroked-button>{{ 'profiles.cooperative.dashboard.range' | translate }}: {{ 'profiles.cooperative.dashboard.all-campaign' | translate }}<mat-icon iconPositionEnd>expand_more</mat-icon></button><button mat-stroked-button>{{ 'profiles.cooperative.dashboard.filter' | translate }}: {{ 'profiles.cooperative.dashboard.potato-coffee' | translate }}<mat-icon iconPositionEnd>expand_more</mat-icon></button></div>@if (ndviChartData(); as chartData) { <div class="chart"><canvas baseChart type="line" [data]="chartData" [options]="ndviChartOptions"></canvas></div> }</mat-card-content></mat-card>
     <mat-card class="quality-card"><mat-card-content><h2>{{ 'profiles.cooperative.dashboard.quality-title' | translate }}</h2><p>{{ 'profiles.cooperative.dashboard.evaluated-lots' | translate: { lots: dashboard.evaluatedLots } }}</p><dl><div><dt>{{ 'profiles.cooperative.dashboard.specialty-coffee' | translate }}</dt><dd>{{ dashboard.specialtyCoffeePercentage }}%</dd></div><div><dt>{{ 'profiles.cooperative.dashboard.first-grade-potato' | translate }}</dt><dd>{{ dashboard.firstGradePotatoPercentage }}%</dd></div><div><dt>{{ 'profiles.cooperative.dashboard.loss-lots' | translate }}</dt><dd>{{ dashboard.lossLotsPercentage }}%</dd></div></dl><button mat-flat-button><mat-icon>add</mat-icon>{{ 'profiles.cooperative.dashboard.register-income' | translate }}</button></mat-card-content></mat-card>
   </section>
-} @else if (!loading()) {
+} @else if (!loading() && !error()) {
+  @if (cooperative(); as cooperative) {
+    <mat-card class="empty-state">
+      <mat-card-content>
+        <h1>{{ cooperative.legalName }}</h1>
+        <p>{{ 'profiles.cooperative.dashboard.no-metrics' | translate }}</p>
+      </mat-card-content>
+      <mat-card-actions>
+        <a mat-stroked-button routerLink="/profiles/cooperative/settings">{{ 'option.cooperative-settings' | translate }}</a>
+      </mat-card-actions>
+    </mat-card>
+  } @else {
   <mat-card class="empty-state"><mat-card-content><mat-icon>apartment</mat-icon><h1>{{ 'profiles.cooperative.dashboard.no-cooperative-title' | translate }}</h1><p>{{ 'profiles.cooperative.dashboard.no-cooperative-message' | translate }}</p></mat-card-content><mat-card-actions><a mat-flat-button routerLink="/profiles/cooperative/registration">{{ 'profiles.cooperative.dashboard.register-cooperative' | translate }}</a></mat-card-actions></mat-card>
+  }
 }
 @if (error(); as error) { <p class="error" role="alert">{{ error }}</p> }

@@ -1,3 +1,4 @@
+import { iamGuard } from '../iam/infrastructure/iam.guard';
 import { Routes } from '@angular/router';
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 
@@ -20,6 +21,16 @@ export const profilesRoutes: Routes = [
     providers: [provideCharts(withDefaultRegisterables())],
     loadComponent: cooperativeDashboardView,
     title: 'Dashboard institucional | SumaqAgro',
+  },
+  {
+    path: 'cooperative/registration',
+    canActivate: [iamGuard],
+    data: { roles: ['COOPERATIVE_DIRECTOR'] },
+    loadComponent: () =>
+      import('./presentation/views/cooperative-registration-view/cooperative-registration-view').then(
+        (module) => module.CooperativeRegistrationView,
+      ),
+    title: 'Registro de cooperativa | SumaqAgro',
   },
   { path: 'cooperative/settings', loadComponent: cooperativeSettingsView, title: 'Configuración institucional | SumaqAgro' },
   { path: '', redirectTo: 'cooperative/dashboard', pathMatch: 'full' },

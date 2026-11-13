@@ -1,0 +1,34 @@
+<app-page-header
+  [title]="'profiles.cooperative.registration.title' | translate"
+  [subtitle]="'profiles.cooperative.registration.subtitle' | translate"
+/>
+
+<form [formGroup]="form" (ngSubmit)="submit()" [attr.aria-busy]="saving()">
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>{{ 'profiles.cooperative.registration.legal-name' | translate }}</mat-label>
+    <input matInput formControlName="legalName" autocomplete="organization" required />
+    <mat-error>{{ 'profiles.cooperative.registration.required' | translate }}</mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>RUC</mat-label>
+    <input matInput formControlName="ruc" inputmode="numeric" maxlength="11" required />
+    <mat-error>{{ 'profiles.cooperative.registration.ruc-error' | translate }}</mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>{{ 'profiles.cooperative.registration.region' | translate }}</mat-label>
+    <input matInput formControlName="region" autocomplete="address-level1" required />
+    <mat-error>{{ 'profiles.cooperative.registration.required' | translate }}</mat-error>
+  </mat-form-field>
+
+  @if (error()) {
+    <p class="full-width" role="alert">{{ error() | translate }}</p>
+  }
+  <div class="actions full-width">
+    <a mat-button routerLink="/profiles/cooperative/dashboard">{{ 'crop-health.cancel' | translate }}</a>
+    <button mat-flat-button type="submit" [disabled]="saving()">
+      {{ (saving() ? 'common.loading' : 'profiles.cooperative.registration.submit') | translate }}
+    </button>
+  </div>
+</form>

@@ -10,7 +10,6 @@ import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ChartConfiguration } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
-import { environment } from '../../../../../environments/environment';
 import { ProfilesStore } from '../../../application/profiles.store';
 import { IamStore } from '../../../../iam/application/iam.store';
 
@@ -24,6 +23,7 @@ import { IamStore } from '../../../../iam/application/iam.store';
 export class CooperativeDashboardView {
   private readonly store = inject(ProfilesStore);
   private readonly session = inject(IamStore);
+  readonly cooperative = this.store.cooperative;
   readonly dashboard = this.store.dashboard;
   readonly loading = this.store.loading;
   readonly error = this.store.error;
