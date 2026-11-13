@@ -52,6 +52,10 @@ export class ProfilesApi extends BaseApi {
     return this.cooperativesEndpoint.update(cooperative, cooperative.id);
   }
 
+  addCooperativeMember(cooperativeId: number, member: { fullName: string; dni: string; phone: string; community: string }): Observable<CooperativeMember> {
+    return this.cooperativeMembersEndpoint.add(cooperativeId, member);
+  }
+
   getCooperativeMembers(cooperativeId: number): Observable<CooperativeMember[]> {
     return this.cooperativeMembersEndpoint.getByCooperative(cooperativeId);
   }

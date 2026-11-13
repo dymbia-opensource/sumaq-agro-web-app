@@ -1,6 +1,31 @@
 {
   "profiles": {
     "cooperative": {
+      "members": {
+        "title": "Member directory",
+        "subtitle": "View the members and plots linked to your cooperative.",
+        "search": "Search by name, ID or code",
+        "add": "Add new member",
+        "new-title": "Register new member",
+        "phone": "Phone",
+        "community": "Sector",
+        "save": "Save",
+        "validation": "Enter a name, an eight-digit ID and a valid phone number.",
+        "duplicate": "A member with this ID already exists.",
+        "save-error": "The member could not be saved.",
+        "back": "Back to directory",
+        "dossier": "Member record",
+        "no-plots": "This member has no linked plots yet.",
+        "view": "View",
+        "name": "Member",
+        "status": "Status",
+        "plots": "Plots",
+        "active": "Active",
+        "inactive": "Inactive",
+        "error": "The member directory could not be loaded.",
+        "empty": "There are no registered members yet.",
+        "no-results": "No members match your search."
+      },
       "settings": {
         "breadcrumb": "Settings",
         "title": "Institutional details",

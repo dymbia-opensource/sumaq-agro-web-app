@@ -24,6 +24,15 @@ export class CooperativeMembersApiEndpoint extends BaseApiEndpoint<
     );
   }
 
+  add(cooperativeId: number, member: { fullName: string; dni: string; phone: string; community: string }): Observable<CooperativeMember> {
+    return this.http.post<CooperativeMemberResource>(this.endpointUrl, {
+      ...member,
+      cooperativeId,
+      active: true,
+      plots: [],
+    }).pipe(map((resource) => this.assembler.toEntityFromResource(resource)));
+  }
+
   getByCooperative(cooperativeId: number): Observable<CooperativeMember[]> {
     const params = new HttpParams().set('cooperativeId', cooperativeId);
     return this.http.get<CooperativeMemberResource[]>(this.endpointUrl, { params }).pipe(

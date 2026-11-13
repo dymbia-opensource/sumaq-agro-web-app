@@ -16,6 +16,9 @@ export class CooperativeMember extends BaseEntity {
   /** Linked account; absent legacy links never imply equality with the membership ID. */
   readonly userId: number | null;
   /** Plot references owned by this member, supplied by the Profiles read model. */
+  readonly dni: string;
+  readonly phone: string;
+  readonly community: string;
   readonly plots: MemberPlot[];
   private readonly _cooperativeId: number;
   private readonly _fullName: string;
@@ -27,6 +30,9 @@ export class CooperativeMember extends BaseEntity {
     fullName: string;
     active: boolean;
     userId?: number | null;
+    dni?: string;
+    phone?: string;
+    community?: string;
     plots?: MemberPlot[];
   }) {
     super({ id: props.id });
@@ -34,6 +40,9 @@ export class CooperativeMember extends BaseEntity {
     this._fullName = props.fullName;
     this._active = props.active;
     this.userId = props.userId ?? null;
+    this.dni = props.dni ?? '';
+    this.phone = props.phone ?? '';
+    this.community = props.community ?? '';
     this.plots = props.plots ?? [];
   }
 

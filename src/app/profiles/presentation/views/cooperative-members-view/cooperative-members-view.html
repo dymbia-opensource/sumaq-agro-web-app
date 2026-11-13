@@ -1,0 +1,127 @@
+<app-page-header
+  [title]="'profiles.cooperative.members.title' | translate"
+  [subtitle]="'profiles.cooperative.members.subtitle' | translate"
+>
+  @if (state()?.status === 'ready' && !adding() && !selected()) {
+    <button mat-flat-button type="button" (click)="adding.set(true); error.set('')">
+      <mat-icon aria-hidden="true">person_add</mat-icon>
+      {{ 'profiles.cooperative.members.add' | translate }}
+    </button>
+  }
+</app-page-header>
+
+@let current = state();
+@switch (current?.status) {
+  @case ('loading') {
+    <mat-progress-bar mode="indeterminate" [attr.aria-label]="'common.loading' | translate" />
+  }
+  @case ('error') {
+    <div class="panel" role="alert">
+      <p>{{ 'profiles.cooperative.members.error' | translate }}</p>
+      <button mat-stroked-button type="button" (click)="retry()">{{ 'common.retry' | translate }}</button>
+    </div>
+  }
+  @case ('no-cooperative') {
+    <div class="panel">
+      <p>{{ 'profiles.cooperative.dashboard.no-cooperative-message' | translate }}</p>
+      <a mat-flat-button routerLink="/profiles/cooperative/registration">
+        {{ 'profiles.cooperative.dashboard.register-cooperative' | translate }}
+      </a>
+    </div>
+  }
+  @case ('ready') {
+    @if (adding()) {
+      <form class="panel member-form" [formGroup]="form" (ngSubmit)="save()" [attr.aria-busy]="saving()">
+        <h2>{{ 'profiles.cooperative.members.new-title' | translate }}</h2>
+        <div class="fields">
+          <label>{{ 'profiles.cooperative.members.name' | translate }}
+            <input formControlName="fullName" autocomplete="name" required />
+          </label>
+          <label>DNI
+            <input formControlName="dni" inputmode="numeric" maxlength="8" required />
+          </label>
+          <label>{{ 'profiles.cooperative.members.phone' | translate }}
+            <input type="tel" formControlName="phone" autocomplete="tel" required />
+          </label>
+          <label>{{ 'profiles.cooperative.members.community' | translate }}
+            <input formControlName="community" maxlength="100" />
+          </label>
+        </div>
+        @if (form.invalid && form.touched) {
+          <p role="status">{{ 'profiles.cooperative.members.validation' | translate }}</p>
+        }
+        @if (error()) { <p role="alert">{{ error() | translate }}</p> }
+        <div class="actions">
+          <button mat-button type="button" [disabled]="saving()" (click)="adding.set(false); form.reset()">
+            {{ 'crop-health.cancel' | translate }}
+          </button>
+          <button mat-flat-button type="submit" [disabled]="saving()">
+            {{ 'profiles.cooperative.members.save' | translate }}
+          </button>
+        </div>
+      </form>
+    } @else if (selected(); as member) {
+      <article class="panel dossier">
+        <button mat-button type="button" (click)="selected.set(null)">
+          {{ 'profiles.cooperative.members.back' | translate }}
+        </button>
+        <h2>{{ 'profiles.cooperative.members.dossier' | translate }} · {{ member.fullName }}</h2>
+        @if (member.dni) { <p>DNI · {{ member.dni }}</p> }
+        @if (member.phone) { <p>{{ 'profiles.cooperative.members.phone' | translate }} · {{ member.phone }}</p> }
+        @if (member.community) { <p>{{ 'profiles.cooperative.members.community' | translate }} · {{ member.community }}</p> }
+        <h3>{{ 'profiles.cooperative.members.plots' | translate }}</h3>
+        <div class="plot-grid">
+          @for (plot of member.plots; track plot.id) {
+            <section class="plot">
+              <h4>{{ plot.name }}</h4>
+              <p>{{ plot.region }} · {{ plot.variety }}</p>
+            </section>
+          } @empty {
+            <p>{{ 'profiles.cooperative.members.no-plots' | translate }}</p>
+          }
+        </div>
+      </article>
+    } @else {
+    <section class="panel" [attr.aria-label]="'profiles.cooperative.members.title' | translate">
+      @if (current?.members?.length) {
+        <label for="member-search">{{ 'profiles.cooperative.members.search' | translate }}</label>
+        <input id="member-search" type="search" [value]="query()" (input)="query.set($event.target.value)" />
+      }
+      @if (visibleMembers().length) {
+        <div class="table-scroll">
+        <table [attr.aria-label]="'profiles.cooperative.members.title' | translate">
+          <thead>
+            <tr>
+              <th scope="col">{{ 'profiles.cooperative.members.name' | translate }}</th>
+              <th scope="col">{{ 'profiles.cooperative.members.status' | translate }}</th>
+              <th scope="col">DNI</th>
+              <th scope="col">{{ 'profiles.cooperative.members.plots' | translate }}</th>
+              <th scope="col">{{ 'common.actions' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (member of visibleMembers(); track member.id) {
+              <tr>
+                <th scope="row">{{ member.fullName }}</th>
+                <td><span class="badge" [class.active]="member.active">
+                  {{ (member.active ? 'profiles.cooperative.members.active' : 'profiles.cooperative.members.inactive') | translate }}
+                </span></td>
+                <td>{{ member.dni || '—' }}</td>
+                <td>{{ member.plots.length }}</td>
+                <td><button mat-stroked-button type="button" (click)="selected.set(member)">
+                  {{ 'profiles.cooperative.members.view' | translate }}
+                </button></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+        </div>
+      } @else {
+        <p role="status">
+          {{ (current?.members?.length ? 'profiles.cooperative.members.no-results' : 'profiles.cooperative.members.empty') | translate }}
+        </p>
+      }
+    </section>
+    }
+  }
+}
