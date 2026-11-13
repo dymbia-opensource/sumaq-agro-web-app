@@ -189,6 +189,8 @@
       "COMPLETED": "Completed"
     },
     "case": {
+      "subtitle": "Review the original report, inspections, prescriptions, and crop progress.",
+      "back": "Back to reports",
       "open": "View case and follow-up",
       "title": "Incident detail and follow-up",
       "no-inspections": "No inspections have been recorded yet.",

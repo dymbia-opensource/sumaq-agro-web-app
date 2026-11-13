@@ -1,5 +1,11 @@
-<a mat-button routerLink="/crop-health/inbox">← {{ 'crop-health.inbox-title' | translate }}</a>
-<h1>{{ 'crop-health.case.title' | translate }}</h1>
+<app-page-header
+  [title]="'crop-health.case.title' | translate"
+  [subtitle]="'crop-health.case.subtitle' | translate"
+>
+  <a mat-stroked-button routerLink="/crop-health/inbox">
+    <span aria-hidden="true">←</span> {{ 'crop-health.case.back' | translate }}
+  </a>
+</app-page-header>
 @if (store.clinicalLoading() || store.saving()) {
   <mat-progress-bar mode="indeterminate" [attr.aria-label]="'common.loading' | translate" />
 }
@@ -12,18 +18,18 @@
 }
 @if (!store.clinicalLoading() && !store.clinicalError() && loaded()) {
   @if (report(); as report) {
-    <mat-card appearance="outlined"
+    <mat-card appearance="outlined" class="case-summary"
       ><mat-card-header
         ><mat-card-title>{{ report.plotName }}</mat-card-title
-        ><mat-card-subtitle>{{
+        ><mat-card-subtitle><span class="case-status" [attr.data-status]="report.status">{{
           'crop-health.report-statuses.' + report.status | translate
-        }}</mat-card-subtitle></mat-card-header
+        }}</span></mat-card-subtitle></mat-card-header
       ><mat-card-content
         ><p>
           {{ 'crop-health.advisor.producer' | translate }}:
           {{ store.producerName(report.reporterId) }} · #{{ report.reporterId }}
         </p>
-        <p>{{ report.description }}</p>
+        <p class="notes">{{ report.description }}</p>
         @if (report.photo) {
           <a [href]="report.photo" target="_blank" rel="noopener noreferrer">{{
             'crop-health.view-photo' | translate
@@ -53,7 +59,7 @@
         </p></mat-card-content
       ></mat-card
     >
-    <h2>{{ 'crop-health.inspections-title' | translate }}</h2>
+    <h2 class="section-title">{{ 'crop-health.inspections-title' | translate }}</h2>
     @for (visit of inspections(); track visit.id) {
       <mat-card appearance="outlined"
         ><mat-card-content
@@ -71,9 +77,9 @@
         </mat-card-content></mat-card
       >
     } @empty {
-      <p>{{ 'crop-health.case.no-inspections' | translate }}</p>
+      <p class="empty-state">{{ 'crop-health.case.no-inspections' | translate }}</p>
     }
-    <h2>{{ 'crop-health.history-title' | translate }}</h2>
+    <h2 class="section-title">{{ 'crop-health.history-title' | translate }}</h2>
     @for (rx of prescriptions(); track rx.id) {
       <mat-card appearance="outlined"
         ><mat-card-header
@@ -87,10 +93,10 @@
         ></mat-card
       >
     } @empty {
-      <p>{{ 'crop-health.case.no-prescriptions' | translate }}</p>
+      <p class="empty-state">{{ 'crop-health.case.no-prescriptions' | translate }}</p>
     }
-    <h2>{{ 'crop-health.case.follow-up' | translate }}</h2>
-    <p>{{ 'crop-health.case.evaluation-notice' | translate }}</p>
+    <h2 class="section-title">{{ 'crop-health.case.follow-up' | translate }}</h2>
+    <p class="follow-up-note">{{ 'crop-health.case.evaluation-notice' | translate }}</p>
     @for (item of evidence(); track item.data.id) {
       <mat-card appearance="outlined"
         ><mat-card-content
@@ -103,7 +109,7 @@
         ></mat-card
       >
     } @empty {
-      <p>{{ 'crop-health.case.no-follow-up' | translate }}</p>
+      <p class="empty-state">{{ 'crop-health.case.no-follow-up' | translate }}</p>
     }
     @if (store.canReport() && report.status === 'INSPECTED' && prescriptions().length) {
       <form #followUpForm="ngForm" [formGroup]="form" (ngSubmit)="submit()">

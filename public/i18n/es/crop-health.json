@@ -189,6 +189,8 @@
       "COMPLETED": "Completada"
     },
     "case": {
+      "subtitle": "Revisa el reporte original, las inspecciones, las recetas y la evolución del cultivo.",
+      "back": "Volver a reportes",
       "open": "Ver caso y seguimiento",
       "title": "Detalle y seguimiento de incidencia",
       "no-inspections": "Todavía no se han registrado inspecciones.",
