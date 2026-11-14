@@ -19,7 +19,7 @@ import {
   ConfirmDeleteDialogData,
 } from './components/confirm-delete-dialog/confirm-delete-dialog';
 
-export type SettingsTab = 'cooperative' | 'technical-team' | 'subscription';
+export type SettingsTab = 'cooperative' | 'technical-team';
 
 /** Institutional configuration details for the cooperative director. */
 @Component({

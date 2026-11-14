@@ -12,13 +12,10 @@
       @case ('technical-team') {
         <strong>Equipo Técnico</strong>
       }
-      @case ('subscription') {
-        <strong>Suscripción</strong>
-      }
     }
   </p>
   <h1>Configuración Institucional y Parámetros</h1>
-  <p>Administración de perfil corporativo, equipo agronómico y membresía</p>
+  <p>Administra los datos de la cooperativa y su equipo agronómico.</p>
 </header>
 
 <nav class="settings-tabs" aria-label="Secciones de configuración">
@@ -37,14 +34,6 @@
     type="button"
   >
     Equipo Técnico
-  </button>
-  <button
-    class="settings-tab"
-    [class.settings-tab--active]="activeTab() === 'subscription'"
-    (click)="selectTab('subscription')"
-    type="button"
-  >
-    Suscripción
   </button>
 </nav>
 
@@ -176,18 +165,6 @@
           </tbody>
         </table>
       </div>
-    </mat-card-content>
-  </mat-card>
-}
-
-@if (activeTab() === 'subscription') {
-  <mat-card class="settings-card">
-    <mat-card-content>
-      <h2>Plan de Suscripción Institucional</h2>
-      <p class="settings-card__description">
-        Gestión de membresía, límites de hectáreas y facturación
-      </p>
-      <p>Próximamente disponible.</p>
     </mat-card-content>
   </mat-card>
 }
