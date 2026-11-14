@@ -1,3 +1,5 @@
+import { HttpErrorResponse } from '@angular/common/http';
+import { buildCostReportPdf } from '../infrastructure/cost-report-pdf';
 import {
   computed,
   DestroyRef,
@@ -833,7 +835,17 @@ export class FarmingStore {
     this.farmingApi.downloadCostReport(command.campaignId).subscribe({
       next: (content) =>
         this.fileDownloader.save({ fileName: `cost-report-${campaign.season}.pdf`, content }),
-      error: (error) => this.fail(error, 'farming.errors.export-report'),
+      error: (error) => {
+        const ledger = this.ledgersByCampaignSignal().get(command.campaignId);
+        if (!(error instanceof HttpErrorResponse) || error.status !== 404 || !ledger) {
+          this.fail(error, 'farming.errors.export-report');
+          return;
+        }
+
+        const plot = this.findPlot(campaign.plotId);
+        const content = buildCostReportPdf(ledger, campaign.season, plot?.name ?? '', plot?.areaHectares ?? 0);
+        this.fileDownloader.save({ fileName: 'cost-report-' + campaign.season + '.pdf', content });
+      },
     });
   };
 

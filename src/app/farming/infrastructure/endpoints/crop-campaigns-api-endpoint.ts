@@ -42,7 +42,6 @@ export class CropCampaignsApiEndpoint extends BaseApiEndpoint<
    */
   getCostReport(campaignId: number): Observable<Blob> {
     return this.http
-      .get(`${this.endpointUrl}/${campaignId}/cost-report`, { responseType: 'blob' })
-      .pipe(catchError(this.handleError('Failed to download the cost report')));
+      .get(`${this.endpointUrl}/${campaignId}/cost-report`, { responseType: 'blob' });
   }
 }

@@ -12,7 +12,7 @@ import { PaymentsApiEndpoint } from './endpoints/payments.endpoint';
 import { PlansApiEndpoint } from './endpoints/plans.endpoint';
 import { SubscriptionsApiEndpoint } from './endpoints/subscriptions.endpoint';
 import { DemoCheckout, type DemoCheckoutRequest } from './mock/demo-checkout';
-import { buildReceiptPdf } from './receipt-pdf';
+import { buildTextPdf } from '../../shared/infrastructure/text-pdf';
 
 @Injectable({ providedIn: 'root' })
 export class SubscriptionsApi extends BaseApi {
@@ -65,7 +65,7 @@ export class SubscriptionsApi extends BaseApi {
    */
   buildReceipt = (payment: Payment, planName: string): ExportedFile => ({
     fileName: `receipt-${payment.transactionToken}.pdf`,
-    content: buildReceiptPdf([
+    content: buildTextPdf([
       'SumaqAgro - Payment receipt',
       `Transaction: ${payment.transactionToken}`,
       `Plan: ${planName}`,
