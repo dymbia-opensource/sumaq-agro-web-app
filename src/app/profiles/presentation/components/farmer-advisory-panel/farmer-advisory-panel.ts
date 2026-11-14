@@ -7,7 +7,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { TranslatePipe } from '@ngx-translate/core';
 import { IamStore } from '../../../../iam/application/iam.store';
-import { FarmerAdvisoryStore } from '../../../application/farmer-advisory.store';
+import { ProfilesStore } from '../../../application/profiles.store';
 
 /** Farmer-controlled demo responsibility selector, shared by plot detail and advisory inbox. */
 @Component({
@@ -52,7 +52,9 @@ import { FarmerAdvisoryStore } from '../../../application/farmer-advisory.store'
 })
 export class FarmerAdvisoryPanel {
   readonly plotId = input.required<number>();
-  readonly store = inject(FarmerAdvisoryStore);
+  /** The view confirms that the plot belongs to the signed-in producer. */
+  readonly owned = input(false);
+  readonly store = inject(ProfilesStore);
   private readonly session = inject(IamStore);
   readonly advisor = computed(() => this.store.advisorFor(this.plotId()));
   readonly assignment = computed(() => this.store.assignmentFor(this.plotId()));
@@ -82,7 +84,7 @@ export class FarmerAdvisoryPanel {
   save(): void {
     const advisorUserId = this.selected();
     if (!this.confirming() || advisorUserId === null) return;
-    this.store.assign(this.plotId(), advisorUserId, () => {
+    this.store.assign(this.plotId(), advisorUserId, this.owned(), () => {
       this.confirming.set(false);
       this.saved.set(true);
     });

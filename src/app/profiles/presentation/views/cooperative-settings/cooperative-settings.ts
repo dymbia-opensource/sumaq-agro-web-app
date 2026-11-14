@@ -14,13 +14,16 @@ import { ReassignTechnicalAdvisorCommand } from '../../../domain/model/commands/
 import { UpdateCooperativeCommand } from '../../../domain/model/commands/update-cooperative.command';
 import { TechnicalAdvisor } from '../../../domain/model/entities/technical-advisor.entity';
 import { AdvisorDialog, AdvisorDialogData } from './components/advisor-dialog/advisor-dialog';
-import { ConfirmDeleteDialog, ConfirmDeleteDialogData } from './components/confirm-delete-dialog/confirm-delete-dialog';
+import {
+  ConfirmDeleteDialog,
+  ConfirmDeleteDialogData,
+} from './components/confirm-delete-dialog/confirm-delete-dialog';
 
 export type SettingsTab = 'cooperative' | 'technical-team' | 'subscription';
 
 /** Institutional configuration details for the cooperative director. */
 @Component({
-  selector: 'app-cooperative-settings-view',
+  selector: 'app-cooperative-settings',
   imports: [
     ReactiveFormsModule,
     MatButtonModule,
@@ -31,10 +34,10 @@ export type SettingsTab = 'cooperative' | 'technical-team' | 'subscription';
     MatInputModule,
     MatProgressBarModule,
   ],
-  templateUrl: './cooperative-settings-view.html',
-  styleUrl: './cooperative-settings-view.css',
+  templateUrl: './cooperative-settings.html',
+  styleUrl: './cooperative-settings.css',
 })
-export class CooperativeSettingsView {
+export class CooperativeSettings {
   private readonly store = inject(ProfilesStore);
   private readonly dialog = inject(MatDialog);
   private readonly session = inject(IamStore);
@@ -48,12 +51,27 @@ export class CooperativeSettingsView {
 
   readonly form = new FormGroup({
     legalName: new FormControl('', { nonNullable: true, validators: Validators.required }),
-    ruc: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.pattern(/^\d{11}$/)] }),
+    ruc: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required, Validators.pattern(/^\d{11}$/)],
+    }),
     region: new FormControl('', { nonNullable: true, validators: Validators.required }),
-    headquartersAddress: new FormControl('', { nonNullable: true, validators: Validators.required }),
-    institutionalEmail: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.email] }),
-    switchboardPhone: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.minLength(7)] }),
-    legalRepresentative: new FormControl('', { nonNullable: true, validators: Validators.required }),
+    headquartersAddress: new FormControl('', {
+      nonNullable: true,
+      validators: Validators.required,
+    }),
+    institutionalEmail: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required, Validators.email],
+    }),
+    switchboardPhone: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required, Validators.minLength(7)],
+    }),
+    legalRepresentative: new FormControl('', {
+      nonNullable: true,
+      validators: Validators.required,
+    }),
   });
 
   constructor() {
@@ -77,7 +95,7 @@ export class CooperativeSettingsView {
           switchboardPhone: cooperative.switchboardPhone,
           legalRepresentative: cooperative.legalRepresentative,
         },
-        { emitEvent: false }
+        { emitEvent: false },
       );
     });
   }
@@ -97,7 +115,8 @@ export class CooperativeSettingsView {
 
   openInviteAdvisorDialog(): void {
     const cooperative = this.cooperative();
-    const coopId = typeof cooperative?.id === 'number' ? cooperative.id : Number(cooperative?.id ?? 1);
+    const coopId =
+      typeof cooperative?.id === 'number' ? cooperative.id : Number(cooperative?.id ?? 1);
 
     const dialogRef = this.dialog.open<AdvisorDialog, AdvisorDialogData>(AdvisorDialog, {
       width: '500px',
@@ -112,8 +131,8 @@ export class CooperativeSettingsView {
             result.name,
             result.cipCode,
             result.phone,
-            result.assignedPlotsCount
-          )
+            result.assignedPlotsCount,
+          ),
         );
       }
     });
@@ -134,8 +153,8 @@ export class CooperativeSettingsView {
             result.name,
             result.cipCode,
             result.phone,
-            result.assignedPlotsCount
-          )
+            result.assignedPlotsCount,
+          ),
         );
       }
     });
@@ -150,7 +169,7 @@ export class CooperativeSettingsView {
       {
         width: '440px',
         data: { advisorName: advisor.name },
-      }
+      },
     );
 
     dialogRef.afterClosed().subscribe((confirmed) => {

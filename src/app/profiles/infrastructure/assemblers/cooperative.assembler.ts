@@ -3,9 +3,11 @@ import { Cooperative } from '../../domain/model/entities/cooperative.entity';
 import { CooperativeResource, CooperativesResponse } from '../responses/cooperative.response';
 
 /** Converts the Cooperative API contract to the domain entity and back. */
-export class CooperativeAssembler
-  implements BaseAssembler<Cooperative, CooperativeResource, CooperativesResponse>
-{
+export class CooperativeAssembler implements BaseAssembler<
+  Cooperative,
+  CooperativeResource,
+  CooperativesResponse
+> {
   toEntityFromResource(resource: CooperativeResource): Cooperative {
     return new Cooperative(resource);
   }

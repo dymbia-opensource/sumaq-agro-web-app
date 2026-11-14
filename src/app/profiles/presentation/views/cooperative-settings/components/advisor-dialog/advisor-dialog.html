@@ -4,7 +4,11 @@
 
 <mat-dialog-content class="dialog-content">
   <p class="dialog-description">
-    {{ isEdit ? 'Actualice la información y cantidad de lotes asignados al asesor técnico.' : 'Ingrese los datos institucionales del nuevo asesor que supervisará las parcelas.' }}
+    {{
+      isEdit
+        ? 'Actualice la información y cantidad de lotes asignados al asesor técnico.'
+        : 'Ingrese los datos institucionales del nuevo asesor que supervisará las parcelas.'
+    }}
   </p>
 
   <form [formGroup]="form" id="advisorForm" (ngSubmit)="onSubmit()" class="dialog-form">

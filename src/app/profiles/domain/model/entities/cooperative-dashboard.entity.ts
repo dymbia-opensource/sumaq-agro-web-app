@@ -8,26 +8,24 @@ export interface NdviTrendPoint {
 
 /** Read-only institutional projection for the cooperative director dashboard. */
 export class CooperativeDashboard extends BaseEntity {
-  constructor(
-    props: {
-      id: number;
-      directorUserId: number;
-      cooperativeName: string;
-      campaignName: string;
-      activeMembers: number;
-      monitoredHectares: number;
-      collectionTons: number;
-      collectionGoalTons: number;
-      optimalPlotsPercentage: number;
-      stressedPlotsPercentage: number;
-      averageCostPerHectare: number;
-      ndviTrend: NdviTrendPoint[];
-      evaluatedLots: number;
-      specialtyCoffeePercentage: number;
-      firstGradePotatoPercentage: number;
-      lossLotsPercentage: number;
-    },
-  ) {
+  constructor(props: {
+    id: number;
+    directorUserId: number;
+    cooperativeName: string;
+    campaignName: string;
+    activeMembers: number;
+    monitoredHectares: number;
+    collectionTons: number;
+    collectionGoalTons: number;
+    optimalPlotsPercentage: number;
+    stressedPlotsPercentage: number;
+    averageCostPerHectare: number;
+    ndviTrend: NdviTrendPoint[];
+    evaluatedLots: number;
+    specialtyCoffeePercentage: number;
+    firstGradePotatoPercentage: number;
+    lossLotsPercentage: number;
+  }) {
     super({ id: props.id });
     this.directorUserId = props.directorUserId;
     this.cooperativeName = props.cooperativeName;
@@ -63,6 +61,8 @@ export class CooperativeDashboard extends BaseEntity {
   readonly lossLotsPercentage: number;
 
   get collectionProgress(): number {
-    return this.collectionGoalTons === 0 ? 0 : (this.collectionTons / this.collectionGoalTons) * 100;
+    return this.collectionGoalTons === 0
+      ? 0
+      : (this.collectionTons / this.collectionGoalTons) * 100;
   }
 }

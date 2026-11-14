@@ -17,7 +17,7 @@ import { UpdateFarmerAccountCommand } from '../../../domain/model/commands/updat
 
 /** Account settings view for the independent farmer (segment 1). */
 @Component({
-  selector: 'app-farmer-settings-view',
+  selector: 'app-farmer-settings',
   imports: [
     ReactiveFormsModule,
     MatButtonModule,
@@ -32,10 +32,10 @@ import { UpdateFarmerAccountCommand } from '../../../domain/model/commands/updat
     RouterLink,
     TranslatePipe,
   ],
-  templateUrl: './farmer-settings-view.html',
-  styleUrl: './farmer-settings-view.css',
+  templateUrl: './farmer-settings.html',
+  styleUrl: './farmer-settings.css',
 })
-export class FarmerSettingsView {
+export class FarmerSettings {
   private readonly store = inject(ProfilesStore);
   private readonly snackBar = inject(MatSnackBar);
   readonly session = inject(IamStore);
