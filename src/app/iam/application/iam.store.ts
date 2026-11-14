@@ -28,9 +28,9 @@ type IamOperation = 'sign-in' | 'sign-up';
 const ROLE_PRIORITY: readonly UserRole[] = ['COOPERATIVE_DIRECTOR', 'AGRONOMIST', 'FARMER'];
 
 const INITIAL_ROUTES: Record<UserRole, string> = {
-  FARMER: '/field-management/dashboard',
-  COOPERATIVE_DIRECTOR: '/profiles/cooperative/dashboard',
-  AGRONOMIST: '/crop-health/inbox',
+  FARMER: '/dashboard',
+  COOPERATIVE_DIRECTOR: '/cooperative/dashboard',
+  AGRONOMIST: '/pest-reports',
 };
 /**
  * Holds IAM state and orchestrates authentication operations.
@@ -68,7 +68,7 @@ export class IamStore {
 
     return {
       id,
-      displayName: user.email,
+      displayName: user.fullName,
       experience,
       initialRoute: INITIAL_ROUTES[experience],
     };

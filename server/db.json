@@ -3,6 +3,8 @@
     {
       "id": 1,
       "userId": 1,
+      "firstName": "Rene",
+      "lastName": "Higuita",
       "phoneNumber": "+51 987 654 2321",
       "email": "guillermoquispe@gmail.com"
     }
@@ -323,10 +325,9 @@
     {
       "id": 2,
       "campaignId": 2,
-      "expectedYield": 200,
+      "expectedYield": 320,
       "actualYield": null,
       "yieldUnit": "SACK",
-      "frozen": false,
       "entries": [
         {
           "id": 6,
@@ -335,7 +336,6 @@
           "quantity": 60,
           "unitPrice": 52,
           "expenseDate": "2026-09-15",
-          "notes": "",
           "clientSyncId": ""
         },
         {
@@ -345,7 +345,6 @@
           "quantity": 25,
           "unitPrice": 120,
           "expenseDate": "2026-09-18",
-          "notes": "",
           "clientSyncId": ""
         },
         {
@@ -355,7 +354,6 @@
           "quantity": 30,
           "unitPrice": 93,
           "expenseDate": "2026-09-19",
-          "notes": "",
           "clientSyncId": ""
         },
         {
@@ -365,7 +363,6 @@
           "quantity": 48,
           "unitPrice": 55,
           "expenseDate": "2026-09-20",
-          "notes": "",
           "clientSyncId": ""
         },
         {
@@ -375,7 +372,6 @@
           "quantity": 32,
           "unitPrice": 66,
           "expenseDate": "2026-10-02",
-          "notes": "",
           "clientSyncId": ""
         },
         {
@@ -385,7 +381,6 @@
           "quantity": 1,
           "unitPrice": 588,
           "expenseDate": "2026-09-14",
-          "notes": "",
           "clientSyncId": ""
         },
         {
@@ -395,7 +390,6 @@
           "quantity": 4,
           "unitPrice": 150,
           "expenseDate": "2026-09-20",
-          "notes": "",
           "clientSyncId": ""
         }
       ]
@@ -629,7 +623,62 @@
       "recommendation": "Check the area for signs of the onset of wilting."
     }
   ],
-  "agroclimatic-alerts": [],
+  "agroclimatic-alerts": [
+    {
+      "id": 1,
+      "title": "Posible descenso de temperatura nocturna",
+      "description": "Ejemplo simulado: se reporta riesgo de bajas temperaturas en parcelas del valle. Revisa las condiciones de tu terreno y coordina con tu asesor las medidas adecuadas para tu cultivo.",
+      "severity": "HIGH",
+      "region": "Junín - Valle del Mantaro",
+      "issuedAt": "2026-10-30T08:00:00-05:00",
+      "source": "SumaqAgro · Datos de demostración"
+    },
+    {
+      "id": 2,
+      "title": "Vigilancia de humedad en el suelo",
+      "description": "Ejemplo simulado: algunas parcelas presentan señales de menor disponibilidad de agua. Consulta los indicadores de salud de tu parcela y verifica la humedad en campo antes de ajustar el riego.",
+      "severity": "MEDIUM",
+      "region": "Junín - Valle del Mantaro",
+      "issuedAt": "2026-10-29T10:30:00-05:00",
+      "source": "SumaqAgro · Datos de demostración"
+    },
+    {
+      "id": 3,
+      "title": "Lluvias intensas y revisión de drenajes",
+      "description": "Ejemplo simulado: se prevé un periodo de lluvias intensas. Revisa los drenajes y los accesos a la parcela, y coordina las labores de campo según las condiciones locales.",
+      "severity": "HIGH",
+      "region": "Junín - Chanchamayo",
+      "issuedAt": "2026-10-30T07:30:00-05:00",
+      "source": "SumaqAgro · Datos de demostración"
+    },
+    {
+      "id": 4,
+      "title": "Revisión preventiva de la salud del cafetal",
+      "description": "Ejemplo simulado: condiciones de humedad elevada requieren mayor seguimiento del cultivo. Inspecciona las hojas y, si observas síntomas, registra un reporte con fotografías para tu asesor.",
+      "severity": "MEDIUM",
+      "region": "Junín - Chanchamayo",
+      "issuedAt": "2026-10-29T09:00:00-05:00",
+      "source": "SumaqAgro · Datos de demostración"
+    },
+    {
+      "id": 5,
+      "title": "Riesgo de helada en zonas altas",
+      "description": "Ejemplo simulado: se informa un escenario de helada en zonas altas. Verifica las condiciones de tu parcela y consulta con tu asesor las acciones apropiadas para la etapa de tu cultivo.",
+      "severity": "CRITICAL",
+      "region": "Huancavelica",
+      "issuedAt": "2026-10-30T06:00:00-05:00",
+      "source": "SumaqAgro · Datos de demostración"
+    },
+    {
+      "id": 6,
+      "title": "Seguimiento preventivo de parcelas",
+      "description": "Ejemplo simulado: realiza una inspección de rutina y revisa los últimos indicadores disponibles. Registra cambios visibles del cultivo para mantener actualizado su seguimiento.",
+      "severity": "LOW",
+      "region": "Huancavelica",
+      "issuedAt": "2026-10-28T11:00:00-05:00",
+      "source": "SumaqAgro · Datos de demostración"
+    }
+  ],
   "climate-forecasts": [],
   "pest-reports": [
     {
@@ -731,5 +780,116 @@
       "recordedAt": "2026-10-21T22:14:12.101Z"
     }
   ],
-  "case-assessments": []
+  "case-assessments": [],
+  "plans": [
+    {
+      "id": 1,
+      "code": "SEED",
+      "name": "Seed",
+      "monthlyPrice": 49,
+      "annualPrice": 490,
+      "currency": "PEN",
+      "plotQuota": 4,
+      "features": [
+        "campaigns-by-plot",
+        "ndvi-ndwi",
+        "expenses",
+        "unit-cost",
+        "agroclimatic-alerts"
+      ]
+    },
+    {
+      "id": 2,
+      "code": "COOPERATIVE_PRO",
+      "name": "Cooperative Pro",
+      "monthlyPrice": 189,
+      "annualPrice": 1890,
+      "currency": "PEN",
+      "plotQuota": 50,
+      "features": [
+        "members-registry",
+        "ndvi-ndwi",
+        "incidents-inspections",
+        "harvest-lots",
+        "qr-certificates"
+      ]
+    },
+    {
+      "id": 3,
+      "code": "TECHNICAL_ADVISOR",
+      "name": "Technical Advisor",
+      "monthlyPrice": 89,
+      "annualPrice": 890,
+      "currency": "PEN",
+      "plotQuota": 20,
+      "features": [
+        "ndvi-ndwi",
+        "pest-reports",
+        "inspections",
+        "prescriptions",
+        "visit-history"
+      ]
+    }
+  ],
+  "subscriptions": [
+    {
+      "id": 1,
+      "userId": 1,
+      "planId": 1,
+      "status": "ACTIVE",
+      "billingCycle": "MONTHLY",
+      "startDate": "2026-10-01",
+      "endDate": "2026-11-01",
+      "autoRenew": true
+    },
+    {
+      "id": 2,
+      "userId": 3,
+      "planId": 2,
+      "status": "ACTIVE",
+      "billingCycle": "MONTHLY",
+      "startDate": "2026-10-01",
+      "endDate": "2026-11-01",
+      "autoRenew": true
+    },
+    {
+      "id": 3,
+      "userId": 4,
+      "planId": 3,
+      "status": "ACTIVE",
+      "billingCycle": "MONTHLY",
+      "startDate": "2026-10-31",
+      "endDate": "2026-11-30",
+      "autoRenew": true
+    }
+  ],
+  "payments": [
+    {
+      "id": 1,
+      "subscriptionId": 1,
+      "amount": 49,
+      "currency": "PEN",
+      "transactionToken": "demo-tx-0001",
+      "status": "COMPLETED",
+      "paidAt": "2026-10-01T10:00:00Z"
+    },
+    {
+      "id": 2,
+      "subscriptionId": 2,
+      "amount": 189,
+      "currency": "PEN",
+      "transactionToken": "demo-tx-0002",
+      "status": "COMPLETED",
+      "paidAt": "2026-10-01T10:05:00Z"
+    },
+    {
+      "id": 3,
+      "subscriptionId": 3,
+      "amount": 89,
+      "currency": "PEN",
+      "transactionToken": "demo-tx-1793459706235",
+      "status": "COMPLETED",
+      "paidAt": "2026-10-31T15:15:06.235Z"
+    }
+  ]
 }

@@ -8,7 +8,7 @@
   [subtitle]="plot() ? ('field-management.finances.subtitle' | translate: subtitleParams()) : ''"
 >
   <div class="header-actions">
-    <a mat-stroked-button class="register" routerLink="/field-management/campaigns">
+    <a mat-stroked-button class="register" routerLink="/campaigns">
       <mat-icon>event_note</mat-icon>
       {{ 'field-management.campaigns.title' | translate }}
     </a>
@@ -60,12 +60,14 @@
     [attr.aria-label]="'field-management.finances.summary' | translate"
   />
 
-  <app-expense-category-filter
-    [selected]="categoryFilter()"
-    (selectedChange)="categoryFilter.set($event)"
-  />
   <div class="finances-grid">
-    <app-expense-list [entries]="expenseHistory()" />
+    <div class="expense-history">
+      <app-expense-category-filter
+        [selected]="categoryFilter()"
+        (selectedChange)="categoryFilter.set($event)"
+      />
+      <app-expense-list [entries]="expenseHistory()" />
+    </div>
     <app-breakeven-panel
       [ledger]="ledger"
       [saving]="loading()"
@@ -78,7 +80,7 @@
     [message]="'field-management.finances.no-ledger' | translate"
   >
     <mat-card-actions align="end">
-      <a mat-flat-button routerLink="/field-management/plots">
+      <a mat-flat-button routerLink="/plots">
         {{ 'field-management.finances.select-plot' | translate }}
       </a>
     </mat-card-actions>

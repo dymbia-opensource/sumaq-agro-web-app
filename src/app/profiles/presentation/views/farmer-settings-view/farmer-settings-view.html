@@ -31,13 +31,13 @@
       <mat-icon>account_circle</mat-icon>
       <div>
         <h2>{{ 'profiles.settings.profile-title' | translate }}</h2>
-        @if (profile()?.fullName) {
-          <p class="profile-name">{{ profile()?.fullName }}</p>
+        @if (profile()?.fullName || session.activeUser()?.displayName; as name) {
+          <p class="profile-name">{{ name }}</p>
         }
         <p>{{ session.currentUser()?.email }}</p>
         <span>{{ 'profiles.settings.farmer-role' | translate }}</span>
       </div>
-      <a mat-stroked-button routerLink="/field-management/plots">{{
+      <a mat-stroked-button routerLink="/plots">{{
         'profiles.settings.manage-plots' | translate
       }}</a>
     </mat-card-content></mat-card
@@ -153,7 +153,7 @@
       @if (session.isPasswordRecoveryPreview) {
         <p class="notice">{{ 'profiles.settings.preview' | translate }}</p>
       }
-      <a mat-stroked-button routerLink="/iam/forgot-password"
+      <a mat-stroked-button routerLink="/forgot-password"
         ><mat-icon>lock_reset</mat-icon>{{ 'profiles.settings.change-password' | translate }}</a
       >
       <div class="preferences">

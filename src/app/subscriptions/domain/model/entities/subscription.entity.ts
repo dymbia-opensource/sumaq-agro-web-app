@@ -122,19 +122,23 @@ export class Subscription extends BaseEntity {
     return this._status === SubscriptionStatus.ACTIVE;
   }
 
-  /** `true` when the user can still use the plan: active, or cancelled but not yet expired. */
+  /** Returns whether the subscription grants access on the given calendar day. */
   hasAccess(today: Date = new Date()): boolean {
-    if (this.isActive()) return true;
-    return this._endDate !== null && this._endDate >= startOfDay(today);
+    const day = startOfDay(today);
+    const grantsAccess =
+      this._status === SubscriptionStatus.ACTIVE || this._status === SubscriptionStatus.CANCELLED;
+
+    return (
+      grantsAccess &&
+      this._endDate !== null &&
+      startOfDay(this._startDate) <= day &&
+      day <= startOfDay(this._endDate)
+    );
   }
 
-  /** `true` when a cancelled plan reached its end date, so the user is left without plan. */
+  /** Returns whether the last paid calendar day has passed. */
   isExpired(today: Date = new Date()): boolean {
-    return (
-      this._status === SubscriptionStatus.CANCELLED &&
-      this._endDate !== null &&
-      this._endDate < startOfDay(today)
-    );
+    return this._endDate !== null && startOfDay(this._endDate) < startOfDay(today);
   }
 
   /** Plots still available under the quota of the plan. */

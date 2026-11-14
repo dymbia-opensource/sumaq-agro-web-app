@@ -1,43 +1,319 @@
 :host {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  max-width: 1000px;
-  margin: auto;
-}
-h1,
-h2,
-p {
-  margin: 0;
-  overflow-wrap: anywhere;
-}
-mat-card-content {
-  padding-top: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-form {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
-}
-form h2,
-form mat-form-field:last-of-type {
-  grid-column: 1/-1;
-}
-.notes {
-  white-space: pre-wrap;
-}
-@media (max-width: 600px) {
-  form {
-    grid-template-columns: minmax(0, 1fr);
-  }
+  --bg-page: #f7f7f2;
+  --surface: #ffffff;
+  --surface-subtle: #f4f6f2;
+  --frame-border: #c8cec4;
+  --inner-border: #dce1d8;
+  --text-main: #18221e;
+  --text-muted: #5c6862;
+
+  --brand-dark: #00423b;
+  --brand-green: #1a7f37;
+  --brand-tint: #e3f0e4;
+  --brand-tint-border: #c3dfc6;
+
+  --info-bg: #eff8ff;
+  --info-border: #b2ddff;
+  --info-text: #175cd3;
+
+  --warn-bg: #fffaeb;
+  --warn-border: #fedf89;
+  --warn-text: #b54708;
+
+  --danger-bg: #fef3f2;
+  --danger-border: #fecdca;
+  --danger-text: #b42318;
+
+  display: block;
+  width: 100%;
+  color: var(--text-main);
 }
 
-#assessment {
+/* Barra de progreso */
+mat-progress-bar {
+  margin: 1rem 0;
+  border-radius: 999px;
+  --mdc-linear-progress-active-indicator-color: var(--brand-green);
+  --mdc-linear-progress-track-color: var(--brand-tint);
+}
+
+/* Mensajes de estado y alertas globales */
+p[role="alert"],
+p[role="status"] {
+  width: 100%;
+  box-sizing: border-box;
+  margin: 1rem 0;
+  padding: 0.9rem 1.2rem;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+p[role="alert"] {
+  background: var(--danger-bg);
+  border: 1.5px solid var(--danger-border);
+  color: var(--danger-text);
+}
+
+p[role="status"] {
+  background: var(--brand-tint);
+  border: 1.5px solid var(--brand-tint-border);
+  color: var(--brand-dark);
+}
+
+/* Botón volver en header y retry */
+app-page-header a[mat-stroked-button],
+button[mat-stroked-button] {
+  border-color: var(--frame-border) !important;
+  color: var(--text-main) !important;
+  background: var(--surface) !important;
+  border-radius: 999px !important;
+  font-weight: 600;
+}
+
+app-page-header a[mat-stroked-button]:hover,
+button[mat-stroked-button]:hover {
+  background: var(--surface-subtle) !important;
+  border-color: var(--brand-green) !important;
+  color: var(--brand-green) !important;
+}
+
+/* =========================================================
+   TARJETAS MAT-CARD (Ancho completo con marco gris)
+   ========================================================= */
+mat-card {
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 1rem;
+  background-color: var(--surface) !important;
+  border: 1.5px solid var(--frame-border) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 2px 6px rgba(24, 34, 30, 0.05) !important;
+  overflow: hidden;
+}
+
+mat-card-header {
+  padding: 1.25rem 1.5rem 0.9rem !important;
+  border-bottom: 1px solid var(--inner-border);
+  background: var(--surface-subtle);
+}
+
+mat-card-title {
+  font-size: 1.15rem !important;
+  font-weight: 700 !important;
+  color: var(--brand-dark) !important;
+  margin-bottom: 0.35rem !important;
+}
+
+mat-card-subtitle {
+  margin: 0 !important;
+}
+
+mat-card-content {
+  padding: 1.25rem 1.5rem !important;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  scroll-margin-top: 90px;
+  gap: 0.75rem;
+}
+
+mat-card-content p {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: var(--text-main);
+}
+
+/* Resumen principal del caso */
+mat-card.case-summary {
+  margin-top: 1.25rem;
+  border-left: 6px solid var(--brand-dark) !important;
+}
+
+/* Chip de estado del reporte */
+.case-status {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.8rem;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  background: var(--surface);
+  border: 1px solid var(--frame-border);
+  color: var(--text-muted);
+}
+
+.case-status[data-status="PENDING"] {
+  background: var(--warn-bg);
+  border-color: var(--warn-border);
+  color: var(--warn-text);
+}
+
+.case-status[data-status="INSPECTED"],
+.case-status[data-status="IN_PROGRESS"] {
+  background: var(--info-bg);
+  border-color: var(--info-border);
+  color: var(--info-text);
+}
+
+.case-status[data-status="RESOLVED"],
+.case-status[data-status="CLOSED"],
+.case-status[data-status="RECOVERED"] {
+  background: var(--brand-tint);
+  border-color: var(--brand-tint-border);
+  color: var(--brand-green);
+}
+
+/* Bloque de notas / descripción */
+.notes {
+  padding: 0.9rem 1.1rem;
+  background: var(--surface-subtle);
+  border: 1px solid var(--inner-border);
+  border-radius: 10px;
+  color: var(--text-main);
+  white-space: pre-line;
+}
+
+/* Enlace de foto y botones de acción dentro del resumen */
+mat-card.case-summary a:not([mat-stroked-button]) {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  background: var(--brand-tint);
+  border: 1px solid var(--brand-tint-border);
+  color: var(--brand-green);
+  font-size: 0.84rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+mat-card.case-summary a:not([mat-stroked-button]):hover {
+  background: #d3e8d5;
+}
+
+mat-card.case-summary nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  padding-top: 0.5rem;
+}
+
+mat-card.case-summary nav a[mat-stroked-button] {
+  background: var(--brand-dark) !important;
+  color: #ffffff !important;
+  border-color: var(--brand-dark) !important;
+}
+
+mat-card.case-summary nav a[mat-stroked-button]:hover {
+  background: #00574e !important;
+}
+
+/* =========================================================
+   TÍTULOS DE SECCIÓN Y ESTADOS VACÍOS
+   ========================================================= */
+.section-title,
+#assessment > h2 {
+  margin: 2rem 0 0.9rem;
+  padding-bottom: 0.55rem;
+  border-bottom: 1.5px solid var(--frame-border);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--brand-dark);
+}
+
+.empty-state,
+#assessment > p:not([role="status"]) {
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0 0 1rem;
+  padding: 1.25rem 1.5rem;
+  background: var(--surface);
+  border: 1.5px dashed var(--frame-border);
+  border-radius: 14px;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.follow-up-note {
+  margin: 0 0 1rem;
+  padding: 0.85rem 1.1rem;
+  background: var(--info-bg);
+  border: 1px solid var(--info-border);
+  border-radius: 12px;
+  color: var(--info-text);
+  font-size: 0.88rem;
+  font-weight: 500;
+}
+
+/* =========================================================
+   FORMULARIOS DE SEGUIMIENTO Y EVALUACIÓN AGRONÓMICA
+   ========================================================= */
+form {
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin: 1.5rem 0;
+  padding: 1.5rem;
+  background: var(--surface);
+  border: 1.5px solid var(--frame-border);
+  border-radius: 16px;
+  box-shadow: 0 2px 6px rgba(24, 34, 30, 0.05);
+}
+
+form h2 {
+  margin: 0 0 0.5rem;
+  padding-bottom: 0.65rem;
+  border-bottom: 1px solid var(--inner-border);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--brand-dark);
+}
+
+form mat-form-field {
+  width: 100%;
+}
+
+form button[type="submit"] {
+  align-self: flex-end;
+  background-color: var(--brand-dark) !important;
+  color: #ffffff !important;
+  border-radius: 999px !important;
+  padding: 0 1.5rem !important;
+  height: 42px;
+  font-weight: 600;
+}
+
+form button[type="submit"]:hover:not(:disabled) {
+  background-color: #00574e !important;
+}
+
+form button[type="submit"]:disabled {
+  opacity: 0.55;
+}
+
+/* =========================================================
+   SECCIÓN DE EVALUACIÓN FINAL (#assessment)
+   ========================================================= */
+#assessment {
+  width: 100%;
+  margin-top: 2rem;
+  padding-top: 0.5rem;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  mat-card-header,
+  mat-card-content,
+  form {
+    padding: 1.1rem !important;
+  }
+
+  form button[type="submit"] {
+    width: 100%;
+  }
 }

@@ -1,4 +1,3 @@
-import { PlotQuotaSummary } from '../../components/plot-quota-summary/plot-quota-summary';
 import { Component, computed, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
@@ -27,7 +26,6 @@ import { RegistrationSteps } from '../../components/registration-steps/registrat
 @Component({
   selector: 'app-plot-registration-view',
   imports: [
-    PlotQuotaSummary,
     MatButtonModule,
     MatProgressBarModule,
     TranslatePipe,
@@ -57,8 +55,8 @@ export class PlotRegistrationView {
   readonly slotNumber = computed(() => this.fieldManagementStore.plotCount() + 1);
 
   protected readonly breadcrumbs: Breadcrumb[] = [
-    { label: 'option.my-plot', link: '/field-management/dashboard' },
-    { label: 'field-management.plots.manage', link: '/field-management/plots' },
+    { label: 'option.my-plot', link: '/dashboard' },
+    { label: 'field-management.plots.manage', link: '/plots' },
     { label: 'field-management.steps.crop-data' },
   ];
 
@@ -97,11 +95,11 @@ export class PlotRegistrationView {
             })
           : undefined,
       },
-      (plot) => this.router.navigate(['field-management/plots', plot.id, 'boundary']).then(),
+      (plot) => this.router.navigate(['/plots', plot.id, 'boundary']).then(),
     );
   }
 
   onCancel() {
-    this.router.navigate(['field-management/plots']).then();
+    this.router.navigate(['/plots']).then();
   }
 }

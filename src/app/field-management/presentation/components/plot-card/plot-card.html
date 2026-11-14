@@ -1,4 +1,4 @@
-<mat-card class="plot-card">
+<mat-card appearance="outlined" class="plot-card">
   <mat-card-header>
     <mat-card-subtitle class="plot-number">
       {{ 'field-management.plots.plot-number' | translate: { number: position() } }}
@@ -36,13 +36,15 @@
   </mat-card-header>
 
   <mat-card-content>
+    <h2 class="plot-name">{{ plot().name }}</h2>
     <mat-chip-set>
       <mat-chip [disableRipple]="true" class="status-chip">
         <mat-icon matChipAvatar>{{ plot().isMonitored() ? 'eco' : 'pending' }}</mat-icon>
-        {{ 'field-management.plot-status.' + plot().status | translate }}
+        {{ (plot().hasPolygon() && !plot().isMonitored()
+          ? 'field-management.plot-status.BOUNDARY_SAVED'
+          : 'field-management.plot-status.' + plot().status) | translate }}
       </mat-chip>
     </mat-chip-set>
-    <h2 class="plot-name">{{ plot().name }}</h2>
     <mat-divider />
     <dl class="plot-data">
       <dt>{{ 'field-management.plots.crop' | translate }}:</dt>

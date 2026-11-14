@@ -8,24 +8,24 @@
   display: block;
   margin-bottom: 6px;
   color: #286643;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 h1 {
   margin: 0 0 6px;
-  font-size: clamp(27px, 2.7vw, 35px);
+  font-size: clamp(28px, 3vw, 36px);
   font-weight: 600;
-  line-height: 1.25;
+  line-height: 1.2;
   letter-spacing: -1.1px;
   text-wrap: balance;
 }
 .form-header p {
   margin: 0;
   color: #52665a;
-  font-size: 13px;
-  line-height: 1.8;
+  font-size: 14px;
+  line-height: 1.6;
 }
 form {
   display: flex;
@@ -36,6 +36,9 @@ mat-form-field {
   width: 100%;
   --mat-form-field-outlined-container-shape: 12px;
 }
+input[matInput] {
+  font-size: 16px;
+}
 .field-icon {
   margin-left: 14px;
   margin-right: 4px;
@@ -44,7 +47,8 @@ mat-form-field {
 }
 .submit-button {
   width: 100%;
-  min-height: 48px;
+  min-height: 50px;
+  font-size: 15px;
   margin-top: 4px;
   --mat-button-filled-container-shape: 12px;
   font-weight: 600;

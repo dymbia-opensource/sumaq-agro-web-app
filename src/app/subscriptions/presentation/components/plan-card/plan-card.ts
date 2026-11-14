@@ -1,6 +1,5 @@
 import { Component, input, output } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { TranslatePipe } from '@ngx-translate/core';
 import { BillingCycle } from '../../../domain/model/entities/billing-cycle';
@@ -9,7 +8,7 @@ import { Plan } from '../../../domain/model/entities/plan.entity';
 /** Displays one subscription plan and emits the user's selection. */
 @Component({
   selector: 'app-plan-card',
-  imports: [MatButtonModule, MatCardModule, MatIconModule, TranslatePipe],
+  imports: [MatButtonModule, MatIconModule, TranslatePipe],
   templateUrl: './plan-card.html',
   styleUrl: './plan-card.css',
 })

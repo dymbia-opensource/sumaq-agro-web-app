@@ -1,4 +1,4 @@
-<app-auth-layout>
+<app-auth-layout [showLanguageSwitcher]="true">
   <header class="form-header">
     <span class="form-eyebrow">{{ 'iam.signIn.eyebrow' | translate }}</span>
     <h1>{{ 'iam.signIn.title' | translate }}</h1>
@@ -14,6 +14,7 @@
         matInput
         type="email"
         formControlName="email"
+        [errorStateMatcher]="fieldErrorMatcher"
         autocomplete="username"
         autocapitalize="none"
         spellcheck="false"
@@ -34,6 +35,7 @@
         matInput
         [type]="hidePassword() ? 'password' : 'text'"
         formControlName="password"
+        [errorStateMatcher]="fieldErrorMatcher"
         autocomplete="current-password"
       />
 
@@ -56,7 +58,7 @@
       }
     </mat-form-field>
 
-    <a class="forgot-password-link" routerLink="/iam/forgot-password">
+    <a class="forgot-password-link" routerLink="/forgot-password">
       {{ 'iam.recovery.forgotLink' | translate }}
     </a>
 
@@ -84,7 +86,7 @@
   </form>
   <p class="auth-link">
     {{ 'iam.signIn.noAccount' | translate }}
-    <a routerLink="/iam/sign-up">
+    <a routerLink="/sign-up">
       {{ 'iam.signIn.register' | translate }}
     </a>
   </p>

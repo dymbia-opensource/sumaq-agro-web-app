@@ -1,11 +1,11 @@
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { Router, RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
-import { Breadcrumb, PageHeader } from '../../../../shared/presentation/components/page-header/page-header';
+import { environment } from '../../../../../environments/environment';
+import { IamStore } from '../../../../iam/application/iam.store';
 import { MessageCard } from '../../../../shared/presentation/components/message-card/message-card';
 import { SubscriptionsStore } from '../../../application/subscriptions.store';
 import { ApplyCouponCommand } from '../../../domain/model/commands/apply-coupon.command';
@@ -19,11 +19,9 @@ import { CouponForm } from '../../components/coupon-form/coupon-form';
   imports: [
     CouponForm,
     MatButtonModule,
-    MatCardModule,
     MatIconModule,
     MatProgressBarModule,
     MessageCard,
-    PageHeader,
     RouterLink,
     TranslatePipe,
   ],
@@ -33,6 +31,11 @@ import { CouponForm } from '../../components/coupon-form/coupon-form';
 export class CheckoutView {
   private readonly router = inject(Router);
   private readonly store = inject(SubscriptionsStore);
+  private readonly iamStore = inject(IamStore);
+
+  protected readonly dashboardRoute = computed(
+    () => this.iamStore.activeUser()?.initialRoute ?? null,
+  );
 
   readonly selectedPlan = this.store.selectedPlan;
   readonly cycle = this.store.billingCycle;
@@ -44,10 +47,7 @@ export class CheckoutView {
   readonly error = this.store.error;
 
   protected readonly paymentStatuses = PaymentStatus;
-  protected readonly breadcrumbs: Breadcrumb[] = [
-    { label: 'subscriptions.catalog.title', link: '/subscriptions/plans' },
-    { label: 'subscriptions.checkout.title' },
-  ];
+  protected readonly demoPaymentsEnabled = environment.useMockSubscriptionPayments;
 
   /** Returns a numeric subscription id expected by the payment commands. */
   private subscriptionId(): number | null {
@@ -70,18 +70,24 @@ export class CheckoutView {
     );
   }
 
-  /** Submits a demo payment without collecting card details. */
+  /** Submits a demo payment using the current session identity. */
   onPay(status: PaymentStatus.COMPLETED | PaymentStatus.REJECTED): void {
+    if (!this.demoPaymentsEnabled) return;
+
     const amount = this.amount();
-    if (!amount || !this.selectedPlan() || this.processing()) return;
+    const userId = this.iamStore.activeUser()?.id ?? null;
+
+    if (userId === null || !amount || !this.selectedPlan() || this.processing()) {
+      return;
+    }
 
     this.store.submitPayment(
       new SubmitPaymentCommand({
         subscriptionId: this.subscriptionId(),
-        cardToken: 'demo-payment-token',
         amount,
         simulatedStatus: status,
       }),
+      userId,
     );
   }
 

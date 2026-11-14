@@ -6,6 +6,11 @@
       "COOPERATIVE_PRO": "Cooperative Pro",
       "TECHNICAL_ADVISOR": "Technical Advisor"
     },
+    "segment": {
+      "SEED": "For independent farmers",
+      "COOPERATIVE_PRO": "For cooperatives",
+      "TECHNICAL_ADVISOR": "For technical advisors"
+    },
     "billing-cycle": {
       "MONTHLY": "Monthly",
       "ANNUAL": "Annual"
@@ -39,13 +44,18 @@
       "selected": "Plan selected",
       "annual-savings": "Save {{amount}} per year",
       "plot-quota": "Up to {{quota}} plots",
-      "choose": "Choose plan"
+      "choose": "Continue to payment",
+      "cancel-note": "Cancel anytime. You keep access until the end of the paid period."
     },
     "catalog": {
-      "title": "Plans",
-      "subtitle": "Choose the plan that best fits your work.",
+      "title": "Activate your plan",
+      "subtitle": "You need an active plan to start using SumaqAgro. Choose how you'd like to pay.",
       "billing-cycle": "Billing cycle",
-      "empty": "No plans are available right now."
+      "empty": "No plans are available right now.",
+      "eyebrow": "Last step",
+      "back": "Back to my subscription",
+      "annual-tag": "Save",
+      "breadcrumb": "Plans"
     },
     "billing": {
       "title": "Subscription and payments",
@@ -71,7 +81,14 @@
       "status": "Status",
       "transaction": "Transaction token",
       "no-payments": "There are no payments recorded yet.",
-      "download-receipt": "Download receipt"
+      "download-receipt": "Download receipt",
+      "receipt": "Receipt",
+      "next-renewal": "Next renewal",
+      "access-until": "Access until",
+      "expired-on": "Expired on",
+      "expired-badge": "Expired",
+      "period-progress": "Billing period progress",
+      "reactivate": "Reactivate subscription"
     },
     "checkout": {
       "title": "Confirm your plan",
@@ -86,12 +103,14 @@
       "apply-coupon": "Apply coupon",
       "total": "Total due",
       "payment-title": "Payment",
-      "demo-notice": "This is a demo: it is not connected to Niubiz yet, and you should not enter card details. The button simulates an approved payment.",
+      "demo-notice": "Demo payment. You will not be charged.",
+      "unavailable": "Demo payments are disabled.",
       "back": "Back to plans",
       "simulate-payment": "Simulate approved payment",
       "payment-approved": "Demo payment approved. Your plan has been updated.",
       "payment-rejected": "Demo payment rejected. Your plan was not changed.",
       "view-billing": "View subscription and payments",
+      "go-to-dashboard": "Go to my dashboard",
       "simulate-rejection": "Simulate rejected payment",
       "no-plan": "Choose a plan before continuing.",
       "choose-plan": "Browse plans"

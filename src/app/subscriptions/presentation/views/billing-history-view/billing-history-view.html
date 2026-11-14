@@ -3,11 +3,11 @@
 }
 
 <app-page-header
-  [breadcrumbs]="breadcrumbs"
   [title]="'subscriptions.billing.title' | translate"
   [subtitle]="'subscriptions.billing.subtitle' | translate"
 >
   <a mat-stroked-button routerLink="/subscriptions/plans">
+    <mat-icon>swap_horiz</mat-icon>
     {{ 'subscriptions.billing.change-plan' | translate }}
   </a>
 </app-page-header>
@@ -17,143 +17,251 @@
 }
 
 @if (subscription(); as current) {
-  <mat-card appearance="outlined" class="subscription-card">
-    <mat-card-header>
-      <mat-icon mat-card-avatar>workspace_premium</mat-icon>
-      <mat-card-title>
+  <section class="panel plan-panel" aria-labelledby="plan-title">
+    <header class="plan-head">
+      <span class="plan-icon" aria-hidden="true"><mat-icon>workspace_premium</mat-icon></span>
+
+      <div class="plan-titles">
+        <div class="plan-name-row">
+          <h2 id="plan-title" class="plan-name">
+            @if (current.plan; as plan) {
+              {{ 'subscriptions.plan-code.' + plan.code | translate }}
+            } @else {
+              {{ 'subscriptions.billing.unknown-plan' | translate }}
+            }
+          </h2>
+
+          @switch (state()) {
+            @case ('renewing') {
+              <span class="chip chip-active">
+                <mat-icon aria-hidden="true">check_circle</mat-icon>
+                {{ 'subscriptions.subscription-status.ACTIVE' | translate }}
+              </span>
+            }
+            @case ('ending') {
+              <span class="chip chip-neutral">
+                <mat-icon aria-hidden="true">schedule</mat-icon>
+                {{ 'subscriptions.subscription-status.CANCELLED' | translate }}
+              </span>
+            }
+            @case ('expired') {
+              <span class="chip chip-error">
+                <mat-icon aria-hidden="true">error</mat-icon>
+                {{ 'subscriptions.billing.expired-badge' | translate }}
+              </span>
+            }
+          }
+        </div>
+
         @if (current.plan; as plan) {
-          {{ 'subscriptions.plan-code.' + plan.code | translate }}
-        } @else {
-          {{ 'subscriptions.billing.unknown-plan' | translate }}
+          <p class="plan-audience">{{ 'subscriptions.segment.' + plan.code | translate }}</p>
         }
-      </mat-card-title>
-      <mat-card-subtitle>
-        {{ ('subscriptions.subscription-status.' + current.status) | translate }}
-      </mat-card-subtitle>
-    </mat-card-header>
+      </div>
 
-    <mat-card-content>
-      <dl>
-        <div>
-          <dt>{{ 'subscriptions.billing.cycle' | translate }}</dt>
-          <dd>{{ ('subscriptions.billing-cycle.' + current.billingCycle) | translate }}</dd>
-        </div>
-        <div>
-          <dt>{{ 'subscriptions.billing.started' | translate }}</dt>
-          <dd>{{ current.startDate | date: 'mediumDate' }}</dd>
-        </div>
-        <div>
-          <dt>{{ 'subscriptions.billing.ends' | translate }}</dt>
-          <dd>
-            {{
-              current.endDate
-                ? (current.endDate | date: 'mediumDate')
-                : ('subscriptions.billing.no-end-date' | translate)
-            }}
-          </dd>
-        </div>
-        <div>
-          <dt>{{ 'subscriptions.billing.plot-quota' | translate }}</dt>
-          <dd>{{ current.plan?.plotQuota ?? 0 }}</dd>
-        </div>
-      </dl>
-
-      @if (current.hasAccess() && current.autoRenew) {
-        @if (confirmingCancellation()) {
-          <section
-            class="cancel-confirmation"
-            role="group"
-            [attr.aria-label]="'subscriptions.billing.cancel-confirmation' | translate"
-          >
-            <p>{{ 'subscriptions.billing.cancel-confirmation' | translate }}</p>
-            <div class="cancel-actions">
-              <button
-                mat-button
-                type="button"
-                [disabled]="processing()"
-                (click)="confirmingCancellation.set(false)"
-              >
-                {{ 'subscriptions.billing.keep' | translate }}
-              </button>
-              <button
-                mat-flat-button
-                type="button"
-                [disabled]="processing()"
-                (click)="onCancelSubscription()"
-              >
-                {{ 'subscriptions.billing.confirm-cancel' | translate }}
-              </button>
-            </div>
-          </section>
-        } @else {
-          <button
-            mat-stroked-button
-            type="button"
-            [disabled]="processing()"
-            (click)="confirmingCancellation.set(true)"
-          >
-            {{ 'subscriptions.billing.cancel' | translate }}
-          </button>
-        }
-      } @else if (current.hasAccess()) {
-        <p class="status-note">{{ 'subscriptions.billing.cancelled-until' | translate }}</p>
-      } @else {
-        <p class="status-note">{{ 'subscriptions.billing.expired' | translate }}</p>
+      @if (current.plan; as plan) {
+        <p class="price">
+          <strong>{{ plan.priceFor(current.billingCycle).format() }}</strong>
+          <span>/ {{ ('subscriptions.billing-cycle.' + current.billingCycle) | translate }}</span>
+        </p>
       }
-    </mat-card-content>
-  </mat-card>
+    </header>
+
+    <dl class="stats">
+      <div>
+        <dt>{{ 'subscriptions.billing.cycle' | translate }}</dt>
+        <dd>{{ ('subscriptions.billing-cycle.' + current.billingCycle) | translate }}</dd>
+      </div>
+      <div>
+        <dt>{{ 'subscriptions.billing.started' | translate }}</dt>
+        <dd>{{ current.startDate | date: 'mediumDate' }}</dd>
+      </div>
+      <div>
+        <dt>{{ endDateLabel() | translate }}</dt>
+        <dd>
+          {{
+            current.endDate
+              ? (current.endDate | date: 'mediumDate')
+              : ('subscriptions.billing.no-end-date' | translate)
+          }}
+        </dd>
+      </div>
+      <div>
+        <dt>{{ 'subscriptions.billing.plot-quota' | translate }}</dt>
+        <dd>{{ current.plan?.plotQuota ?? 0 }}</dd>
+      </div>
+    </dl>
+
+    @let progress = periodProgress();
+    @if (state() !== 'expired' && progress !== null && current.endDate) {
+      <div class="period">
+        <mat-progress-bar
+          mode="determinate"
+          [value]="progress"
+          [attr.aria-label]="'subscriptions.billing.period-progress' | translate"
+        />
+        <div class="period-dates">
+          <span>{{ current.startDate | date: 'mediumDate' }}</span>
+          <span>{{ current.endDate | date: 'mediumDate' }}</span>
+        </div>
+      </div>
+    }
+
+    <footer class="plan-foot">
+      @switch (state()) {
+        @case ('renewing') {
+          @if (confirmingCancellation()) {
+            <section
+              class="confirm"
+              role="group"
+              [attr.aria-label]="'subscriptions.billing.cancel-confirmation' | translate"
+            >
+              <mat-icon aria-hidden="true">warning</mat-icon>
+              <p>{{ 'subscriptions.billing.cancel-confirmation' | translate }}</p>
+              <div class="confirm-actions">
+                <button
+                  mat-flat-button
+                  type="button"
+                  [disabled]="processing()"
+                  (click)="confirmingCancellation.set(false)"
+                >
+                  {{ 'subscriptions.billing.keep' | translate }}
+                </button>
+                <button
+                  mat-button
+                  type="button"
+                  class="danger"
+                  [disabled]="processing()"
+                  (click)="onCancelSubscription()"
+                >
+                  {{ 'subscriptions.billing.confirm-cancel' | translate }}
+                </button>
+              </div>
+            </section>
+          } @else {
+            <button
+              mat-button
+              type="button"
+              class="danger"
+              [disabled]="processing()"
+              (click)="confirmingCancellation.set(true)"
+            >
+              {{ 'subscriptions.billing.cancel' | translate }}
+            </button>
+          }
+        }
+        @case ('ending') {
+          <p class="note">
+            <mat-icon aria-hidden="true">info</mat-icon>
+            {{ 'subscriptions.billing.cancelled-until' | translate }}
+          </p>
+        }
+        @case ('expired') {
+          <div class="expired-note">
+            <mat-icon aria-hidden="true">error</mat-icon>
+            <p>{{ 'subscriptions.billing.expired' | translate }}</p>
+            <a mat-flat-button class="cta" routerLink="/subscriptions/plans">
+              {{ 'subscriptions.billing.reactivate' | translate }}
+            </a>
+          </div>
+        }
+      }
+    </footer>
+  </section>
 } @else if (!loading() && !error()) {
-  <app-message-card
-    icon="workspace_premium"
-    [message]="'subscriptions.billing.no-subscription' | translate"
-  >
-    <mat-card-actions align="end">
-      <a mat-flat-button routerLink="/subscriptions/plans">
-        {{ 'subscriptions.billing.browse-plans' | translate }}
-      </a>
-    </mat-card-actions>
-  </app-message-card>
+  <section class="panel empty-panel">
+    <span class="empty-icon" aria-hidden="true"><mat-icon>workspace_premium</mat-icon></span>
+    <p>{{ 'subscriptions.billing.no-subscription' | translate }}</p>
+    <a mat-flat-button class="cta" routerLink="/subscriptions/plans">
+      {{ 'subscriptions.billing.browse-plans' | translate }}
+    </a>
+  </section>
 }
 
-<section class="payments-section">
-  <h2>{{ 'subscriptions.billing.payment-history' | translate }}</h2>
+<section class="panel payments" aria-labelledby="payments-title">
+  <header class="payments-head">
+    <h2 id="payments-title">{{ 'subscriptions.billing.payment-history' | translate }}</h2>
+  </header>
+
   @if (payments().length) {
-    <div class="payment-list">
-      @for (payment of payments(); track payment.id) {
-        <mat-card appearance="outlined" class="payment-card">
-          <mat-card-content>
-            <dl class="payment-details">
-              <div>
-                <dt>{{ 'subscriptions.billing.amount' | translate }}</dt>
-                <dd>{{ payment.amount.format() }}</dd>
-              </div>
-              <div>
-                <dt>{{ 'subscriptions.billing.date' | translate }}</dt>
-                <dd>{{ payment.paidAt | date: 'mediumDate' }}</dd>
-              </div>
-              <div>
-                <dt>{{ 'subscriptions.billing.status' | translate }}</dt>
-                <dd>{{ 'subscriptions.payment-status.' + payment.status | translate }}</dd>
-              </div>
-              <div>
-                <dt>{{ 'subscriptions.billing.transaction' | translate }}</dt>
-                <dd class="transaction-token">{{ payment.transactionToken }}</dd>
-              </div>
-            </dl>
-            <button
-              mat-stroked-button
-              type="button"
-              [attr.aria-label]="'subscriptions.billing.download-receipt' | translate"
-              (click)="onDownloadReceipt(payment.id)"
-            >
-              <mat-icon>download</mat-icon>
-              {{ 'subscriptions.billing.download-receipt' | translate }}
-            </button>
-          </mat-card-content>
-        </mat-card>
-      }
+    <div class="table-wrap">
+      <table role="table">
+        <thead role="rowgroup">
+        <tr role="row">
+          <th role="columnheader" scope="col">{{ 'subscriptions.billing.date' | translate }}</th>
+          <th role="columnheader" scope="col">{{ 'subscriptions.billing.amount' | translate }}</th>
+          <th role="columnheader" scope="col">{{ 'subscriptions.billing.status' | translate }}</th>
+          <th role="columnheader" scope="col">
+            {{ 'subscriptions.billing.transaction' | translate }}
+          </th>
+          <th role="columnheader" scope="col" class="col-actions">
+            <span class="sr-only">{{ 'subscriptions.billing.download-receipt' | translate }}</span>
+          </th>
+        </tr>
+        </thead>
+        <tbody role="rowgroup">
+          @for (payment of payments(); track payment.id) {
+            <tr role="row">
+              <td role="cell" [attr.data-label]="'subscriptions.billing.date' | translate">
+                {{ payment.paidAt | date: 'mediumDate' }}
+              </td>
+              <td
+                role="cell"
+                class="amount"
+                [attr.data-label]="'subscriptions.billing.amount' | translate"
+              >
+                {{ payment.amount.format() }}
+              </td>
+              <td role="cell" [attr.data-label]="'subscriptions.billing.status' | translate">
+                @switch (payment.status) {
+                  @case (paymentStatuses.COMPLETED) {
+                    <span class="chip chip-active">
+                      <mat-icon aria-hidden="true">check_circle</mat-icon>
+                      {{ 'subscriptions.payment-status.' + payment.status | translate }}
+                    </span>
+                  }
+                  @case (paymentStatuses.REJECTED) {
+                    <span class="chip chip-error">
+                      <mat-icon aria-hidden="true">cancel</mat-icon>
+                      {{ 'subscriptions.payment-status.' + payment.status | translate }}
+                    </span>
+                  }
+                  @default {
+                    <span class="chip chip-neutral">
+                      <mat-icon aria-hidden="true">schedule</mat-icon>
+                      {{ 'subscriptions.payment-status.' + payment.status | translate }}
+                    </span>
+                  }
+                }
+              </td>
+              <td
+                role="cell"
+                class="token"
+                [attr.data-label]="'subscriptions.billing.transaction' | translate"
+              >
+                <code [attr.title]="payment.transactionToken">{{ payment.transactionToken }}</code>
+              </td>
+              <td role="cell" class="col-actions">
+                @if (payment.isCompleted()) {
+                  <button
+                    mat-button
+                    type="button"
+                    [attr.aria-label]="'subscriptions.billing.download-receipt' | translate"
+                    (click)="onDownloadReceipt(payment.id)"
+                  >
+                    <mat-icon>download</mat-icon>
+                    {{ 'subscriptions.billing.receipt' | translate }}
+                  </button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
     </div>
   } @else if (!loading() && !error()) {
-    <app-message-card icon="receipt_long" [message]="'subscriptions.billing.no-payments' | translate" />
+    <div class="empty-inline">
+      <mat-icon aria-hidden="true">receipt_long</mat-icon>
+      <p>{{ 'subscriptions.billing.no-payments' | translate }}</p>
+    </div>
   }
 </section>

@@ -19,6 +19,7 @@ export class SignInAssembler {
     return new AuthenticatedUser({
       id: response.id,
       email: response.email,
+      fullName: response.fullName,
       roles: response.roles.map((role) => UserRoleAssembler.toDomain(role)),
       token: response.token,
     });

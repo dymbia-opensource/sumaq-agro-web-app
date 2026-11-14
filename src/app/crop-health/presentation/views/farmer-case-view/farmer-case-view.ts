@@ -1,3 +1,4 @@
+import { PageHeader } from '../../../../shared/presentation/components/page-header/page-header';
 import { DatePipe } from '@angular/common';
 import {
   Component,
@@ -39,6 +40,7 @@ import { todayInLima } from '../../../domain/model/validation';
 @Component({
   selector: 'app-farmer-case-view',
   imports: [
+    PageHeader,
     DatePipe,
     RouterLink,
     TranslatePipe,

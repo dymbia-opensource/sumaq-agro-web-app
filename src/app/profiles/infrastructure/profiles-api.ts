@@ -1,8 +1,9 @@
+import { CooperativeMemberDetails } from './responses/cooperative-member.response';
 import { HttpClient } from '@angular/common/http';
 import { inject, Service } from '@angular/core';
 import { map, Observable } from 'rxjs';
 import { BaseApi } from '../../shared/infrastructure/base-api';
-import { CooperativeMember } from '../domain/model/entities/cooperative-member.entity';
+import { CooperativeMember, MemberPlot } from '../domain/model/entities/cooperative-member.entity';
 import { Cooperative } from '../domain/model/entities/cooperative.entity';
 import { CooperativeDashboard } from '../domain/model/entities/cooperative-dashboard.entity';
 import { FarmerProfile } from '../domain/model/entities/farmer-profile.entity';
@@ -44,8 +45,28 @@ export class ProfilesApi extends BaseApi {
     return this.cooperativesEndpoint.getByDirector(userId);
   }
 
+  registerCooperative(directorUserId: number, legalName: string, ruc: string, region: string): Observable<unknown> {
+    return this.cooperativesEndpoint.register(directorUserId, legalName, ruc, region);
+  }
+
   updateCooperative(cooperative: Cooperative): Observable<Cooperative> {
     return this.cooperativesEndpoint.update(cooperative, cooperative.id);
+  }
+
+  addCooperativeMember(cooperativeId: number, member: CooperativeMemberDetails): Observable<CooperativeMember> {
+    return this.cooperativeMembersEndpoint.add(cooperativeId, member);
+  }
+
+  updateCooperativeMember(id: number | string, details: CooperativeMemberDetails): Observable<CooperativeMember> {
+    return this.cooperativeMembersEndpoint.updateDetails(id, details);
+  }
+
+  linkMemberAccount(memberId: number | string, userId: number): Observable<CooperativeMember> {
+    return this.cooperativeMembersEndpoint.linkAccount(memberId, userId);
+  }
+
+  linkMemberPlot(member: CooperativeMember, plot: MemberPlot): Observable<CooperativeMember> {
+    return this.cooperativeMembersEndpoint.linkPlot(member, plot);
   }
 
   getCooperativeMembers(cooperativeId: number): Observable<CooperativeMember[]> {

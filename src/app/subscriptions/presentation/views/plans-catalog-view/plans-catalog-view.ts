@@ -1,25 +1,43 @@
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
-import { Breadcrumb, PageHeader } from '../../../../shared/presentation/components/page-header/page-header';
+import { map } from 'rxjs';
+import { IamStore } from '../../../../iam/application/iam.store';
+import type { UserRole } from '../../../../iam/domain/model/value-objects/user-role';
 import { MessageCard } from '../../../../shared/presentation/components/message-card/message-card';
 import { SubscriptionsStore } from '../../../application/subscriptions.store';
 import { SelectSubscriptionPlanCommand } from '../../../domain/model/commands/select-subscription-plan.command';
 import { BillingCycle } from '../../../domain/model/entities/billing-cycle';
 import { Plan } from '../../../domain/model/entities/plan.entity';
+import {
+  planForSegment,
+  type SubscriptionSegment,
+} from '../../../domain/model/value-objects/subscription-segment';
 import { PlanCard } from '../../components/plan-card/plan-card';
+
+/** Mapping of user roles to subscription segments. */
+const SEGMENT_BY_ROLE: Readonly<Record<UserRole, SubscriptionSegment>> = {
+  FARMER: 'INDEPENDENT_FARMER',
+  COOPERATIVE_DIRECTOR: 'COOPERATIVE',
+  AGRONOMIST: 'TECHNICAL_ADVISOR',
+};
 
 /** Catalog of available subscription plans and their billing cycles. */
 @Component({
   selector: 'app-plans-catalog-view',
   imports: [
+    MatButtonModule,
     MatButtonToggleModule,
+    MatIconModule,
     MatProgressBarModule,
     MessageCard,
-    PageHeader,
     PlanCard,
+    RouterLink,
     TranslatePipe,
   ],
   templateUrl: './plans-catalog-view.html',
@@ -28,20 +46,36 @@ import { PlanCard } from '../../components/plan-card/plan-card';
 export class PlansCatalogView {
   private readonly router = inject(Router);
   private readonly store = inject(SubscriptionsStore);
+  private readonly iamStore = inject(IamStore);
 
-  readonly plans = this.store.plans;
+  readonly plans = computed(() => {
+    const user = this.iamStore.activeUser();
+    if (!user) return [];
+
+    const allowedPlanCode = planForSegment(SEGMENT_BY_ROLE[user.experience]);
+    return this.store.plans().filter((plan) => plan.code === allowedPlanCode);
+  });
   readonly subscription = this.store.subscription;
   readonly selectedPlan = this.store.selectedPlan;
-  readonly currentUserId = this.store.currentUserId;
+  readonly currentUserId = computed(() => this.iamStore.activeUser()?.id ?? null);
   readonly cycle = this.store.billingCycle;
   readonly loading = this.store.loading;
   readonly error = this.store.error;
 
+  protected readonly accessCheckFailed = toSignal(
+    inject(ActivatedRoute).queryParamMap.pipe(
+      map((params) => params.get('accessCheck') === 'failed'),
+    ),
+    { initialValue: false },
+  );
+
   /** Billing cycles offered by the catalog toggle. */
   protected readonly cycles = BillingCycle;
 
-  /** Breadcrumb path for the catalog page. */
-  protected readonly breadcrumbs: Breadcrumb[] = [{ label: 'subscriptions.catalog.title' }];
+  /** `true` when the plan has a saving to advertise on the Annual option. */
+  protected readonly hasAnnualSavings = computed(
+    () => (this.plans()[0]?.annualSavings().amount ?? 0) > 0,
+  );
 
   constructor() {
     const userId = this.currentUserId();
@@ -54,19 +88,21 @@ export class PlansCatalogView {
     if (cycle !== this.cycle()) this.store.toggleBillingCycle();
   }
 
-  /** Creates the selection command for the signed-in user. */
+  /** Requests checkout for the plan chosen in the catalog. */
   onSelectPlan(plan: Plan): void {
-    const userId = this.currentUserId();
-    if (userId === null) return;
+    const user = this.iamStore.activeUser();
+    if (!user) return;
 
-    this.store.selectPlan(
+    const accepted = this.store.selectPlan(
       new SelectSubscriptionPlanCommand({
-        userId,
+        userId: user.id,
         planCode: plan.code,
         billingCycle: this.cycle(),
       }),
+      SEGMENT_BY_ROLE[user.experience],
     );
-    if (this.store.selectedPlan()?.code === plan.code) {
+
+    if (accepted) {
       void this.router.navigate(['/subscriptions/checkout']);
     }
   }

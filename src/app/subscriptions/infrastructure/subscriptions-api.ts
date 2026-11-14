@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
+import { environment } from '../../../environments/environment';
 import { BaseApi } from '../../shared/infrastructure/base-api';
 import { ExportedFile } from '../../shared/infrastructure/file-downloader';
 import { Payment } from '../domain/model/entities/payment.entity';
@@ -10,6 +11,7 @@ import { DEMO_COUPONS } from './demo-coupons';
 import { PaymentsApiEndpoint } from './endpoints/payments.endpoint';
 import { PlansApiEndpoint } from './endpoints/plans.endpoint';
 import { SubscriptionsApiEndpoint } from './endpoints/subscriptions.endpoint';
+import { DemoCheckout, type DemoCheckoutRequest } from './mock/demo-checkout';
 import { buildReceiptPdf } from './receipt-pdf';
 
 
@@ -19,6 +21,7 @@ export class SubscriptionsApi extends BaseApi {
   private readonly plansEndpoint = new PlansApiEndpoint(this.http);
   private readonly subscriptionsEndpoint = new SubscriptionsApiEndpoint(this.http);
   private readonly paymentsEndpoint = new PaymentsApiEndpoint(this.http);
+  private readonly demoCheckout = new DemoCheckout(this.subscriptionsEndpoint, this.paymentsEndpoint);
 
   /** Retrieves the plans of the catalog. */
   getPlans = (): Observable<Plan[]> => this.plansEndpoint.getAll();
@@ -31,9 +34,11 @@ export class SubscriptionsApi extends BaseApi {
   getSubscriptionByUserId = (userId: number): Observable<Subscription | null> =>
     this.subscriptionsEndpoint.getByUser(userId);
 
-  /** Creates a subscription. */
-  createSubscription = (subscription: Subscription): Observable<Subscription> =>
-    this.subscriptionsEndpoint.create(subscription);
+  /** Runs the university checkout when demo payments are enabled. */
+  submitCheckout = (request: DemoCheckoutRequest) =>
+    environment.useMockSubscriptionPayments
+      ? this.demoCheckout.submit(request)
+      : throwError(() => new Error('subscriptions.checkout.unavailable'));
 
   /** Saves the changes of a subscription (new plan, cancellation). */
   updateSubscription = (subscription: Subscription): Observable<Subscription> =>
@@ -42,9 +47,6 @@ export class SubscriptionsApi extends BaseApi {
   /** Retrieves the payments of one subscription. */
   getPayments = (subscriptionId: number): Observable<Payment[]> =>
     this.paymentsEndpoint.getBySubscription(subscriptionId);
-
-  /** Registers a payment. */
-  createPayment = (payment: Payment): Observable<Payment> => this.paymentsEndpoint.create(payment);
 
   /**
    * Checks a promotional code.

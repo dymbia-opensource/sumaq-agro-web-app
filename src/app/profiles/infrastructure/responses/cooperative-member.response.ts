@@ -7,10 +7,20 @@ export interface CooperativeMemberResource extends BaseResource {
   cooperativeId: number;
   fullName: string;
   active: boolean;
+  dni?: string;
+  phone?: string;
+  community?: string;
   /** Account reference, independent of the membership identifier. */
   userId?: number | null;
   /** Canonical plot references available to the member. */
   plots?: MemberPlot[];
+}
+
+export interface CooperativeMemberDetails {
+  fullName: string;
+  dni: string;
+  phone: string;
+  community: string;
 }
 
 /** API response used by the production service when it wraps members. */

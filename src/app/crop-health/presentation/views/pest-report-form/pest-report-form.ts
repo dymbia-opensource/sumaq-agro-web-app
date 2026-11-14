@@ -58,7 +58,7 @@ export class PestReportForm {
     }), () => {
       this.formDirective()?.resetForm({ plotId: value.plotId, severity: 'LOW', description: '' });
       this.reportForm.enable(); this.saved.set(true);
-      this.snackBar.open(this.translate.instant('crop-health.report-saved'), this.translate.instant('crop-health.view-inbox'), { duration: 7000 }).onAction().subscribe(() => { void this.router.navigate(['/crop-health/inbox']); });
+      this.snackBar.open(this.translate.instant('crop-health.report-saved'), this.translate.instant('crop-health.view-inbox'), { duration: 7000 }).onAction().subscribe(() => { void this.router.navigate(['/pest-reports']); });
     }, () => this.reportForm.enable());
   }
 }

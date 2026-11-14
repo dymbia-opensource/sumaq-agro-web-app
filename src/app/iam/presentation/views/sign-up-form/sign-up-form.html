@@ -1,4 +1,9 @@
-<app-auth-layout [compact]="true" imageSrc="/images/img-register.jpeg" imagePosition="65% center">
+<app-auth-layout
+  [showLanguageSwitcher]="true"
+  [compact]="true"
+  imageSrc="/images/img-register.jpeg"
+  imagePosition="65% center"
+>
   <header class="form-header">
     <span class="form-eyebrow">{{ 'iam.signUp.eyebrow' | translate }}</span>
     <h1>{{ 'iam.signUp.title' | translate }}</h1>
@@ -12,7 +17,7 @@
       <p>{{ 'iam.signUp.successMessage' | translate }}</p>
     </div>
 
-    <a mat-flat-button class="submit-button" routerLink="/iam/sign-in">
+    <a mat-flat-button class="submit-button" routerLink="/sign-in">
       {{ 'iam.signIn.submit' | translate }}
     </a>
   } @else {
@@ -51,6 +56,7 @@
             matInput
             type="text"
             formControlName="firstName"
+            [errorStateMatcher]="fieldErrorMatcher"
             autocomplete="given-name"
             autocapitalize="words"
             maxlength="100"
@@ -75,6 +81,7 @@
             matInput
             type="text"
             formControlName="lastName"
+            [errorStateMatcher]="fieldErrorMatcher"
             autocomplete="family-name"
             autocapitalize="words"
             maxlength="100"
@@ -100,6 +107,7 @@
           matInput
           type="email"
           formControlName="email"
+          [errorStateMatcher]="fieldErrorMatcher"
           autocomplete="username"
           autocapitalize="none"
           spellcheck="false"
@@ -121,6 +129,7 @@
             matInput
             [type]="hidePassword() ? 'password' : 'text'"
             formControlName="password"
+            [errorStateMatcher]="fieldErrorMatcher"
             autocomplete="new-password"
           />
 
@@ -202,7 +211,7 @@
 
     <p class="auth-link">
       {{ 'iam.signUp.hasAccount' | translate }}
-      <a routerLink="/iam/sign-in">
+      <a routerLink="/sign-in">
         {{ 'iam.signIn.submit' | translate }}
       </a>
     </p>

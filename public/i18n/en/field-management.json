@@ -1,6 +1,7 @@
 {
   "field-management": {
     "dashboard": {
+      "welcome": "Welcome!",
       "good-morning": "Good morning, {{ name }}!",
       "good-afternoon": "Good afternoon, {{ name }}!",
       "good-evening": "Good evening, {{ name }}!",
@@ -46,6 +47,7 @@
     },
     "plot-status": {
       "WITHOUT_POLYGON": "Without polygon",
+      "BOUNDARY_SAVED": "Boundary saved · No monitoring",
       "ACTIVE_MONITORING": "Active monitoring"
     },
     "crop-type": {

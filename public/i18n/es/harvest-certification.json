@@ -171,7 +171,6 @@
       "issue-incomplete": "No se completó la emisión y actualización del lote. Recarga para consultar el estado confirmado antes de reintentar."
     },
     "scope": {
-      "no-membership": "Tu usuario no tiene una membresía activa vinculada. Solicita a la cooperativa que revise tu registro.",
       "no-cooperative": "Tu usuario no tiene una cooperativa asignada como director.",
       "not-authorized": "Esta sección está disponible para productores y directores de cooperativa. La emisión corresponde al director.",
       "load-error": "No se pudieron consultar tus relaciones con la cooperativa. Intenta nuevamente."

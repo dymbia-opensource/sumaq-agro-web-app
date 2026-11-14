@@ -9,7 +9,7 @@
 >
   @if (plot()) {
     <div class="header-actions">
-      <a mat-stroked-button [routerLink]="['/field-management/plots', id(), 'boundary']">
+      <a mat-stroked-button [routerLink]="['/plots', id(), 'boundary']">
         <mat-icon>polyline</mat-icon>
         {{ 'field-management.plots.delineate' | translate }}
       </a>
@@ -34,7 +34,7 @@
       <app-soil-baseline-card
         [soilBaseline]="plot.soilBaseline"
         [cropType]="campaign()?.cropType"
-        [recordLink]="['/field-management/plots', id(), 'soil']"
+        [recordLink]="['/plots', id(), 'soil']"
       />
     </div>
   </div>
@@ -44,7 +44,7 @@
     [message]="'field-management.plot-detail.not-found' | translate"
   >
     <mat-card-actions align="end">
-      <a mat-flat-button routerLink="/field-management/plots">
+      <a mat-flat-button routerLink="/plots">
         {{ 'field-management.finances.select-plot' | translate }}
       </a>
     </mat-card-actions>

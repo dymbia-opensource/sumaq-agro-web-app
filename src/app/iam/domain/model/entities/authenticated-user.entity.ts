@@ -6,10 +6,12 @@ import { UserRole } from '../value-objects/user-role';
  */
 export class AuthenticatedUser extends User {
   private readonly _token: string;
+  readonly fullName: string;
 
   constructor(props: {
     id: number | string;
     email: string;
+    fullName?: string | null;
     roles: readonly UserRole[];
     token: string;
   }) {
@@ -26,6 +28,7 @@ export class AuthenticatedUser extends User {
     }
 
     this._token = token;
+    this.fullName = typeof props.fullName === 'string' ? props.fullName.trim() : '';
   }
 
   get token(): string {

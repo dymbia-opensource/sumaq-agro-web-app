@@ -171,7 +171,6 @@
       "issue-incomplete": "Certificate issuance and batch update did not both complete. Reload to check the confirmed state before retrying."
     },
     "scope": {
-      "no-membership": "Your account has no linked active membership. Ask the cooperative to review your record.",
       "no-cooperative": "Your account is not assigned as a cooperative director.",
       "not-authorized": "This section is available to producers and cooperative directors. Only the director can issue certificates.",
       "load-error": "Your cooperative relationships could not be loaded. Please retry."

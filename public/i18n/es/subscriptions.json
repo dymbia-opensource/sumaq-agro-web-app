@@ -6,6 +6,11 @@
       "COOPERATIVE_PRO": "Cooperativa Pro",
       "TECHNICAL_ADVISOR": "Asesor Técnico"
     },
+    "segment": {
+      "SEED": "Para agricultores independientes",
+      "COOPERATIVE_PRO": "Para cooperativas",
+      "TECHNICAL_ADVISOR": "Para asesores técnicos"
+    },
     "billing-cycle": {
       "MONTHLY": "Mensual",
       "ANNUAL": "Anual"
@@ -39,13 +44,18 @@
       "selected": "Plan seleccionado",
       "annual-savings": "Ahorras {{amount}} al año",
       "plot-quota": "Hasta {{quota}} parcelas",
-      "choose": "Elegir plan"
+      "choose": "Continuar al pago",
+      "cancel-note": "Cancela cuando quieras. Conservas el acceso hasta el final del período pagado."
     },
     "catalog": {
-      "title": "Planes",
-      "subtitle": "Elige el plan que mejor se adapte a tu actividad.",
+      "title": "Activa tu plan",
+      "subtitle": "Para empezar a usar SumaqAgro necesitas un plan activo. Elige cómo prefieres pagar.",
       "billing-cycle": "Frecuencia de pago",
-      "empty": "No hay planes disponibles en este momento."
+      "empty": "No hay planes disponibles en este momento.",
+      "eyebrow": "Último paso",
+      "back": "Volver a mi suscripción",
+      "annual-tag": "Ahorra",
+      "breadcrumb": "Planes"
     },
     "billing": {
       "title": "Suscripción y pagos",
@@ -71,7 +81,14 @@
       "status": "Estado",
       "transaction": "Token de transacción",
       "no-payments": "Aún no hay pagos registrados.",
-      "download-receipt": "Descargar comprobante"
+      "download-receipt": "Descargar comprobante",
+      "receipt": "Comprobante",
+      "next-renewal": "Próxima renovación",
+      "access-until": "Acceso hasta",
+      "expired-on": "Venció el",
+      "expired-badge": "Vencida",
+      "period-progress": "Progreso del período de facturación",
+      "reactivate": "Reactivar suscripción"
     },
     "checkout": {
       "title": "Confirmar plan",
@@ -86,12 +103,14 @@
       "apply-coupon": "Aplicar cupón",
       "total": "Total a pagar",
       "payment-title": "Pago",
-      "demo-notice": "Esta es una demostración: no está conectada a Niubiz y no debes ingresar datos de tarjeta. El botón simula un pago aprobado.",
+      "demo-notice": "Pago de demostración. No se realizará ningún cobro.",
+      "unavailable": "El pago de demostración no está habilitado.",
       "back": "Volver a los planes",
       "simulate-payment": "Simular pago aprobado",
       "payment-approved": "Pago de demostración aprobado. Tu plan se actualizó.",
       "payment-rejected": "El pago de demostración fue rechazado. Tu plan no cambió.",
       "view-billing": "Ver suscripción y pagos",
+      "go-to-dashboard": "Ir a mi panel",
       "simulate-rejection": "Simular pago rechazado",
       "no-plan": "Primero elige un plan para continuar.",
       "choose-plan": "Ver planes"

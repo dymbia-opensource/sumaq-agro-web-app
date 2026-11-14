@@ -2,28 +2,43 @@
   <mat-progress-bar mode="indeterminate" [attr.aria-label]="'common.loading' | translate" />
 }
 
-<app-page-header
-  [breadcrumbs]="breadcrumbs"
-  [title]="'subscriptions.catalog.title' | translate"
-  [subtitle]="'subscriptions.catalog.subtitle' | translate"
-/>
+@if (subscription()?.hasAccess()) {
+  <a mat-button class="back" routerLink="/subscriptions">
+    <mat-icon>arrow_back</mat-icon>
+    {{ 'subscriptions.catalog.back' | translate }}
+  </a>
+}
+
+<header class="intro">
+  <p class="eyebrow">{{ 'subscriptions.catalog.eyebrow' | translate }}</p>
+  <h1>{{ 'subscriptions.catalog.title' | translate }}</h1>
+  <p class="subtitle">{{ 'subscriptions.catalog.subtitle' | translate }}</p>
+</header>
 
 @if (error(); as error) {
   <app-message-card icon="error" [message]="error | translate" [alert]="true" />
+} @else if (accessCheckFailed()) {
+  <app-message-card
+    icon="warning"
+    [message]="'subscriptions.errors.load-subscription' | translate"
+    [alert]="true"
+  />
 }
 
 <section class="cycle-picker" [attr.aria-label]="'subscriptions.catalog.billing-cycle' | translate">
-  <span>{{ 'subscriptions.catalog.billing-cycle' | translate }}</span>
   <mat-button-toggle-group
     [value]="cycle()"
     (valueChange)="onCycleChange($event)"
-    aria-label="Billing cycle"
+    [attr.aria-label]="'subscriptions.catalog.billing-cycle' | translate"
   >
     <mat-button-toggle [value]="cycles.MONTHLY">
       {{ 'subscriptions.billing-cycle.MONTHLY' | translate }}
     </mat-button-toggle>
     <mat-button-toggle [value]="cycles.ANNUAL">
       {{ 'subscriptions.billing-cycle.ANNUAL' | translate }}
+      @if (hasAnnualSavings()) {
+        <span class="tag">{{ 'subscriptions.catalog.annual-tag' | translate }}</span>
+      }
     </mat-button-toggle>
   </mat-button-toggle-group>
 </section>

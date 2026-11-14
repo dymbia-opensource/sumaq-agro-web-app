@@ -143,9 +143,7 @@ export class HarvestCertificationStore {
             this.certificatesSignal.set(certificates);
             this.readySignal.set(true);
             this.loadingSignal.set(false);
-            if (user.experience === 'FARMER' && !scope.members.length) {
-              this.noticeSignal.set('harvest-certification.scope.no-membership');
-            } else if (user.experience === 'COOPERATIVE_DIRECTOR' && scope.cooperativeId === null) {
+            if (user.experience === 'COOPERATIVE_DIRECTOR' && scope.cooperativeId === null) {
               this.noticeSignal.set('harvest-certification.scope.no-cooperative');
             }
           },

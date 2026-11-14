@@ -10,7 +10,6 @@ import {
 } from '@angular/core';
 import {
   catchError,
-  finalize,
   tap,
   concatMap,
   forkJoin,
@@ -52,7 +51,6 @@ import {
   PendingExpensePayload,
 } from '../infrastructure/assemblers/pending-expense-assembler';
 import { FileDownloader } from '../../shared/infrastructure/file-downloader';
-import { PlotSelectionService } from './plot-selection.service';
 
 /**
  * Plots included in the Seed plan (demo quota until subscriptions are implemented).
@@ -100,15 +98,14 @@ export class FieldManagementStore {
   private readonly offlineSync = inject(OfflineSync);
   private readonly pendingExpenses = new PendingExpenseAssembler();
   private readonly fileDownloader = inject(FileDownloader);
-  private readonly plotSelection = inject(PlotSelectionService);
 
   private readonly plotsSignal = signal<FieldPlot[]>([]);
   private readonly campaignsByPlotSignal = signal<Map<number, CropCampaign[]>>(new Map());
   private readonly ledgersByCampaignSignal = signal<Map<number, CampaignLedger | null>>(new Map());
   private readonly plotsLoadingSignal = signal(false);
   private readonly loadingSignal = signal<boolean>(false);
-  private readonly ledgersLoading = signal(false);
   private readonly errorSignal = signal<string | null>(null);
+  private readonly selectedPlotIdSignal = signal<number | null>(null);
   private readonly syncingSignal = signal(false);
   private plotsLoad?: Subscription;
   private plotMutation?: Subscription;
@@ -128,7 +125,7 @@ export class FieldManagementStore {
   readonly plotsLoading = this.plotsLoadingSignal.asReadonly();
 
   /** `true` while data is being loaded from or saved to the API. */
-  readonly loading = computed(() => this.loadingSignal() || this.ledgersLoading());
+  readonly loading = this.loadingSignal.asReadonly();
 
   /** i18n key of the last error, or `null`. */
   readonly error = this.errorSignal.asReadonly();
@@ -186,7 +183,7 @@ export class FieldManagementStore {
   );
 
   /** Identifier of the plot shown in Field Management and Crop Health, or `null`. */
-  readonly selectedPlotId = this.plotSelection.selectedPlotId;
+  readonly selectedPlotId = this.selectedPlotIdSignal.asReadonly();
 
   /** Plot shown on the dashboard. */
   readonly selectedPlot = computed(() =>
@@ -225,12 +222,6 @@ export class FieldManagementStore {
     effect(() => {
       const userId = this.currentUserId();
       untracked(() => (userId === null ? this.clearState() : this.loadMyPlots(userId)));
-    });
-    effect(() => {
-      const plotId = this.selectedPlotId();
-      const campaigns = this.campaignsByPlotSignal().get(plotId ?? -1) ?? [];
-      const owned = this.plots().some((plot) => plot.id === plotId);
-      untracked(() => this.loadSelectedPlotLedgers(owned ? campaigns : []));
     });
     effect(() => {
       if (this.offlineSync.isOnline() && this.pendingExpenseCount() > 0) {
@@ -305,7 +296,7 @@ export class FieldManagementStore {
           if (first) {
             this.selectPlot(keep ? this.selectedPlotId()! : (first.id as number));
           } else {
-            this.plotSelection.select(null);
+            this.selectedPlotIdSignal.set(null);
           }
         },
         error: (error) => {
@@ -322,7 +313,7 @@ export class FieldManagementStore {
    * advisors and cooperatives that are not part of the producer's plots.
    * @param plotId - Plot to show, or `null`.
    */
-  selectPlotId = (plotId: number | null): void => this.plotSelection.select(plotId);
+  selectPlotId = (plotId: number | null): void => this.selectedPlotIdSignal.set(plotId);
 
   /**
    * Selects a plot and loads the cost ledgers of its campaigns.
@@ -330,35 +321,27 @@ export class FieldManagementStore {
    */
   selectPlot = (plotId: number): void => {
     if (!this.plots().some((plot) => plot.id === plotId)) return;
-    this.plotSelection.select(plotId);
-  };
-
-  /** Reacts to selection changes from either Field Management or Crop Health. */
-  private loadSelectedPlotLedgers(campaigns: CropCampaign[]): void {
     this.ledgersLoad?.unsubscribe();
+    this.selectedPlotIdSignal.set(plotId);
+    const campaigns = this.campaignsByPlotSignal().get(plotId) ?? [];
     if (campaigns.length === 0) return;
-    const ownerUserId = this.currentUserId();
-    const revision = this.plotRevision;
-    const plotId = this.selectedPlotId();
-    this.ledgersLoading.set(true);
-    this.errorSignal.set(null);
+    this.startLoading();
     this.ledgersLoad = forkJoin(
       campaigns.map((campaign) =>
         this.fieldManagementApi.getLedgerByCampaign(campaign.id as number).pipe(retry(2)),
       ),
-    ).pipe(finalize(() => this.ledgersLoading.set(false))).subscribe({
+    ).subscribe({
       next: (ledgers) => {
-        if (ownerUserId === null || !this.isPlotParticipant(ownerUserId, revision) ||
-            plotId !== this.selectedPlotId()) return;
         this.ledgersByCampaignSignal.update((current) => {
           const next = new Map(current);
           campaigns.forEach((campaign, index) => next.set(campaign.id as number, ledgers[index]));
           return next;
         });
+        this.loadingSignal.set(false);
       },
       error: (error) => this.fail(error, 'field-management.errors.load-plot'),
     });
-  }
+  };
 
   // ---------- FieldPlot aggregate ----------
 
@@ -574,7 +557,7 @@ export class FieldManagementStore {
           this.plotMutationBusy.set(false);
           this.loadingSignal.set(false);
           if (this.selectedPlotId() === id) {
-            this.plotSelection.select(null);
+            this.selectedPlotIdSignal.set(null);
             const first = this.plots()[0];
             if (first) this.selectPlot(first.id as number);
           }
@@ -1013,6 +996,7 @@ export class FieldManagementStore {
     this.plotsSignal.set([]);
     this.campaignsByPlotSignal.set(new Map());
     this.ledgersByCampaignSignal.set(new Map());
+    this.selectedPlotIdSignal.set(null);
     this.errorSignal.set(null);
   }
 
