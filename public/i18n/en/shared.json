@@ -29,7 +29,8 @@
     "assigned-plots": "Assigned plots"
   },
   "layout": {
-    "search": "Search within my plot...",
+    "search": "Search plots…",
+    "no-plot-matches": "No plots found",
     "menu": "Open menu",
     "connection": "Connection status",
     "connected": "Connected",

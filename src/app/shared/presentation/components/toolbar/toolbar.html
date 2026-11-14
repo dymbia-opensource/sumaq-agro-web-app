@@ -12,11 +12,24 @@
   <label class="search">
     <mat-icon aria-hidden="true">search</mat-icon>
     <input
-      type="search"
+      #plotSearch
+      type="text"
+      [value]="query()"
+      (input)="query.set(plotSearch.value)"
+      [matAutocomplete]="plotOptions"
       [attr.aria-label]="'layout.search' | translate"
       [placeholder]="'layout.search' | translate"
     />
   </label>
+  <mat-autocomplete #plotOptions="matAutocomplete" autoActiveFirstOption (optionSelected)="openPlot($event.option.value, plotSearch)">
+    @for (plot of plotMatches(); track plot.id) {
+      <mat-option [value]="plot.id">{{ plot.name }} · {{ plot.region }}</mat-option>
+    } @empty {
+      @if (query().trim()) {
+        <mat-option disabled>{{ (searchLoading() ? 'common.loading' : 'layout.no-plot-matches') | translate }}</mat-option>
+      }
+    }
+  </mat-autocomplete>
 
   <span class="spacer"></span>
 

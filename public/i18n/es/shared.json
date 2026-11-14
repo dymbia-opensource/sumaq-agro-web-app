@@ -29,7 +29,8 @@
     "assigned-plots": "Parcelas asignadas"
   },
   "layout": {
-    "search": "Buscar en mi parcela...",
+    "search": "Buscar parcela…",
+    "no-plot-matches": "No se encontraron parcelas",
     "menu": "Abrir menú",
     "connection": "Estado de conexión",
     "connected": "Conectado",
