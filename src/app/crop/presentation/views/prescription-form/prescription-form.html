@@ -1,0 +1,80 @@
+<app-page-header [breadcrumbs]="breadcrumbs()" [title]="'crop.prescribe-title' | translate" />
+@if (store.writeError(); as error) {
+  <p role="alert">{{ error | translate }}</p>
+}
+<p>{{ 'crop.workflow-demo' | translate }}</p>
+@if (store.clinicalLoading() || store.saving()) {
+  <mat-progress-bar mode="indeterminate" [attr.aria-label]="'common.loading' | translate" />
+}
+@if (store.clinicalError(); as error) {
+  <mat-card appearance="outlined" role="alert"
+    ><mat-card-content
+      ><p>{{ error | translate }}</p></mat-card-content
+    ></mat-card
+  >
+}
+
+@if (saved()) {
+  <p role="status">{{ 'crop.prescription-saved' | translate }}</p>
+}
+@if (!store.clinicalLoading() && !store.clinicalError() && store.treatableReports().length === 0) {
+  <p>{{ 'crop.inspection-required' | translate }}</p>
+}
+@if (!store.clinicalLoading() && !store.clinicalError() && store.advisors().length === 0) {
+  <p>{{ 'crop.no-advisors' | translate }}</p>
+}
+<mat-card appearance="outlined" class="form-card"
+  ><mat-card-content>
+    <form [formGroup]="prescriptionForm" (ngSubmit)="onSubmit()">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>{{ 'crop.related-report' | translate }}</mat-label>
+        <mat-select formControlName="reportId">
+          @for (report of store.treatableReports(); track report.id) {
+            <mat-option [value]="report.id"
+              >{{ store.reportLabel(+report.id) }} · {{ report.description }}</mat-option
+            >
+          }
+        </mat-select>
+        <mat-error>{{ 'crop.required-field' | translate }}</mat-error>
+      </mat-form-field>
+      <p>{{ 'crop.agronomist' | translate }}: {{ store.currentAdvisor()?.name }}</p>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>{{ 'crop.form-agrochemical' | translate }}</mat-label>
+        <input matInput type="text" formControlName="agrochemical" />
+        <mat-error>{{ 'crop.required-field' | translate }}</mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>{{ 'crop.form-dosage' | translate }}</mat-label>
+        <input matInput type="text" formControlName="dosage" />
+        <mat-error>{{ 'crop.required-field' | translate }}</mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>{{ 'crop.form-instructions' | translate }}</mat-label>
+        <textarea matInput formControlName="instructions" rows="4"></textarea>
+        <mat-error>{{ 'crop.required-field' | translate }}</mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>{{ 'crop.application-date' | translate }}</mat-label>
+        <input matInput type="date" formControlName="applicationDate" />
+        <mat-error>{{ 'crop.required-field' | translate }}</mat-error>
+      </mat-form-field>
+      <div class="form-actions">
+        <button
+          mat-flat-button
+          type="submit"
+          [disabled]="
+            prescriptionForm.invalid ||
+            prescriptionForm.disabled ||
+            store.clinicalLoading() ||
+            store.saving() ||
+            store.treatableReports().length === 0 ||
+            store.advisors().length === 0
+          "
+        >
+          {{ 'crop.btn-issue-prescription' | translate }}
+        </button>
+        <a mat-stroked-button routerLink="/prescriptions">{{ 'crop.history-title' | translate }}</a>
+      </div>
+    </form>
+  </mat-card-content></mat-card
+>

@@ -1,0 +1,224 @@
+<app-page-header
+  [breadcrumbs]="breadcrumbs"
+  [title]="'crop.case.title' | translate"
+  [subtitle]="'crop.case.subtitle' | translate"
+>
+  <a mat-stroked-button routerLink="/pest-reports">
+    <span aria-hidden="true">←</span> {{ 'crop.case.back' | translate }}
+  </a>
+</app-page-header>
+@if (store.clinicalLoading() || store.saving()) {
+  <mat-progress-bar mode="indeterminate" [attr.aria-label]="'common.loading' | translate" />
+}
+@if (store.clinicalError(); as error) {
+  <p role="alert">{{ error | translate }}</p>
+  <button mat-stroked-button (click)="reload()">{{ 'common.retry' | translate }}</button>
+}
+@if (store.writeError(); as error) {
+  <p role="alert">{{ error | translate }}</p>
+}
+@if (!store.clinicalLoading() && !store.clinicalError() && loaded()) {
+  @if (report(); as report) {
+    <mat-card appearance="outlined" class="case-summary"
+      ><mat-card-header
+        ><mat-card-title>{{ report.plotName }}</mat-card-title
+        ><mat-card-subtitle
+          ><span class="case-status" [attr.data-status]="report.status">{{
+            'crop.report-statuses.' + report.status | translate
+          }}</span></mat-card-subtitle
+        ></mat-card-header
+      ><mat-card-content
+        ><p>
+          {{ 'crop.advisor.producer' | translate }}: {{ store.producerName(report.reporterId) }} ·
+          #{{ report.reporterId }}
+        </p>
+        <p class="notes">{{ report.description }}</p>
+        @if (report.photo) {
+          <a [href]="report.photo" target="_blank" rel="noopener noreferrer">{{
+            'crop.view-photo' | translate
+          }}</a>
+        }
+        <nav>
+          @if (store.canSchedule() && report.status === 'PENDING') {
+            <a
+              mat-stroked-button
+              [routerLink]="['/pest-reports', report.id, 'inspections']"
+              >{{ 'crop.inspections-title' | translate }}</a
+            >
+          }
+          @if (store.canPrescribe() && report.status === 'INSPECTED') {
+            <a
+              mat-stroked-button
+              [routerLink]="['/pest-reports', report.id, 'prescriptions', 'new']"
+              >{{ 'crop.btn-prescribe' | translate }}</a
+            >
+          }
+        </nav>
+        <p>
+          {{ 'crop.form-severity' | translate }}:
+          {{ 'crop.severities.' + report.severity | translate }}
+        </p></mat-card-content
+      ></mat-card
+    >
+    <h2 class="section-title">{{ 'crop.inspections-title' | translate }}</h2>
+    @for (visit of inspections(); track visit.id) {
+      <mat-card appearance="outlined"
+        ><mat-card-content
+          ><p>
+            {{ visit.scheduledAt | date: 'medium' : '-0500' : locale() }} ·
+            {{ 'crop.case.' + visit.status | translate }}
+          </p>
+          <p>{{ visit.notes }}</p>
+          @if (visit.completedAt) {
+            <p>
+              {{ visit.completedAt | date: 'medium' : '-0500' : locale() }} ·
+              {{ store.advisorName(visit.inspectorUserId!) }}
+            </p>
+          }
+        </mat-card-content></mat-card
+      >
+    } @empty {
+      <p class="empty-state">{{ 'crop.case.no-inspections' | translate }}</p>
+    }
+    <h2 class="section-title">{{ 'crop.history-title' | translate }}</h2>
+    @for (rx of prescriptions(); track rx.id) {
+      <mat-card appearance="outlined"
+        ><mat-card-header
+          ><mat-card-title>{{ rx.recommendedProducts }}</mat-card-title></mat-card-header
+        ><mat-card-content
+          ><p>{{ rx.dosageInstructions }}</p>
+          <p>
+            {{ rx.applicationDate | date: 'longDate' : undefined : locale() }} ·
+            {{ store.advisorName(rx.agronomistId) }}
+          </p></mat-card-content
+        ></mat-card
+      >
+    } @empty {
+      <p class="empty-state">{{ 'crop.case.no-prescriptions' | translate }}</p>
+    }
+    <h2 class="section-title">{{ 'crop.case.follow-up' | translate }}</h2>
+    <p class="follow-up-note">{{ 'crop.case.evaluation-notice' | translate }}</p>
+    @for (item of evidence(); track item.data.id) {
+      <mat-card appearance="outlined"
+        ><mat-card-content
+          ><p>
+            <strong>{{ 'crop.case.' + item.data.kind | translate }}</strong> ·
+            {{ item.data.occurredOn | date: 'longDate' : undefined : locale() }}
+          </p>
+          <p>{{ prescriptionLabel(item.data.prescriptionId) }}</p>
+          <p class="notes">{{ item.data.notes }}</p></mat-card-content
+        ></mat-card
+      >
+    } @empty {
+      <p class="empty-state">{{ 'crop.case.no-follow-up' | translate }}</p>
+    }
+    @if (store.canReport() && report.status === 'INSPECTED' && prescriptions().length) {
+      <form #followUpForm="ngForm" [formGroup]="form" (ngSubmit)="submit()">
+        <h2>{{ 'crop.case.record' | translate }}</h2>
+        @if (form.invalid && form.touched) {
+          <p role="alert">{{ 'crop.case.form-validation' | translate }}</p>
+        }
+        <mat-form-field appearance="outline"
+          ><mat-label>{{ 'crop.case.prescription' | translate }}</mat-label
+          ><mat-select formControlName="prescriptionId">
+            @for (rx of prescriptions(); track rx.id) {
+              <mat-option [value]="+rx.id">{{ rx.recommendedProducts }}</mat-option>
+            }
+          </mat-select></mat-form-field
+        >
+        <mat-form-field appearance="outline"
+          ><mat-label>{{ 'crop.case.kind' | translate }}</mat-label
+          ><mat-select formControlName="kind"
+            ><mat-option value="APPLICATION">{{ 'crop.case.APPLICATION' | translate }}</mat-option
+            ><mat-option value="EVOLUTION">{{
+              'crop.case.EVOLUTION' | translate
+            }}</mat-option></mat-select
+          ></mat-form-field
+        >
+        <mat-form-field appearance="outline"
+          ><mat-label>{{ 'crop.case.date' | translate }}</mat-label
+          ><input matInput type="date" formControlName="occurredOn" [max]="today"
+        /></mat-form-field>
+        <mat-form-field appearance="outline"
+          ><mat-label>{{ 'crop.case.notes' | translate }}</mat-label
+          ><textarea matInput rows="4" maxlength="2000" formControlName="notes"></textarea>
+          @if (form.controls.notes.invalid && form.controls.notes.touched) {
+            <mat-error>{{ 'crop.case.notes-validation' | translate }}</mat-error>
+          }
+        </mat-form-field>
+        <button
+          mat-flat-button
+          type="submit"
+          [disabled]="store.saving() || store.clinicalLoading() || form.disabled"
+        >
+          {{ 'crop.case.save' | translate }}
+        </button>
+      </form>
+    }
+    <section id="assessment" #assessmentSection>
+      <h2>{{ 'crop.advisor.assessments' | translate }}</h2>
+      @for (evaluation of evaluations(); track evaluation.data.id) {
+        <mat-card appearance="outlined"
+          ><mat-card-content>
+            <p>
+              <strong>{{ 'crop.advisor.' + evaluation.data.outcome | translate }}</strong>
+            </p>
+            <p>
+              {{ store.advisorName(evaluation.data.agronomistUserId) }} ·
+              {{ evaluation.data.recordedAt | date: 'medium' : '-0500' : locale() }}
+            </p>
+            <p class="notes">{{ evaluation.data.notes }}</p>
+            <p>
+              {{ 'crop.advisor.evidence-reviewed' | translate }}:
+              {{ evaluation.data.evidenceIds.length }}
+            </p>
+          </mat-card-content></mat-card
+        >
+      } @empty {
+        <p>{{ 'crop.advisor.no-assessments' | translate }}</p>
+      }
+      @if (store.canPrescribe() && report.status === 'INSPECTED') {
+        <p>{{ 'crop.advisor.assessment-notice' | translate }}</p>
+        @if (store.canAssess(+report.id)) {
+          <form #assessmentFormRef="ngForm" [formGroup]="assessmentForm" (ngSubmit)="evaluate()">
+            <mat-form-field appearance="outline"
+              ><mat-label>{{ 'crop.advisor.conclusion' | translate }}</mat-label>
+              <mat-select formControlName="outcome">
+                <mat-option value="FOLLOW_UP_REQUIRED">{{
+                  'crop.advisor.FOLLOW_UP_REQUIRED' | translate
+                }}</mat-option>
+                <mat-option value="RECOVERED">{{
+                  'crop.advisor.RECOVERED' | translate
+                }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline"
+              ><mat-label>{{ 'crop.advisor.assessment-notes' | translate }}</mat-label>
+              <textarea matInput rows="4" maxlength="2000" formControlName="notes"></textarea>
+              @if (assessmentForm.controls.notes.invalid && assessmentForm.controls.notes.touched) {
+                <mat-error>{{ 'crop.case.notes-validation' | translate }}</mat-error>
+              }
+            </mat-form-field>
+            <button
+              mat-flat-button
+              type="submit"
+              [disabled]="store.saving() || assessmentForm.disabled"
+            >
+              {{ 'crop.advisor.save-evaluation' | translate }}
+            </button>
+          </form>
+        } @else {
+          <p>{{ 'crop.advisor.awaiting-evidence' | translate }}</p>
+        }
+      }
+      @if (assessmentSaved()) {
+        <p role="status">{{ 'crop.advisor.evaluation-saved' | translate }}</p>
+      }
+    </section>
+    @if (saved()) {
+      <p role="status">{{ 'crop.case.saved' | translate }}</p>
+    }
+  } @else {
+    <p role="status">{{ 'crop.case.not-found' | translate }}</p>
+  }
+}

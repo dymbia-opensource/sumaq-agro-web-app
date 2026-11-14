@@ -1,0 +1,91 @@
+<app-page-header
+  [title]="'crop.alerts-title' | translate"
+  [subtitle]="'crop.alerts-subtitle' | translate"
+/>
+
+<section class="plot-panel" [attr.aria-label]="'crop.plot-selector' | translate">
+  <app-crop-plot-selector
+    [plots]="store.plots()"
+    [selectedPlotId]="store.selectedPlot()?.id"
+    [disabled]="store.scopeLoading()"
+    (plotSelected)="store.selectPlot(+$event)"
+  />
+
+  @if (store.selectedPlot(); as plot) {
+    <div class="plot-badge">
+      <mat-icon aria-hidden="true">location_on</mat-icon>
+      <span
+        >{{ 'crop.region' | translate }}: <strong>{{ plot.region }}</strong></span
+      >
+    </div>
+  }
+</section>
+
+@if (store.scopeLoading() || store.alertsLoading()) {
+  <mat-progress-bar mode="indeterminate" [attr.aria-label]="'common.loading' | translate" />
+}
+
+@if (store.alertsError(); as error) {
+  <div class="feedback error" role="alert">
+    <mat-icon aria-hidden="true">error_outline</mat-icon>
+    <p>{{ error | translate }}</p>
+    <button mat-stroked-button type="button" (click)="reloadAlerts()">
+      {{ 'common.retry' | translate }}
+    </button>
+  </div>
+} @else if (!store.scopeLoading() && !store.alertsLoading()) {
+  @if (store.selectedPlot()) {
+    <section class="alerts-section" aria-labelledby="alerts-heading">
+      <h2 id="alerts-heading" class="sr-only">
+        {{ 'crop.alerts-title' | translate }}
+      </h2>
+
+      <div class="alerts-list">
+        @for (alert of store.alerts(); track alert.id) {
+          <article class="alert-card" [attr.data-severity]="alert.severity.toLowerCase()">
+            <header class="alert-header">
+              <div class="alert-heading">
+                <h3>{{ alert.title }}</h3>
+                <p class="metadata">
+                  <time [attr.datetime]="alert.issuedAt">
+                    {{ alert.issuedAt | date: 'mediumDate' }}
+                  </time>
+                  @if (alert.source) {
+                    <span aria-hidden="true"> · </span>
+                    <span>{{ alert.source }}</span>
+                  }
+                </p>
+              </div>
+
+              <span class="severity">
+                <mat-icon aria-hidden="true">
+                  {{ alert.severity === 'LOW' ? 'info' : 'warning' }}
+                </mat-icon>
+                {{ 'crop.severity-' + alert.severity.toLowerCase() | translate }}
+              </span>
+            </header>
+
+            <p class="description">{{ alert.description }}</p>
+
+            <footer class="alert-footer">
+              <span class="metadata alert-region">
+                <mat-icon aria-hidden="true">location_on</mat-icon>
+                {{ 'crop.region' | translate }}: {{ alert.region }}
+              </span>
+            </footer>
+          </article>
+        } @empty {
+          <div class="feedback success" role="status">
+            <mat-icon aria-hidden="true">check_circle</mat-icon>
+            <p>{{ 'crop.no-alerts' | translate }}</p>
+          </div>
+        }
+      </div>
+    </section>
+  } @else {
+    <div class="feedback neutral" role="status">
+      <mat-icon aria-hidden="true">location_off</mat-icon>
+      <p>{{ 'crop.no-plots' | translate }}</p>
+    </div>
+  }
+}
