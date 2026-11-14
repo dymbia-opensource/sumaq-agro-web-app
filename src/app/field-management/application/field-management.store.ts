@@ -41,7 +41,11 @@ import { SpecifySeedVarietyCommand } from '../domain/model/commands/specify-seed
 import { StartCropCampaignCommand } from '../domain/model/commands/start-crop-campaign.command';
 import { Money } from '../../shared/domain/model/money';
 import { CampaignLedger, YieldUnit } from '../domain/model/entities/campaign-ledger.entity';
-import { CampaignStatus, CropCampaign, CropType } from '../domain/model/entities/crop-campaign.entity';
+import {
+  CampaignStatus,
+  CropCampaign,
+  CropType,
+} from '../domain/model/entities/crop-campaign.entity';
 import { ExpenseCategory, ExpenseEntry } from '../domain/model/entities/expense-entry.entity';
 import { FieldPlot, SoilBaseline } from '../domain/model/entities/field-plot.entity';
 import { FieldManagementApi } from '../infrastructure/field-management-api';
@@ -51,15 +55,6 @@ import {
   PendingExpensePayload,
 } from '../infrastructure/assemblers/pending-expense-assembler';
 import { FileDownloader } from '../../shared/infrastructure/file-downloader';
-
-/**
- * Plots included in the Seed plan (demo quota until subscriptions are implemented).
- *
- * @remarks
- * The quota belongs to Subscriptions and Payments; with the RESTful API,
- * Field Management asks for it before registering a plot.
- */
-export const SEED_PLAN_PLOT_QUOTA = 4;
 
 /** Any of the three expenses of the cost ledger (US-37 to US-39). */
 export type RecordExpenseCommand = ExpenseCommand;
@@ -114,6 +109,7 @@ export class FieldManagementStore {
   private readonly quotaLoaded = signal(false);
   private readonly plotMutationBusy = signal(false);
   private readonly registrationIncompleteSignal = signal(false);
+  private readonly planPlotQuota = signal<{ ownerUserId: number; limit: number } | null>(null);
   private ledgersLoad?: Subscription;
 
   /** Plots of the producer. */
@@ -134,7 +130,9 @@ export class FieldManagementStore {
   readonly online = this.offlineSync.isOnline;
 
   /** Expenses recorded offline that are waiting to be synchronized. */
-  readonly pendingExpenseCount = this.offlineSync.pendingCountOf(PendingOperationType.FIELD_EXPENSE);
+  readonly pendingExpenseCount = this.offlineSync.pendingCountOf(
+    PendingOperationType.FIELD_EXPENSE,
+  );
 
   /** `true` while the offline expenses are being synchronized. */
   readonly syncing = this.syncingSignal.asReadonly();
@@ -149,17 +147,32 @@ export class FieldManagementStore {
   /** Number of plots of the producer. */
   readonly plotCount = computed(() => this.plots().length);
 
-  /** Plots allowed by the plan of the producer. */
-  readonly plotQuota = signal(SEED_PLAN_PLOT_QUOTA).asReadonly();
+  /** Stores the plan limit for the current producer. */
+  setPlanPlotQuota(ownerUserId: number, limit: number | null): void {
+    if (ownerUserId !== this.currentUserId()) return;
 
-  /** Quota is known only after a successful read for the currently selected producer. */
-  readonly plotQuotaReady = computed(
+    this.planPlotQuota.set(
+      limit !== null && Number.isSafeInteger(limit) && limit > 0 ? { ownerUserId, limit } : null,
+    );
+  }
+
+  /** Plots allowed by the plan of the producer, or 0 until Subscriptions answers. */
+  readonly plotQuota = computed(() => {
+    const quota = this.planPlotQuota();
+    return quota && quota.ownerUserId === this.currentUserId() ? quota.limit : 0;
+  });
+
+  /** The plots of the producer finished loading, independently of the plan quota. */
+  readonly ownedPlotsReady = computed(
     () =>
       this.currentUserId() !== null &&
       this.quotaOwner() === this.currentUserId() &&
       this.quotaLoaded() &&
       !this.plotsLoading(),
   );
+
+  /** Quota is known only after a successful read for the currently selected producer. */
+  readonly plotQuotaReady = computed(() => this.ownedPlotsReady() && this.plotQuota() > 0);
 
   /** Remaining slots never become negative, including legacy accounts above the quota. */
   readonly remainingPlotSlots = computed(() => Math.max(0, this.plotQuota() - this.plotCount()));
@@ -730,7 +743,9 @@ export class FieldManagementStore {
    */
   syncPendingExpenses = (): void => {
     if (this.syncingSignal() || !this.offlineSync.isOnline()) return;
-    const pending = this.offlineSync.pendingOf<PendingExpensePayload>(PendingOperationType.FIELD_EXPENSE);
+    const pending = this.offlineSync.pendingOf<PendingExpensePayload>(
+      PendingOperationType.FIELD_EXPENSE,
+    );
     const ledgerIds = [...new Set(pending.map((operation) => operation.payload.ledgerId))];
     if (ledgerIds.length === 0) return;
     this.syncingSignal.set(true);
@@ -845,9 +860,9 @@ export class FieldManagementStore {
         } catch (error) {
           return throwError(() => error);
         }
-        return this.fieldManagementApi.createLedger(ledger).pipe(
-          map((createdLedger) => ({ campaign: created, ledger: createdLedger })),
-        );
+        return this.fieldManagementApi
+          .createLedger(ledger)
+          .pipe(map((createdLedger) => ({ campaign: created, ledger: createdLedger })));
       }),
     );
   }
@@ -988,6 +1003,7 @@ export class FieldManagementStore {
     this.plotMutationBusy.set(false);
     this.quotaLoaded.set(false);
     this.quotaOwner.set(null);
+    this.planPlotQuota.set(null);
     this.registrationIncompleteSignal.set(false);
     this.plotsLoadingSignal.set(false);
     this.plotsLoad?.unsubscribe();
@@ -1037,9 +1053,23 @@ export class FieldManagementStore {
    */
   private applyExpense(ledger: CampaignLedger, command: RecordExpenseCommand): void {
     if (command instanceof RecordInputExpenseCommand)
-      this.addExpense(ledger, ExpenseCategory.INPUTS, command.inputName, command.quantity, command.unitPrice, command);
+      this.addExpense(
+        ledger,
+        ExpenseCategory.INPUTS,
+        command.inputName,
+        command.quantity,
+        command.unitPrice,
+        command,
+      );
     else if (command instanceof RecordDailyLaborExpenseCommand)
-      this.addExpense(ledger, ExpenseCategory.LABOR, command.activity, command.workers * command.days, command.dailyWage, command);
+      this.addExpense(
+        ledger,
+        ExpenseCategory.LABOR,
+        command.activity,
+        command.workers * command.days,
+        command.dailyWage,
+        command,
+      );
     else this.addExpense(ledger, ExpenseCategory.FREIGHT, command.route, 1, command.cost, command);
   }
 
@@ -1111,6 +1141,9 @@ export class FieldManagementStore {
 
   /** Campaign in progress, or the most recent one. */
   private static currentOf(campaigns: CropCampaign[]): CropCampaign | undefined {
-    return campaigns.find((campaign) => campaign.status === CampaignStatus.IN_PROGRESS) ?? campaigns.at(-1);
+    return (
+      campaigns.find((campaign) => campaign.status === CampaignStatus.IN_PROGRESS) ??
+      campaigns.at(-1)
+    );
   }
 }
