@@ -1,4 +1,4 @@
-import { PlanCode } from '../entities/plan-code';
+import { PlanCode } from './plan-code';
 
 export type SubscriptionSegment = 'INDEPENDENT_FARMER' | 'COOPERATIVE' | 'TECHNICAL_ADVISOR';
 

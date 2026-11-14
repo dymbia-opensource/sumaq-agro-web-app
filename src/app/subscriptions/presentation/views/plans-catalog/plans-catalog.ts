@@ -8,7 +8,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { map } from 'rxjs';
 import { IamStore } from '../../../../iam/application/iam.store';
-import type { UserRole } from '../../../../iam/domain/model/value-objects/user-role';
+import type { UserRole } from '../../../../iam/domain/model/entities/user-role';
 import { MessageCard } from '../../../../shared/presentation/components/message-card/message-card';
 import { SubscriptionsStore } from '../../../application/subscriptions.store';
 import { SelectSubscriptionPlanCommand } from '../../../domain/model/commands/select-subscription-plan.command';
@@ -17,7 +17,7 @@ import { Plan } from '../../../domain/model/entities/plan.entity';
 import {
   planForSegment,
   type SubscriptionSegment,
-} from '../../../domain/model/value-objects/subscription-segment';
+} from '../../../domain/model/entities/subscription-segment';
 import { PlanCard } from '../../components/plan-card/plan-card';
 
 /** Mapping of user roles to subscription segments. */
@@ -29,7 +29,7 @@ const SEGMENT_BY_ROLE: Readonly<Record<UserRole, SubscriptionSegment>> = {
 
 /** Catalog of available subscription plans and their billing cycles. */
 @Component({
-  selector: 'app-plans-catalog-view',
+  selector: 'app-plans-catalog',
   imports: [
     MatButtonModule,
     MatButtonToggleModule,
@@ -40,10 +40,10 @@ const SEGMENT_BY_ROLE: Readonly<Record<UserRole, SubscriptionSegment>> = {
     RouterLink,
     TranslatePipe,
   ],
-  templateUrl: './plans-catalog-view.html',
-  styleUrl: './plans-catalog-view.css',
+  templateUrl: './plans-catalog.html',
+  styleUrl: './plans-catalog.css',
 })
-export class PlansCatalogView {
+export class PlansCatalog {
   private readonly router = inject(Router);
   private readonly store = inject(SubscriptionsStore);
   private readonly iamStore = inject(IamStore);

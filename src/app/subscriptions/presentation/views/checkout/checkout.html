@@ -65,7 +65,7 @@
       <dl>
         <div>
           <dt>{{ 'subscriptions.checkout.billing-cycle' | translate }}</dt>
-          <dd>{{ ('subscriptions.billing-cycle.' + cycle()) | translate }}</dd>
+          <dd>{{ 'subscriptions.billing-cycle.' + cycle() | translate }}</dd>
         </div>
         <div>
           <dt>{{ 'subscriptions.checkout.plot-quota' | translate }}</dt>
@@ -98,8 +98,8 @@
         <mat-icon aria-hidden="true">info</mat-icon>
         {{
           (demoPaymentsEnabled
-              ? 'subscriptions.checkout.demo-notice'
-              : 'subscriptions.checkout.unavailable'
+            ? 'subscriptions.checkout.demo-notice'
+            : 'subscriptions.checkout.unavailable'
           ) | translate
         }}
       </p>

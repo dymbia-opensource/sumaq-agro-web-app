@@ -4,9 +4,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { Router, RouterOutlet } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { IamStore } from '../../../../iam/application/iam.store';
-import { AuthNavigationService } from '../../../../iam/infrastructure/auth-navigation.service';
+import { AuthNavigation } from '../../../../iam/infrastructure/auth-navigation';
 import { LanguageSwitcher } from '../../../../shared/presentation/components/language-switcher/language-switcher';
-import { SubscriptionsStore } from '../../../application/subscriptions.store';
 
 /**
  * Shell of the plan selection and checkout pages.
@@ -18,7 +17,6 @@ import { SubscriptionsStore } from '../../../application/subscriptions.store';
  */
 @Component({
   imports: [RouterOutlet, MatButtonModule, MatIconModule, TranslatePipe, LanguageSwitcher],
-  providers: [SubscriptionsStore],
   selector: 'app-subscriptions-shell',
   styleUrl: './subscriptions-shell.css',
   templateUrl: './subscriptions-shell.html',
@@ -26,7 +24,7 @@ import { SubscriptionsStore } from '../../../application/subscriptions.store';
 export class SubscriptionsShell {
   private readonly session = inject(IamStore);
   private readonly router = inject(Router);
-  private readonly authNavigation = inject(AuthNavigationService);
+  private readonly authNavigation = inject(AuthNavigation);
 
   protected readonly userName = computed(() => this.session.activeUser()?.displayName ?? '');
 

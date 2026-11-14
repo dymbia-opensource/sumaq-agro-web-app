@@ -61,7 +61,7 @@
       @if (current.plan; as plan) {
         <p class="price">
           <strong>{{ plan.priceFor(current.billingCycle).format() }}</strong>
-          <span>/ {{ ('subscriptions.billing-cycle.' + current.billingCycle) | translate }}</span>
+          <span>/ {{ 'subscriptions.billing-cycle.' + current.billingCycle | translate }}</span>
         </p>
       }
     </header>
@@ -69,7 +69,7 @@
     <dl class="stats">
       <div>
         <dt>{{ 'subscriptions.billing.cycle' | translate }}</dt>
-        <dd>{{ ('subscriptions.billing-cycle.' + current.billingCycle) | translate }}</dd>
+        <dd>{{ 'subscriptions.billing-cycle.' + current.billingCycle | translate }}</dd>
       </div>
       <div>
         <dt>{{ 'subscriptions.billing.started' | translate }}</dt>
@@ -186,17 +186,23 @@
     <div class="table-wrap">
       <table role="table">
         <thead role="rowgroup">
-        <tr role="row">
-          <th role="columnheader" scope="col">{{ 'subscriptions.billing.date' | translate }}</th>
-          <th role="columnheader" scope="col">{{ 'subscriptions.billing.amount' | translate }}</th>
-          <th role="columnheader" scope="col">{{ 'subscriptions.billing.status' | translate }}</th>
-          <th role="columnheader" scope="col">
-            {{ 'subscriptions.billing.transaction' | translate }}
-          </th>
-          <th role="columnheader" scope="col" class="col-actions">
-            <span class="sr-only">{{ 'subscriptions.billing.download-receipt' | translate }}</span>
-          </th>
-        </tr>
+          <tr role="row">
+            <th role="columnheader" scope="col">{{ 'subscriptions.billing.date' | translate }}</th>
+            <th role="columnheader" scope="col">
+              {{ 'subscriptions.billing.amount' | translate }}
+            </th>
+            <th role="columnheader" scope="col">
+              {{ 'subscriptions.billing.status' | translate }}
+            </th>
+            <th role="columnheader" scope="col">
+              {{ 'subscriptions.billing.transaction' | translate }}
+            </th>
+            <th role="columnheader" scope="col" class="col-actions">
+              <span class="sr-only">{{
+                'subscriptions.billing.download-receipt' | translate
+              }}</span>
+            </th>
+          </tr>
         </thead>
         <tbody role="rowgroup">
           @for (payment of payments(); track payment.id) {

@@ -14,14 +14,16 @@ import { SubscriptionsApiEndpoint } from './endpoints/subscriptions.endpoint';
 import { DemoCheckout, type DemoCheckoutRequest } from './mock/demo-checkout';
 import { buildReceiptPdf } from './receipt-pdf';
 
-
 @Injectable({ providedIn: 'root' })
 export class SubscriptionsApi extends BaseApi {
   private readonly http = inject(HttpClient);
   private readonly plansEndpoint = new PlansApiEndpoint(this.http);
   private readonly subscriptionsEndpoint = new SubscriptionsApiEndpoint(this.http);
   private readonly paymentsEndpoint = new PaymentsApiEndpoint(this.http);
-  private readonly demoCheckout = new DemoCheckout(this.subscriptionsEndpoint, this.paymentsEndpoint);
+  private readonly demoCheckout = new DemoCheckout(
+    this.subscriptionsEndpoint,
+    this.paymentsEndpoint,
+  );
 
   /** Retrieves the plans of the catalog. */
   getPlans = (): Observable<Plan[]> => this.plansEndpoint.getAll();

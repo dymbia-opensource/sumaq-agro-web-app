@@ -15,7 +15,7 @@ import { CouponForm } from '../../components/coupon-form/coupon-form';
 
 /** Checkout summary and demo payment flow for a selected plan. */
 @Component({
-  selector: 'app-checkout-view',
+  selector: 'app-checkout',
   imports: [
     CouponForm,
     MatButtonModule,
@@ -25,10 +25,10 @@ import { CouponForm } from '../../components/coupon-form/coupon-form';
     RouterLink,
     TranslatePipe,
   ],
-  templateUrl: './checkout-view.html',
-  styleUrl: './checkout-view.css',
+  templateUrl: './checkout.html',
+  styleUrl: './checkout.css',
 })
-export class CheckoutView {
+export class Checkout {
   private readonly router = inject(Router);
   private readonly store = inject(SubscriptionsStore);
   private readonly iamStore = inject(IamStore);

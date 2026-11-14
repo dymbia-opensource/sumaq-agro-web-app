@@ -24,7 +24,7 @@ const END_DATE_LABEL: Readonly<Record<PeriodState, string>> = {
 
 /** Current subscription and payment history of the signed-in user. */
 @Component({
-  selector: 'app-billing-history-view',
+  selector: 'app-billing-history',
   imports: [
     DatePipe,
     MatButtonModule,
@@ -35,11 +35,10 @@ const END_DATE_LABEL: Readonly<Record<PeriodState, string>> = {
     RouterLink,
     TranslatePipe,
   ],
-  providers: [SubscriptionsStore],
-  templateUrl: './billing-history-view.html',
-  styleUrl: './billing-history-view.css',
+  templateUrl: './billing-history.html',
+  styleUrl: './billing-history.css',
 })
-export class BillingHistoryView {
+export class BillingHistory {
   private readonly store = inject(SubscriptionsStore);
   private readonly iamStore = inject(IamStore);
 
