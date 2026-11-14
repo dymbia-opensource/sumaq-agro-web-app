@@ -1,3 +1,4 @@
+import { printCertificate } from '../../components/farmer-certificates/certificate-print';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -401,7 +402,8 @@ export class HarvestCertificates {
   }
 
   print(): void {
-    window.print();
+    const certificate = document.getElementById('print-certificate');
+    if (certificate) void printCertificate(certificate);
   }
 
   private emptyForm() {

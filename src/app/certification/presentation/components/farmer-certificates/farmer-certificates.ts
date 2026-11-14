@@ -1,3 +1,4 @@
+import { printCertificate } from './certificate-print';
 import { DatePipe } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
@@ -54,7 +55,10 @@ export class FarmerCertificates {
     this.visibleQr.update((current) => (current === certificateId ? null : certificateId));
   }
 
-  protected print(): void {
-    window.print();
+  protected print(source: HTMLElement, certificate: QualityCertificate): void {
+    void printCertificate(source, {
+      url: this.verificationUrl(certificate),
+      qr: this.qrUrl(certificate),
+    });
   }
 }

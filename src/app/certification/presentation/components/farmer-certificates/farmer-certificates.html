@@ -14,7 +14,7 @@
   }
 
   @for (row of certificates(); track row.certificate.id) {
-    <article class="farmer-certificate">
+    <article class="farmer-certificate" #printableCertificate>
       <h2>
         {{ 'certification.farmer.certificate-title' | translate: { code: row.batch.data.code } }}
       </h2>
@@ -56,7 +56,7 @@
         >
           <mat-icon>qr_code</mat-icon> {{ 'certification.farmer.show-qr' | translate }}
         </button>
-        <button type="button" class="farmer-outline-button" (click)="print()">
+        <button type="button" class="farmer-outline-button" (click)="print(printableCertificate, row.certificate)">
           <mat-icon>download</mat-icon>
           {{ 'certification.farmer.download-pdf' | translate }}
         </button>

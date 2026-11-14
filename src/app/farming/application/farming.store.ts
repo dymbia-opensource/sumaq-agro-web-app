@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { buildCostReportPdf } from '../infrastructure/cost-report-pdf';
+import { buildCostReportPdf } from '../presentation/components/campaign-summary-card/cost-report-pdf';
 import {
   computed,
   DestroyRef,
