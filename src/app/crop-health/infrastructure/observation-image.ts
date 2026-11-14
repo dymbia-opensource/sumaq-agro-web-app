@@ -1,8 +1,8 @@
-import { FieldPlot } from '../../../field-management/domain/model/entities/field-plot.entity';
-import { SatelliteObservation } from '../../domain/model/entities/satellite-observation.entity';
+import { PlotSummary } from '../../field-management/infrastructure/plot-directory';
+import { SatelliteObservation } from '../domain/model/entities/satellite-observation.entity';
 
 /** Creates a branded PNG from the recorded observation, without changing its values. */
-export async function observationImage(plot: FieldPlot, observation: SatelliteObservation, labels: Record<string, string>, locale: string): Promise<Blob> {
+export async function observationImage(plot: PlotSummary, observation: SatelliteObservation, labels: Record<string, string>, locale: string): Promise<Blob> {
   const canvas = document.createElement('canvas');
   canvas.width = 1200;
   const context = canvas.getContext('2d');

@@ -1,6 +1,5 @@
 import { CaseAssessment, CaseAssessmentData } from '../domain/model/entities/case-assessment';
 import { CaseAssessmentsApi } from '../infrastructure/case-assessments.api';
-import { PlotAdvisorAssignmentsApi } from '../../profiles/infrastructure/plot-advisor-assignments.api';
 import {
   TreatmentFollowUp,
   TreatmentFollowUpData,
@@ -19,12 +18,11 @@ import {
   tap,
   throwError,
 } from 'rxjs';
-import { IamStore, SessionParticipant } from '../../iam/application/iam.store';
-import { FieldManagementApi } from '../../field-management/infrastructure/field-management-api';
-import { FieldManagementStore } from '../../field-management/application/field-management.store';
-import { FieldPlot } from '../../field-management/domain/model/entities/field-plot.entity';
-import { ProfilesApi } from '../../profiles/infrastructure/profiles-api';
-import { TechnicalAdvisor } from '../../profiles/domain/model/entities/technical-advisor.entity';
+import { SessionContext } from '../../iam/application/session-context';
+import { SessionParticipant } from '../../iam/application/session-participant';
+import { PlotSelectionService } from '../../field-management/application/plot-selection.service';
+import { PlotDirectory, PlotSummary } from '../../field-management/infrastructure/plot-directory';
+import { AdvisoryDirectory, AdvisorSummary } from '../../profiles/infrastructure/advisory-directory';
 import { CropHealthApi } from '../infrastructure/crop-health-api';
 import { RecordPestReportCommand } from '../domain/model/commands/record-pest-report.command';
 import { ScheduleFieldInspectionCommand } from '../domain/model/commands/schedule-field-inspection.command';
@@ -41,7 +39,6 @@ import { requireDate, todayInLima } from '../domain/model/validation';
 @Service()
 export class CropHealthStore {
   private readonly api = inject(CropHealthApi);
-  private readonly assignmentApi = inject(PlotAdvisorAssignmentsApi);
   private readonly assessmentApi = inject(CaseAssessmentsApi);
   private readonly assessmentsSignal = signal<CaseAssessment[]>([]);
   /** Assessments are visible only through the participant's authorized case list. */
@@ -54,17 +51,17 @@ export class CropHealthStore {
   );
   private readonly followUpApi = inject(TreatmentFollowUpsApi);
   private readonly followUpsSignal = signal<TreatmentFollowUp[]>([]);
-  private readonly profiles = inject(ProfilesApi);
-  private readonly fields = inject(FieldManagementApi);
-  private readonly fieldStore = inject(FieldManagementStore);
-  private readonly session = inject(IamStore);
+  private readonly profiles = inject(AdvisoryDirectory);
+  private readonly fields = inject(PlotDirectory);
+  private readonly selection = inject(PlotSelectionService);
+  private readonly session = inject(SessionContext);
   private readonly requests = new Map<string, Subscription>();
   private readonly busy = signal<Record<string, boolean>>({});
   private readonly errors = signal<Record<string, string | null>>({});
-  private readonly plotsSignal = signal<FieldPlot[]>([]);
-  private readonly advisorSignal = signal<TechnicalAdvisor | null>(null);
-  private readonly advisorsSignal = signal<TechnicalAdvisor[]>([]);
-  private readonly scopeUser = signal<number | null>(null);
+  private readonly plotsSignal = signal<PlotSummary[]>([]);
+  private readonly advisorSignal = signal<AdvisorSummary | null>(null);
+  private readonly advisorsSignal = signal<AdvisorSummary[]>([]);
+  private readonly scopeUser = signal<SessionParticipant | null>(null);
   private readonly ready = signal(false);
   private epoch = 0;
   private readonly observationsSignal = signal<SatelliteObservation[]>([]);
@@ -89,18 +86,13 @@ export class CropHealthStore {
   readonly scopeReady = computed(
     () =>
       this.ready() &&
-      this.scopeUser() === this.activeUser()?.id &&
-      (!this.canReport() || !this.fieldStore.plotsLoading()),
+      this.scopeUser() === this.activeUser(),
   );
   readonly plots = computed(() =>
-    !this.scopeReady()
-      ? []
-      : this.canReport()
-        ? this.fieldStore.plots().filter((plot) => plot.ownerUserId === this.activeUser()?.id)
-        : this.plotsSignal(),
+    this.scopeReady() ? this.plotsSignal() : [],
   );
   readonly selectedPlot = computed(() =>
-    this.plots().find((plot) => plot.id === this.fieldStore.selectedPlotId()),
+    this.plots().find((plot) => plot.id === this.selection.selectedPlotId()),
   );
   readonly observations = computed(() =>
     this.scopeReady()
@@ -152,21 +144,13 @@ export class CropHealthStore {
   readonly loading = computed(() =>
     Object.entries(this.busy()).some(([key, value]) => key !== 'write' && value),
   );
-  readonly scopeLoading = computed(
-    () => !!this.busy()['scope'] || (this.canReport() && this.fieldStore.plotsLoading()),
-  );
+  readonly scopeLoading = computed(() => !!this.busy()['scope']);
   readonly clinicalLoading = computed(() => !!this.busy()['clinical'] || this.scopeLoading());
   readonly observationsLoading = computed(
     () => !!this.busy()['observations'] || this.scopeLoading(),
   );
   readonly alertsLoading = computed(() => !!this.busy()['alerts'] || this.scopeLoading());
-  readonly scopeError = computed(
-    () =>
-      this.errors()['scope'] ??
-      (this.canReport() && this.fieldStore.error() === 'field-management.errors.load-plots'
-        ? 'crop-health.errors.load-plots'
-        : null),
-  );
+  readonly scopeError = computed(() => this.errors()['scope'] ?? null);
   readonly clinicalError = computed(() => this.scopeError() ?? this.errors()['clinical'] ?? null);
   readonly observationsError = computed(
     () => this.scopeError() ?? this.errors()['observations'] ?? null,
@@ -192,21 +176,26 @@ export class CropHealthStore {
     inject(DestroyRef).onDestroy(() => this.reset());
     effect(() => {
       const user = this.activeUser();
+      this.fields.changes();
       untracked(() => this.loadScope(user));
+    });
+    effect(() => {
+      this.selection.selectedPlotId();
+      untracked(() => this.clearPlotData());
     });
   }
 
   private loadScope(user: SessionParticipant | null): void {
     this.reset();
     if (!user) return;
-    this.scopeUser.set(user.id);
+    this.scopeUser.set(user);
     const result =
       user.experience === 'FARMER'
-        ? this.fields.getPlotsByOwner(user.id).pipe(
+        ? this.fields.getByOwner(user.id).pipe(
             map((plots) => ({
               plots,
-              advisors: [] as TechnicalAdvisor[],
-              advisor: null as TechnicalAdvisor | null,
+              advisors: [] as AdvisorSummary[],
+              advisor: null as AdvisorSummary | null,
             })),
           )
         : user.experience === 'AGRONOMIST'
@@ -237,16 +226,16 @@ export class CropHealthStore {
         this.advisorSignal.set(data.advisor);
         this.ready.set(true);
         const selected =
-          data.plots.find((plot) => plot.id === this.fieldStore.selectedPlotId()) ?? data.plots[0];
-        this.fieldStore.selectPlotId(selected ? (selected.id as number) : null);
+          data.plots.find((plot) => plot.id === this.selection.selectedPlotId()) ?? data.plots[0];
+        this.selection.select(selected?.id ?? null);
       },
       'crop-health.errors.load-plots',
     );
   }
 
   /** Resolves explicit active plot grants without requiring a cooperative membership. */
-  private advisorScope(advisor: TechnicalAdvisor, userId: number) {
-    return this.assignmentApi.getByAdvisor(userId).pipe(
+  private advisorScope(advisor: AdvisorSummary, userId: number) {
+    return this.profiles.getByAdvisor(userId).pipe(
       switchMap((records) => {
         const active = records.filter(
           (item) => item.advisorUserId === userId && item.status === 'ACTIVE',
@@ -255,8 +244,8 @@ export class CropHealthStore {
           throw new Error('crop-health.errors.assignment-conflict');
         return (
           active.length
-            ? this.fields.getPlotsByIds(active.map((item) => item.plotId))
-            : of([] as FieldPlot[])
+            ? this.fields.getByIds(active.map((item) => item.plotId))
+            : of([] as PlotSummary[])
         ).pipe(
           map((plots) => ({
             plots: plots.filter((plot) =>
@@ -277,7 +266,7 @@ export class CropHealthStore {
     const user = this.activeUser();
     const report = this.report(reportId);
     if (user?.experience !== 'AGRONOMIST') return defer(operation);
-    return this.assignmentApi.getByPlot(report.plotId).pipe(
+    return this.profiles.getByPlot(report.plotId).pipe(
       switchMap((assignment) => {
         const plot = this.plots().find((item) => item.id === report.plotId);
         if (
@@ -303,20 +292,10 @@ export class CropHealthStore {
     return user?.id === userId ? user.displayName : `#${userId}`;
   }
 
-  private cooperativeScope(cooperativeId: number, advisor: TechnicalAdvisor | null) {
-    return forkJoin({
-      members: this.profiles.getCooperativeMembers(cooperativeId),
-      advisors: this.profiles.getTechnicalAdvisors(cooperativeId),
-    }).pipe(
-      switchMap(({ members, advisors }) => {
-        const ids = [
-          ...new Set(
-            members
-              .filter((member) => member.active)
-              .flatMap((member) => member.plots.map((plot) => plot.id)),
-          ),
-        ];
-        const plots = ids.length ? this.fields.getPlotsByIds(ids) : of([] as FieldPlot[]);
+  private cooperativeScope(cooperativeId: number, advisor: AdvisorSummary | null) {
+    return this.profiles.getCooperativeScope(cooperativeId).pipe(
+      switchMap(({ plotIds, advisors }) => {
+        const plots = plotIds.length ? this.fields.getByIds(plotIds) : of([] as PlotSummary[]);
         return plots.pipe(map((plots) => ({ plots, advisors, advisor })));
       }),
     );
@@ -325,13 +304,16 @@ export class CropHealthStore {
   /** Retries failed scope resolution; views reload their data once the scope is ready. */
   retryScope(): void {
     const user = this.activeUser();
-    if (user?.experience === 'FARMER' && this.fieldStore.error())
-      this.fieldStore.loadMyPlots(user.id);
     this.loadScope(user);
   }
 
   selectPlot(plotId: number): void {
     if (!this.plots().some((plot) => plot.id === plotId)) return;
+    this.selection.select(plotId);
+  }
+
+  /** Shared selection changes invalidate pending reads, including changes from another context. */
+  private clearPlotData(): void {
     this.requests.get('observations')?.unsubscribe();
     this.requests.get('alerts')?.unsubscribe();
     this.setBusy('observations', false);
@@ -340,13 +322,11 @@ export class CropHealthStore {
     this.alertsSignal.set([]);
     this.setError('observations', null);
     this.setError('alerts', null);
-    this.fieldStore.selectPlotId(plotId);
-    if (this.canReport()) this.fieldStore.selectPlot(plotId);
   }
 
   loadObservations(plotId: number): void {
     this.observationsSignal.set([]);
-    if (!this.plots().some((plot) => plot.id === plotId && plot.hasPolygon())) return;
+    if (!this.plots().some((plot) => plot.id === plotId && plot.hasPolygon)) return;
     this.read(
       'observations',
       this.api.getObservationsByPlot(plotId).pipe(retry(2)),

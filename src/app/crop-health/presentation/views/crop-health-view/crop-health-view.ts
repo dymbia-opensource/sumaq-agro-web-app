@@ -12,7 +12,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { TranslateService, TranslatePipe } from '@ngx-translate/core';
 import { CropHealthStore } from '../../../application/crop-health.store';
 import { CropPlotSelector } from '../../components/plot-selector/plot-selector';
-import { observationImage } from '../../utils/observation-image';
+import { observationImage } from '../../../infrastructure/observation-image';
 import * as L from 'leaflet';
 
 @Component({
@@ -65,7 +65,7 @@ export class CropHealthView implements AfterViewInit, OnDestroy {
     if (!this.map) return;
     if (this.sectorLayer) { this.map.removeLayer(this.sectorLayer); this.sectorLayer = undefined; }
     const plot = this.store.selectedPlot();
-    if (!plot?.hasPolygon()) { this.map.setView([-9.19, -75.015], 5); return; }
+    if (!plot?.hasPolygon) { this.map.setView([-9.19, -75.015], 5); return; }
     const color = this.selectedLayer === 'ndvi' ? '#16803c' : '#0369a1';
     const vertices = plot.boundary.map(vertex => [vertex.latitude, vertex.longitude] as L.LatLngTuple);
     const outline = L.polygon(vertices, { color: '#ffffff', weight: 7, opacity: 0.95, fill: false, interactive: false });

@@ -15,7 +15,7 @@
   <mat-card appearance="outlined" role="alert"><mat-card-content><p>{{ error | translate }}</p></mat-card-content></mat-card>
 } @else if (!store.observationsLoading()) {
   @if (!store.selectedPlot()) { <p role="status">{{ 'crop-health.no-plots' | translate }}</p> }
-  @else if (!store.selectedPlot()!.hasPolygon()) { <p role="status">{{ 'crop-health.no-polygon' | translate }}</p> }
+  @else if (!store.selectedPlot()!.hasPolygon) { <p role="status">{{ 'crop-health.no-polygon' | translate }}</p> }
   @else if (!store.latestObservation()) { <p role="status">{{ 'crop-health.no-observations' | translate }}</p> }
 }
 <div class="layers-bar">

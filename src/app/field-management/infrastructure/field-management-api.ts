@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { inject, Injectable, signal } from '@angular/core';
+import { Observable, tap } from 'rxjs';
 import { BaseApi } from '../../shared/infrastructure/base-api';
 import { CampaignLedger } from '../domain/model/entities/campaign-ledger.entity';
 import { CropCampaign } from '../domain/model/entities/crop-campaign.entity';
@@ -14,6 +14,9 @@ import { FieldPlotsApiEndpoint } from './endpoints/field-plots-api-endpoint';
  */
 @Injectable({ providedIn: 'root' })
 export class FieldManagementApi extends BaseApi {
+  private readonly plotRevision = signal(0);
+  /** Notifies readers after a confirmed plot mutation; does not duplicate plot state. */
+  readonly plotChanges = this.plotRevision.asReadonly();
   private readonly http = inject(HttpClient);
   private readonly plotsEndpoint = new FieldPlotsApiEndpoint(this.http);
   private readonly campaignsEndpoint = new CropCampaignsApiEndpoint(this.http);
@@ -46,21 +49,27 @@ export class FieldManagementApi extends BaseApi {
    * @param plot - The plot to create.
    * @returns An Observable of the created FieldPlot object.
    */
-  createPlot = (plot: FieldPlot): Observable<FieldPlot> => this.plotsEndpoint.create(plot);
+  createPlot = (plot: FieldPlot): Observable<FieldPlot> => this.plotsEndpoint.create(plot).pipe(
+    tap(() => this.plotRevision.update((revision) => revision + 1)),
+  );
 
   /**
    * Updates an existing plot.
    * @param plot - The plot to update.
    * @returns An Observable of the updated FieldPlot object.
    */
-  updatePlot = (plot: FieldPlot): Observable<FieldPlot> => this.plotsEndpoint.update(plot, plot.id);
+  updatePlot = (plot: FieldPlot): Observable<FieldPlot> => this.plotsEndpoint.update(plot, plot.id).pipe(
+    tap(() => this.plotRevision.update((revision) => revision + 1)),
+  );
 
   /**
    * Deletes a plot by ID.
    * @param id - The ID of the plot to delete.
    * @returns An Observable of void.
    */
-  deletePlot = (id: number): Observable<void> => this.plotsEndpoint.delete(id);
+  deletePlot = (id: number): Observable<void> => this.plotsEndpoint.delete(id).pipe(
+    tap(() => this.plotRevision.update((revision) => revision + 1)),
+  );
 
   /**
    * Retrieves the campaigns of one plot.
