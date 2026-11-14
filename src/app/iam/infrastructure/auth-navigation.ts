@@ -1,4 +1,4 @@
-import { inject, Service } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { PRIMARY_OUTLET, Router, UrlTree } from '@angular/router';
 import { IamStore } from '../application/iam.store';
 
@@ -24,15 +24,13 @@ const PRIVATE_ROUTE_ROOTS = new Set([
 ]);
 
 /** Resolves post-login destinations. Route guards still enforce access rules. */
-@Service()
-export class AuthNavigationService {
+@Injectable({ providedIn: 'root' })
+export class AuthNavigation {
   private readonly router = inject(Router);
   private readonly session = inject(IamStore);
 
   destination(returnUrl: string | null): UrlTree {
-    const fallback = this.router.parseUrl(
-      this.session.activeUser()?.initialRoute ?? '/sign-in',
-    );
+    const fallback = this.router.parseUrl(this.session.activeUser()?.initialRoute ?? '/sign-in');
 
     if (
       !this.session.hasActiveUser() ||

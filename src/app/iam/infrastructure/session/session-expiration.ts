@@ -1,13 +1,13 @@
 import { DOCUMENT } from '@angular/common';
-import { DestroyRef, inject, Service } from '@angular/core';
+import { DestroyRef, inject, Injectable } from '@angular/core';
 
 const MAX_TIMEOUT_MS = 2_147_483_647;
 
 /**
  * Watches session expiration using timers and browser lifecycle events.
  */
-@Service()
-export class SessionExpirationService {
+@Injectable({ providedIn: 'root' })
+export class SessionExpiration {
   private expiresAt: number | null = null;
   private onExpired?: () => void;
   private timer?: ReturnType<typeof setTimeout>;

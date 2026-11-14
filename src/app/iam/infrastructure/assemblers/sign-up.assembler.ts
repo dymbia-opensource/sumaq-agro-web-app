@@ -13,10 +13,10 @@ export class SignUpAssembler {
       email: command.email,
       password: command.password,
       roles: [UserRoleAssembler.toResource(command.role)],
-      profile:{
-        firstName:command.firstName,
-        lastName:command.lastName,
-      }
+      profile: {
+        firstName: command.firstName,
+        lastName: command.lastName,
+      },
     };
   }
 

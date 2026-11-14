@@ -1,7 +1,7 @@
-import { Service } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { environment } from '../../../../environments/environment';
 import { AuthenticatedUser } from '../../domain/model/entities/authenticated-user.entity';
-import { UserRole } from '../../domain/model/value-objects/user-role';
+import { UserRole } from '../../domain/model/entities/user-role';
 
 export const MOCK_SESSION_STORAGE_KEY = 'sumaq-agro.iam.mock-session.v1';
 export const MOCK_SESSION_DURATION_MS = 30 * 60 * 1000;
@@ -18,8 +18,8 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 /** Tab-scoped persistence for development sessions only. It never validates real credentials. */
-@Service()
-export class SessionStorageService {
+@Injectable({ providedIn: 'root' })
+export class SessionStorage {
   get enabled(): boolean {
     return !environment.production && environment.useMockAuthentication;
   }

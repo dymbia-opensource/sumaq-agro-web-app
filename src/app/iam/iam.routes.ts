@@ -7,7 +7,7 @@ export const iamRoutes: Routes = [
       import('./presentation/views/forgot-password-form/forgot-password-form').then(
         (m) => m.ForgotPasswordForm,
       ),
-    title: 'Recuperar acceso | SumaqAgro',
+    title: 'iam.recovery.forgot.title',
   },
   {
     path: 'reset-password',
@@ -15,18 +15,18 @@ export const iamRoutes: Routes = [
       import('./presentation/views/reset-password-form/reset-password-form').then(
         (m) => m.ResetPasswordForm,
       ),
-    title: 'Restablecer contraseña | SumaqAgro',
+    title: 'iam.recovery.reset.title',
   },
   {
     path: 'sign-in',
     loadComponent: () =>
       import('./presentation/views/sign-in-form/sign-in-form').then((m) => m.SignInForm),
-    title: 'Iniciar sesión | SumaqAgro',
+    title: 'iam.signIn.title',
   },
   {
     path: 'sign-up',
     loadComponent: () =>
       import('./presentation/views/sign-up-form/sign-up-form').then((m) => m.SignUpForm),
-    title: 'Crear cuenta | SumaqAgro',
+    title: 'iam.signUp.title',
   },
 ];

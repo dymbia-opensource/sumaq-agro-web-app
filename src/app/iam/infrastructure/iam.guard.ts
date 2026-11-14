@@ -1,7 +1,7 @@
 import { inject } from '@angular/core';
 import { CanActivateChildFn, CanActivateFn, Router } from '@angular/router';
 import { IamStore } from '../application/iam.store';
-import {UserRole} from '../domain/model/value-objects/user-role';
+import { UserRole } from '../domain/model/entities/user-role';
 
 /**
  * Checks session validity and the active role required by a route.
