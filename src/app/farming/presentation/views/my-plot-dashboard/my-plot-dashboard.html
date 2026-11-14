@@ -1,0 +1,72 @@
+@if (loading()) {
+  <mat-progress-bar mode="indeterminate" [attr.aria-label]="'common.loading' | translate" />
+}
+
+<app-page-header
+  [breadcrumbs]="breadcrumbs"
+  [title]="greetingKey() | translate: { name: userName() }"
+  [subtitle]="
+    campaign()
+      ? plotSummary() +
+        ' | ' +
+        ('farming.dashboard.campaign' | translate) +
+        ' ' +
+        campaign()!.season
+      : plotSummary()
+  "
+>
+  <div class="header-actions">
+    <a mat-stroked-button class="view-plots" routerLink="/campaigns">
+      <mat-icon>event_note</mat-icon>
+      {{ 'farming.campaigns.title' | translate }}
+    </a>
+    <a mat-flat-button class="view-plots" routerLink="/plots">
+      <mat-icon>grid_view</mat-icon>
+      {{ 'farming.dashboard.view-all-plots' | translate }}
+    </a>
+  </div>
+</app-page-header>
+
+@if (error()) {
+  <app-message-card
+    icon="cloud_off"
+    [message]="'farming.dashboard.load-error' | translate"
+    [alert]="true"
+  >
+    <mat-card-actions align="end">
+      <button mat-button (click)="retry()">
+        <mat-icon>refresh</mat-icon>
+        {{ 'common.retry' | translate }}
+      </button>
+    </mat-card-actions>
+  </app-message-card>
+} @else if (!loading() && plots().length === 0) {
+  <app-message-card icon="agriculture" [message]="'farming.dashboard.no-plots' | translate">
+    <mat-card-actions align="end">
+      <a mat-flat-button routerLink="/plots/new">
+        <mat-icon>add</mat-icon>
+        {{ 'farming.dashboard.register-plot' | translate }}
+      </a>
+    </mat-card-actions>
+  </app-message-card>
+} @else {
+  <app-campaign-kpi-cards
+    [attr.aria-label]="'farming.dashboard.summary' | translate"
+    role="region"
+    [campaign]="campaign()"
+    [ledger]="ledger()"
+    [observation]="latestObservation()"
+    [satelliteLoading]="observationsLoading()"
+    [satelliteError]="observationsError()"
+  />
+
+  <section class="charts-grid">
+    <app-ndvi-chart-card
+      [observations]="observations()"
+      [sowingDate]="campaign()?.sowingDate"
+      [loading]="observationsLoading()"
+      [error]="observationsError()"
+    />
+    <app-cost-distribution-card [ledger]="ledger()" />
+  </section>
+}

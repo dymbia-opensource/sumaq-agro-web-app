@@ -1,0 +1,28 @@
+<h2 mat-dialog-title>
+  {{ 'farming.campaigns.close-title' | translate: { season: data.season } }}
+</h2>
+
+<mat-dialog-content>
+  <p class="warning">
+    <mat-icon aria-hidden="true">lock</mat-icon>
+    {{ 'farming.campaigns.close-warning' | translate }}
+  </p>
+
+  <mat-form-field class="yield-field">
+    <mat-label>{{ 'farming.reports.actual-yield' | translate }}</mat-label>
+    <input matInput type="number" min="0" [formControl]="actualYield" />
+    <span matTextSuffix>{{ 'farming.yield-unit.' + data.yieldUnit | translate }}</span>
+    <mat-hint>{{ 'farming.campaigns.actual-yield-hint' | translate }}</mat-hint>
+    @if (actualYield.invalid) {
+      <mat-error>{{ 'farming.expense-form.positive' | translate }}</mat-error>
+    }
+  </mat-form-field>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>{{ 'common.cancel' | translate }}</button>
+  <button mat-flat-button (click)="onConfirm()">
+    <mat-icon>task_alt</mat-icon>
+    {{ 'farming.campaigns.close' | translate }}
+  </button>
+</mat-dialog-actions>

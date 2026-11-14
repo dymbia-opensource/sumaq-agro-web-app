@@ -1,0 +1,49 @@
+@if (loading()) {
+  <mat-progress-bar mode="indeterminate" [attr.aria-label]="'common.loading' | translate" />
+}
+
+<app-page-header
+  [breadcrumbs]="breadcrumbs"
+  [title]="plot()?.name ?? ('farming.plot-detail.title' | translate)"
+  [subtitle]="'farming.plot-detail.subtitle' | translate"
+>
+  @if (plot()) {
+    <div class="header-actions">
+      <a mat-stroked-button [routerLink]="['/plots', id(), 'boundary']">
+        <mat-icon>polyline</mat-icon>
+        {{ 'farming.plots.delineate' | translate }}
+      </a>
+      <button mat-flat-button (click)="onViewOnDashboard()">
+        <mat-icon>home</mat-icon>
+        {{ 'farming.plots.view-on-dashboard' | translate }}
+      </button>
+    </div>
+  }
+</app-page-header>
+
+@if (error(); as error) {
+  <app-message-card icon="error" [message]="error | translate" [alert]="true" />
+}
+
+@if (plot(); as plot) {
+  <div class="detail-grid">
+    <app-plot-polygon-viewer [coordinates]="plot.boundary" />
+    <div class="side">
+      <app-farmer-advisory-panel [plotId]="id()" [owned]="true" />
+      <app-plot-cadastre-card [plot]="plot" [campaign]="campaign()" />
+      <app-soil-baseline-card
+        [soilBaseline]="plot.soilBaseline"
+        [cropType]="campaign()?.cropType"
+        [recordLink]="['/plots', id(), 'soil']"
+      />
+    </div>
+  </div>
+} @else if (!plotsLoading()) {
+  <app-message-card icon="search_off" [message]="'farming.plot-detail.not-found' | translate">
+    <mat-card-actions align="end">
+      <a mat-flat-button routerLink="/plots">
+        {{ 'farming.finances.select-plot' | translate }}
+      </a>
+    </mat-card-actions>
+  </app-message-card>
+}

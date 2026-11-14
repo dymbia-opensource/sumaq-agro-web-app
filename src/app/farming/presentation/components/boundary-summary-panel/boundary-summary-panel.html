@@ -1,0 +1,73 @@
+<mat-card appearance="outlined" class="summary-card">
+  <mat-card-header>
+    <mat-card-title>{{ 'farming.boundary.summary' | translate }}</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <dl class="summary-data">
+      <dt>{{ 'farming.boundary.plot' | translate }}:</dt>
+      <dd>{{ plot()?.name }}</dd>
+      <dt>{{ 'farming.plots.crop' | translate }}:</dt>
+      <dd>{{ campaign()?.seedVariety }}</dd>
+    </dl>
+
+    <mat-divider />
+
+    <h3>{{ 'farming.boundary.coordinates' | translate }}</h3>
+    @if (coordinates().length === 0) {
+      <p class="empty">{{ 'farming.boundary.no-vertices' | translate }}</p>
+    } @else {
+      <ol class="coordinates">
+        @for (vertex of coordinates(); track $index) {
+          <li>
+            <strong>V{{ $index + 1 }}:</strong>
+            {{ vertex.latitude | number: '1.4-4' }}, {{ vertex.longitude | number: '1.4-4' }}
+          </li>
+        }
+      </ol>
+    }
+
+    <mat-divider />
+
+    <h3>{{ 'farming.boundary.area' | translate }}</h3>
+    <p class="area" [class.area-invalid]="status() === 'CROSSED'">
+      {{ areaHectares() | number: '1.0-2' }} {{ 'farming.plots.hectares' | translate }}
+    </p>
+    @if (plot(); as plot) {
+      @if (!plot.hasPolygon() && plot.areaHectares > 0) {
+        <p class="declared">
+          {{
+            'farming.boundary.declared' | translate: { area: (plot.areaHectares | number: '1.0-2') }
+          }}
+        </p>
+      }
+    }
+
+    <h3>{{ 'farming.boundary.status' | translate }}</h3>
+    <mat-chip-set>
+      <mat-chip [disableRipple]="true" [class]="'polygon-' + status()">
+        <mat-icon matChipAvatar>{{ statusIcon() }}</mat-icon>
+        {{ 'farming.boundary.polygon-' + status() | translate }}
+      </mat-chip>
+    </mat-chip-set>
+
+    <div class="summary-actions">
+      <button mat-stroked-button (click)="undo.emit()" [disabled]="coordinates().length === 0">
+        <mat-icon>undo</mat-icon>
+        {{ 'farming.boundary.undo' | translate }}
+      </button>
+      <button mat-stroked-button (click)="clear.emit()" [disabled]="coordinates().length === 0">
+        <mat-icon>layers_clear</mat-icon>
+        {{ 'farming.boundary.clear' | translate }}
+      </button>
+      <button
+        mat-flat-button
+        class="save"
+        (click)="save.emit()"
+        [disabled]="status() !== 'CLOSED' || saving()"
+      >
+        <mat-icon>satellite_alt</mat-icon>
+        {{ 'farming.boundary.save' | translate }}
+      </button>
+    </div>
+  </mat-card-content>
+</mat-card>

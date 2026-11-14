@@ -1,0 +1,41 @@
+@if (loading()) {
+  <mat-progress-bar mode="indeterminate" [attr.aria-label]="'common.loading' | translate" />
+}
+
+<app-page-header
+  [breadcrumbs]="breadcrumbs"
+  [title]="'farming.plots.title' | translate"
+  [subtitle]="
+    (plotQuotaReady() ? 'farming.plots.subtitle' : 'farming.plots.quota-checking')
+      | translate: { used: plotCount(), quota: plotQuota() }
+  "
+/>
+
+<app-plot-quota-summary [showRefresh]="false" />
+
+@if (error(); as error) {
+  <app-message-card icon="error" [message]="error | translate" [alert]="true" />
+}
+
+<section class="plot-grid" [attr.aria-label]="'farming.plots.title' | translate">
+  <!-- Registered plots (US-28) -->
+  @for (plot of plots(); track plot.id; let index = $index) {
+    <app-plot-card
+      [plot]="plot"
+      [campaign]="campaigns().get(plot.id)"
+      [position]="index + 1"
+      [deletionDisabled]="loading() || !ownedPlotsReady()"
+      (viewOnDashboard)="onSelectPlot($event)"
+      (viewMonitoring)="onViewMonitoring($event)"
+      (delineate)="onDelineate($event)"
+      (viewDetail)="onViewDetail($event)"
+      (recordSoil)="onRecordSoil($event)"
+      (remove)="onDeletePlot($event)"
+    />
+  }
+
+  <!-- Free slots of the plan (US-22) -->
+  @for (number of freeSlots(); track number) {
+    <app-plot-slot-card [position]="number" (register)="onRegisterNewPlot()" />
+  }
+</section>

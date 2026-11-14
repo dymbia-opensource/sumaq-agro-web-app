@@ -1,0 +1,51 @@
+@if (loading()) {
+  <mat-progress-bar mode="indeterminate" [attr.aria-label]="'common.loading' | translate" />
+}
+
+<app-page-header
+  [breadcrumbs]="breadcrumbs"
+  [title]="'farming.campaigns.title' | translate"
+  [subtitle]="plot() ? ('farming.campaigns.subtitle' | translate: subtitleParams()) : ''"
+>
+  @if (plot() && !hasCampaignInProgress()) {
+    <a mat-flat-button class="start" routerLink="new">
+      <mat-icon>add</mat-icon>
+      {{ 'farming.campaigns.new' | translate }}
+    </a>
+  }
+</app-page-header>
+
+@if (error(); as error) {
+  <app-message-card icon="error" [message]="error | translate" [alert]="true" />
+}
+
+@if (plot()) {
+  @if (hasCampaignInProgress()) {
+    <app-message-card icon="info" [message]="'farming.campaigns.one-in-progress' | translate" />
+  }
+
+  <section class="campaign-list" [attr.aria-label]="'farming.campaigns.title' | translate">
+    @for (summary of summaries(); track summary.campaignId) {
+      <app-campaign-summary-card
+        [summary]="summary"
+        [saving]="loading()"
+        (closeCampaign)="onClose($event)"
+        (exportReport)="onExport($event)"
+      />
+    } @empty {
+      <app-message-card icon="agriculture" [message]="'farming.campaigns.empty' | translate">
+        <mat-card-actions align="end">
+          <a mat-flat-button routerLink="new">{{ 'farming.campaigns.new' | translate }}</a>
+        </mat-card-actions>
+      </app-message-card>
+    }
+  </section>
+} @else if (!loading()) {
+  <app-message-card icon="grid_view" [message]="'farming.finances.no-ledger' | translate">
+    <mat-card-actions align="end">
+      <a mat-flat-button routerLink="/plots">
+        {{ 'farming.finances.select-plot' | translate }}
+      </a>
+    </mat-card-actions>
+  </app-message-card>
+}

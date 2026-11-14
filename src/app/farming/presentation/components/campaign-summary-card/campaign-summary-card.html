@@ -1,0 +1,82 @@
+@let item = summary();
+@let unit = 'farming.yield-unit.' + item.yieldUnit | translate;
+
+<mat-card appearance="outlined" class="summary-card" [class.active]="item.isActive">
+  <mat-card-header>
+    <mat-icon mat-card-avatar>{{ item.isActive ? 'agriculture' : 'inventory_2' }}</mat-icon>
+    <mat-card-title>
+      {{ 'farming.dashboard.campaign' | translate }} {{ item.season }}
+    </mat-card-title>
+    <mat-card-subtitle>
+      {{ 'farming.crop-type.' + item.cropType | translate }} – {{ item.seedVariety }}
+    </mat-card-subtitle>
+    <mat-chip-set class="status">
+      <mat-chip [disableRipple]="true" [highlighted]="item.isActive">
+        {{ 'farming.campaign-status.' + item.status | translate }}
+      </mat-chip>
+    </mat-chip-set>
+  </mat-card-header>
+
+  <mat-card-content>
+    <dl class="figures">
+      <div>
+        <dt>{{ 'farming.campaigns.sowing-date' | translate }}</dt>
+        <dd>
+          {{
+            item.sowingDate
+              ? (item.sowingDate | date: 'mediumDate')
+              : ('farming.campaigns.not-sown' | translate)
+          }}
+        </dd>
+      </div>
+      <div>
+        <dt>{{ 'farming.finances.total-invested' | translate }}</dt>
+        <dd>{{ item.totalInvestment.format() }}</dd>
+      </div>
+      <div>
+        <dt>{{ 'farming.reports.cost-per-hectare' | translate }}</dt>
+        <dd>{{ item.costPerHectare.format() }}</dd>
+      </div>
+      <div>
+        <dt>{{ 'farming.finances.breakeven-title' | translate }}</dt>
+        <dd>{{ item.breakevenPrice.format() }}</dd>
+      </div>
+      <div>
+        <dt>{{ 'farming.finances.expected-yield' | translate }}</dt>
+        <dd>{{ item.expectedYield | number: '1.0-2' }} {{ unit }}</dd>
+      </div>
+      <div>
+        <dt>{{ 'farming.reports.actual-yield' | translate }}</dt>
+        <dd>
+          @if (item.actualYield !== null) {
+            {{ item.actualYield | number: '1.0-2' }} {{ unit }}
+            @if (item.yieldAchievement; as achievement) {
+              <span class="achievement">({{ achievement | number: '1.0-0' }}%)</span>
+            }
+          } @else {
+            —
+          }
+        </dd>
+      </div>
+    </dl>
+    <p class="expenses">
+      {{ 'farming.campaigns.expense-count' | translate: { count: item.expenseCount } }}
+    </p>
+  </mat-card-content>
+
+  <mat-divider />
+  <mat-card-actions align="end">
+    @if (item.ledgerId !== null) {
+      <button mat-button (click)="exportReport.emit(item)">
+        <mat-icon>download</mat-icon>
+        {{ 'farming.reports.export' | translate }}
+      </button>
+    }
+    @if (item.isActive) {
+      <button mat-flat-button [disabled]="saving()" (click)="closeCampaign.emit(item)">
+        <mat-icon>task_alt</mat-icon>
+        {{ 'farming.campaigns.close' | translate }}
+      </button>
+    }
+  </mat-card-actions>
+</mat-card>

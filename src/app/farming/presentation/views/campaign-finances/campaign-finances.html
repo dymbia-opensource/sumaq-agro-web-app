@@ -1,0 +1,82 @@
+@if (loading()) {
+  <mat-progress-bar mode="indeterminate" [attr.aria-label]="'common.loading' | translate" />
+}
+
+<app-page-header
+  [breadcrumbs]="breadcrumbs"
+  [title]="'option.expenses' | translate"
+  [subtitle]="plot() ? ('farming.finances.subtitle' | translate: subtitleParams()) : ''"
+>
+  <div class="header-actions">
+    <a mat-stroked-button class="register" routerLink="/campaigns">
+      <mat-icon>event_note</mat-icon>
+      {{ 'farming.campaigns.title' | translate }}
+    </a>
+    @if (ledger()) {
+      <a mat-stroked-button class="register" routerLink="reports">
+        <mat-icon>analytics</mat-icon>
+        {{ 'farming.reports.title' | translate }}
+      </a>
+    }
+    @if (ledger() && !ledger()!.frozen) {
+      <button mat-flat-button class="register" [matMenuTriggerFor]="expenseMenu">
+        <mat-icon>add</mat-icon>
+        {{ 'farming.finances.register-expense' | translate }}
+      </button>
+      <mat-menu #expenseMenu="matMenu">
+        @for (item of expenseLinks; track item.link) {
+          <a mat-menu-item [routerLink]="item.link">
+            <mat-icon>{{ item.icon }}</mat-icon>
+            {{ item.label | translate }}
+          </a>
+        }
+      </mat-menu>
+    }
+  </div>
+</app-page-header>
+
+<app-offline-sync-banner
+  [online]="online()"
+  [pending]="pendingExpenseCount()"
+  [syncing]="syncing()"
+  (sync)="onSync()"
+/>
+
+@if (error(); as error) {
+  <app-message-card icon="error" [message]="error | translate" [alert]="true" />
+}
+
+@if (ledger(); as ledger) {
+  @if (ledger.frozen) {
+    <app-message-card icon="lock" [message]="'farming.finances.ledger-closed' | translate" />
+  }
+
+  <app-ledger-summary-cards
+    [ledger]="ledger"
+    role="region"
+    [attr.aria-label]="'farming.finances.summary' | translate"
+  />
+
+  <div class="finances-grid">
+    <div class="expense-history">
+      <app-expense-category-filter
+        [selected]="categoryFilter()"
+        (selectedChange)="categoryFilter.set($event)"
+      />
+      <app-expense-list [entries]="expenseHistory()" />
+    </div>
+    <app-breakeven-panel
+      [ledger]="ledger"
+      [saving]="loading()"
+      (expectedYieldChange)="onExpectedYieldChange($event)"
+    />
+  </div>
+} @else if (!loading()) {
+  <app-message-card icon="receipt_long" [message]="'farming.finances.no-ledger' | translate">
+    <mat-card-actions align="end">
+      <a mat-flat-button routerLink="/plots">
+        {{ 'farming.finances.select-plot' | translate }}
+      </a>
+    </mat-card-actions>
+  </app-message-card>
+}

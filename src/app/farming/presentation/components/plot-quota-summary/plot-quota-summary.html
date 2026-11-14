@@ -1,0 +1,44 @@
+<section [attr.aria-label]="'farming.plots.plan-title' | translate">
+  @if (store.plotQuotaReady()) {
+    <p aria-live="polite">
+      <strong>{{
+        'farming.plots.quota-usage'
+          | translate: { used: store.plotCount(), quota: store.plotQuota() }
+      }}</strong>
+    </p>
+    <mat-progress-bar
+      mode="determinate"
+      [value]="(store.plotCount() / store.plotQuota()) * 100"
+      [attr.aria-label]="
+        'farming.plots.quota-usage'
+          | translate: { used: store.plotCount(), quota: store.plotQuota() }
+      "
+    />
+    <p>
+      {{ 'farming.plots.quota-remaining' | translate: { remaining: store.remainingPlotSlots() } }}
+    </p>
+    <p>{{ 'farming.plots.quota-counting' | translate }}</p>
+    @if (store.plotQuotaReached()) {
+      <p role="status">
+        {{ 'farming.plots.plan-full' | translate: { quota: store.plotQuota() } }}
+      </p>
+    }
+    @if (showRefresh()) {
+      <button mat-button (click)="refresh()" [disabled]="store.loading()">
+        {{ 'farming.plots.quota-refresh' | translate }}
+      </button>
+    }
+  } @else {
+    <p role="status">
+      {{
+        (store.loading() || checkingPlan()
+          ? 'farming.plots.quota-checking'
+          : 'farming.errors.quota-unavailable'
+        ) | translate
+      }}
+    </p>
+    @if (!store.loading() && !checkingPlan() && store.currentUserId() !== null) {
+      <button mat-stroked-button (click)="refresh()">{{ 'common.retry' | translate }}</button>
+    }
+  }
+</section>

@@ -1,0 +1,69 @@
+<mat-card appearance="outlined" class="soil-card">
+  <mat-card-header>
+    <mat-icon mat-card-avatar>landslide</mat-icon>
+    <mat-card-title>{{ 'farming.soil.title' | translate }}</mat-card-title>
+    @if (soilBaseline(); as soil) {
+      <mat-card-subtitle>
+        {{
+          'farming.soil.recorded-at' | translate: { date: (soil.recordedAt | date: 'mediumDate') }
+        }}
+      </mat-card-subtitle>
+    }
+  </mat-card-header>
+
+  <mat-card-content>
+    @if (soilBaseline(); as soil) {
+      <dl class="values">
+        <div>
+          <dt>{{ 'farming.soil.ph' | translate }}</dt>
+          <dd>{{ soil.ph | number: '1.1-2' }}</dd>
+        </div>
+        <div>
+          <dt>{{ 'farming.soil.texture' | translate }}</dt>
+          <dd>{{ 'farming.soil-texture.' + soil.texture | translate }}</dd>
+        </div>
+        <div>
+          <dt>{{ 'farming.soil.organic-matter' | translate }}</dt>
+          <dd>{{ soil.organicMatterPercentage | number: '1.1-2' }} %</dd>
+        </div>
+      </dl>
+
+      <ul class="advice">
+        @if (cropType(); as crop) {
+          @if (needsLiming(soil, crop)) {
+            <li class="warn">
+              <mat-icon aria-hidden="true">warning</mat-icon>
+              {{
+                'farming.soil.needs-liming'
+                  | translate: { crop: ('farming.crop-type.' + crop | translate) }
+              }}
+            </li>
+          } @else {
+            <li>
+              <mat-icon aria-hidden="true">check_circle</mat-icon>
+              {{
+                'farming.soil.ph-ok'
+                  | translate: { crop: ('farming.crop-type.' + crop | translate) }
+              }}
+            </li>
+          }
+        }
+        @if (isLowInOrganicMatter(soil)) {
+          <li class="warn">
+            <mat-icon aria-hidden="true">compost</mat-icon>
+            {{ 'farming.soil.low-organic-matter' | translate }}
+          </li>
+        }
+      </ul>
+    } @else {
+      <p class="empty">{{ 'farming.soil.empty' | translate }}</p>
+    }
+  </mat-card-content>
+
+  <mat-card-actions align="end">
+    <a mat-stroked-button [routerLink]="recordLink()">
+      <mat-icon>science</mat-icon>
+      {{ (soilBaseline() ? 'farming.soil.update' : 'farming.soil.record') | translate }}
+    </a>
+  </mat-card-actions>
+</mat-card>
