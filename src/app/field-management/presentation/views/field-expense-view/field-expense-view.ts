@@ -19,7 +19,7 @@ import {
 import { EXPENSE_CATEGORY_ICONS } from '../../components/ledger-summary-cards/ledger-summary-cards';
 import { OfflineSyncBanner } from '../../components/offline-sync-banner/offline-sync-banner';
 
-const FINANCES_ROUTE = '/field-management/finances';
+const FINANCES_ROUTE = '/finances';
 
 /** Registers an expense of the active campaign; each expense type has its own route (US-37 to US-39). */
 @Component({

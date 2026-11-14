@@ -1,5 +1,5 @@
 @if (caseId) {
-  <a mat-button [routerLink]="['/crop-health/reports', caseId]">{{
+  <a mat-button [routerLink]="['/pest-reports', caseId]">{{
     'crop-health.case.open' | translate
   }}</a>
 }
@@ -8,7 +8,7 @@
   <h1>{{ 'crop-health.inspections-title' | translate }}</h1>
 </header>
 <nav class="back-nav">
-  <a mat-stroked-button routerLink="/crop-health/inbox">{{
+  <a mat-stroked-button routerLink="/pest-reports">{{
     'crop-health.inbox-title' | translate
   }}</a>
 </nav>

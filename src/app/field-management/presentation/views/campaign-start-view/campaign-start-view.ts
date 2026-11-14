@@ -15,7 +15,7 @@ import { StartCropCampaignCommand } from '../../../domain/model/commands/start-c
 import { CropType } from '../../../domain/model/entities/crop-campaign.entity';
 import { CampaignForm, CampaignFormData } from '../../components/campaign-form/campaign-form';
 
-const CAMPAIGNS_ROUTE = '/field-management/campaigns';
+const CAMPAIGNS_ROUTE = '/campaigns';
 
 /**
  * Starts a new campaign on the selected plot once the previous one is closed

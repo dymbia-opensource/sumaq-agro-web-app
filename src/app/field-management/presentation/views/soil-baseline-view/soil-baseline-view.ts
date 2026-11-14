@@ -42,8 +42,8 @@ export class SoilBaselineView {
   // UI state
   readonly breadcrumbs = computed<Breadcrumb[]>(() => [
     { label: 'option.my-plot', link: '/dashboard' },
-    { label: 'field-management.plots.manage', link: '/field-management/plots' },
-    { label: 'field-management.plot-detail.title', link: `/field-management/plots/${this.id()}` },
+    { label: 'field-management.plots.manage', link: '/plots' },
+    { label: 'field-management.plot-detail.title', link: `/plots/${this.id()}` },
     { label: 'field-management.soil.title' },
   ]);
 
@@ -56,6 +56,6 @@ export class SoilBaselineView {
   }
 
   onCancel() {
-    this.router.navigate(['/field-management/plots', this.id()]).then();
+    this.router.navigate(['/plots', this.id()]).then();
   }
 }

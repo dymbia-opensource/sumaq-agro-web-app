@@ -2,7 +2,7 @@
   [title]="'crop-health.case.title' | translate"
   [subtitle]="'crop-health.case.subtitle' | translate"
 >
-  <a mat-stroked-button routerLink="/crop-health/inbox">
+  <a mat-stroked-button routerLink="/pest-reports">
     <span aria-hidden="true">←</span> {{ 'crop-health.case.back' | translate }}
   </a>
 </app-page-header>
@@ -39,7 +39,7 @@
           @if (store.canSchedule() && report.status === 'PENDING') {
             <a
               mat-stroked-button
-              routerLink="/crop-health/inspections"
+              routerLink="/inspections"
               [queryParams]="{ reportId: report.id }"
               >{{ 'crop-health.inspections-title' | translate }}</a
             >
@@ -47,7 +47,7 @@
           @if (store.canPrescribe() && report.status === 'INSPECTED') {
             <a
               mat-stroked-button
-              routerLink="/crop-health/prescribe"
+              routerLink="/prescriptions/new"
               [queryParams]="{ reportId: report.id }"
               >{{ 'crop-health.btn-prescribe' | translate }}</a
             >

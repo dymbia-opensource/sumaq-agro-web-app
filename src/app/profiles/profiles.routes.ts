@@ -15,7 +15,6 @@ export const profilesRoutes: Routes = [
     loadComponent: farmerSettingsView,
     title: 'Configuración y ayuda | SumaqAgro',
   },
-  { path: 'cooperative/dashboard', redirectTo: '/cooperative/dashboard', pathMatch: 'full' },
   {
     path: 'cooperative/registration',
     canActivate: [iamGuard],
@@ -43,5 +42,4 @@ export const profilesRoutes: Routes = [
     title: 'Expediente del socio | SumaqAgro',
   },
   { path: 'cooperative/settings', loadComponent: cooperativeSettingsView, title: 'Configuración institucional | SumaqAgro' },
-  { path: '', redirectTo: '/cooperative/dashboard', pathMatch: 'full' },
 ];

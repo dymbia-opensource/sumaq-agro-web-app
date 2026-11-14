@@ -24,7 +24,7 @@
   @case ('no-cooperative') {
     <div class="panel">
       <p>{{ 'profiles.cooperative.dashboard.no-cooperative-message' | translate }}</p>
-      <a mat-flat-button routerLink="/profiles/cooperative/registration">
+      <a mat-flat-button routerLink="/cooperative/registration">
         {{ 'profiles.cooperative.dashboard.register-cooperative' | translate }}
       </a>
     </div>
@@ -62,7 +62,7 @@
       </form>
     } @else if (selected(); as member) {
       <article class="panel dossier">
-        <a mat-button routerLink="/profiles/cooperative/members" [state]="{ memberSearch: query() }">
+        <a mat-button routerLink="/cooperative/members" [state]="{ memberSearch: query() }">
           {{ 'profiles.cooperative.members.back' | translate }}
         </a>
         <h2>{{ 'profiles.cooperative.members.dossier' | translate }} · {{ member.fullName }}</h2>
@@ -199,7 +199,7 @@
     } @else if (memberId() !== null) {
       <div class="panel" role="status">
         <p>{{ 'profiles.cooperative.members.not-found' | translate }}</p>
-        <a mat-button routerLink="/profiles/cooperative/members" [state]="{ memberSearch: query() }">
+        <a mat-button routerLink="/cooperative/members" [state]="{ memberSearch: query() }">
           {{ 'profiles.cooperative.members.back' | translate }}
         </a>
       </div>

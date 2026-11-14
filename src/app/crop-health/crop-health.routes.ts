@@ -55,10 +55,8 @@ export const cropHealthRoutes: Routes = [
         loadComponent: cropHealthView,
         title: 'Crop Health – SumaqAgro | Multispectral Satellite Viewer',
       },
-      { path: 'alerts', redirectTo: '/alerts', pathMatch: 'full' },
-      { path: 'advisor', redirectTo: '/advisor', pathMatch: 'full' },
       {
-        path: 'inbox',
+        path: 'pest-reports',
         loadComponent: diagnosisInboxView,
         title: 'Diagnosis Inbox – SumaqAgro',
       },
@@ -73,13 +71,13 @@ export const cropHealthRoutes: Routes = [
         title: 'Prescriptions History – SumaqAgro',
       },
       {
-        path: 'report-pest',
+        path: 'pest-reports/new',
         data: { roles: ['FARMER'] },
         loadComponent: pestReportForm,
         title: 'Report Pest or Disease – SumaqAgro',
       },
       {
-        path: 'reports/:id',
+        path: 'pest-reports/:id',
         loadComponent: () =>
           import('./presentation/views/farmer-case-view/farmer-case-view').then(
             (m) => m.FarmerCaseView,
@@ -87,12 +85,11 @@ export const cropHealthRoutes: Routes = [
         title: 'Incident follow-up – SumaqAgro',
       },
       {
-        path: 'prescribe',
+        path: 'prescriptions/new',
         data: { roles: ['AGRONOMIST'] },
         loadComponent: prescriptionForm,
         title: 'Issue Technical Prescription – SumaqAgro',
       },
-      { path: '', redirectTo: 'monitoring', pathMatch: 'full' },
     ],
   },
 ];

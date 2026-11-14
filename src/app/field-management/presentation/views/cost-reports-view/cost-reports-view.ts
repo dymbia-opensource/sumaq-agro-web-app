@@ -49,7 +49,7 @@ export class CostReportsView {
   // UI state
   protected readonly breadcrumbs: Breadcrumb[] = [
     { label: 'option.my-plot', link: '/dashboard' },
-    { label: 'option.expenses', link: '/field-management/finances' },
+    { label: 'option.expenses', link: '/finances' },
     { label: 'field-management.reports.title' },
   ];
 

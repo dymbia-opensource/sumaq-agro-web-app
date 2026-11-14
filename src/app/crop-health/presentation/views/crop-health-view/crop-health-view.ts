@@ -89,7 +89,7 @@ export class CropHealthView implements AfterViewInit, OnDestroy {
     this.baseLayers[this.selectedBase].addTo(map);
   }
   onLayerChange(): void { this.drawSector(); }
-  consultAgronomist(): void { void this.router.navigate(['/crop-health/inbox']); }
+  consultAgronomist(): void { void this.router.navigate(['/pest-reports']); }
   async downloadImage(): Promise<void> {
     const plot = this.store.selectedPlot();
     const observation = this.store.latestObservation();

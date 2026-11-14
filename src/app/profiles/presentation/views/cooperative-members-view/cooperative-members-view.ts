@@ -275,7 +275,7 @@ export class CooperativeMembersView {
           this.retry();
           return;
         }
-        void this.router.navigate(['/profiles/cooperative/members', member.id], {
+        void this.router.navigate(['/cooperative/members', member.id], {
           state: { memberSearch: this.query() },
         });
       },

@@ -1,6 +1,6 @@
 <header class="view-header"><span class="breadcrumb">{{ 'crop-health.clinical-eyebrow' | translate }}</span><h1>{{ 'crop-health.history-title' | translate }}</h1></header>
 @if (store.writeError(); as error) { <p role="alert">{{ error | translate }}</p> }
-<nav class="back-nav"><a mat-stroked-button routerLink="/crop-health/inbox">{{ 'crop-health.inbox-title' | translate }}</a></nav>
+<nav class="back-nav"><a mat-stroked-button routerLink="/pest-reports">{{ 'crop-health.inbox-title' | translate }}</a></nav>
 @if (store.clinicalLoading() || store.saving()) {
   <mat-progress-bar mode="indeterminate" [attr.aria-label]="'common.loading' | translate" />
 }

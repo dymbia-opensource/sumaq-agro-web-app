@@ -61,7 +61,6 @@ export const fieldManagementRoutes: Routes = [
     path: '',
     providers: [provideCharts(withDefaultRegisterables())],
     children: [
-      { path: 'dashboard', redirectTo: '/dashboard', pathMatch: 'full' },
       { path: 'plots', loadComponent: registeredPlotsView, title: `My Plots – ${baseTitle}` },
       {
         path: 'plots/new',
@@ -111,7 +110,6 @@ export const fieldManagementRoutes: Routes = [
         title: `Register a Freight Expense – ${baseTitle}`,
       },
       { path: 'finances/expenses/new', redirectTo: 'finances/expenses/new/inputs', pathMatch: 'full' },
-      { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
     ],
   },
 ];

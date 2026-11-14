@@ -35,7 +35,7 @@ const ROLE_PRIORITY: readonly UserRole[] = ['COOPERATIVE_DIRECTOR', 'AGRONOMIST'
 const INITIAL_ROUTES: Record<UserRole, string> = {
   FARMER: '/dashboard',
   COOPERATIVE_DIRECTOR: '/cooperative/dashboard',
-  AGRONOMIST: '/crop-health/inbox',
+  AGRONOMIST: '/pest-reports',
 };
 /**
  * Holds IAM state and orchestrates authentication operations.

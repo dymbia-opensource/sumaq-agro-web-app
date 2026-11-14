@@ -3,7 +3,7 @@
   [subtitle]="(store.canReport() ? 'crop-health.consult-subtitle' : 'crop-health.inbox-subtitle') | translate"
 >
   @if (store.canReport()) {
-    <a mat-flat-button routerLink="/crop-health/report-pest">
+    <a mat-flat-button routerLink="/pest-reports/new">
       <mat-icon aria-hidden="true">add</mat-icon>{{ 'crop-health.new-report' | translate }}
     </a>
   }
@@ -15,17 +15,17 @@
       <h2 id="reports-title">{{ 'option.diagnosis-inbox' | translate }}</h2>
       <div class="workspace-actions">
         @if (store.canPrescribe()) {
-          <a mat-stroked-button routerLink="/crop-health/assigned-plots">{{
+          <a mat-stroked-button routerLink="/assigned-plots">{{
             'crop-health.advisor.plots' | translate
           }}</a>
         }
         <button mat-button (click)="reload()" [disabled]="store.loading() || store.saving()">
           {{ 'crop-health.advisor.refresh' | translate }}
         </button>
-        <a mat-stroked-button routerLink="/crop-health/inspections">{{
+        <a mat-stroked-button routerLink="/inspections">{{
           'crop-health.inspections-title' | translate
         }}</a>
-        <a mat-stroked-button routerLink="/crop-health/prescriptions">{{
+        <a mat-stroked-button routerLink="/prescriptions">{{
           'crop-health.history-title' | translate
         }}</a>
       </div>
@@ -116,7 +116,7 @@
                 </mat-card-content>
               </div>
               <mat-card-actions>
-                <a mat-stroked-button [routerLink]="['/crop-health/reports', report.id]">{{
+                <a mat-stroked-button [routerLink]="['/pest-reports', report.id]">{{
                   'crop-health.case.open' | translate
                 }}</a>
                 @if (store.canDeleteReport(+report.id)) {
@@ -141,7 +141,7 @@
                 @if (store.canSchedule() && report.status === 'PENDING') {
                   <a
                     mat-flat-button
-                    routerLink="/crop-health/inspections"
+                    routerLink="/inspections"
                     [queryParams]="{ reportId: report.id }"
                     >{{ 'crop-health.schedule-inspection' | translate }}</a
                   >
@@ -149,7 +149,7 @@
                 @if (store.canPrescribe() && report.status === 'INSPECTED') {
                   <a
                     mat-stroked-button
-                    routerLink="/crop-health/prescribe"
+                    routerLink="/prescriptions/new"
                     [queryParams]="{ reportId: report.id }"
                     >{{ 'crop-health.btn-prescribe' | translate }}</a
                   >
@@ -157,7 +157,7 @@
                 @if (store.canAssess(+report.id)) {
                   <a
                     mat-stroked-button
-                    [routerLink]="['/crop-health/reports', report.id]"
+                    [routerLink]="['/pest-reports', report.id]"
                     fragment="assessment"
                     >{{ 'crop-health.advisor.evaluate' | translate }}</a
                   >
