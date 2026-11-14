@@ -1,5 +1,5 @@
 {
-  "field-management": {
+  "farming": {
     "dashboard": {
       "welcome": "Welcome!",
       "good-morning": "Good morning, {{ name }}!",
@@ -105,7 +105,8 @@
       "declared-area": "Estimated Area (Declared)",
       "positive": "Enter a value greater than zero.",
       "cancel": "Cancel / Back",
-      "next-step-hint": "In the next step you will mark the corners of your land on the satellite map."
+      "next-step-hint": "In the next step you will mark the corners of your land on the satellite map.",
+      "tab-title": "Register a plot"
     },
     "boundary": {
       "title": "Delineate Land",

@@ -1,10 +1,7 @@
 {
-  "harvest-certification": {
+  "certification": {
     "page-title": "Official certificates",
     "loading": "Loading certificates",
-    "home": "Home",
-    "quality-improvement": "Quality and improvement",
-    "official-certificates": "Official certificates",
     "title": "Official certificates of origin and quality",
     "subtitle": "Auditable record of graded batches with public traceability",
     "campaign": "Season",

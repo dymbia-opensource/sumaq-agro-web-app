@@ -111,7 +111,15 @@
         "pending": "Coming soon",
         "no-cooperative-title": "You have not registered a cooperative yet",
         "no-cooperative-message": "Register the institutional details to start managing your members.",
-        "register-cooperative": "Register cooperative"
+        "register-cooperative": "Register cooperative",
+        "tab-title": "Institutional dashboard"
+      },
+      "supervision": {
+        "in-charge": "Supervised by",
+        "none": "Without an assigned advisor.",
+        "assign": "Assign",
+        "release": "Remove assignment",
+        "no-team": "Invite agronomists with a linked account to assign supervision."
       }
     },
     "settings": {
@@ -239,7 +247,8 @@
         "save": "Assignment could not be saved. Your selection is preserved for retry.",
         "denied": "You may only assign available advisors to your own plots.",
         "conflict": "Duplicate assignments were found for this plot. Request a data review."
-      }
+      },
+      "by-director": "The board of your cooperative assigns the advisor of each plot."
     }
   }
 }

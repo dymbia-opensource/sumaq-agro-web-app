@@ -1,5 +1,5 @@
 {
-  "field-management": {
+  "farming": {
     "dashboard": {
       "welcome": "¡Te damos la bienvenida!",
       "good-morning": "¡Buen día, {{ name }}!",
@@ -105,7 +105,8 @@
       "declared-area": "Área Estimada (Declarada)",
       "positive": "Ingresa un valor mayor que cero.",
       "cancel": "Cancelar / Volver",
-      "next-step-hint": "En el siguiente paso marcarás las esquinas de tu terreno en el mapa satelital."
+      "next-step-hint": "En el siguiente paso marcarás las esquinas de tu terreno en el mapa satelital.",
+      "tab-title": "Registrar parcela"
     },
     "boundary": {
       "title": "Delimitar Terreno",

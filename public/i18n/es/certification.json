@@ -1,10 +1,7 @@
 {
-  "harvest-certification": {
+  "certification": {
     "page-title": "Certificados oficiales",
     "loading": "Cargando certificados",
-    "home": "Inicio",
-    "quality-improvement": "Calidad y mejora",
-    "official-certificates": "Certificados oficiales",
     "title": "Certificados oficiales de origen y calidad",
     "subtitle": "Registro auditable de lotes calificados con trazabilidad pública",
     "campaign": "Campaña",

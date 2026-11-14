@@ -1,38 +1,5 @@
 {
-  "crop_health": {
-    "eyebrow": "Crop Health",
-    "viewer_title": "Multispectral Satellite Viewer",
-    "viewer_subtitle": "Satellite image automatically processed for your plot",
-    "change_plot": "Change Plot",
-    "layers": "LAYERS",
-    "foliage_vigor": "Foliage Vigor (NDVI)",
-    "soil_moisture": "Soil Moisture (NDWI)",
-    "satellite_diagnosis": "Satellite Diagnosis",
-    "updated_ago": "Updated",
-    "avg_vigor": "Average Vigor",
-    "stress_detected": "Stress Detected",
-    "recommendation": "RECOMMENDATION",
-    "btn_consult": "Consult the advisor",
-    "btn_download": "Download PDF Data Sheet",
-    "legend_critical": "Critical",
-    "legend_stress": "Water Stress",
-    "legend_optimum": "Optimum",
-    "good": "Good",
-    "ha": "Ha",
-    "alerts_title": "Agroclimatic Alerts",
-    "no_alerts": "No active alerts at this moment. Everything is safe!",
-    "region": "Region",
-    "form_title": "Report a Pest / Disease",
-    "form_describe": "Describe the pest or symptoms",
-    "form_severity": "Severity",
-    "form_photo": "Photo URL",
-    "btn_send_report": "Send Report to Agronomist",
-    "severity_low": "Low (Few plants affected)",
-    "severity_medium": "Medium (Spread across a sector)",
-    "severity_high": "High (Spreading rapidly, severe damage)",
-    "desc_required": "Description is required"
-  },
-  "crop-health": {
+  "crop": {
     "eyebrow": "Satellite Monitoring",
     "viewer-title": "Crop Health",
     "viewer-subtitle": "Multispectral analysis of the latest image",
@@ -67,11 +34,10 @@
     "form-severity": "Severity",
     "form-title": "Pest Report",
     "history-title": "Prescription History",
-    "inbox-subtitle": "Pending diagnoses inbox",
+    "inbox-subtitle": "Review pest reports and follow up on inspections and prescriptions.",
     "inbox-title": "Diagnosis Inbox",
     "consult-title": "Consult your advisor",
     "consult-subtitle": "Report crop issues, check your plot’s advisor, and track your cases.",
-    "inbox-subtitle": "Review pest reports and follow up on inspections and prescriptions.",
     "inspections-title": "Field Inspections",
     "no-alerts": "No alerts are recorded for this region.",
     "no-observations": "No satellite observations are available for this plot.",
@@ -243,6 +209,7 @@
       "save-evaluation": "Record evaluation",
       "awaiting-evidence": "Waiting for farmer application and evolution records for the same prescription.",
       "evaluation-saved": "Evaluation saved. The case status reflects the recorded conclusion."
-    }
+    },
+    "plot-selector": "Plot selector"
   }
 }
