@@ -16,11 +16,11 @@
   "
 >
   <div class="header-actions">
-    <a mat-stroked-button class="view-plots" routerLink="/field-management/campaigns">
+    <a mat-stroked-button class="view-plots" routerLink="/campaigns">
       <mat-icon>event_note</mat-icon>
       {{ 'field-management.campaigns.title' | translate }}
     </a>
-    <a mat-flat-button class="view-plots" routerLink="/field-management/plots">
+    <a mat-flat-button class="view-plots" routerLink="/plots">
       <mat-icon>grid_view</mat-icon>
       {{ 'field-management.dashboard.view-all-plots' | translate }}
     </a>
@@ -46,7 +46,7 @@
     [message]="'field-management.dashboard.no-plots' | translate"
   >
     <mat-card-actions align="end">
-      <a mat-flat-button routerLink="/field-management/plots/new">
+      <a mat-flat-button routerLink="/plots/new">
         <mat-icon>add</mat-icon>
         {{ 'field-management.dashboard.register-plot' | translate }}
       </a>

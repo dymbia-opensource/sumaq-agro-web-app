@@ -15,29 +15,28 @@ const checkoutPages: Routes = [
     loadComponent: () => import('./presentation/views/checkout-view/checkout-view').then((m) => m.CheckoutView),
     title: 'Pago | SumaqAgro',
   },
-  { path: '',
-    redirectTo: 'plans',
-    pathMatch: 'full'
-  },
 ];
 
 /** Lazy-loaded routes for the Subscriptions and Payments context. */
 export const subscriptionsRoutes: Routes = [
-  {
-    path: '',
-    component: SubscriptionsShell,
-    children: checkoutPages,
-  },
+  { path: 'billing', redirectTo: '', pathMatch: 'full' },
   {
     // Subscription management keeps the app shell (side menu and top bar).
     path: '',
+    pathMatch: 'full',
     loadComponent: layout,
     children: [
       {
-        path: 'billing',
+        path: '',
+        pathMatch: 'full',
         loadComponent: () => import('./presentation/views/billing-history-view/billing-history-view').then((m) => m.BillingHistoryView,),
         title: 'Suscripción y pagos | SumaqAgro',
       },
     ],
+  },
+  {
+    path: '',
+    component: SubscriptionsShell,
+    children: checkoutPages,
   },
 ];

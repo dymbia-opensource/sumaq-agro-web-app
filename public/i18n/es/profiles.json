@@ -1,6 +1,49 @@
 {
   "profiles": {
     "cooperative": {
+      "members": {
+        "demo-account": "Cuenta de agricultor de prueba",
+        "link-account": "Vincular cuenta",
+        "link-account-error": "No se pudo vincular la cuenta. Verifica que no esté vinculada a otro socio de la cooperativa.",
+        "collection": "Historial de acopio",
+        "net-total": "Peso neto acumulado",
+        "net-weight": "Peso neto",
+        "no-collection": "Este socio todavía no tiene lotes de acopio registrados.",
+        "certificates": "Certificados emitidos",
+        "no-certificates": "Este socio todavía no tiene certificados emitidos.",
+        "verify-certificate": "Verificar certificado",
+        "certificate-ACTIVE": "Vigente",
+        "certificate-REVOKED": "Revocado",
+        "edit": "Editar datos del socio",
+        "link-plot": "Añadir lote",
+        "no-linkable-plots": "No hay parcelas delimitadas disponibles para vincular.",
+        "link-error": "No se pudo vincular la parcela. Comprueba que tenga una campaña activa de papa o café.",
+        "link-account-first": "El socio necesita una cuenta vinculada para incorporar sus parcelas.",
+        "not-found": "No encontramos ese socio en el padrón de tu cooperativa.",
+        "title": "Padrón de socios",
+        "subtitle": "Consulta los socios y las parcelas vinculadas a tu cooperativa.",
+        "search": "Buscar por nombre, DNI o código",
+        "add": "Agregar nuevo socio",
+        "new-title": "Incorporar nuevo socio",
+        "phone": "Contacto",
+        "community": "Sector",
+        "save": "Guardar",
+        "validation": "Completa el nombre, un DNI de 8 dígitos y un teléfono válido.",
+        "duplicate": "Ya existe un socio con ese DNI.",
+        "save-error": "No se pudo guardar el socio.",
+        "back": "Volver al padrón",
+        "dossier": "Expediente del socio",
+        "no-plots": "Este socio aún no tiene parcelas vinculadas.",
+        "view": "Ver",
+        "name": "Socio",
+        "status": "Estado",
+        "plots": "Parcelas",
+        "active": "Activo",
+        "inactive": "Inactivo",
+        "error": "No se pudo cargar el padrón.",
+        "empty": "Todavía no hay socios registrados.",
+        "no-results": "Ningún socio coincide con la búsqueda."
+      },
       "settings": {
         "breadcrumb": "Configuración",
         "title": "Datos institucionales",
@@ -14,6 +57,8 @@
         "address": "Dirección de sede central"
       },
       "registration": {
+        "existing": "Tu cuenta ya tiene una cooperativa registrada.",
+        "error": "No pudimos completar el registro. Inténtalo de nuevo.",
         "back": "Volver al dashboard",
         "title": "Registrar cooperativa",
         "subtitle": "Completa los datos institucionales de la organización.",
@@ -32,6 +77,7 @@
         "saving": "Registrando..."
       },
       "dashboard": {
+        "no-metrics": "Todavía no hay indicadores para esta cooperativa.",
         "breadcrumb": "Dashboard",
         "title": "Panel de Control - {{ cooperative }}",
         "subtitle": "Supervisión de {{ members }} socios activos | {{ hectares }} Hectáreas bajo monitoreo satelital",

@@ -1,7 +1,7 @@
 <h1>{{ 'crop-health.advisor.plots' | translate }}</h1>
 <p>{{ 'crop-health.advisor.scope-notice' | translate }}</p>
 <nav>
-  <a mat-stroked-button routerLink="/crop-health/inbox">{{
+  <a mat-stroked-button routerLink="/pest-reports">{{
     'crop-health.inbox-title' | translate
   }}</a>
   <button mat-button (click)="reload()" [disabled]="store.loading() || store.saving()">
@@ -38,11 +38,11 @@
         <mat-card-actions>
           <a
             mat-stroked-button
-            routerLink="/crop-health/inbox"
+            routerLink="/pest-reports"
             [queryParams]="{ plotId: plot.id }"
             >{{ 'crop-health.advisor.view-work' | translate }}</a
           >
-          <a mat-button routerLink="/crop-health/monitoring" (click)="store.selectPlot(+plot.id)">{{
+          <a mat-button routerLink="/monitoring" (click)="store.selectPlot(+plot.id)">{{
             'crop-health.advisor.monitor' | translate
           }}</a>
         </mat-card-actions>

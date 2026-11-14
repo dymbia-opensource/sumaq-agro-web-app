@@ -47,6 +47,7 @@
     },
     "plot-status": {
       "WITHOUT_POLYGON": "Sin polígono",
+      "BOUNDARY_SAVED": "Delimitada · Sin monitoreo",
       "ACTIVE_MONITORING": "Monitoreo activo"
     },
     "crop-type": {

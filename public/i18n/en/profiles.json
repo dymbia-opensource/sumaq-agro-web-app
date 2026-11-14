@@ -1,6 +1,49 @@
 {
   "profiles": {
     "cooperative": {
+      "members": {
+        "demo-account": "Demo farmer account",
+        "link-account": "Link account",
+        "link-account-error": "Could not link the account. Check whether another member of the cooperative already uses it.",
+        "collection": "Collection history",
+        "net-total": "Total net weight",
+        "net-weight": "Net weight",
+        "no-collection": "No collection batches have been recorded for this member yet.",
+        "certificates": "Issued certificates",
+        "no-certificates": "No certificates have been issued for this member yet.",
+        "verify-certificate": "Verify certificate",
+        "certificate-ACTIVE": "Active",
+        "certificate-REVOKED": "Revoked",
+        "edit": "Edit member details",
+        "link-plot": "Add plot",
+        "no-linkable-plots": "No plots with saved boundaries are available to link.",
+        "link-error": "The plot could not be linked. Check that it has an active potato or coffee campaign.",
+        "link-account-first": "The member needs a linked account before their plots can be added.",
+        "not-found": "This member could not be found in your cooperative directory.",
+        "title": "Member directory",
+        "subtitle": "View the members and plots linked to your cooperative.",
+        "search": "Search by name, ID or code",
+        "add": "Add new member",
+        "new-title": "Register new member",
+        "phone": "Phone",
+        "community": "Sector",
+        "save": "Save",
+        "validation": "Enter a name, an eight-digit ID and a valid phone number.",
+        "duplicate": "A member with this ID already exists.",
+        "save-error": "The member could not be saved.",
+        "back": "Back to directory",
+        "dossier": "Member record",
+        "no-plots": "This member has no linked plots yet.",
+        "view": "View",
+        "name": "Member",
+        "status": "Status",
+        "plots": "Plots",
+        "active": "Active",
+        "inactive": "Inactive",
+        "error": "The member directory could not be loaded.",
+        "empty": "There are no registered members yet.",
+        "no-results": "No members match your search."
+      },
       "settings": {
         "breadcrumb": "Settings",
         "title": "Institutional details",
@@ -14,6 +57,8 @@
         "address": "Headquarters address"
       },
       "registration": {
+        "existing": "Your account already has a registered cooperative.",
+        "error": "Registration could not be completed. Try again.",
         "back": "Back to dashboard",
         "title": "Register cooperative",
         "subtitle": "Complete the organization's institutional details.",
@@ -32,6 +77,7 @@
         "saving": "Registering..."
       },
       "dashboard": {
+        "no-metrics": "There are no metrics for this cooperative yet.",
         "breadcrumb": "Dashboard",
         "title": "Control Panel - {{ cooperative }}",
         "subtitle": "Oversight of {{ members }} active members | {{ hectares }} hectares under satellite monitoring",

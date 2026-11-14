@@ -53,12 +53,12 @@ export class FarmerSettingsView {
   ] as const;
   readonly faqs = ['connection', 'contact', 'alerts'] as const;
   readonly destinations: Record<string, string> = {
-    plots: '/field-management/plots',
-    campaigns: '/field-management/campaigns',
-    expenses: '/field-management/finances',
-    health: '/crop-health/monitoring',
-    certificates: '/harvest-certification/certificates',
-    offline: '/field-management/finances',
+    plots: '/plots',
+    campaigns: '/campaigns',
+    expenses: '/finances',
+    health: '/monitoring',
+    certificates: '/certificates',
+    offline: '/finances',
   };
   readonly icons: Record<string, string> = {
     plots: 'map',

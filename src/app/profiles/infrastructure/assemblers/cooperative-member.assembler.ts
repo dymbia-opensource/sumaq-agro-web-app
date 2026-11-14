@@ -21,6 +21,9 @@ export class CooperativeMemberAssembler implements BaseAssembler<
       cooperativeId: entity.cooperativeId,
       fullName: entity.fullName,
       active: entity.active,
+      dni: entity.dni,
+      phone: entity.phone,
+      community: entity.community,
       userId: entity.userId,
       plots: entity.plots,
     };

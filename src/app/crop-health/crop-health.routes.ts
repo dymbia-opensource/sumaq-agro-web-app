@@ -4,12 +4,12 @@ import { Routes } from '@angular/router';
 const cropHealthView = () =>
   import('./presentation/views/crop-health-view/crop-health-view').then((m) => m.CropHealthView);
 
-const agriculturalAlertsView = () =>
+export const agriculturalAlertsView = () =>
   import('./presentation/views/agricultural-alerts-view/agricultural-alerts-view').then(
     (m) => m.AgriculturalAlertsView,
   );
 
-const diagnosisInboxView = () =>
+export const diagnosisInboxView = () =>
   import('./presentation/views/diagnosis-inbox-view/diagnosis-inbox-view').then(
     (m) => m.DiagnosisInboxView,
   );
@@ -56,17 +56,7 @@ export const cropHealthRoutes: Routes = [
         title: 'Crop Health – SumaqAgro | Multispectral Satellite Viewer',
       },
       {
-        path: 'alerts',
-        loadComponent: agriculturalAlertsView,
-        title: 'Agroclimatic Alerts – SumaqAgro',
-      },
-      {
-        path: 'advisor',
-        loadComponent: diagnosisInboxView,
-        title: 'Crop Health Advisor – SumaqAgro',
-      },
-      {
-        path: 'inbox',
+        path: 'pest-reports',
         loadComponent: diagnosisInboxView,
         title: 'Diagnosis Inbox – SumaqAgro',
       },
@@ -81,13 +71,13 @@ export const cropHealthRoutes: Routes = [
         title: 'Prescriptions History – SumaqAgro',
       },
       {
-        path: 'report-pest',
+        path: 'pest-reports/new',
         data: { roles: ['FARMER'] },
         loadComponent: pestReportForm,
         title: 'Report Pest or Disease – SumaqAgro',
       },
       {
-        path: 'reports/:id',
+        path: 'pest-reports/:id',
         loadComponent: () =>
           import('./presentation/views/farmer-case-view/farmer-case-view').then(
             (m) => m.FarmerCaseView,
@@ -95,12 +85,11 @@ export const cropHealthRoutes: Routes = [
         title: 'Incident follow-up – SumaqAgro',
       },
       {
-        path: 'prescribe',
+        path: 'prescriptions/new',
         data: { roles: ['AGRONOMIST'] },
         loadComponent: prescriptionForm,
         title: 'Issue Technical Prescription – SumaqAgro',
       },
-      { path: '', redirectTo: 'monitoring', pathMatch: 'full' },
     ],
   },
 ];

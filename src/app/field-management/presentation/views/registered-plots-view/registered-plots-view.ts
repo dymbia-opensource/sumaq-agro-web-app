@@ -48,7 +48,7 @@ export class RegisteredPlotsView {
 
   // UI state
   protected readonly breadcrumbs: Breadcrumb[] = [
-    { label: 'option.my-plot', link: '/field-management/dashboard' },
+    { label: 'option.my-plot', link: '/dashboard' },
     { label: 'field-management.plots.manage' },
   ];
 
@@ -76,29 +76,29 @@ export class RegisteredPlotsView {
   // Actions
   onRegisterNewPlot() {
     if (!this.canRegisterPlot()) return;
-    this.router.navigate(['field-management/plots/new']).then();
+    this.router.navigate(['/plots/new']).then();
   }
 
   onSelectPlot(plot: FieldPlot) {
     this.fieldManagementStore.selectPlot(plot.id as number);
-    this.router.navigate(['field-management/dashboard']).then();
+    this.router.navigate(['dashboard']).then();
   }
 
   onViewMonitoring(plot: FieldPlot) {
     this.fieldManagementStore.selectPlot(plot.id as number);
-    this.router.navigate(['crop-health/monitoring']).then();
+    this.router.navigate(['/monitoring']).then();
   }
 
   onDelineate(plot: FieldPlot) {
-    this.router.navigate(['field-management/plots', plot.id, 'boundary']).then();
+    this.router.navigate(['/plots', plot.id, 'boundary']).then();
   }
 
   onViewDetail(plot: FieldPlot) {
-    this.router.navigate(['field-management/plots', plot.id]).then();
+    this.router.navigate(['/plots', plot.id]).then();
   }
 
   onRecordSoil(plot: FieldPlot) {
-    this.router.navigate(['field-management/plots', plot.id, 'soil']).then();
+    this.router.navigate(['/plots', plot.id, 'soil']).then();
   }
 
   /** Deletes the plot only if the producer confirms. */

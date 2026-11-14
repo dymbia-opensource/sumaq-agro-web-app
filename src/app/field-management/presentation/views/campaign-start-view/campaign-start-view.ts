@@ -15,7 +15,7 @@ import { StartCropCampaignCommand } from '../../../domain/model/commands/start-c
 import { CropType } from '../../../domain/model/entities/crop-campaign.entity';
 import { CampaignForm, CampaignFormData } from '../../components/campaign-form/campaign-form';
 
-const CAMPAIGNS_ROUTE = '/field-management/campaigns';
+const CAMPAIGNS_ROUTE = '/campaigns';
 
 /**
  * Starts a new campaign on the selected plot once the previous one is closed
@@ -48,7 +48,7 @@ export class CampaignStartView {
 
   // UI state
   protected readonly breadcrumbs: Breadcrumb[] = [
-    { label: 'option.my-plot', link: '/field-management/dashboard' },
+    { label: 'option.my-plot', link: '/dashboard' },
     { label: 'field-management.campaigns.title', link: CAMPAIGNS_ROUTE },
     { label: 'field-management.campaigns.new' },
   ];

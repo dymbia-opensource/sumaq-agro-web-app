@@ -16,7 +16,7 @@ export const iamGuard: CanActivateFn & CanActivateChildFn = (route, state) => {
   const user = store.activeUser();
 
   if (!user) {
-    return router.createUrlTree(['/iam/sign-in'], {
+    return router.createUrlTree(['/sign-in'], {
       queryParams: {
         returnUrl: state.url,
       },

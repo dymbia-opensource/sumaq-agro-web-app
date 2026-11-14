@@ -2,11 +2,25 @@ import { inject, Service } from '@angular/core';
 import { PRIMARY_OUTLET, Router, UrlTree } from '@angular/router';
 import { IamStore } from '../application/iam.store';
 
-const PRIVATE_CONTEXTS = new Set([
+const PRIVATE_ROUTE_ROOTS = new Set([
   'field-management',
   'crop-health',
   'profiles',
   'harvest-certification',
+  'dashboard',
+  'cooperative',
+  'advisor',
+  'alerts',
+  'certificates',
+  'plots',
+  'campaigns',
+  'finances',
+  'assigned-plots',
+  'monitoring',
+  'inspections',
+  'prescriptions',
+  'pest-reports',
+  'settings',
 ]);
 
 /** Resolves post-login destinations. Route guards still enforce access rules. */
@@ -17,7 +31,7 @@ export class AuthNavigationService {
 
   destination(returnUrl: string | null): UrlTree {
     const fallback = this.router.parseUrl(
-      this.session.activeUser()?.initialRoute ?? '/iam/sign-in',
+      this.session.activeUser()?.initialRoute ?? '/sign-in',
     );
 
     if (
@@ -39,7 +53,7 @@ export class AuthNavigationService {
         !primary ||
         Object.keys(tree.root.children).length !== 1 ||
         primary.hasChildren() ||
-        !PRIVATE_CONTEXTS.has(primary.segments[0]?.path) ||
+        !PRIVATE_ROUTE_ROOTS.has(primary.segments[0]?.path) ||
         primary.segments.some(
           (segment) =>
             Object.keys(segment.parameters).length > 0 ||
@@ -60,7 +74,7 @@ export class AuthNavigationService {
   signOut(): void {
     this.session.signOut();
 
-    void this.router.navigateByUrl('/iam/sign-in', {
+    void this.router.navigateByUrl('/sign-in', {
       replaceUrl: true,
     });
   }
