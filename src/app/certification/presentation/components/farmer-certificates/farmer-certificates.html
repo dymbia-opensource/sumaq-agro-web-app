@@ -1,0 +1,92 @@
+<div class="farmer-certificates">
+  <app-page-header
+    class="farmer-header"
+    [breadcrumbs]="breadcrumbs"
+    [title]="'certification.farmer.title' | translate"
+    [subtitle]="'certification.farmer.subtitle' | translate"
+  />
+
+  @if (store.error(); as error) {
+    <div class="error-banner" role="alert">
+      {{ 'certification.load-save-error' | translate }} {{ error | translate }}
+      <button type="button" (click)="store.load()">{{ 'common.retry' | translate }}</button>
+    </div>
+  }
+
+  @for (row of certificates(); track row.certificate.id) {
+    <article class="farmer-certificate">
+      <h2>
+        {{ 'certification.farmer.certificate-title' | translate: { code: row.batch.data.code } }}
+      </h2>
+      <p class="farmer-details">
+        {{ 'certification.farmer.crop' | translate }}: {{ row.batch.data.variety }} |
+        {{ 'certification.farmer.farm' | translate }}: {{ row.batch.data.plotName }} ({{
+          row.batch.data.plotRegion
+        }}) | {{ 'certification.farmer.issued' | translate }}:
+        {{ row.certificate.data.issuedAt | date: 'dd/MM/yyyy' }}
+      </p>
+      <p class="farmer-grading">
+        <strong>{{ 'certification.farmer.grading' | translate }}:</strong>
+        @if (row.batch.data.potatoGrading; as grading) {
+          {{
+            'certification.farmer.potato-grading'
+              | translate
+                : {
+                    first: grading.firstPercentage,
+                    second: grading.secondPercentage,
+                    third: grading.thirdPercentage,
+                  }
+          }}
+        } @else {
+          {{
+            'certification.farmer.coffee-grading'
+              | translate: { score: row.batch.data.coffeeCupping?.totalScore }
+          }}
+        }
+      </p>
+      <div class="farmer-seal">
+        <span>{{ 'certification.farmer.digital-seal' | translate }}:</span
+        ><span class="seal-badge">{{ 'certification.farmer.accredited' | translate }}</span>
+      </div>
+      <div class="farmer-actions">
+        <button
+          type="button"
+          class="farmer-qr-button"
+          (click)="toggleQr(row.certificate.id)"
+        >
+          <mat-icon>qr_code</mat-icon> {{ 'certification.farmer.show-qr' | translate }}
+        </button>
+        <button type="button" class="farmer-outline-button" (click)="print()">
+          <mat-icon>download</mat-icon>
+          {{ 'certification.farmer.download-pdf' | translate }}
+        </button>
+        <a
+          class="farmer-outline-button"
+          [href]="verificationUrl(row.certificate)"
+          target="_blank"
+          rel="noopener"
+          >{{ 'certification.farmer.web-record' | translate }}</a
+        >
+      </div>
+      @if (visibleQr() === row.certificate.id) {
+        <div class="farmer-qr-panel">
+          <img
+            [src]="qrUrl(row.certificate)"
+            width="180"
+            height="180"
+            [alt]="'certification.farmer.qr-alt' | translate"
+          />
+          <p>{{ 'certification.farmer.qr-instruction' | translate }}</p>
+        </div>
+      }
+    </article>
+  } @empty {
+    @if (!store.loading() && !store.error() && !store.notice()) {
+      <div class="farmer-empty">{{ 'certification.farmer.empty' | translate }}</div>
+    }
+  }
+
+  <aside class="farmer-tip">
+    <mat-icon>lightbulb</mat-icon><span>{{ 'certification.farmer.tip' | translate }}</span>
+  </aside>
+</div>

@@ -1,0 +1,31 @@
+@if (cropType === 'ANDEAN_POTATO') {
+  <p class="form-section-title">{{ 'certification.grading.potato-title' | translate }}</p>
+  <div class="grade-grid">
+    <label
+      >{{ 'certification.grading.first' | translate
+      }}<input type="number" min="0" max="100" [(ngModel)]="form.firstPercentage"
+    /></label>
+    <label
+      >{{ 'certification.grading.second' | translate
+      }}<input type="number" min="0" max="100" [(ngModel)]="form.secondPercentage"
+    /></label>
+    <label
+      >{{ 'certification.grading.third' | translate
+      }}<input type="number" min="0" max="100" [(ngModel)]="form.thirdPercentage"
+    /></label>
+  </div>
+  <label class="damage"
+    >{{ 'certification.grading.weevil' | translate }}
+    <input type="number" min="0" max="100" step="0.1" [(ngModel)]="form.weevilDamagePercentage"
+  /></label>
+  <p class="validation" [class.invalid]="gradingTotal !== 100">
+    {{ 'certification.grading.total' | translate: { total: gradingTotal } }}
+  </p>
+} @else {
+  <p class="form-section-title">{{ 'certification.grading.coffee-title' | translate }}</p>
+  <label class="damage"
+    >{{ 'certification.grading.sca-score' | translate }}
+    <input type="number" min="0" max="100" step="0.1" [(ngModel)]="form.scaScore"
+  /></label>
+  <p class="validation">{{ 'certification.grading.specialty-hint' | translate }}</p>
+}

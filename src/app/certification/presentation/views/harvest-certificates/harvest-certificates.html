@@ -1,0 +1,390 @@
+@if (store.loading()) {
+  <mat-progress-bar mode="indeterminate" [attr.aria-label]="'certification.loading' | translate" />
+}
+
+@if (store.notice(); as notice) {
+  <p role="status">{{ notice | translate }}</p>
+}
+@if (!isFarmer() && !store.canIssue() && store.error(); as error) {
+  <div role="alert">
+    {{ error | translate }}
+    <button type="button" (click)="store.load()">{{ 'common.retry' | translate }}</button>
+  </div>
+}
+
+@if (isFarmer()) {
+  <app-farmer-certificates />
+} @else if (store.canIssue()) {
+  <app-page-header
+    [breadcrumbs]="breadcrumbs"
+    [title]="'certification.title' | translate"
+    [subtitle]="'certification.subtitle' | translate"
+    [compact]="true"
+  >
+    <div class="header-actions">
+      <span class="campaign"
+        >{{ 'certification.campaign' | translate }} 2026-I <mat-icon>expand_more</mat-icon></span
+      >
+      <button
+        mat-flat-button
+        class="primary-action"
+        [disabled]="store.loading() || members().length === 0"
+        (click)="openNew()"
+      >
+        <mat-icon>add</mat-icon>
+        {{ 'certification.evaluate-new' | translate }}
+      </button>
+    </div>
+  </app-page-header>
+
+  @if (store.error(); as error) {
+    <div class="error-banner" role="alert">
+      {{ 'certification.load-save-error' | translate }} {{ error | translate }}
+      <button type="button" (click)="store.load()">{{ 'common.retry' | translate }}</button>
+    </div>
+  }
+
+  <h2 class="section-label">{{ 'certification.kpi.title' | translate }}</h2>
+  <section class="kpi-grid" [attr.aria-label]="'certification.kpi.summary' | translate">
+    <article class="kpi-card">
+      <span>{{ 'certification.kpi.total' | translate }}</span
+      ><strong>{{
+        'certification.kpi.issued-count' | translate: { count: store.activeCertificates().length }
+      }}</strong
+      ><small>{{ 'certification.kpi.public-verification' | translate }}</small>
+    </article>
+    <article class="kpi-card">
+      <span>{{ 'certification.kpi.certified-batches' | translate }}</span
+      ><strong>{{
+        'certification.kpi.certification-rate' | translate: { rate: certificationRate }
+      }}</strong
+      ><small>{{
+        'certification.kpi.first-potato-average' | translate: { rate: potatoFirstRate }
+      }}</small>
+    </article>
+    <article class="kpi-card">
+      <span>{{ 'certification.kpi.specialty-coffee' | translate }}</span
+      ><strong>{{
+        'certification.kpi.qualified-count' | translate: { count: specialtyCoffeeCount }
+      }}</strong
+      ><small>{{ 'certification.kpi.sca-threshold' | translate }}</small>
+    </article>
+  </section>
+
+  <section class="filters" [attr.aria-label]="'certification.filters.summary' | translate">
+    <h2>{{ 'certification.filters.title' | translate }}</h2>
+    <div class="filter-row">
+      <label class="search">
+        <mat-icon>search</mat-icon>
+        <input
+          type="search"
+          [placeholder]="'certification.filters.search' | translate"
+          [ngModel]="search()"
+          (ngModelChange)="search.set($event); page.set(1)"
+      /></label>
+      <label
+        >{{ 'certification.filters.crop' | translate }}
+        <select [ngModel]="cropFilter()" (ngModelChange)="cropFilter.set($event); page.set(1)">
+          <option value="ALL">
+            {{ 'certification.filters.all-masculine' | translate }}
+          </option>
+          <option value="ANDEAN_POTATO">
+            {{ 'certification.filters.potato' | translate }}
+          </option>
+          <option value="SPECIALTY_COFFEE">
+            {{ 'certification.filters.coffee' | translate }}
+          </option>
+        </select></label
+      >
+      <label
+        >{{ 'certification.filters.quality' | translate }}
+        <select
+          [ngModel]="qualityFilter()"
+          (ngModelChange)="qualityFilter.set($event); page.set(1)"
+        >
+          <option value="ALL">
+            {{ 'certification.filters.all-feminine' | translate }}
+          </option>
+          <option value="PREMIUM_GOLD">
+            {{ 'certification.quality-category.PREMIUM_GOLD' | translate }}
+          </option>
+          <option value="STANDARD">
+            {{ 'certification.quality-category.STANDARD' | translate }}
+          </option>
+          <option value="SPECIALTY_COFFEE">
+            {{ 'certification.quality-category.SPECIALTY_COFFEE' | translate }}
+          </option>
+          <option value="COMMERCIAL_COFFEE">
+            {{ 'certification.quality-category.COMMERCIAL_COFFEE' | translate }}
+          </option>
+        </select></label
+      >
+    </div>
+  </section>
+
+  <section class="table-shell" [attr.aria-label]="'certification.table.summary' | translate">
+    <div class="table-title">{{ 'certification.table.title' | translate }}</div>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>{{ 'certification.table.batch-code' | translate }}</th>
+            <th>{{ 'certification.table.producer' | translate }}</th>
+            <th>{{ 'certification.table.crop-variety' | translate }}</th>
+            <th>{{ 'certification.table.volume' | translate }}</th>
+            <th>{{ 'certification.table.quality' | translate }}</th>
+            <th>{{ 'certification.table.issued' | translate }}</th>
+            <th>{{ 'certification.table.document' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of visibleRows(); track row.certificate.id) {
+            <tr>
+              <td>{{ row.batch.data.code }}</td>
+              <td>{{ row.batch.data.memberName }}</td>
+              <td>
+                {{ row.batch.data.variety }}<small>{{ row.batch.data.plotName }}</small>
+              </td>
+              <td>{{ row.batch.netKg | number: '1.0-2' }} kg</td>
+              <td>
+                @if (row.batch.data.qualityCategory === 'SPECIALTY_COFFEE') {
+                  {{
+                    'certification.table.sca-points'
+                      | translate: { score: row.batch.data.coffeeCupping?.totalScore }
+                  }}
+                } @else {
+                  {{
+                    'certification.table.first-rate'
+                      | translate: { rate: row.batch.data.potatoGrading?.firstPercentage }
+                  }}
+                }
+              </td>
+              <td>{{ row.certificate.data.issuedAt | date: 'dd/MM/yyyy' }}</td>
+              <td>
+                <button
+                  type="button"
+                  class="table-button"
+                  (click)="showCertificate(row.certificate)"
+                >
+                  {{ 'certification.table.view-certificate' | translate }}
+                </button>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="7" class="empty">
+                {{ 'certification.table.empty' | translate }}
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <div class="pagination">
+    <span>{{
+      'certification.table.showing'
+        | translate
+          : {
+              shown: visibleRows().length,
+              total: rows().length,
+            }
+    }}</span>
+    <div>
+      <button type="button" (click)="selectPage(page() - 1)" [disabled]="page() === 1">‹</button>
+      <span>{{ page() }} / {{ pageCount() }}</span>
+      <button type="button" (click)="selectPage(page() + 1)" [disabled]="page() === pageCount()">
+        ›
+      </button>
+    </div>
+  </div>
+
+  @if (dialog() !== 'closed') {
+    <div class="modal-backdrop" (click)="close()">
+      <section
+        class="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-title"
+        (click)="$event.stopPropagation()"
+      >
+        <header class="modal-header">
+          <div>
+            <h2 id="modal-title">{{ 'certification.modal.title' | translate }}</h2>
+            <p>
+              {{ 'certification.modal.active-campaign' | translate }}: 2026-I <span>|</span>
+              {{ 'certification.modal.intake-record' | translate }}
+            </p>
+          </div>
+          <button
+            type="button"
+            class="close"
+            [attr.aria-label]="'certification.modal.close' | translate"
+            (click)="close()"
+          >
+            ×
+          </button>
+        </header>
+        <div class="modal-content">
+          @if (dialog() === 'form') {
+            <app-harvest-batch-registration
+              [form]="form"
+              [members]="members()"
+              [plots]="plotsForMember"
+              (memberChanged)="changeMember()"
+            />
+            <button type="button" class="example-button" (click)="loadExample()">
+              {{ 'certification.modal.load-example' | translate }}
+            </button>
+            <app-harvest-grading-sheet [form]="form" [cropType]="selectedCrop" />
+            @if (formError()) {
+              <p class="form-error" role="alert">
+                {{ formError() | translate: formErrorParams() }}
+              </p>
+            }
+          } @else if (selectedBatch(); as batch) {
+            <p class="form-section-title">
+              {{
+                (dialog() === 'issued'
+                  ? 'certification.modal.certificate-issued'
+                  : 'certification.modal.certificate-preview'
+                ) | translate
+              }}
+            </p>
+            <div class="certificate" id="print-certificate">
+              <div class="certificate-title">
+                SUMAQAGRO CERTIFICATE ENGINE <span>|</span>
+                {{ 'certification.certificate.technical-document' | translate }}
+              </div>
+              <div class="certificate-body">
+                <div class="certificate-facts">
+                  <div>
+                    <strong>{{ 'certification.certificate.producer' | translate }} :</strong>
+                    {{ batch.data.memberName }} <br /><strong
+                      >{{ 'certification.certificate.plot' | translate }} :</strong
+                    >
+                    {{ batch.data.plotName }} · {{ batch.data.plotRegion }} <br /><strong
+                      >{{ 'certification.certificate.gps' | translate }} :</strong
+                    >
+                    {{ batch.data.coordinates }}
+                  </div>
+                  <div>
+                    <strong>{{ 'certification.certificate.product' | translate }} :</strong>
+                    {{ batch.data.variety }} ·
+                    <strong>{{ 'certification.certificate.volume' | translate }} :</strong>
+                    {{ batch.netKg | number: '1.0-2' }}
+                    {{ 'certification.certificate.net-kg' | translate }} <br /><strong
+                      >{{ 'certification.certificate.quality' | translate }} :</strong
+                    >
+                    {{ 'certification.quality-category.' + batch.data.qualityCategory | translate }}
+                    <br />
+                    @if (batch.data.potatoGrading; as grade) {
+                      {{ 'certification.certificate.first' | translate }}:
+                      {{ grade.firstPercentage }} % ·
+                      {{ 'certification.certificate.second' | translate }}:
+                      {{ grade.secondPercentage }} % ·
+                      {{ 'certification.certificate.loss' | translate }}:
+                      {{ grade.thirdPercentage }} %
+                    } @else {
+                      {{ 'certification.certificate.sca-score' | translate }}:
+                      {{ batch.data.coffeeCupping?.totalScore }}
+                    }
+                  </div>
+                  @if (selectedCertificate(); as certificate) {
+                    <div>
+                      @if (certificate.data.verificationToken.startsWith('demo-')) {
+                        <strong>{{ 'certification.certificate.demo-record' | translate }}</strong
+                        ><br />
+                      } @else {
+                        <strong>{{ 'certification.certificate.hash' | translate }} :</strong>
+                        {{ certificate.data.sha256Hash.slice(0, 18) }}…<br />
+                      }
+                      <strong>{{ 'certification.certificate.issued-by' | translate }} :</strong>
+                      {{ certificate.data.issuedByName }} <br /><strong
+                        >{{ 'certification.certificate.date' | translate }} :</strong
+                      >
+                      {{ certificate.data.issuedAt | date: 'dd/MM/yyyy HH:mm' }}
+                    </div>
+                  } @else if (draftHash(); as hash) {
+                    <div>
+                      <strong
+                        >{{ 'certification.certificate.preliminary-hash' | translate }} :</strong
+                      >
+                      {{ hash.slice(0, 18) }} …<br /><strong
+                        >{{ 'certification.certificate.expected-issuer' | translate }}:</strong
+                      >
+                      {{ store.issuer()?.displayName }}<br /><strong
+                        >{{ 'certification.certificate.preview-date' | translate }} :</strong
+                      >
+                      {{ draftIssuedAt() | date: 'dd/MM/yyyy HH:mm' }}
+                    </div>
+                  }
+                </div>
+                <div class="qr-panel">
+                  @if (previewUrl()) {
+                    <img
+                      [src]="qrImageUrl()"
+                      width="120"
+                      height="120"
+                      [alt]="'certification.certificate.qr-alt' | translate"
+                    />
+                    @if (selectedCertificate()) {
+                      <a [href]="previewUrl()" target="_blank" rel="noopener">{{
+                        'certification.certificate.verify' | translate
+                      }}</a>
+                    } @else {
+                      <span>{{ 'certification.certificate.link-pending' | translate }}</span>
+                    }
+                  } @else {
+                    <mat-icon>qr_code_2</mat-icon>
+                    <span>{{ 'certification.certificate.qr-pending' | translate }}</span>
+                  }
+                </div>
+              </div>
+            </div>
+            @if (dialog() === 'preview') {
+              <label class="notify"
+                ><input
+                  type="checkbox"
+                  [ngModel]="notifyMember()"
+                  (ngModelChange)="notifyMember.set($event)"
+                  disabled
+                />
+                {{ 'certification.modal.sms-pending' | translate }}</label
+              >
+            }
+          }
+        </div>
+        <footer class="modal-footer">
+          @if (dialog() === 'form') {
+            <button type="button" class="secondary" (click)="close()">
+              {{ 'common.cancel' | translate }}
+            </button>
+            <button type="button" class="primary" (click)="preview()">
+              {{ 'certification.modal.review' | translate }}
+            </button>
+          } @else if (dialog() === 'preview') {
+            <button type="button" class="secondary" (click)="dialog.set('form')">
+              ← {{ 'certification.modal.modify' | translate }}
+            </button>
+            <button
+              type="button"
+              class="primary"
+              [disabled]="busy() || store.loading()"
+              (click)="issue()"
+            >
+              {{ 'certification.modal.issue' | translate }}
+            </button>
+          } @else {
+            <button type="button" class="secondary" (click)="close()">
+              {{ 'certification.modal.close' | translate }}
+            </button>
+            <button type="button" class="primary" (click)="print()">
+              {{ 'certification.modal.print' | translate }}
+            </button>
+          }
+        </footer>
+      </section>
+    </div>
+  }
+}
