@@ -33,7 +33,7 @@
     <mat-icon iconPositionEnd>expand_more</mat-icon>
   </button>
   <mat-menu #userMenu="matMenu" xPosition="before">
-    <a mat-menu-item routerLink="/settings">
+    <a mat-menu-item [routerLink]="settingsRoute()">
       <mat-icon>person</mat-icon>
       <span>{{ 'layout.profile' | translate }}</span>
     </a>

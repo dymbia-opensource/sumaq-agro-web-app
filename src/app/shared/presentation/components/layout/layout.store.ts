@@ -12,7 +12,6 @@ import { fromEvent, map, merge } from 'rxjs';
  */
 @Injectable({ providedIn: 'root' })
 export class LayoutStore {
-
   /** `true` on phones and small tablets. */
   readonly isHandset = toSignal(
     inject(BreakpointObserver)
@@ -59,5 +58,4 @@ export class LayoutStore {
       this.sidebarOpenedSignal.set(false);
     }
   }
-
 }

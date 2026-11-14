@@ -9,7 +9,8 @@ import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { LayoutStore } from '../layout/layout.store';
 import { IamStore } from '../../../../iam/application/iam.store';
-import { AuthNavigationService } from '../../../../iam/infrastructure/auth-navigation.service';
+import { AuthNavigation } from '../../../../iam/infrastructure/auth-navigation';
+import { settingsRouteFor } from '../../../infrastructure/navigation-config';
 
 /**
  * Top bar of the shell: mobile menu, search, connection status and user menu.
@@ -32,10 +33,17 @@ import { AuthNavigationService } from '../../../../iam/infrastructure/auth-navig
 export class Toolbar {
   protected readonly layout = inject(LayoutStore);
   private readonly session = inject(IamStore);
-  private readonly authNavigation = inject(AuthNavigationService);
+  private readonly authNavigation = inject(AuthNavigation);
 
   /** Display name provided by the current session projection. */
   readonly userName = computed(() => this.session.activeUser()?.displayName ?? '');
+
+  /** Account page of the signed-in role; a director manages the cooperative one. */
+  protected readonly settingsRoute = computed(() => {
+    const experience = this.session.activeUser()?.experience;
+
+    return experience ? settingsRouteFor(experience) : '/settings';
+  });
   protected signOut(): void {
     this.layout.closeSidebarOnHandset();
     this.authNavigation.signOut();

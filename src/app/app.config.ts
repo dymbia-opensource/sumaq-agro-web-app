@@ -8,11 +8,12 @@ import { registerLocaleData } from '@angular/common';
 import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import localeEsPe from '@angular/common/locales/es-PE';
 import { MatIconRegistry } from '@angular/material/icon';
-import { provideRouter, withComponentInputBinding } from '@angular/router';
+import { TitleStrategy, provideRouter, withComponentInputBinding } from '@angular/router';
 import { provideTranslateService } from '@ngx-translate/core';
 import { provideTranslateMultiHttpLoader } from '@ngx-translate/http-loader';
 import { routes } from './app.routes';
 import { iamInterceptor } from './iam/infrastructure/iam.interceptor';
+import { TranslatedTitleStrategy } from './shared/infrastructure/translated-title.strategy';
 import { mockAuthenticationInterceptor } from './iam/infrastructure/mock/mock-authentication.interceptor';
 
 /** Spanish (Peru) data for dates and numbers; English is built in. */
@@ -24,10 +25,10 @@ registerLocaleData(localeEsPe, 'es');
  */
 const TRANSLATION_FILES = [
   'shared',
-  'field-management',
-  'crop-health',
+  'farming',
+  'crop',
   'profiles',
-  'harvest-certification',
+  'certification',
   'iam',
   'subscriptions',
 ];
@@ -44,18 +45,21 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes, withComponentInputBinding()),
-    provideHttpClient(withFetch(),
-      withInterceptors([
-        iamInterceptor,
-        mockAuthenticationInterceptor
-      ])),
+    provideHttpClient(
+      withFetch(),
+      withInterceptors([iamInterceptor, mockAuthenticationInterceptor]),
+    ),
     provideTranslateService({
       loader: provideTranslateMultiHttpLoader({
-        resources: TRANSLATION_FILES.map((file) => ({ prefix: './i18n/', suffix: `/${file}.json` })),
+        resources: TRANSLATION_FILES.map((file) => ({
+          prefix: './i18n/',
+          suffix: `/${file}.json`,
+        })),
       }),
       fallbackLang: 'en',
       lang: 'en',
     }),
+    { provide: TitleStrategy, useClass: TranslatedTitleStrategy },
     provideAppInitializer(() => {
       inject(MatIconRegistry).setDefaultFontSetClass('material-symbols-outlined');
     }),
