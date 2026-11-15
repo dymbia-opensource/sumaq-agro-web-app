@@ -11,6 +11,13 @@ import { Component, DestroyRef, computed, effect, inject, signal, untracked } fr
 import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatCardModule } from '@angular/material/card';
+import { MatTableModule } from '@angular/material/table';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { catchError, finalize, map, of, startWith, switchMap } from 'rxjs';
@@ -30,6 +37,13 @@ import { ProfilesApi } from '../../../infrastructure/profiles-api';
     MatIconModule,
     MatButtonModule,
     MatProgressBarModule,
+    MatCardModule,
+    MatTableModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatChipsModule,
+    MatButtonToggleModule,
     RouterLink,
     TranslatePipe,
     PageHeader,
@@ -122,19 +136,17 @@ export class CooperativeMembers {
         return this.api.getCooperativeByDirector(user.id).pipe(
           switchMap((cooperative) =>
             cooperative
-              ? this.api
-                  .getCooperativeMembers(Number(cooperative.id))
-                  .pipe(
-                    map(
-                      (members) =>
-                        ({
-                          status: 'ready',
-                          members,
-                          cooperativeId: Number(cooperative.id),
-                          directorId: user.id,
-                        }) as const,
-                    ),
-                  )
+              ? this.api.getCooperativeMembers(Number(cooperative.id)).pipe(
+                  map(
+                    (members) =>
+                      ({
+                        status: 'ready',
+                        members,
+                        cooperativeId: Number(cooperative.id),
+                        directorId: user.id,
+                      }) as const,
+                  ),
+                )
               : of({ status: 'no-cooperative' } as const),
           ),
           startWith({ status: 'loading' } as const),
@@ -154,6 +166,36 @@ export class CooperativeMembers {
       return null;
     return state.members.find((member) => String(member.id) === id) ?? null;
   });
+
+  /** Columns of the member table, in display order. */
+  protected readonly columns: string[] = ['member', 'dni', 'phone', 'status', 'plots', 'actions'];
+
+  protected readonly statusFilter = signal<'all' | 'active' | 'inactive'>('all');
+  protected readonly filters = [
+    { value: 'all', label: 'profiles.cooperative.members.filter-all' },
+    { value: 'active', label: 'profiles.cooperative.members.active' },
+    { value: 'inactive', label: 'profiles.cooperative.members.inactive' },
+  ] as const;
+
+  /** Summary shown above the member table; null when there is nothing to summarize. */
+  protected readonly stats = computed(() => {
+    const state = this.state();
+    if (state?.status !== 'ready' || state.members.length === 0) return null;
+    return {
+      total: state.members.length,
+      active: state.members.filter((member) => member.active).length,
+      plots: state.members.reduce((total, member) => total + member.plots.length, 0),
+    };
+  });
+
+  protected initials(name: string): string {
+    return name
+      .trim()
+      .split(/\s+/)
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase() ?? '')
+      .join('');
+  }
 
   private readonly fields = inject(FarmingStore);
   private readonly plotSelection = signal<{ memberId: string; options: PlotSummary[] } | null>(
@@ -310,10 +352,13 @@ export class CooperativeMembers {
     const normalize = (value: string) =>
       value.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
     const query = normalize(this.query().trim());
-    return state.members.filter((member) =>
-      [member.fullName, member.dni, String(member.id)].some((value) =>
-        normalize(value).includes(query),
-      ),
+    const status = this.statusFilter();
+    return state.members.filter(
+      (member) =>
+        (status === 'all' || member.active === (status === 'active')) &&
+        [member.fullName, member.dni, String(member.id)].some((value) =>
+          normalize(value).includes(query),
+        ),
     );
   });
 
