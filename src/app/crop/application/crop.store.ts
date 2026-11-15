@@ -1,10 +1,7 @@
-import { CaseAssessment, CaseAssessmentData } from '../domain/model/entities/case-assessment';
-import {
-  TreatmentFollowUp,
-  TreatmentFollowUpData,
-} from '../domain/model/entities/treatment-follow-up';
+import { HttpErrorResponse } from '@angular/common/http';
 import { computed, DestroyRef, effect, inject, Injectable, signal, untracked } from '@angular/core';
 import {
+  catchError,
   Observable,
   defer,
   Subscription,
@@ -13,7 +10,6 @@ import {
   of,
   retry,
   switchMap,
-  tap,
   throwError,
 } from 'rxjs';
 import { IamStore } from '../../iam/application/iam.store';
@@ -33,22 +29,13 @@ import { FieldInspection } from '../domain/model/entities/field-inspection.entit
 import { SatelliteObservation } from '../domain/model/entities/satellite-observation.entity';
 import { TechnicalPrescription } from '../domain/model/entities/technical-prescription.entity';
 import { todayInLima } from '../../shared/infrastructure/api-date';
-import { requireDate } from '../domain/model/validation';
+import { RegionalBulletin } from '../domain/model/entities/regional-bulletin';
+import { requireDate, requireText } from '../domain/model/validation';
 
 /** Coordinates scoped data and participant permissions. Production authorization belongs to the API. */
 @Injectable({ providedIn: 'root' })
 export class CropStore {
   private readonly api = inject(CropApi);
-  private readonly assessmentsSignal = signal<CaseAssessment[]>([]);
-  /** Assessments are visible only through the participant's authorized case list. */
-  readonly assessments = computed(() =>
-    this.scopeReady()
-      ? this.assessmentsSignal().filter((item) =>
-          this.pestReports().some((report) => report.id === item.data.reportId),
-        )
-      : [],
-  );
-  private readonly followUpsSignal = signal<TreatmentFollowUp[]>([]);
   private readonly profiles = inject(ProfilesStore);
   private readonly farming = inject(FarmingStore);
   private readonly session = inject(IamStore);
@@ -65,20 +52,10 @@ export class CropStore {
   private readonly reportsSignal = signal<PestReport[]>([]);
   private readonly alertsSignal = signal<AgroclimaticAlert[]>([]);
   private readonly forecastsSignal = signal<ClimateForecast[]>([]);
+  private readonly bulletinsSignal = signal<RegionalBulletin[]>([]);
   private readonly inspectionsSignal = signal<FieldInspection[]>([]);
   private readonly prescriptionsSignal = signal<TechnicalPrescription[]>([]);
 
-  /** Farmer evidence remains scoped to reports visible to the current participant. */
-  readonly followUps = computed(() =>
-    this.scopeReady()
-      ? this.followUpsSignal().filter((item) =>
-          this.pestReports().some(
-            (report) =>
-              report.id === item.data.reportId && report.reporterId === item.data.producerUserId,
-          ),
-        )
-      : [],
-  );
   readonly activeUser = this.session.activeUser;
   readonly scopeReady = computed(() => this.ready() && this.scopeUser() === this.activeUser());
   readonly plots = computed(() => (this.scopeReady() ? this.plotsSignal() : []));
@@ -105,7 +82,12 @@ export class CropStore {
       ? this.alertsSignal().filter((item) => item.region === this.selectedPlot()?.region)
       : [],
   );
-  readonly forecasts = computed(() => (this.scopeReady() ? this.forecastsSignal() : []));
+  readonly forecasts = computed(() =>
+    this.forecastsSignal().filter((item) => item.region === this.selectedPlot()?.region),
+  );
+  readonly bulletins = computed(() =>
+    this.bulletinsSignal().filter((item) => item.region === this.selectedPlot()?.region),
+  );
   readonly inspections = computed(() =>
     this.scopeReady()
       ? this.inspectionsSignal().filter((inspection) =>
@@ -147,13 +129,23 @@ export class CropStore {
     () => this.scopeError() ?? this.errors()['observations'] ?? null,
   );
   readonly alertsError = computed(() => this.scopeError() ?? this.errors()['alerts'] ?? null);
+  readonly forecastsLoading = computed(() => !!this.busy()['forecasts']);
+  readonly forecastsError = computed(() => this.errors()['forecasts'] ?? null);
+  readonly bulletinsLoading = computed(() => !!this.busy()['bulletins']);
+  readonly bulletinsError = computed(() => this.errors()['bulletins'] ?? null);
+  readonly importingObservation = computed(() => !!this.busy()['satellite-import']);
+  readonly importError = computed(() => this.errors()['satellite-import'] ?? null);
   readonly writeError = computed(() => this.errors()['write'] ?? null);
   readonly error = computed(() => Object.values(this.errors()).find((value) => value) ?? null);
   readonly pendingPestReportsCount = computed(
     () => this.pestReports().filter((report) => report.status === 'PENDING').length,
   );
   readonly treatableReports = computed(() =>
-    this.pestReports().filter((report) => report.status === 'INSPECTED'),
+    this.pestReports().filter(
+      (report) =>
+        report.status === 'INSPECTED' &&
+        !this.prescriptions().some((rx) => rx.reportId === report.id),
+    ),
   );
   readonly schedulableReports = computed(() =>
     this.pestReports().filter(
@@ -309,6 +301,13 @@ export class CropStore {
   private clearPlotData(): void {
     this.requests.get('observations')?.unsubscribe();
     this.requests.get('alerts')?.unsubscribe();
+    for (const key of ['forecasts', 'bulletins', 'satellite-import']) {
+      this.requests.get(key)?.unsubscribe();
+      this.setBusy(key, false);
+      this.setError(key, null);
+    }
+    this.forecastsSignal.set([]);
+    this.bulletinsSignal.set([]);
     this.setBusy('observations', false);
     this.setBusy('alerts', false);
     this.observationsSignal.set([]);
@@ -326,12 +325,7 @@ export class CropStore {
       (data) => {
         const plot = this.plots().find((plot) => plot.id === plotId);
         if (!plot) return;
-        if (
-          data.some(
-            (observation) =>
-              observation.plotId !== plotId || observation.stressAreaHectares > plot.areaHectares,
-          )
-        ) {
+        if (data.some((observation) => observation.plotId !== plotId)) {
           throw new Error('crop.errors.invalid-data');
         }
         this.observationsSignal.set(
@@ -353,70 +347,129 @@ export class CropStore {
     );
   }
 
+  canImportObservation(): boolean {
+    const plot = this.selectedPlot();
+    return this.scopeReady() && !!plot?.hasPolygon && plot.ownerUserId === this.activeUser()?.id;
+  }
+
+  importLatestObservation(): void {
+    const plot = this.selectedPlot();
+    if (!plot || !this.canImportObservation() || this.importingObservation()) return;
+    const now = new Date();
+    const from = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    this.read(
+      'satellite-import',
+      this.api
+        .importObservation(plot.id, from.toISOString(), now.toISOString())
+        .pipe(
+          catchError((error: unknown) =>
+            throwError(() =>
+              error instanceof HttpErrorResponse &&
+              error.status === 404 &&
+              error.error?.code === 'SATELLITEOBSERVATION_NOT_FOUND'
+                ? new Error('crop.errors.no-satellite-in-range')
+                : error,
+            ),
+          ),
+        ),
+      () => this.loadObservations(plot.id),
+      'crop.errors.import-observations',
+    );
+  }
+
+  loadRegionalData(region: string): void {
+    this.loadAlerts(region);
+    if (!this.plots().some((plot) => plot.region === region)) return;
+    this.read(
+      'forecasts',
+      this.api.getForecastsByRegion(region),
+      (items) =>
+        this.forecastsSignal.set(
+          [...items].sort((a, b) => Date.parse(a.forecastDate) - Date.parse(b.forecastDate)),
+        ),
+      'crop.errors.load-forecasts',
+    );
+    this.loadBulletins(region);
+  }
+
+  private loadBulletins(region: string): void {
+    this.read(
+      'bulletins',
+      this.api.getBulletinsByRegion(region),
+      (items) =>
+        this.bulletinsSignal.set(
+          [...items].sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt)),
+        ),
+      'crop.errors.load-bulletins',
+    );
+  }
+
+  publishBulletin(title: string, content: string, onSaved: () => void): void {
+    const plot = this.selectedPlot();
+    const agronomistId = this.activeUser()?.id;
+    this.mutate(
+      () => {
+        if (!this.canPrescribe() || !plot || agronomistId === undefined) this.denied();
+        requireText(title);
+        requireText(content);
+        return this.api.publishBulletin({
+          agronomistId,
+          region: plot.region,
+          title: title.trim(),
+          content: content.trim(),
+        });
+      },
+      () => {
+        if (this.selectedPlot()?.region === plot?.region) this.loadBulletins(plot!.region);
+      },
+      onSaved,
+      () => {},
+      'crop.errors.save-bulletin',
+    );
+  }
+
   loadClinicalData(onLoaded?: () => void): void {
     if (!this.scopeReady()) return;
     const plots = this.plots();
-    const reports = plots.length
-      ? forkJoin(plots.map((plot) => this.api.getPestReportsByPlot(plot.id as number))).pipe(
-          map((groups) => groups.flat()),
+    const data = plots.length
+      ? forkJoin(
+          plots.map((plot) =>
+            forkJoin({
+              reports: this.api.getPestReportsByPlot(plot.id),
+              inspections: this.api.getInspectionsByPlot(plot.id),
+              prescriptions: this.api.getPrescriptionsByPlot(plot.id),
+            }).pipe(
+              map((items) => {
+                const reports = items.reports
+                  .filter(
+                    (report) =>
+                      report.plotId === plot.id &&
+                      report.reporterId === plot.ownerUserId &&
+                      (!this.canReport() || report.reporterId === this.activeUser()?.id),
+                  )
+                  .map((report) => this.withPlotName(report, plot.name));
+                const ids = new Set(reports.map((report) => report.id));
+                return {
+                  reports,
+                  inspections: items.inspections.filter(
+                    (item) => item.plotId === plot.id && ids.has(item.reportId),
+                  ),
+                  prescriptions: items.prescriptions.filter(
+                    (item) => item.plotId === plot.id && ids.has(item.reportId),
+                  ),
+                };
+              }),
+            ),
+          ),
         )
-      : of([] as PestReport[]);
+      : of([]);
     this.read(
       'clinical',
-      reports.pipe(
-        switchMap((reports) => {
-          const allowed = reports.filter(
-            (report) =>
-              plots.some(
-                (plot) =>
-                  plot.id === report.plotId &&
-                  (this.activeUser()?.experience !== 'AGRONOMIST' ||
-                    plot.ownerUserId === report.reporterId),
-              ) &&
-              (!this.canReport() || report.reporterId === this.activeUser()?.id),
-          );
-          const ids = new Set(allowed.map((report) => report.id));
-          if (!ids.size)
-            return of({
-              reports: allowed,
-              inspections: [] as FieldInspection[],
-              prescriptions: [] as TechnicalPrescription[],
-              followUps: [] as TreatmentFollowUp[],
-              assessments: [] as CaseAssessment[],
-            });
-          return forkJoin({
-            assessments: forkJoin([...ids].map((id) => this.api.getAssessmentsByReportId(Number(id)))),
-            inspections: this.api.getInspections(),
-            prescriptions: this.api.getPrescriptions(),
-            followUps: forkJoin([...ids].map((id) => this.api.getFollowUpsByReportId(Number(id)))),
-          }).pipe(
-            map((data) => ({
-              reports: allowed,
-              assessments: data.assessments.flat().filter((item) => ids.has(item.data.reportId)),
-              inspections: data.inspections.filter((item) => ids.has(item.reportId)),
-              prescriptions: data.prescriptions.filter((item) => ids.has(item.reportId)),
-              followUps: data.followUps
-                .flat()
-                .filter(
-                  (item) =>
-                    ids.has(item.data.reportId) &&
-                    allowed.some(
-                      (report) =>
-                        report.id === item.data.reportId &&
-                        report.reporterId === item.data.producerUserId,
-                    ),
-                ),
-            })),
-          );
-        }),
-        retry(2),
-      ),
-      (data) => {
-        this.reportsSignal.set(data.reports);
-        this.inspectionsSignal.set(data.inspections);
-        this.prescriptionsSignal.set(data.prescriptions);
-        this.followUpsSignal.set(data.followUps);
-        this.assessmentsSignal.set(data.assessments);
+      data,
+      (groups) => {
+        this.reportsSignal.set(groups.flatMap((item) => item.reports));
+        this.inspectionsSignal.set(groups.flatMap((item) => item.inspections));
+        this.prescriptionsSignal.set(groups.flatMap((item) => item.prescriptions));
         onLoaded?.();
       },
       'crop.errors.load-workflow',
@@ -437,9 +490,9 @@ export class CropStore {
         )
           this.denied();
         new PestReport({ ...command });
-        return this.api.recordReport(
-          new RecordPestReportCommand({ ...command, plotName: plot!.name }),
-        );
+        return this.api
+          .recordReport(command)
+          .pipe(map((report) => this.withPlotName(report, plot.name)));
       },
       (report) => this.reportsSignal.update((items) => [...items, report]),
       onSaved,
@@ -463,8 +516,21 @@ export class CropStore {
           throw new Error('crop.errors.future-visit');
         if (this.inspections().some((item) => item.reportId === command.reportId))
           throw new Error('crop.errors.visit-already-scheduled');
-        return this.withResponsibility(command.reportId, () =>
-          this.api.scheduleInspection(command),
+        const report = this.report(command.reportId);
+        return this.profiles.responsibilityByPlot(report.plotId).pipe(
+          switchMap((assignment) => {
+            const user = this.activeUser();
+            if (
+              !assignment ||
+              assignment.status !== 'ACTIVE' ||
+              assignment.producerUserId !== report.reporterId
+            ) {
+              throw new Error('crop.errors.assign-before-visit');
+            }
+            if (!user || (user.experience === 'AGRONOMIST' && assignment.advisorUserId !== user.id))
+              this.denied();
+            return this.api.scheduleInspection(command, assignment.advisorUserId);
+          }),
         );
       },
       (inspection) => this.inspectionsSignal.update((items) => [...items, inspection]),
@@ -474,55 +540,49 @@ export class CropStore {
     );
   }
 
-  completeInspection(id: number, notes: string, onSaved: () => void, onFailure: () => void): void {
-    let inspectionSaved = false;
+  completeInspection(
+    id: number,
+    findings: string,
+    onSaved: () => void,
+    onFailure: () => void,
+  ): void {
     this.mutate(
       () => {
-        const user = this.activeUser();
-        const current = this.inspections().find((item) => item.id === id);
-        if (!this.canPrescribe() || !user || !current) this.denied();
-        const report = this.copyReport(this.report(current!.reportId));
-        if (report.status !== 'PENDING') throw new Error('crop.errors.invalid-transition');
-        const inspection = new FieldInspection({
-          id: current!.id,
-          reportId: current!.reportId,
-          scheduledAt: current!.scheduledAt,
-          notes: current!.notes,
-          status: current!.status,
-          completedAt: current!.completedAt,
-          inspectorUserId: current!.inspectorUserId,
-        });
-        let saved: Observable<FieldInspection>;
-        if (inspection.status === 'COMPLETED') {
-          if (inspection.inspectorUserId !== user!.id || report.status !== 'PENDING') this.denied();
-          saved = of(inspection);
-        } else {
-          inspection.complete(notes, user!.id);
-          saved = defer(() => this.api.updateInspection(inspection));
-        }
-        return this.withResponsibility(current!.reportId, () => saved).pipe(
-          tap((result) => {
-            inspectionSaved = true;
-            this.inspectionsSignal.update((items) =>
-              items.map((item) => (item.id === result.id ? result : item)),
-            );
-          }),
-          switchMap(() => {
-            if (report.status !== 'PENDING') return of(report);
-            report.markInspected();
-            return this.withResponsibility(Number(report.id), () => this.api.updateReport(report));
-          }),
+        const inspection = this.inspections().find((item) => item.id === id);
+        if (!inspection || !this.canComplete(inspection)) this.denied();
+        requireText(findings, 10);
+        if (Date.parse(inspection.scheduledAt) > Date.now())
+          throw new Error('crop.errors.visit-not-due');
+        return this.withResponsibility(inspection.reportId, () =>
+          this.api.completeInspection(id, findings.trim()),
         );
       },
-      (report) => this.replaceReport(report),
+      (inspection) => {
+        this.inspectionsSignal.update((items) =>
+          items.map((item) => (item.id === id ? inspection : item)),
+        );
+        const plot = this.plots().find((item) => item.id === inspection.plotId);
+        if (plot) {
+          this.read(
+            'inspection-report',
+            this.api.getPestReport(inspection.reportId),
+            (report) => {
+              if (report.plotId !== plot.id || report.status === 'PENDING') {
+                throw new Error('crop.errors.inspection-status-partial');
+              }
+              this.replaceReport(this.withPlotName(report, plot.name));
+            },
+            'crop.errors.inspection-status-partial',
+          );
+        }
+      },
       onSaved,
       onFailure,
-      () =>
-        inspectionSaved
-          ? 'crop.errors.inspection-status-partial'
-          : 'crop.errors.complete-inspection',
+      'crop.errors.complete-inspection',
     );
   }
+
+  readonly inspectionReportError = computed(() => this.errors()['inspection-report'] ?? null);
 
   issuePrescription(
     command: IssueTechnicalPrescriptionCommand,
@@ -537,7 +597,12 @@ export class CropStore {
         requireDate(command.applicationDate);
         if (command.applicationDate < todayInLima())
           throw new Error('crop.errors.past-application');
-        new TechnicalPrescription({ ...command });
+        requireText(command.product);
+        requireText(command.dosage);
+        requireText(command.instructions);
+        if (this.prescriptions().some((rx) => rx.reportId === command.reportId)) {
+          throw new Error('crop.errors.invalid-transition');
+        }
         return this.withResponsibility(command.reportId, () => this.api.issuePrescription(command));
       },
       (prescription) => this.prescriptionsSignal.update((items) => [...items, prescription]),
@@ -547,203 +612,32 @@ export class CropStore {
     );
   }
 
-  /**
-   * Records an agronomist's evaluation after rereading the case and farmer evidence.
-   * @remarks Recovery requires application and evolution for every prescription. The
-   * assessment is persisted first. A failed report update keeps that assessment and
-   * reuses its ID when retrying; production must make these writes transactional.
-   * @param command - Stable draft ID, conclusion and notes. Author/time derive from the session.
-   * @param onSaved - Invoked after the evaluation and any required closure are confirmed.
-   * @param onFailure - Retains the form draft for correction or retry.
-   */
-  recordAssessment(
-    command: Pick<CaseAssessmentData, 'id' | 'reportId' | 'outcome' | 'notes'>,
-    onSaved: () => void,
-    onFailure: () => void,
-  ): void {
-    let assessmentSaved = false;
-    this.mutate(
-      () => {
-        if (!this.canPrescribe() || this.clinicalLoading() || this.clinicalError()) this.denied();
-        const user = this.activeUser()!;
-        const current = this.report(command.reportId);
-        return this.withResponsibility(command.reportId, () =>
-          forkJoin({
-            reports: this.api.getPestReportsByPlot(current.plotId),
-            prescriptions: this.api.getPrescriptionsByReportId(command.reportId),
-            followUps: this.api.getFollowUpsByReportId(command.reportId),
-            assessments: this.api.getAssessmentsByReportId(command.reportId),
-          }),
-        ).pipe(
-          switchMap((data) => {
-            const report = data.reports.find(
-              (item) =>
-                item.id === command.reportId &&
-                item.reporterId === current.reporterId &&
-                item.plotId === current.plotId,
-            );
-            if (!report) this.denied();
-            const prescriptions = data.prescriptions.filter(
-              (item) => item.reportId === command.reportId,
-            );
-            const evidence = data.followUps.filter(
-              (item) =>
-                item.data.reportId === command.reportId &&
-                item.data.producerUserId === report!.reporterId &&
-                prescriptions.some((rx) => rx.id === item.data.prescriptionId) &&
-                item.data.occurredOn <= todayInLima(),
-            );
-            const evolved = prescriptions.filter((rx) =>
-              evidence.some(
-                (item) =>
-                  item.data.prescriptionId === rx.id &&
-                  item.data.kind === 'EVOLUTION' &&
-                  evidence.some(
-                    (application) =>
-                      application.data.prescriptionId === rx.id &&
-                      application.data.kind === 'APPLICATION' &&
-                      application.data.occurredOn >= rx.applicationDate.slice(0, 10) &&
-                      application.data.occurredOn <= item.data.occurredOn,
-                  ),
-              ),
-            );
-            if (
-              !evolved.length ||
-              (command.outcome === 'RECOVERED' && evolved.length !== prescriptions.length)
-            )
-              throw new Error('crop.errors.assessment-evidence');
-            const existing = data.assessments.find((item) => item.data.id === command.id);
-            const assessment = new CaseAssessment({
-              ...command,
-              agronomistUserId: user.id,
-              evidenceIds: evidence.map((item) => item.data.id).sort(),
-              recordedAt: existing?.data.recordedAt ?? new Date().toISOString(),
-            });
-            if (
-              existing &&
-              (existing.data.agronomistUserId !== user.id ||
-                existing.data.outcome !== assessment.data.outcome ||
-                existing.data.notes !== assessment.data.notes ||
-                JSON.stringify([...existing.data.evidenceIds].sort()) !==
-                  JSON.stringify(assessment.data.evidenceIds))
-            )
-              throw new Error('crop.errors.assessment-conflict');
-            if (
-              report!.status !== 'INSPECTED' &&
-              !(existing?.data.outcome === 'RECOVERED' && report!.status === 'RESOLVED')
-            )
-              throw new Error('crop.errors.invalid-transition');
-            return this.withResponsibility(command.reportId, () =>
-              existing ? of(existing) : this.api.recordAssessment(assessment.data),
-            ).pipe(
-              tap((saved) => {
-                assessmentSaved = true;
-                this.assessmentsSignal.update((items) => [
-                  ...items.filter((item) => item.data.id !== saved.data.id),
-                  saved,
-                ]);
-              }),
-              switchMap((saved) => {
-                if (saved.data.outcome !== 'RECOVERED' || report!.status === 'RESOLVED')
-                  return of(report!);
-                const resolved = this.copyReport(report!);
-                resolved.resolve();
-                return this.withResponsibility(command.reportId, () =>
-                  this.api.updateReport(resolved),
-                );
-              }),
-            );
-          }),
-        );
-      },
-      (report) => this.replaceReport(report),
-      onSaved,
-      onFailure,
-      () => (assessmentSaved ? 'crop.errors.assessment-partial' : 'crop.errors.save-assessment'),
+  canApplyPrescription(prescription: TechnicalPrescription): boolean {
+    const user = this.activeUser();
+    return (
+      this.canReport() &&
+      prescription.status === 'ISSUED' &&
+      this.pestReports().some(
+        (report) =>
+          report.id === prescription.reportId &&
+          report.plotId === prescription.plotId &&
+          report.reporterId === user?.id,
+      )
     );
   }
 
-  /**
-   * Records farmer evidence for a prescription belonging to their own incident.
-   * @param command - Stable client ID, prescription, date and notes; account is session-derived.
-   * @param onSaved - Called after persisted confirmation in the same session.
-   * @param onFailure - Restores editing while preserving the draft for a retry.
-   */
-  recordFollowUp(
-    command: Omit<TreatmentFollowUpData, 'producerUserId' | 'recordedAt'>,
-    onSaved: () => void,
-    onFailure: () => void,
-  ): void {
+  applyPrescription(id: number, onSaved: () => void = () => {}): void {
     this.mutate(
       () => {
-        const report = this.report(command.reportId);
-        const user = this.activeUser();
-        const prescription = this.prescriptions().find(
-          (item) => item.id === command.prescriptionId && item.reportId === report.id,
-        );
-        if (
-          !this.canReport() ||
-          !user ||
-          report.reporterId !== user.id ||
-          !this.plots().some((plot) => plot.id === report.plotId && plot.ownerUserId === user.id)
-        )
-          this.denied();
-        if (
-          this.clinicalLoading() ||
-          this.clinicalError() ||
-          report.status !== 'INSPECTED' ||
-          !prescription
-        )
-          throw new Error('crop.errors.follow-up-not-ready');
-        const evidence = new TreatmentFollowUp({
-          ...command,
-          producerUserId: user.id,
-          recordedAt: new Date().toISOString(),
-        });
-        if (
-          command.occurredOn > todayInLima() ||
-          command.occurredOn < prescription.applicationDate.slice(0, 10)
-        )
-          throw new Error('crop.errors.follow-up-date');
-        return this.api.getFollowUpsByReportId(command.reportId).pipe(
-          switchMap((existing) => {
-            if (user !== this.activeUser() || !this.scopeReady()) this.denied();
-            const matching = existing.filter(
-              (item) =>
-                item.data.reportId === command.reportId &&
-                item.data.prescriptionId === command.prescriptionId &&
-                item.data.producerUserId === user.id,
-            );
-            const retry = matching.find((item) => item.data.id === evidence.data.id);
-            if (retry) {
-              if (
-                retry.data.kind !== evidence.data.kind ||
-                retry.data.occurredOn !== evidence.data.occurredOn ||
-                retry.data.notes !== evidence.data.notes
-              )
-                throw new Error('crop.errors.follow-up-conflict');
-              return of(retry);
-            }
-            const application = matching.find((item) => item.data.kind === 'APPLICATION');
-            if (command.kind === 'APPLICATION' && application)
-              throw new Error('crop.errors.application-exists');
-            if (
-              command.kind === 'EVOLUTION' &&
-              (!application || command.occurredOn < application.data.occurredOn)
-            )
-              throw new Error('crop.errors.application-required');
-            return this.api.recordFollowUp(evidence.data);
-          }),
-        );
+        const prescription = this.prescriptions().find((rx) => rx.id === id);
+        if (!prescription || !this.canApplyPrescription(prescription)) this.denied();
+        return this.api.applyPrescription(id);
       },
-      (evidence) =>
-        this.followUpsSignal.update((items) => [
-          ...items.filter((item) => item.data.id !== evidence.data.id),
-          evidence,
-        ]),
+      (saved) =>
+        this.prescriptionsSignal.update((items) => items.map((rx) => (rx.id === id ? saved : rx))),
       onSaved,
-      onFailure,
-      'crop.errors.save-follow-up',
+      () => {},
+      'crop.errors.apply-prescription',
     );
   }
 
@@ -788,32 +682,11 @@ export class CropStore {
       '#' + id
     );
   }
-  /** Requires producer application and evolution before offering professional evaluation. */
-  canAssess(id: number): boolean {
-    return (
-      this.canPrescribe() &&
-      !this.clinicalLoading() &&
-      !this.clinicalError() &&
-      this.pestReports().some((report) => report.id === id && report.status === 'INSPECTED') &&
-      this.prescriptions().some(
-        (rx) =>
-          rx.reportId === id &&
-          this.followUps().some(
-            (item) => item.data.prescriptionId === rx.id && item.data.kind === 'APPLICATION',
-          ) &&
-          this.followUps().some(
-            (item) => item.data.prescriptionId === rx.id && item.data.kind === 'EVOLUTION',
-          ),
-      )
-    );
-  }
   canComplete(inspection: FieldInspection): boolean {
     return (
       this.canPrescribe() &&
-      this.pestReports().some(
-        (report) => report.id === inspection.reportId && report.status === 'PENDING',
-      ) &&
-      (inspection.status === 'SCHEDULED' || inspection.inspectorUserId === this.activeUser()?.id)
+      inspection.status === 'SCHEDULED' &&
+      inspection.inspectorUserId === this.activeUser()?.id
     );
   }
 
@@ -822,11 +695,11 @@ export class CropStore {
     if (!report) this.denied();
     return report!;
   }
-  private copyReport(report: PestReport): PestReport {
+  private withPlotName(report: PestReport, plotName: string): PestReport {
     return new PestReport({
       id: report.id,
       plotId: report.plotId,
-      plotName: report.plotName,
+      plotName,
       reporterId: report.reporterId,
       description: report.description,
       severity: report.severity,
@@ -850,9 +723,12 @@ export class CropStore {
     this.errors.update((items) => ({ ...items, [key]: value }));
   }
   private message(error: unknown, fallback: string): string {
-    return error instanceof Error && error.message.startsWith('crop.errors.')
-      ? error.message
-      : fallback;
+    if (error instanceof Error && error.message.startsWith('crop.errors.')) return error.message;
+    if (error instanceof HttpErrorResponse && [400, 409, 422].includes(error.status)) {
+      const detail = error.error?.details || error.error?.detail;
+      if (typeof detail === 'string' && detail.trim()) return detail;
+    }
+    return fallback;
   }
 
   private read<T>(
@@ -950,9 +826,8 @@ export class CropStore {
     this.observationsSignal.set([]);
     this.reportsSignal.set([]);
     this.alertsSignal.set([]);
-    this.followUpsSignal.set([]);
-    this.assessmentsSignal.set([]);
     this.forecastsSignal.set([]);
+    this.bulletinsSignal.set([]);
     this.inspectionsSignal.set([]);
     this.prescriptionsSignal.set([]);
   }

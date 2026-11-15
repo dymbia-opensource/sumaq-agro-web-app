@@ -179,10 +179,9 @@ export class CropHealth implements AfterViewInit, OnDestroy {
         plot: 'plot',
         capture: 'capture-date',
         area: 'plot-area',
-        stress: 'stress-detected',
+        source: 'observation-source',
         clouds: 'cloud-coverage',
         temperature: 'surface-temperature',
-        recommendation: 'recommendation',
         noData: 'no-data',
         footer: 'image-footer',
       };

@@ -1,34 +1,25 @@
-﻿/**
- * Command to issue a technical treatment prescription for a pest report.
- */
+/** Prescription fields provided by the agronomist. */
 export class IssueTechnicalPrescriptionCommand {
-  /** Target pest report identifier. */
   readonly reportId: number;
-  /** Agronomist issuing the prescription. */
   readonly agronomistId: number;
-  /** Recommended products to apply. */
-  readonly recommendedProducts: string;
-  /** Dosage and handling instructions. */
-  readonly dosageInstructions: string;
-  /** Suggested application date. */
+  readonly product: string;
+  readonly dosage: string;
+  readonly instructions: string;
   readonly applicationDate: string;
 
-  /**
-   * Initializes a new instance of {@link IssueTechnicalPrescriptionCommand}.
-   *
-   * @param props - Command payload.
-   */
-  constructor(props: {
+  constructor(fields: {
     reportId: number;
     agronomistId: number;
-    recommendedProducts: string;
-    dosageInstructions: string;
+    product: string;
+    dosage: string;
+    instructions: string;
     applicationDate: string;
   }) {
-    this.reportId = props.reportId;
-    this.agronomistId = props.agronomistId;
-    this.recommendedProducts = props.recommendedProducts;
-    this.dosageInstructions = props.dosageInstructions;
-    this.applicationDate = props.applicationDate;
+    this.reportId = fields.reportId;
+    this.agronomistId = fields.agronomistId;
+    this.product = fields.product;
+    this.dosage = fields.dosage;
+    this.instructions = fields.instructions;
+    this.applicationDate = fields.applicationDate;
   }
 }

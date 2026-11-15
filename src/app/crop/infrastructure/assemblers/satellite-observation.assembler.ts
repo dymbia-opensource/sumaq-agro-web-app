@@ -14,26 +14,24 @@ export class SatelliteObservationAssembler implements BaseAssembler<
     return new SatelliteObservation({
       id: resource.id,
       plotId: resource.plotId,
-      date: resource.date,
+      date: resource.capturedAt,
+      source: resource.source,
       ndviMean: resource.ndviMean,
       ndwiMean: resource.ndwiMean,
       surfaceTempKelvin: resource.surfaceTempKelvin,
       cloudCoveragePercent: resource.cloudCoveragePercent,
-      stressAreaHectares: resource.stressAreaHectares,
-      recommendation: resource.recommendation,
     });
   }
   toResourceFromEntity(entity: SatelliteObservation): SatelliteObservationResource {
     return {
       id: entity.id as number,
       plotId: entity.plotId,
-      date: entity.date,
+      capturedAt: entity.date,
+      source: entity.source,
       ndviMean: entity.ndviMean,
       ndwiMean: entity.ndwiMean,
       surfaceTempKelvin: entity.surfaceTempKelvin,
       cloudCoveragePercent: entity.cloudCoveragePercent,
-      stressAreaHectares: entity.stressAreaHectares,
-      recommendation: entity.recommendation,
     };
   }
   toEntitiesFromResponse(response: SatelliteObservationsResponse): SatelliteObservation[] {

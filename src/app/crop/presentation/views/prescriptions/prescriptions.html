@@ -18,7 +18,7 @@
     @for (rx of store.prescriptions(); track rx.id) {
       <mat-card appearance="outlined" class="history-card">
         <mat-card-header>
-          <mat-card-title>{{ rx.recommendedProducts }}</mat-card-title>
+          <mat-card-title>{{ rx.product }}</mat-card-title>
           <mat-card-subtitle
             >{{ store.reportLabel(rx.reportId) }} ·
             {{ store.advisorName(rx.agronomistId) }}</mat-card-subtitle
@@ -28,7 +28,12 @@
           <p>
             {{ 'crop.application-date' | translate }}: {{ rx.applicationDate | date: 'mediumDate' }}
           </p>
-          <p class="instructions">{{ rx.dosageInstructions }}</p>
+          <p>{{ rx.dosage }}</p>
+          <p class="instructions">{{ rx.instructions }}</p>
+          <p>{{ 'crop.prescription-status.' + rx.status | translate }}</p>
+          @if (rx.appliedAt) {
+            <p>{{ 'crop.applied-at' | translate }}: {{ rx.appliedAt | date: 'medium' }}</p>
+          }
         </mat-card-content>
       </mat-card>
     } @empty {

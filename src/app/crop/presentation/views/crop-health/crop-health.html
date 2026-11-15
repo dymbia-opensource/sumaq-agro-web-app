@@ -29,6 +29,16 @@
     <p role="status">{{ 'crop.no-observations' | translate }}</p>
   }
 }
+@if (store.canImportObservation()) {
+  <button mat-stroked-button type="button"
+    [disabled]="store.importingObservation() || store.observationsLoading()"
+    (click)="store.importLatestObservation()">
+    {{ (store.importingObservation() ? 'common.loading' : 'crop.import-recent-observation') | translate }}
+  </button>
+}
+@if (store.importError(); as error) {
+  <p role="status">{{ error | translate }}</p>
+}
 <div class="layers-bar">
   <span>{{ 'crop.layers' | translate }}</span>
   <mat-radio-group [(ngModel)]="selectedLayer" (change)="onLayerChange()">
@@ -76,18 +86,16 @@
         ) {
           <dl class="metrics">
             <dt>NDVI</dt>
-            <dd>{{ observation.ndviMean | number: '1.2-2' }}</dd>
+            <dd>{{ observation.ndviMean === null ? ('crop.no-data' | translate) : (observation.ndviMean | number: '1.2-2') }}</dd>
             <dt>NDWI</dt>
-            <dd>{{ observation.ndwiMean | number: '1.2-2' }}</dd>
-            <dt>{{ 'crop.stress-detected' | translate }}</dt>
-            <dd>{{ observation.stressAreaHectares | number: '1.1-1' }} ha</dd>
+            <dd>{{ observation.ndwiMean === null ? ('crop.no-data' | translate) : (observation.ndwiMean | number: '1.2-2') }}</dd>
+            <dt>{{ 'crop.observation-source' | translate }}</dt>
+            <dd>{{ observation.source }}</dd>
+            @if (observation.cloudCoveragePercent !== null) {
+              <dt>{{ 'crop.cloud-coverage' | translate }}</dt>
+              <dd>{{ observation.cloudCoveragePercent | number: '1.0-1' }}%</dd>
+            }
           </dl>
-          @if (observation.recommendation) {
-            <div class="recommendation-box">
-              <strong>{{ 'crop.recommendation' | translate }}</strong>
-              <p>{{ observation.recommendation }}</p>
-            </div>
-          }
         } @else {
           <dl class="metrics">
             <dt>NDVI</dt>
@@ -95,7 +103,9 @@
             <dt>NDWI</dt>
             <dd>{{ 'crop.no-data' | translate }}</dd>
           </dl>
-          <p>{{ 'crop.observation-pending' | translate }}</p>
+          @if (!store.observationsError()) {
+            <p>{{ 'crop.observation-pending' | translate }}</p>
+          }
         }
       </mat-card-content>
       <mat-card-actions>

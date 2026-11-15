@@ -1,56 +1,36 @@
-﻿import { HttpClient, HttpParams } from '@angular/common/http';
-import { catchError, map, Observable } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { map } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { BaseApiEndpoint } from '../../../shared/infrastructure/base-api-endpoint';
-import { FieldInspection } from '../../domain/model/entities/field-inspection.entity';
+import { ScheduleFieldInspectionCommand } from '../../domain/model/commands/schedule-field-inspection.command';
 import { FieldInspectionAssembler } from '../assemblers/field-inspection.assembler';
-import {
-  FieldInspectionResource,
-  FieldInspectionsResponse,
-} from '../responses/field-inspection.response';
+import { FieldInspectionResource } from '../responses/field-inspection.response';
 
-/**
- * HTTP endpoint for managing scheduled field inspections (`/field-inspections`).
- */
-export class FieldInspectionsApiEndpoint extends BaseApiEndpoint<
-  FieldInspection,
-  FieldInspectionResource,
-  FieldInspectionsResponse,
-  FieldInspectionAssembler
-> {
-  /**
-   * Initializes the endpoint with the configured environment URL.
-   * @param http - Angular's HttpClient.
-   */
-  constructor(http: HttpClient) {
-    super(
-      http,
-      `${environment.platformProviderApiBaseUrl}${environment.platformProviderFieldInspectionsEndpointPath}`,
-      new FieldInspectionAssembler(),
-    );
-  }
+export class FieldInspectionsApiEndpoint {
+  private readonly url =
+    environment.platformProviderApiBaseUrl +
+    environment.platformProviderFieldInspectionsEndpointPath;
+  private readonly assembler = new FieldInspectionAssembler();
+  constructor(private readonly http: HttpClient) {}
 
-  /**
-   * Fetches field inspections linked to a specific pest report.
-   * @param reportId - The unique identifier of the pest report.
-   * @returns An observable of the domain entities.
-   */
-  getByReportId(reportId: number): Observable<FieldInspection[]> {
-    const params = new HttpParams().set('reportId', reportId);
+  getByPlot(plotId: number) {
     return this.http
-      .get<FieldInspectionsResponse | FieldInspectionResource[]>(this.endpointUrl, { params })
-      .pipe(
-        map((response) => this.toEntities(response)),
-        catchError(this.handleError('Failed to fetch field inspections')),
-      );
+      .get<FieldInspectionResource[]>(this.url, { params: { plotId } })
+      .pipe(map((items) => items.map(this.assembler.toEntityFromResource)));
   }
 
-  /** Lets the API assign the ID of a new record. */
-  override create(entity: FieldInspection): Observable<FieldInspection> {
-    const { id: _id, ...resource } = this.assembler.toResourceFromEntity(entity);
-    return this.http.post<FieldInspectionResource>(this.endpointUrl, resource).pipe(
-      map((created) => this.assembler.toEntityFromResource(created)),
-      catchError(this.handleError('Failed to create field-inspection')),
-    );
+  schedule(command: ScheduleFieldInspectionCommand, agronomistId: number) {
+    return this.http
+      .post<FieldInspectionResource>(this.url, {
+        pestReportId: command.reportId,
+        agronomistId,
+        scheduledAt: command.scheduledAt,
+      })
+      .pipe(map(this.assembler.toEntityFromResource));
+  }
+
+  complete(id: number, findings: string) {
+    return this.http
+      .patch<FieldInspectionResource>(this.url + '/' + id + '/completion', { findings })
+      .pipe(map(this.assembler.toEntityFromResource));
   }
 }

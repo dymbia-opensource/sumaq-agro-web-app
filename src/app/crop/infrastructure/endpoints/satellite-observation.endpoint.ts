@@ -46,4 +46,9 @@ export class SatelliteObservationsApiEndpoint extends BaseApiEndpoint<
         catchError(this.handleError('Failed to fetch satellite observations')),
       );
   }
+  importLatest(plotId: number, start: string, end: string): Observable<SatelliteObservation> {
+    return this.http
+      .post<SatelliteObservationResource>(this.endpointUrl + '/import', { plotId, start, end })
+      .pipe(map((resource) => this.assembler.toEntityFromResource(resource)));
+  }
 }

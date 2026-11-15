@@ -1,14 +1,5 @@
-import { BaseResource, BaseResponse } from '../../../shared/infrastructure/base-response';
+import { TechnicalPrescriptionProps } from '../../domain/model/entities/technical-prescription.entity';
 
-export interface TechnicalPrescriptionResource extends BaseResource {
-  id: number;
-  reportId: number;
-  agronomistId: number;
-  recommendedProducts: string;
-  dosageInstructions: string;
-  applicationDate: string;
-}
-
-export interface TechnicalPrescriptionsResponse extends BaseResponse {
-  prescriptions: TechnicalPrescriptionResource[];
-}
+export type TechnicalPrescriptionResource = Omit<TechnicalPrescriptionProps, 'reportId'> & {
+  pestReportId: number;
+};

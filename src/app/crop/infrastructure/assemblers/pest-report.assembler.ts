@@ -7,11 +7,11 @@ export class PestReportAssembler implements BaseAssembler<
   PestReportResource,
   PestReportsResponse
 > {
-  toEntityFromResource(resource: PestReportResource): PestReport {
+  toEntityFromResource(resource: PestReportResource, plotName = resource.plotName): PestReport {
     return new PestReport({
       id: resource.id,
       plotId: resource.plotId,
-      plotName: resource.plotName,
+      plotName,
       reporterId: resource.reporterId,
       description: resource.description,
       severity: resource.severity,

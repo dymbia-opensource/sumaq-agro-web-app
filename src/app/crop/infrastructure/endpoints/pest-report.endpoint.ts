@@ -44,7 +44,8 @@ export class PestReportsApiEndpoint extends BaseApiEndpoint<
 
   /** Lets the API assign the ID of a new record. */
   override create(entity: PestReport): Observable<PestReport> {
-    const { id: _id, ...resource } = this.assembler.toResourceFromEntity(entity);
+    const { plotId, reporterId, description, severity } = entity;
+    const resource = { plotId, reporterId, description, severity };
     return this.http.post<PestReportResource>(this.endpointUrl, resource).pipe(
       map((created) => this.assembler.toEntityFromResource(created)),
       catchError(this.handleError('Failed to create pest-report')),
