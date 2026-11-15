@@ -1,57 +1,121 @@
-import { HttpClient } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { CooperativeMember } from '../../profiles/domain/model/entities/cooperative-member.entity';
-import { IssueQualityCertificateCommand } from '../domain/model/commands/issue-quality-certificate.command';
-import { RegisterHarvestBatchCommand } from '../domain/model/commands/register-harvest-batch.command';
-import { HarvestBatch, HarvestBatchProps } from '../domain/model/entities/harvest-batch.entity';
-import { PublicTraceabilityRecord } from '../domain/model/entities/public-traceability-record.entity';
-import { QualityCertificate } from '../domain/model/entities/quality-certificate.entity';
-import { HarvestBatchesApiEndpoint } from './endpoints/harvest-batches.endpoint';
-import { PublicTraceabilityApiEndpoint } from './endpoints/public-traceability.endpoint';
-import { QualityCertificatesApiEndpoint } from './endpoints/quality-certificates.endpoint';
+import { HttpClient } from "@angular/common/http";
+import { inject, Injectable } from "@angular/core";
+import { environment } from "../../../environments/environment";
+import {
+  BatchEntry,
+  HarvestBatchResource,
+  PublicTraceabilityResource,
+  QualityCertificateResource,
+  RegisterBatchRequest,
+} from "./responses/certification-workspace.response";
 
-/** Member and source plots offered by the collection form. */
-export type CooperativeMemberOption = CooperativeMember;
-
-/** Facade for harvest batches, certificates and public traceability. */
-@Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: "root" })
 export class CertificationApi {
   private readonly http = inject(HttpClient);
-  private readonly batches = new HarvestBatchesApiEndpoint(this.http);
-  private readonly certificates = new QualityCertificatesApiEndpoint(this.http);
-  private readonly traceability = new PublicTraceabilityApiEndpoint(this.http);
+  private readonly base = environment.platformProviderApiBaseUrl.replace(
+    /\/+$/,
+    "",
+  );
+  private readonly batches = this.base + "/harvest-batches";
+  private readonly certificates = this.base + "/quality-certificates";
 
-  getBatches(cooperativeId: number): Observable<HarvestBatch[]> {
-    return this.batches.getByCooperative(cooperativeId);
+  listBatches(cooperativeId: number) {
+    return this.http.get<BatchEntry[]>(this.batches, {
+      params: { cooperativeId },
+    });
   }
 
-  createBatch(batch: RegisterHarvestBatchCommand): Observable<HarvestBatch> {
-    return this.batches.register(batch);
+  register(body: RegisterBatchRequest) {
+    return this.http.post<HarvestBatchResource>(this.batches, body);
   }
 
-  updateBatch(batch: HarvestBatchProps): Observable<HarvestBatch> {
-    return this.batches.update(new HarvestBatch(batch), batch.id);
+  batch(id: number) {
+    return this.http.get<HarvestBatchResource>(this.batches + "/" + id);
   }
 
-  getCertificates(): Observable<QualityCertificate[]> {
-    return this.certificates.getAll();
+  weigh(id: number, body: { grossWeightKg: number; tareKg: number }) {
+    return this.http.post<HarvestBatchResource>(
+      this.batches + "/" + id + "/weight",
+      body,
+    );
   }
 
-  createCertificate(certificate: IssueQualityCertificateCommand): Observable<QualityCertificate> {
-    return this.certificates.issue(certificate);
+  sample(
+    id: number,
+    body: { sampleIdentifier: string; sampleWeightKg: number },
+  ) {
+    return this.http.post<HarvestBatchResource>(
+      this.batches + "/" + id + "/sample",
+      body,
+    );
   }
 
-  verifyCertificate(token: string): Observable<QualityCertificate | null> {
-    return this.certificates.getByToken(token);
+  gradePotato(
+    id: number,
+    body: {
+      firstPercentage: number;
+      secondPercentage: number;
+      thirdPercentage: number;
+      pestDamagePercentage: number;
+    },
+  ) {
+    return this.http.post<HarvestBatchResource>(
+      this.batches + "/" + id + "/potato-calibers",
+      body,
+    );
   }
 
-  getBatch(id: number): Observable<HarvestBatch> {
-    return this.batches.getById(id);
+  cupCoffee(
+    id: number,
+    body: {
+      aroma: number;
+      flavor: number;
+      acidity: number;
+      body: number;
+      totalScore: number;
+      fermentDefect: boolean;
+    },
+  ) {
+    return this.http.post<HarvestBatchResource>(
+      this.batches + "/" + id + "/coffee-cupping",
+      body,
+    );
   }
 
-  /** Consulta el registro público por token; el endpoint une lote y certificado. */
-  getPublicTraceability(token: string): Observable<PublicTraceabilityRecord | null> {
-    return this.traceability.getByToken(token);
+  issue(body: {
+    certificateNumber: string;
+    harvestBatchId: number;
+    issuedByUserId: number;
+  }) {
+    return this.http.post<QualityCertificateResource>(this.certificates, body);
+  }
+
+  certificate(certificateNumber: string) {
+    return this.http.get<QualityCertificateResource>(this.certificates, {
+      params: { certificateNumber },
+    });
+  }
+
+  revoke(id: number) {
+    return this.http.post<QualityCertificateResource>(
+      this.certificates + "/" + id + "/revocation",
+      null,
+    );
+  }
+
+  document(certificateNumber: string) {
+    return this.http.get(this.certificates + "/document", {
+      params: { certificateNumber },
+      responseType: "blob",
+    });
+  }
+
+  verify(number: string, hash: string) {
+    return this.http.get<PublicTraceabilityResource>(
+      this.base + "/public/traceability",
+      {
+        params: { number, hash },
+      },
+    );
   }
 }

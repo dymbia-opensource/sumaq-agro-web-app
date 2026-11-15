@@ -1,66 +1,68 @@
-import { DatePipe, DecimalPipe } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { switchMap } from 'rxjs';
-import { TranslatePipe } from '@ngx-translate/core';
-import { HarvestBatch } from '../../../domain/model/entities/harvest-batch.entity';
-import { QualityCertificate } from '../../../domain/model/entities/quality-certificate.entity';
-import { CertificationApi } from '../../../infrastructure/certification-api';
+import { DecimalPipe } from "@angular/common";
+import { HttpErrorResponse } from "@angular/common/http";
+import { Component, inject } from "@angular/core";
+import { toSignal } from "@angular/core/rxjs-interop";
+import { ActivatedRoute } from "@angular/router";
+import { TranslatePipe } from "@ngx-translate/core";
+import { catchError, map, of, startWith, switchMap } from "rxjs";
+import { CertificationApi } from "../../../infrastructure/certification-api";
+import { PublicTraceabilityResource } from "../../../infrastructure/responses/certification-workspace.response";
+
+interface Verification {
+  loading?: boolean;
+  error?: string;
+  result?: PublicTraceabilityResource;
+}
 
 @Component({
-  selector: 'app-public-traceability',
-  imports: [DatePipe, DecimalPipe, TranslatePipe],
+  selector: "app-public-traceability",
+  imports: [DecimalPipe, TranslatePipe],
   template: `
     <article class="trace-card">
-      <p class="eyebrow">SumaqAgro · {{ 'certification.trace.public-verification' | translate }}</p>
-      @if (loading()) {
-        <h1>{{ 'certification.trace.verifying' | translate }}</h1>
-      } @else if (error()) {
-        <h1>{{ 'certification.trace.verification-failed' | translate }}</h1>
-        <p>{{ error() | translate }}</p>
-      } @else if (certificate(); as certificate) {
-        @if (certificate.data.status === 'ACTIVE') {
-          @if (batch(); as batch) {
-            <h1>{{ 'certification.trace.registered' | translate }}</h1>
-            <p class="status">
-              {{ 'certification.trace.active' | translate }} ·
-              {{ certificate.data.certificateNumber }}
-            </p>
-            @if (certificate.data.verificationToken.startsWith('demo-')) {
-              <p>{{ 'certification.trace.demo-data' | translate }}</p>
-            }
-            <dl>
-              <dt>{{ 'certification.trace.producer' | translate }}</dt>
-              <dd>{{ batch.data.memberName }}</dd>
-              <dt>{{ 'certification.trace.batch' | translate }}</dt>
-              <dd>{{ batch.data.code }}</dd>
-              <dt>{{ 'certification.trace.product' | translate }}</dt>
-              <dd>{{ batch.data.variety }}</dd>
-              <dt>{{ 'certification.trace.origin' | translate }}</dt>
-              <dd>{{ batch.data.plotName }}, {{ batch.data.plotRegion }}</dd>
-              <dt>{{ 'certification.trace.coordinates' | translate }}</dt>
-              <dd>{{ batch.data.coordinates }}</dd>
-              <dt>{{ 'certification.trace.volume' | translate }}</dt>
-              <dd>{{ batch.netKg | number: '1.0-2' }} kg</dd>
-              <dt>{{ 'certification.trace.quality' | translate }}</dt>
-              <dd>
-                {{ 'certification.quality-category.' + batch.data.qualityCategory | translate }}
-              </dd>
-              <dt>{{ 'certification.trace.issued' | translate }}</dt>
-              <dd>{{ certificate.data.issuedAt | date: 'longDate' }}</dd>
-              <dt>{{ 'certification.trace.issuer' | translate }}</dt>
-              <dd>{{ certificate.data.issuedByName }}</dd>
-              @if (!certificate.data.verificationToken.startsWith('demo-')) {
-                <dt>{{ 'certification.trace.registered-hash' | translate }}</dt>
-                <dd class="hash">{{ certificate.data.sha256Hash }}</dd>
-              }
-            </dl>
-          }
+      <p class="eyebrow">
+        SumaqAgro · {{ "certification.trace.public-verification" | translate }}
+      </p>
+      @let state = verification();
+      @if (state.loading) {
+        <h1>{{ "certification.trace.verifying" | translate }}</h1>
+      } @else if (state.error) {
+        <h1>{{ "certification.trace.verification-failed" | translate }}</h1>
+        <p>{{ state.error | translate }}</p>
+      } @else if (state.result; as result) {
+        @if (result.status === "REVOKED") {
+          <h1>{{ "certification.trace.revoked" | translate }}</h1>
+          <p>{{ "certification.trace.not-valid" | translate }}</p>
+        } @else if (!result.authentic) {
+          <h1>{{ "certification.trace.verification-failed" | translate }}</h1>
+          <p>{{ "certification.workspace.invalid-hash" | translate }}</p>
         } @else {
-          <h1>{{ 'certification.trace.revoked' | translate }}</h1>
-          <p>
-            {{ 'certification.trace.not-valid' | translate }} {{ certificate.data.revokedReason }}
+          <h1>{{ "certification.trace.registered" | translate }}</h1>
+          <p class="status">
+            {{ result.certificateNumber }} ·
+            {{ "certification.trace.active" | translate }}
           </p>
+          <dl>
+            <dt>{{ "certification.trace.batch" | translate }}</dt>
+            <dd>{{ result.batchCode }}</dd>
+            <dt>{{ "certification.trace.product" | translate }}</dt>
+            <dd>
+              {{
+                "certification.workspace.cropType." + result.cropType
+                  | translate
+              }}
+              @if (result.seedVariety) {
+                · {{ result.seedVariety }}
+              }
+            </dd>
+            @if (result.plotName || result.region) {
+              <dt>{{ "certification.trace.origin" | translate }}</dt>
+              <dd>{{ result.plotName }} {{ result.region }}</dd>
+            }
+            <dt>{{ "certification.trace.quality" | translate }}</dt>
+            <dd>
+              {{ result.qualityCategory }} · {{ result.qualityScore | number }}
+            </dd>
+          </dl>
         }
       }
     </article>
@@ -133,34 +135,36 @@ import { CertificationApi } from '../../../infrastructure/certification-api';
     `,
   ],
 })
-/** Consulta por token el certificado que abre el QR y muestra su trazabilidad. */
 export class PublicTraceability {
-  private readonly api = inject(CertificationApi);
   private readonly route = inject(ActivatedRoute);
-  readonly certificate = signal<QualityCertificate | null>(null);
-  readonly batch = signal<HarvestBatch | null>(null);
-  readonly loading = signal(true);
-  readonly error = signal('');
+  private readonly api = inject(CertificationApi);
 
-  constructor() {
-    // Cada token de la URL inicia una nueva consulta pública.
-    this.route.paramMap
-      .pipe(switchMap((params) => this.api.getPublicTraceability(params.get('token') ?? '')))
-      .subscribe({
-        next: (record) => {
-          if (!record) {
-            this.error.set('certification.trace.unknown-code');
-            this.loading.set(false);
-            return;
-          }
-          this.certificate.set(record.certificate);
-          this.batch.set(record.batch);
-          this.loading.set(false);
-        },
-        error: () => {
-          this.error.set('certification.trace.api-unavailable');
-          this.loading.set(false);
-        },
-      });
-  }
+  protected readonly verification = toSignal<Verification, Verification>(
+    this.route.queryParamMap.pipe(
+      switchMap((params) => {
+        const number = params.get("number")?.trim();
+        const hash = params.get("hash")?.trim();
+        if (!number || !hash)
+          return of<Verification>({
+            error: "certification.workspace.missing-link",
+          });
+        if (!/^[a-f0-9]{64}$/i.test(hash)) {
+          return of<Verification>({ error: 'certification.workspace.invalid-hash' });
+        }
+        return this.api.verify(number, hash).pipe(
+          map((result): Verification => ({ result })),
+          catchError((error: unknown) =>
+            of<Verification>({
+              error:
+                error instanceof HttpErrorResponse && error.status === 404
+                  ? "certification.workspace.not-found"
+                  : "certification.workspace.verification-unavailable",
+            }),
+          ),
+          startWith<Verification, [Verification]>({ loading: true }),
+        );
+      }),
+    ),
+    { initialValue: { loading: true } },
+  );
 }
