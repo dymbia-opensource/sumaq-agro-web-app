@@ -42,7 +42,17 @@
         "inactive": "Inactivo",
         "error": "No se pudo cargar el padrón.",
         "empty": "Todavía no hay socios registrados.",
-        "no-results": "Ningún socio coincide con la búsqueda."
+        "no-results": "Ningún socio coincide con la búsqueda.",
+        "kpi-total": "Socios registrados",
+        "kpi-active": "Socios activos",
+        "kpi-plots": "Parcelas vinculadas",
+        "filter-all": "Todos",
+        "filter-status": "Filtrar por estado",
+        "clear-search": "Limpiar búsqueda",
+        "error-name": "Ingresa el nombre del socio",
+        "error-dni": "El DNI debe tener 8 dígitos",
+        "error-phone": "Ingresa un teléfono válido",
+        "dni-hint": "8 dígitos"
       },
       "settings": {
         "breadcrumb": "Configuración",
@@ -111,7 +121,15 @@
         "pending": "Próximamente",
         "no-cooperative-title": "Aún no registras una cooperativa",
         "no-cooperative-message": "Registra los datos institucionales para comenzar a administrar a tus socios.",
-        "register-cooperative": "Registrar cooperativa"
+        "register-cooperative": "Registrar cooperativa",
+        "tab-title": "Dashboard institucional"
+      },
+      "supervision": {
+        "in-charge": "Supervisada por",
+        "none": "Sin asesor asignado.",
+        "assign": "Asignar",
+        "release": "Quitar asignación",
+        "no-team": "Invita agrónomos con cuenta vinculada para asignar la supervisión."
       }
     },
     "settings": {
@@ -239,7 +257,8 @@
         "save": "No se pudo guardar la vinculación. Conservamos tu selección para reintentar.",
         "denied": "Solo puedes vincular asesores disponibles a tus propias parcelas.",
         "conflict": "Hay asignaciones duplicadas para esta parcela. Solicita revisar los datos."
-      }
+      },
+      "by-director": "La directiva de tu cooperativa asigna el asesor de cada parcela."
     }
   }
 }

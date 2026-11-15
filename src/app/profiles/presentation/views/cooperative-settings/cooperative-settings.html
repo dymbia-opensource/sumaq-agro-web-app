@@ -1,0 +1,174 @@
+@if (loading()) {
+  <mat-progress-bar mode="indeterminate" />
+}
+
+<header class="settings-header">
+  <p class="breadcrumb">
+    Configuración <mat-icon>chevron_right</mat-icon>
+    @switch (activeTab()) {
+      @case ('cooperative') {
+        <strong>Datos de la Cooperativa</strong>
+      }
+      @case ('technical-team') {
+        <strong>Equipo Técnico</strong>
+      }
+    }
+  </p>
+  <h1>Configuración Institucional y Parámetros</h1>
+  <p>Administra los datos de la cooperativa y su equipo agronómico.</p>
+</header>
+
+<nav class="settings-tabs" aria-label="Secciones de configuración">
+  <button
+    class="settings-tab"
+    [class.settings-tab--active]="activeTab() === 'cooperative'"
+    (click)="selectTab('cooperative')"
+    type="button"
+  >
+    Datos de la Cooperativa
+  </button>
+  <button
+    class="settings-tab"
+    [class.settings-tab--active]="activeTab() === 'technical-team'"
+    (click)="selectTab('technical-team')"
+    type="button"
+  >
+    Equipo Técnico
+  </button>
+</nav>
+
+@if (activeTab() === 'cooperative' && cooperative()) {
+  <mat-card class="settings-card">
+    <mat-card-content>
+      <h2>Ficha Institucional de la Cooperativa</h2>
+      <p class="settings-card__description">
+        Actualice los datos oficiales vinculados al registro legal y operativo
+      </p>
+
+      <form [formGroup]="form" (ngSubmit)="saveCooperative()" class="settings-form">
+        <mat-form-field appearance="outline">
+          <mat-label>Razón social</mat-label>
+          <input matInput formControlName="legalName" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>RUC</mat-label>
+          <input matInput formControlName="ruc" inputmode="numeric" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Región / Cuenca productiva</mat-label>
+          <input matInput formControlName="region" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Dirección de sede central</mat-label>
+          <input matInput formControlName="headquartersAddress" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Correo institucional de contacto</mat-label>
+          <input matInput formControlName="institutionalEmail" type="email" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Teléfono de mesa de partes</mat-label>
+          <input matInput formControlName="switchboardPhone" type="tel" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Representante legal / Gerente general</mat-label>
+          <input matInput formControlName="legalRepresentative" />
+        </mat-form-field>
+
+        <div class="settings-form__actions">
+          <button mat-flat-button type="submit" [disabled]="saving()">
+            {{ saving() ? 'Guardando...' : 'Guardar cambios' }}
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+}
+
+@if (activeTab() === 'technical-team') {
+  <mat-card class="settings-card team-card">
+    <mat-card-content>
+      <div class="team-card__header">
+        <div>
+          <h2>Equipo de Asesoría Agronómica Vinculado</h2>
+          <p class="settings-card__description">
+            Supervisión técnica de campo sobre parcelas de socios
+          </p>
+        </div>
+        <button
+          mat-flat-button
+          class="btn-invite"
+          (click)="openInviteAdvisorDialog()"
+          type="button"
+        >
+          <mat-icon>add</mat-icon> Invitar Nuevo Asesor
+        </button>
+      </div>
+
+      <div class="table-container">
+        <table class="advisor-table">
+          <thead>
+            <tr>
+              <th>Nombre del Asesor</th>
+              <th>Colegiatura CIP</th>
+              <th>Teléfono</th>
+              <th>Parcelas</th>
+              <th class="text-right">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (advisor of technicalAdvisors(); track advisor.id ?? advisor.cipCode) {
+              <tr>
+                <td class="font-medium">{{ advisor.name }}</td>
+                <td class="cip-cell">
+                  {{
+                    advisor.cipCode.startsWith('CIP:') ? advisor.cipCode : 'CIP: ' + advisor.cipCode
+                  }}
+                </td>
+                <td>{{ advisor.phone }}</td>
+                <td>
+                  {{ advisor.assignedPlotsCount }}
+                  {{ advisor.assignedPlotsCount === 1 ? 'lote' : 'lotes' }}
+                </td>
+                <td class="text-right actions-cell">
+                  <button
+                    mat-stroked-button
+                    class="btn-action"
+                    (click)="openReassignAdvisorDialog(advisor)"
+                    type="button"
+                  >
+                    Reasignar
+                  </button>
+                  <button
+                    mat-stroked-button
+                    class="btn-action"
+                    (click)="openRetirarAdvisorDialog(advisor)"
+                    type="button"
+                  >
+                    Retirar
+                  </button>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="5" class="empty-state">
+                  No se encontraron asesores técnicos en el equipo.
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </mat-card-content>
+  </mat-card>
+}
+
+@if (error(); as error) {
+  <p class="error" role="alert">{{ error }}</p>
+}

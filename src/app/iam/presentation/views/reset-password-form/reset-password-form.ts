@@ -1,9 +1,19 @@
-import { Component, computed, effect, inject, signal, untracked ,DestroyRef} from '@angular/core';
+import {
+  Component,
+  computed,
+  DestroyRef,
+  effect,
+  inject,
+  signal,
+  untracked,
+  viewChild,
+} from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import {
   AbstractControl,
   FormControl,
   FormGroup,
+  FormGroupDirective,
   ReactiveFormsModule,
   ValidationErrors,
   Validators,
@@ -67,6 +77,8 @@ export class ResetPasswordForm {
     { validators: matchingPasswords },
   );
 
+  private readonly formDirective = viewChild(FormGroupDirective);
+
   constructor() {
     inject(DestroyRef).onDestroy(() => {
       this.store.clearPasswordRecovery();
@@ -75,14 +87,21 @@ export class ResetPasswordForm {
       this.token();
       untracked(() => {
         this.store.clearPasswordRecovery();
-        this.form.reset();
+        this.resetForm();
         this.hidePassword.set(true);
         this.hideConfirmation.set(true);
       });
     });
     effect(() => {
-      if (this.store.passwordRecoveryCompleted()) untracked(() => this.form.reset());
+      if (this.store.passwordRecoveryCompleted()) untracked(() => this.resetForm());
     });
+  }
+
+  /** Clears the fields and the submitted mark, so none is left showing an error. */
+  private resetForm(): void {
+    const directive = this.formDirective();
+    if (directive) directive.resetForm();
+    else this.form.reset();
   }
 
   protected submit(): void {

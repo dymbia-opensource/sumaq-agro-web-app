@@ -14,10 +14,19 @@ export class CooperativesApiEndpoint extends BaseApiEndpoint<
   CooperativeAssembler
 > {
   constructor(http: HttpClient) {
-    super(http, `${environment.platformProviderApiBaseUrl}${environment.platformProviderCooperativesEndpointPath}`, new CooperativeAssembler());
+    super(
+      http,
+      `${environment.platformProviderApiBaseUrl}${environment.platformProviderCooperativesEndpointPath}`,
+      new CooperativeAssembler(),
+    );
   }
 
-  register(directorUserId: number, legalName: string, ruc: string, region: string): Observable<unknown> {
+  register(
+    directorUserId: number,
+    legalName: string,
+    ruc: string,
+    region: string,
+  ): Observable<unknown> {
     return this.http.post(this.endpointUrl, {
       directorUserId,
       legalName,
@@ -33,9 +42,10 @@ export class CooperativesApiEndpoint extends BaseApiEndpoint<
   getByDirector(userId: number): Observable<Cooperative | null> {
     const params = new HttpParams().set('directorUserId', userId);
     return this.http.get<CooperativeResource[]>(this.endpointUrl, { params }).pipe(
-      map((cooperatives) => cooperatives[0] ? this.assembler.toEntityFromResource(cooperatives[0]) : null),
+      map((cooperatives) =>
+        cooperatives[0] ? this.assembler.toEntityFromResource(cooperatives[0]) : null,
+      ),
       catchError(this.handleError('Failed to fetch the cooperative')),
     );
   }
-
 }

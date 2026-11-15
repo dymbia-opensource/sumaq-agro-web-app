@@ -4,7 +4,10 @@ import { environment } from '../../../../environments/environment';
 import { BaseApiEndpoint } from '../../../shared/infrastructure/base-api-endpoint';
 import { FarmerProfile } from '../../domain/model/entities/farmer-profile.entity';
 import { FarmerProfileAssembler } from '../assemblers/farmer-profile.assembler';
-import { FarmerProfileResource, FarmerProfilesResponse } from '../responses/farmer-profile.response';
+import {
+  FarmerProfileResource,
+  FarmerProfilesResponse,
+} from '../responses/farmer-profile.response';
 
 /** HTTP endpoint for the farmer Profiles resource. */
 export class FarmerProfilesApiEndpoint extends BaseApiEndpoint<

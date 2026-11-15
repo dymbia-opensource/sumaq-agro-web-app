@@ -58,7 +58,8 @@ export class DemoCheckout {
         : of({ status, subscription: null, payment: null });
     }
 
-    const next = currentSubscription?.copy() ??
+    const next =
+      currentSubscription?.copy() ??
       Subscription.start({ userId, plan, billingCycle, startDate: now });
     if (currentSubscription) next.changePlan(plan, billingCycle, now);
 

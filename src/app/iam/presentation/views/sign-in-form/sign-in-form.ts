@@ -10,7 +10,7 @@ import { SignInCommand } from '../../../domain/model/commands/sign-in.command';
 import { AuthLayout } from '../../components/auth-layout/auth-layout';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { AuthNavigationService } from '../../../infrastructure/auth-navigation.service';
+import { AuthNavigation } from '../../../infrastructure/auth-navigation';
 import {
   DevelopmentDemoAccount,
   getDevelopmentDemoAccounts,
@@ -38,7 +38,7 @@ export class SignInForm {
   protected readonly demoAccounts = getDevelopmentDemoAccounts();
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
-  private readonly navigation = inject(AuthNavigationService);
+  private readonly navigation = inject(AuthNavigation);
 
   constructor() {
     this.store.clearFeedback();

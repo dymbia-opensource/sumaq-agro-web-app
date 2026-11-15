@@ -1,17 +1,32 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { computed, DestroyRef, inject, Service, signal } from '@angular/core';
+import { computed, DestroyRef, inject, Injectable, signal } from '@angular/core';
 import { finalize, Subscription, Observable } from 'rxjs';
 import { SignInCommand } from '../domain/model/commands/sign-in.command';
 import { SignUpCommand } from '../domain/model/commands/sign-up.command';
 import { AuthenticatedUser } from '../domain/model/entities/authenticated-user.entity';
 import { IamApi } from '../infrastructure/iam-api';
-import { SessionStorageService } from '../infrastructure/session/session-storage.service';
-import { SessionExpirationService } from '../infrastructure/session/session-expiration.service';
+import { getDevelopmentDemoAccounts } from '../infrastructure/mock/development-demo-accounts';
+import { SessionStorage } from '../infrastructure/session/session-storage';
+import { SessionExpiration } from '../infrastructure/session/session-expiration';
 import { RequestPasswordResetCommand } from '../domain/model/commands/request-password-reset.command';
 import { ResetPasswordCommand } from '../domain/model/commands/reset-password.command';
-import { UserRole } from '../domain/model/value-objects/user-role';
-import { SessionParticipant } from './session-participant';
-export type { SessionParticipant } from './session-participant';
+import { UserRole } from '../domain/model/entities/user-role';
+
+/** Published identity projection; it excludes credentials and authentication operations. */
+export interface SessionParticipant {
+  readonly id: number;
+  readonly displayName: string;
+  readonly experience: UserRole;
+  readonly initialRoute: string;
+}
+
+/** Published identity projection; it excludes credentials and authentication operations. */
+export interface SessionParticipant {
+  readonly id: number;
+  readonly displayName: string;
+  readonly experience: UserRole;
+  readonly initialRoute: string;
+}
 
 export type IamError =
   | 'INVALID_CREDENTIALS'
@@ -35,11 +50,11 @@ const INITIAL_ROUTES: Record<UserRole, string> = {
 /**
  * Holds IAM state and orchestrates authentication operations.
  */
-@Service()
+@Injectable({ providedIn: 'root' })
 export class IamStore {
   private readonly iamApi = inject(IamApi);
-  private readonly sessionStorage = inject(SessionStorageService);
-  private readonly sessionExpiration = inject(SessionExpirationService);
+  private readonly sessionStorage = inject(SessionStorage);
+  private readonly sessionExpiration = inject(SessionExpiration);
   private readonly expiresAtSignal = signal<number | null>(null);
   private activeRequest?: Subscription;
 
@@ -49,6 +64,12 @@ export class IamStore {
   private readonly registrationCompletedSignal = signal(false);
 
   readonly currentUser = this.currentUserSignal.asReadonly();
+
+  /** Demo producer accounts offered while the IAM API is simulated. */
+  readonly demoFarmerAccounts: readonly { readonly id: number; readonly email: string }[] =
+    getDevelopmentDemoAccounts()
+      .filter(({ role }) => role === 'FARMER')
+      .map(({ id, email }) => ({ id, email }));
   /**
    * Public identity projection consumed by other bounded contexts.
    */

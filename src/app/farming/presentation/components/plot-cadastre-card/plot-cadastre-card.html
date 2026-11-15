@@ -1,0 +1,64 @@
+<mat-card appearance="outlined" class="cadastre-card">
+  <mat-card-header>
+    <mat-icon mat-card-avatar>map</mat-icon>
+    <mat-card-title>{{ 'farming.plot-detail.cadastre' | translate }}</mat-card-title>
+    <mat-chip-set class="status">
+      <mat-chip [disableRipple]="true" [highlighted]="plot().isMonitored()">
+        <mat-icon matChipAvatar>{{ plot().isMonitored() ? 'satellite_alt' : 'pending' }}</mat-icon>
+        {{
+          (plot().hasPolygon() && !plot().isMonitored()
+            ? 'farming.plot-status.BOUNDARY_SAVED'
+            : 'farming.plot-status.' + plot().status
+          ) | translate
+        }}
+      </mat-chip>
+    </mat-chip-set>
+  </mat-card-header>
+
+  <mat-card-content>
+    <dl class="data">
+      <dt>{{ 'farming.plots.location' | translate }}</dt>
+      <dd>{{ plot().region }}</dd>
+
+      <dt>{{ 'farming.plots.area' | translate }}</dt>
+      <dd>
+        {{ plot().areaHectares | number: '1.0-4' }}
+        {{ 'farming.plots.hectares' | translate }}
+      </dd>
+
+      <dt>{{ 'farming.plot-detail.vertices' | translate }}</dt>
+      <dd>{{ plot().boundary.length }}</dd>
+
+      <dt>{{ 'farming.plot-detail.agromonitoring' | translate }}</dt>
+      <dd class="code">{{ plot().agroMonitoringPolygonId ?? '—' }}</dd>
+
+      <dt>{{ 'farming.plots.crop' | translate }}</dt>
+      <dd>
+        @if (campaign(); as campaign) {
+          {{ 'farming.crop-type.' + campaign.cropType | translate }} –
+          {{ campaign.seedVariety }} ({{ campaign.season }})
+        } @else {
+          {{ 'farming.plots.no-campaign' | translate }}
+        }
+      </dd>
+
+      @if (campaign()?.sowingDate; as sowingDate) {
+        <dt>{{ 'farming.campaigns.sowing-date' | translate }}</dt>
+        <dd>{{ sowingDate | date: 'mediumDate' }}</dd>
+      }
+    </dl>
+
+    @if (plot().hasPolygon()) {
+      <details class="vertices">
+        <summary>{{ 'farming.boundary.coordinates' | translate }}</summary>
+        <ol>
+          @for (vertex of plot().boundary; track $index) {
+            <li>
+              {{ vertex.latitude | number: '1.5-5' }}, {{ vertex.longitude | number: '1.5-5' }}
+            </li>
+          }
+        </ol>
+      </details>
+    }
+  </mat-card-content>
+</mat-card>

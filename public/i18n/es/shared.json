@@ -20,7 +20,6 @@
     "cooperative-dashboard": "Dashboard",
     "member-directory": "Padrón",
     "cooperative-plot-health": "Salud de Parcelas",
-    "cooperative-costs": "Costos",
     "cooperative-certificates": "Certificados",
     "cooperative-alerts": "Alertas",
     "cooperative-settings": "Configuración",
@@ -30,7 +29,8 @@
     "assigned-plots": "Parcelas asignadas"
   },
   "layout": {
-    "search": "Buscar en mi parcela...",
+    "search": "Buscar parcela…",
+    "no-plot-matches": "No se encontraron parcelas",
     "menu": "Abrir menú",
     "connection": "Estado de conexión",
     "connected": "Conectado",

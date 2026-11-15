@@ -1,0 +1,19 @@
+@if (!online() || pending() > 0) {
+  <div class="banner" [class.offline]="!online()" role="status">
+    <mat-icon aria-hidden="true">{{ online() ? 'cloud_sync' : 'cloud_off' }}</mat-icon>
+    <p>
+      @if (!online()) {
+        {{ 'farming.offline.no-connection' | translate }}
+      }
+      @if (pending() > 0) {
+        {{ 'farming.offline.pending' | translate: { count: pending() } }}
+      }
+    </p>
+    @if (online() && pending() > 0) {
+      <button mat-button [disabled]="syncing()" (click)="sync.emit()">
+        <mat-icon>sync</mat-icon>
+        {{ (syncing() ? 'farming.offline.syncing' : 'farming.offline.sync-now') | translate }}
+      </button>
+    }
+  </div>
+}

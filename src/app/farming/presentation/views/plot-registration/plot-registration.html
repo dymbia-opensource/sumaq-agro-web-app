@@ -1,0 +1,28 @@
+@if (loading()) {
+  <mat-progress-bar mode="indeterminate" [attr.aria-label]="'common.loading' | translate" />
+}
+<app-page-header
+  [breadcrumbs]="breadcrumbs"
+  [title]="
+    (plotQuotaReady() && !plotQuotaReached() ? 'farming.plot-form.title' : 'farming.plots.register')
+      | translate: { slot: slotNumber(), quota: plotQuota() }
+  "
+  [subtitle]="'farming.plot-form.subtitle' | translate"
+/>
+@if (error(); as error) {
+  <app-message-card icon="error" [message]="error | translate" [alert]="true" />
+}
+@if (plotQuotaReached() || registrationIncomplete()) {
+  <button mat-stroked-button (click)="onCancel()">
+    {{ 'farming.plots.manage' | translate }}
+  </button>
+} @else if (plotQuotaReady()) {
+  <app-registration-steps [current]="1" />
+  <app-plot-registration-form
+    [saving]="loading() || !canRegisterPlot()"
+    (submitted)="onRegister($event)"
+    (cancel)="onCancel()"
+  />
+} @else {
+  <button mat-stroked-button (click)="onCancel()">{{ 'common.back' | translate }}</button>
+}

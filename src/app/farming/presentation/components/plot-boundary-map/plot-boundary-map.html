@@ -1,0 +1,46 @@
+<mat-card appearance="outlined" class="map-card">
+  <div class="map-toolbar">
+    <mat-form-field class="search" subscriptSizing="dynamic" appearance="outline">
+      <mat-icon matPrefix>search</mat-icon>
+      <input
+        #search
+        matInput
+        [placeholder]="'farming.boundary.search' | translate"
+        (keydown.enter)="onSearch(search.value)"
+      />
+    </mat-form-field>
+    <button mat-stroked-button (click)="onUseMyLocation()">
+      <mat-icon>my_location</mat-icon>
+      {{ 'farming.boundary.my-location' | translate }}
+    </button>
+  </div>
+  @if (searchMessage(); as message) {
+    <p class="map-message" role="alert">{{ message | translate }}</p>
+  }
+
+  <div
+    #mapElement
+    class="map"
+    role="application"
+    [attr.aria-label]="'farming.boundary.map' | translate"
+  ></div>
+
+  <div class="map-footer">
+    <p>
+      <mat-icon>touch_app</mat-icon>
+      {{ 'farming.boundary.instructions' | translate: { minimum: minimumVertices } }}
+    </p>
+    <mat-button-toggle-group
+      [value]="layer()"
+      (change)="layer.set($event.value)"
+      [attr.aria-label]="'farming.boundary.layer' | translate"
+    >
+      <mat-button-toggle value="satellite">
+        {{ 'farming.boundary.layer-satellite' | translate }}
+      </mat-button-toggle>
+      <mat-button-toggle value="streets">
+        {{ 'farming.boundary.layer-streets' | translate }}
+      </mat-button-toggle>
+    </mat-button-toggle-group>
+  </div>
+</mat-card>

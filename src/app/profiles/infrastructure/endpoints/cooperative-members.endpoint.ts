@@ -3,7 +3,10 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { catchError, map, Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { BaseApiEndpoint } from '../../../shared/infrastructure/base-api-endpoint';
-import { CooperativeMember, MemberPlot } from '../../domain/model/entities/cooperative-member.entity';
+import {
+  CooperativeMember,
+  MemberPlot,
+} from '../../domain/model/entities/cooperative-member.entity';
 import { CooperativeMemberAssembler } from '../assemblers/cooperative-member.assembler';
 import {
   CooperativeMemberResource,
@@ -26,33 +29,39 @@ export class CooperativeMembersApiEndpoint extends BaseApiEndpoint<
   }
 
   add(cooperativeId: number, member: CooperativeMemberDetails): Observable<CooperativeMember> {
-    return this.http.post<CooperativeMemberResource>(this.endpointUrl, {
-      ...member,
-      cooperativeId,
-      active: true,
-      plots: [],
-    }).pipe(map((resource) => this.assembler.toEntityFromResource(resource)));
+    return this.http
+      .post<CooperativeMemberResource>(this.endpointUrl, {
+        ...member,
+        cooperativeId,
+        active: true,
+        plots: [],
+      })
+      .pipe(map((resource) => this.assembler.toEntityFromResource(resource)));
   }
 
-  updateDetails(id: number | string, details: CooperativeMemberDetails): Observable<CooperativeMember> {
-    return this.http.patch<CooperativeMemberResource>(
-      this.endpointUrl + '/' + encodeURIComponent(id),
-      details,
-    ).pipe(map((resource) => this.assembler.toEntityFromResource(resource)));
+  updateDetails(
+    id: number | string,
+    details: CooperativeMemberDetails,
+  ): Observable<CooperativeMember> {
+    return this.http
+      .patch<CooperativeMemberResource>(this.endpointUrl + '/' + encodeURIComponent(id), details)
+      .pipe(map((resource) => this.assembler.toEntityFromResource(resource)));
   }
 
   linkAccount(memberId: number | string, userId: number): Observable<CooperativeMember> {
-    return this.http.patch<CooperativeMemberResource>(
-      this.endpointUrl + '/' + encodeURIComponent(memberId),
-      { userId },
-    ).pipe(map((resource) => this.assembler.toEntityFromResource(resource)));
+    return this.http
+      .patch<CooperativeMemberResource>(this.endpointUrl + '/' + encodeURIComponent(memberId), {
+        userId,
+      })
+      .pipe(map((resource) => this.assembler.toEntityFromResource(resource)));
   }
 
   linkPlot(member: CooperativeMember, plot: MemberPlot): Observable<CooperativeMember> {
-    return this.http.patch<CooperativeMemberResource>(
-      this.endpointUrl + '/' + encodeURIComponent(member.id),
-      { plots: [...member.plots, plot] },
-    ).pipe(map((resource) => this.assembler.toEntityFromResource(resource)));
+    return this.http
+      .patch<CooperativeMemberResource>(this.endpointUrl + '/' + encodeURIComponent(member.id), {
+        plots: [...member.plots, plot],
+      })
+      .pipe(map((resource) => this.assembler.toEntityFromResource(resource)));
   }
 
   getByCooperative(cooperativeId: number): Observable<CooperativeMember[]> {

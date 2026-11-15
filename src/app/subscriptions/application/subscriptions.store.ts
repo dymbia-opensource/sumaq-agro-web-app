@@ -13,7 +13,10 @@ import { PaymentStatus } from '../domain/model/entities/payment-status';
 import { Plan } from '../domain/model/entities/plan.entity';
 import { Subscription } from '../domain/model/entities/subscription.entity';
 import { SubscriptionsApi } from '../infrastructure/subscriptions-api';
-import { planForSegment, type SubscriptionSegment, } from '../domain/model/value-objects/subscription-segment';
+import {
+  planForSegment,
+  type SubscriptionSegment,
+} from '../domain/model/entities/subscription-segment';
 
 /** Result of the last payment attempt, shown in the last step of the checkout. */
 export type PaymentResult = PaymentStatus.COMPLETED | PaymentStatus.REJECTED;
@@ -31,7 +34,7 @@ export interface AppliedCoupon {
  * The views send commands and read signals. Every change is applied to a copy
  * of the subscription; the shown state is only updated when the API confirms.
  */
-@Injectable()
+@Injectable({ providedIn: 'root' })
 export class SubscriptionsStore {
   private readonly destroyRef = inject(DestroyRef);
   private readonly subscriptionsApi = inject(SubscriptionsApi);
@@ -152,7 +155,12 @@ export class SubscriptionsStore {
   selectPlan = (command: SelectSubscriptionPlanCommand, segment: SubscriptionSegment): boolean => {
     const plan = this.plansSignal().find((candidate) => candidate.code === command.planCode);
 
-    if (!plan || plan.code !== planForSegment(segment) || !Number.isSafeInteger(command.userId) || command.userId <= 0) {
+    if (
+      !plan ||
+      plan.code !== planForSegment(segment) ||
+      !Number.isSafeInteger(command.userId) ||
+      command.userId <= 0
+    ) {
       this.errorSignal.set('subscriptions.errors.select-plan');
       return false;
     }

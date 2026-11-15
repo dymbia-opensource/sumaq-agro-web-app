@@ -12,8 +12,7 @@ import { PaymentsApiEndpoint } from './endpoints/payments.endpoint';
 import { PlansApiEndpoint } from './endpoints/plans.endpoint';
 import { SubscriptionsApiEndpoint } from './endpoints/subscriptions.endpoint';
 import { DemoCheckout, type DemoCheckoutRequest } from './mock/demo-checkout';
-import { buildReceiptPdf } from './receipt-pdf';
-
+import { buildTextPdf } from '../../shared/infrastructure/text-pdf';
 
 @Injectable({ providedIn: 'root' })
 export class SubscriptionsApi extends BaseApi {
@@ -21,7 +20,10 @@ export class SubscriptionsApi extends BaseApi {
   private readonly plansEndpoint = new PlansApiEndpoint(this.http);
   private readonly subscriptionsEndpoint = new SubscriptionsApiEndpoint(this.http);
   private readonly paymentsEndpoint = new PaymentsApiEndpoint(this.http);
-  private readonly demoCheckout = new DemoCheckout(this.subscriptionsEndpoint, this.paymentsEndpoint);
+  private readonly demoCheckout = new DemoCheckout(
+    this.subscriptionsEndpoint,
+    this.paymentsEndpoint,
+  );
 
   /** Retrieves the plans of the catalog. */
   getPlans = (): Observable<Plan[]> => this.plansEndpoint.getAll();
@@ -63,7 +65,7 @@ export class SubscriptionsApi extends BaseApi {
    */
   buildReceipt = (payment: Payment, planName: string): ExportedFile => ({
     fileName: `receipt-${payment.transactionToken}.pdf`,
-    content: buildReceiptPdf([
+    content: buildTextPdf([
       'SumaqAgro - Payment receipt',
       `Transaction: ${payment.transactionToken}`,
       `Plan: ${planName}`,

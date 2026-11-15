@@ -1,0 +1,655 @@
+<app-page-header
+  [title]="
+    (memberId() === null
+      ? 'profiles.cooperative.members.title'
+      : 'profiles.cooperative.members.dossier'
+    ) | translate
+  "
+  [subtitle]="
+    memberId() === null
+      ? ('profiles.cooperative.members.subtitle' | translate)
+      : selected()?.fullName
+  "
+>
+  @if (state()?.status === 'ready' && !adding() && memberId() === null) {
+    <button mat-flat-button type="button" (click)="adding.set(true); error.set('')">
+      <mat-icon aria-hidden="true">person_add</mat-icon>
+      {{ 'profiles.cooperative.members.add' | translate }}
+    </button>
+  }
+</app-page-header>
+
+@let current = state();
+@switch (current?.status) {
+  @case ('loading') {
+    <mat-progress-bar mode="indeterminate" [attr.aria-label]="'common.loading' | translate" />
+  }
+  @case ('error') {
+    <mat-card appearance="outlined" class="state-card error" role="alert">
+      <mat-card-content class="state-content">
+        <span class="state-icon"><mat-icon aria-hidden="true">error_outline</mat-icon></span>
+        <p>{{ 'profiles.cooperative.members.error' | translate }}</p>
+        <button mat-stroked-button type="button" (click)="retry()">
+          {{ 'common.retry' | translate }}
+        </button>
+      </mat-card-content>
+    </mat-card>
+  }
+  @case ('no-cooperative') {
+    <mat-card appearance="outlined" class="state-card">
+      <mat-card-content class="state-content">
+        <span class="state-icon"><mat-icon aria-hidden="true">agriculture</mat-icon></span>
+        <p>{{ 'profiles.cooperative.dashboard.no-cooperative-message' | translate }}</p>
+        <a mat-flat-button routerLink="/cooperative/registration">
+          {{ 'profiles.cooperative.dashboard.register-cooperative' | translate }}
+        </a>
+      </mat-card-content>
+    </mat-card>
+  }
+  @case ('ready') {
+    @if ((adding() && memberId() === null) || editing()) {
+      <!-- ============================ FORMULARIO ============================ -->
+      <mat-card appearance="outlined" class="form-card">
+        <form
+          class="member-form"
+          [formGroup]="form"
+          (ngSubmit)="save()"
+          [attr.aria-busy]="saving()"
+        >
+          <h2>
+            {{
+              (editing()
+                  ? 'profiles.cooperative.members.edit'
+                  : 'profiles.cooperative.members.new-title'
+              ) | translate
+            }}
+          </h2>
+
+          <div class="fields">
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'profiles.cooperative.members.name' | translate }}</mat-label>
+              <mat-icon matPrefix aria-hidden="true">person</mat-icon>
+              <input matInput formControlName="fullName" autocomplete="name" required />
+              <mat-error>{{ 'profiles.cooperative.members.error-name' | translate }}</mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>DNI</mat-label>
+              <mat-icon matPrefix aria-hidden="true">badge</mat-icon>
+              <input
+                matInput
+                formControlName="dni"
+                inputmode="numeric"
+                maxlength="8"
+                placeholder="12345678"
+                required
+              />
+              <mat-hint>{{ 'profiles.cooperative.members.dni-hint' | translate }}</mat-hint>
+              <mat-error>{{ 'profiles.cooperative.members.error-dni' | translate }}</mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'profiles.cooperative.members.phone' | translate }}</mat-label>
+              <mat-icon matPrefix aria-hidden="true">call</mat-icon>
+              <input
+                matInput
+                type="tel"
+                formControlName="phone"
+                autocomplete="tel"
+                placeholder="+51 999 999 999"
+                required
+              />
+              <mat-error>{{ 'profiles.cooperative.members.error-phone' | translate }}</mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'profiles.cooperative.members.community' | translate }}</mat-label>
+              <mat-icon matPrefix aria-hidden="true">location_on</mat-icon>
+              <input matInput formControlName="community" maxlength="100" />
+            </mat-form-field>
+          </div>
+
+          @if (error()) {
+            <p class="form-alert" role="alert">
+              <mat-icon aria-hidden="true">error_outline</mat-icon>
+              {{ error() | translate }}
+            </p>
+          }
+
+          <div class="actions">
+            <button mat-stroked-button type="button" [disabled]="saving()" (click)="closeForm()">
+              {{ 'crop.cancel' | translate }}
+            </button>
+            <button mat-flat-button type="submit" [disabled]="saving()">
+              {{ 'profiles.cooperative.members.save' | translate }}
+            </button>
+          </div>
+        </form>
+      </mat-card>
+    } @else if (selected(); as member) {
+      <!-- ============================ EXPEDIENTE ============================ -->
+      <mat-card appearance="outlined" class="dossier">
+        <mat-card-content>
+          <a
+            mat-button
+            class="back"
+            routerLink="/cooperative/members"
+            [state]="{ memberSearch: query() }"
+          >
+            <mat-icon aria-hidden="true">arrow_back</mat-icon>
+            {{ 'profiles.cooperative.members.back' | translate }}
+          </a>
+
+          <header class="profile">
+            <span class="avatar avatar-lg" aria-hidden="true">{{ initials(member.fullName) }}</span>
+            <div class="profile-main">
+              <h2>{{ member.fullName }}</h2>
+              <mat-chip-set>
+                <mat-chip
+                  class="status-chip"
+                  [class.inactive]="!member.active"
+                  [disableRipple]="true"
+                >
+                  {{
+                    (member.active
+                        ? 'profiles.cooperative.members.active'
+                        : 'profiles.cooperative.members.inactive'
+                    ) | translate
+                  }}
+                </mat-chip>
+              </mat-chip-set>
+            </div>
+            <button
+              mat-stroked-button
+              class="edit-btn"
+              type="button"
+              [disabled]="linking() || saving()"
+              (click)="editMember(member)"
+            >
+              <mat-icon aria-hidden="true">edit</mat-icon>
+              {{ 'profiles.cooperative.members.edit' | translate }}
+            </button>
+
+            <dl class="facts">
+              @if (member.dni) {
+                <div>
+                  <mat-icon aria-hidden="true">badge</mat-icon>
+                  <dt>DNI</dt>
+                  <dd>{{ member.dni }}</dd>
+                </div>
+              }
+              @if (member.phone) {
+                <div>
+                  <mat-icon aria-hidden="true">call</mat-icon>
+                  <dt>{{ 'profiles.cooperative.members.phone' | translate }}</dt>
+                  <dd>{{ member.phone }}</dd>
+                </div>
+              }
+              @if (member.community) {
+                <div>
+                  <mat-icon aria-hidden="true">location_on</mat-icon>
+                  <dt>{{ 'profiles.cooperative.members.community' | translate }}</dt>
+                  <dd>{{ member.community }}</dd>
+                </div>
+              }
+            </dl>
+          </header>
+
+          <mat-tab-group class="dossier-tabs">
+            <!-- ---------------------------- Parcelas ---------------------------- -->
+            <mat-tab>
+              <ng-template mat-tab-label>
+                {{ 'profiles.cooperative.members.plots' | translate }}
+                <span class="tab-count">{{ member.plots.length }}</span>
+              </ng-template>
+              <div class="tab-content">
+                @if (member.userId) {
+                  <div class="link-bar">
+                    <button
+                      mat-stroked-button
+                      type="button"
+                      [disabled]="linking()"
+                      (click)="loadPlots()"
+                    >
+                      <mat-icon aria-hidden="true">add_location_alt</mat-icon>
+                      {{ 'profiles.cooperative.members.link-plot' | translate }}
+                    </button>
+                  </div>
+                  @if (plotOptions(); as options) {
+                    <ul class="option-list">
+                      @for (plot of options; track plot.id) {
+                        <li>
+                          <button
+                            mat-button
+                            type="button"
+                            [disabled]="linking()"
+                            (click)="linkPlot(plot)"
+                          >
+                            <mat-icon aria-hidden="true">landscape</mat-icon>
+                            {{ plot.name }} · {{ plot.region }}
+                          </button>
+                        </li>
+                      } @empty {
+                        <li class="option-empty">
+                          {{ 'profiles.cooperative.members.no-linkable-plots' | translate }}
+                        </li>
+                      }
+                    </ul>
+                  }
+                  @if (plotError()) {
+                    <p class="form-alert" role="alert">
+                      <mat-icon aria-hidden="true">error_outline</mat-icon>
+                      {{ 'profiles.cooperative.members.link-error' | translate }}
+                    </p>
+                  }
+                } @else {
+                  <div class="link-account">
+                    <p>{{ 'profiles.cooperative.members.link-account-first' | translate }}</p>
+                    @if (member.active && demoFarmers.length) {
+                      <div class="link-account-row">
+                        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                          <mat-label>
+                            {{ 'profiles.cooperative.members.demo-account' | translate }}
+                          </mat-label>
+                          <mat-select
+                            #account
+                            [value]="demoFarmers[0].id"
+                            [disabled]="accountBusy()"
+                          >
+                            @for (farmer of demoFarmers; track farmer.id) {
+                              <mat-option [value]="farmer.id">{{ farmer.email }}</mat-option>
+                            }
+                          </mat-select>
+                        </mat-form-field>
+                        <button
+                          mat-stroked-button
+                          type="button"
+                          [disabled]="accountBusy()"
+                          (click)="linkAccount(+account.value)"
+                        >
+                          <mat-icon aria-hidden="true">link</mat-icon>
+                          {{ 'profiles.cooperative.members.link-account' | translate }}
+                        </button>
+                      </div>
+                      @if (accountError()) {
+                        <p class="form-alert" role="alert">
+                          <mat-icon aria-hidden="true">error_outline</mat-icon>
+                          {{ 'profiles.cooperative.members.link-account-error' | translate }}
+                        </p>
+                      }
+                    }
+                  </div>
+                }
+
+                <div class="plot-grid">
+                  @for (plot of member.plots; track plot.id) {
+                    <mat-card appearance="outlined" class="plot">
+                      <mat-card-header>
+                        <mat-icon mat-card-avatar class="plot-icon" aria-hidden="true">landscape</mat-icon>
+                        <mat-card-title>{{ plot.name }}</mat-card-title>
+                        <mat-card-subtitle>{{ plot.region }} · {{ plot.variety }}</mat-card-subtitle>
+                      </mat-card-header>
+                      @if (member.userId; as producerUserId) {
+                        <mat-card-content>
+                          <app-plot-advisor-assignment
+                            [plotId]="plot.id"
+                            [producerUserId]="producerUserId"
+                          />
+                        </mat-card-content>
+                      }
+                    </mat-card>
+                  } @empty {
+                    <p class="tab-empty">
+                      {{ 'profiles.cooperative.members.no-plots' | translate }}
+                    </p>
+                  }
+                </div>
+              </div>
+            </mat-tab>
+
+            <!-- ---------------------------- Acopio ---------------------------- -->
+            <mat-tab>
+              <ng-template mat-tab-label>
+                {{ 'profiles.cooperative.members.collection' | translate }}
+                <span class="tab-count">{{ memberBatches().length }}</span>
+              </ng-template>
+              <ng-template matTabContent>
+                <div class="tab-content">
+                  @if (harvest.loading()) {
+                    <mat-progress-bar
+                      mode="indeterminate"
+                      [attr.aria-label]="'common.loading' | translate"
+                    />
+                  } @else if (harvest.error(); as error) {
+                    <p class="form-alert" role="alert">
+                      <mat-icon aria-hidden="true">error_outline</mat-icon>
+                      {{ error | translate }}
+                    </p>
+                    <button mat-stroked-button type="button" (click)="harvest.load()">
+                      {{ 'common.retry' | translate }}
+                    </button>
+                  } @else if (harvest.notice(); as notice) {
+                    <p class="tab-empty" role="status">{{ notice | translate }}</p>
+                  } @else if (memberBatches().length) {
+                    <p class="collection-total">
+                      <span>{{ 'profiles.cooperative.members.net-total' | translate }}</span>
+                      <strong>{{ collectedKg() | number: '1.0-2' }} kg</strong>
+                    </p>
+                    <div class="plot-grid">
+                      @for (batch of memberBatches(); track batch.id) {
+                        <mat-card appearance="outlined" class="plot">
+                          <mat-card-header>
+                            <mat-icon mat-card-avatar class="plot-icon" aria-hidden="true">scale</mat-icon>
+                            <mat-card-title>{{ batch.data.code }}</mat-card-title>
+                            <mat-card-subtitle>
+                              {{ batch.data.plotName }} · {{ batch.data.variety }}
+                            </mat-card-subtitle>
+                          </mat-card-header>
+                          <mat-card-content class="batch-meta">
+                            <span>{{ batch.data.collectedAt | date: 'mediumDate' }}</span>
+                            <span>
+                              {{ 'profiles.cooperative.members.net-weight' | translate }}
+                              <strong>{{ batch.netKg | number: '1.0-2' }} kg</strong>
+                            </span>
+                          </mat-card-content>
+                        </mat-card>
+                      }
+                    </div>
+                  } @else {
+                    <p class="tab-empty">
+                      {{ 'profiles.cooperative.members.no-collection' | translate }}
+                    </p>
+                  }
+                </div>
+              </ng-template>
+            </mat-tab>
+
+            <!-- ---------------------------- Certificados ---------------------------- -->
+            <mat-tab>
+              <ng-template mat-tab-label>
+                {{ 'profiles.cooperative.members.certificates' | translate }}
+                <span class="tab-count">{{ issuedCertificates().length }}</span>
+              </ng-template>
+              <ng-template matTabContent>
+                <div class="tab-content">
+                  @if (harvest.loading()) {
+                    <mat-progress-bar
+                      mode="indeterminate"
+                      [attr.aria-label]="'common.loading' | translate"
+                    />
+                  } @else if (harvest.error(); as error) {
+                    <p class="form-alert" role="alert">
+                      <mat-icon aria-hidden="true">error_outline</mat-icon>
+                      {{ error | translate }}
+                    </p>
+                    <button mat-stroked-button type="button" (click)="harvest.load()">
+                      {{ 'common.retry' | translate }}
+                    </button>
+                  } @else if (harvest.notice(); as notice) {
+                    <p class="tab-empty" role="status">{{ notice | translate }}</p>
+                  } @else {
+                    <div class="plot-grid">
+                      @for (item of issuedCertificates(); track item.certificate.id) {
+                        <mat-card appearance="outlined" class="plot">
+                          <mat-card-header>
+                            <mat-icon mat-card-avatar class="plot-icon" aria-hidden="true">workspace_premium</mat-icon>
+                            <mat-card-title>{{ item.certificate.certificateNumber }}</mat-card-title>
+                            <mat-card-subtitle>
+                              {{ item.batch.code }} · {{ item.batch.plotName }}
+                            </mat-card-subtitle>
+                          </mat-card-header>
+                          <mat-card-content class="batch-meta">
+                            <span>{{ item.certificate.issuedAt | date: 'mediumDate' }}</span>
+                            <mat-chip-set>
+                              <mat-chip
+                                class="status-chip"
+                                [class.revoked]="item.certificate.status === 'REVOKED'"
+                                [disableRipple]="true"
+                              >
+                                {{
+                                  'profiles.cooperative.members.certificate-' +
+                                  item.certificate.status | translate
+                                }}
+                              </mat-chip>
+                            </mat-chip-set>
+                          </mat-card-content>
+                          @if (item.certificate.verificationToken) {
+                            <mat-card-actions>
+                              <a
+                                mat-stroked-button
+                                [routerLink]="['/verify', item.certificate.verificationToken]"
+                              >
+                                {{ 'profiles.cooperative.members.verify-certificate' | translate }}
+                              </a>
+                            </mat-card-actions>
+                          }
+                        </mat-card>
+                      } @empty {
+                        <p class="tab-empty">
+                          {{ 'profiles.cooperative.members.no-certificates' | translate }}
+                        </p>
+                      }
+                    </div>
+                  }
+                </div>
+              </ng-template>
+            </mat-tab>
+          </mat-tab-group>
+        </mat-card-content>
+      </mat-card>
+    } @else if (memberId() !== null) {
+      <!-- ============================ NO ENCONTRADO ============================ -->
+      <mat-card appearance="outlined" class="state-card" role="status">
+        <mat-card-content class="state-content">
+          <span class="state-icon"><mat-icon aria-hidden="true">person_off</mat-icon></span>
+          <p>{{ 'profiles.cooperative.members.not-found' | translate }}</p>
+          <a mat-stroked-button routerLink="/cooperative/members" [state]="{ memberSearch: query() }">
+            {{ 'profiles.cooperative.members.back' | translate }}
+          </a>
+        </mat-card-content>
+      </mat-card>
+    } @else {
+      <!-- ============================ LISTA ============================ -->
+      <div class="members-view">
+        @if (stats(); as s) {
+          <div class="kpi-row">
+            <mat-card appearance="outlined" class="kpi">
+              <mat-card-content class="kpi-content">
+                <span class="kpi-icon"><mat-icon aria-hidden="true">groups</mat-icon></span>
+                <div>
+                  <p>{{ 'profiles.cooperative.members.kpi-total' | translate }}</p>
+                  <strong>{{ s.total }}</strong>
+                </div>
+              </mat-card-content>
+            </mat-card>
+            <mat-card appearance="outlined" class="kpi">
+              <mat-card-content class="kpi-content">
+                <span class="kpi-icon"><mat-icon aria-hidden="true">verified_user</mat-icon></span>
+                <div>
+                  <p>{{ 'profiles.cooperative.members.kpi-active' | translate }}</p>
+                  <strong>{{ s.active }}</strong>
+                </div>
+              </mat-card-content>
+            </mat-card>
+            <mat-card appearance="outlined" class="kpi">
+              <mat-card-content class="kpi-content">
+                <span class="kpi-icon"><mat-icon aria-hidden="true">landscape</mat-icon></span>
+                <div>
+                  <p>{{ 'profiles.cooperative.members.kpi-plots' | translate }}</p>
+                  <strong>{{ s.plots }}</strong>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          </div>
+        }
+
+        <mat-card
+          appearance="outlined"
+          class="list-card"
+          [attr.aria-label]="'profiles.cooperative.members.title' | translate"
+        >
+          <mat-card-content>
+            @if (current?.members?.length) {
+              <div class="toolbar">
+                <mat-form-field appearance="outline" subscriptSizing="dynamic" class="search-field">
+                  <mat-icon matPrefix aria-hidden="true">search</mat-icon>
+                  <mat-label>{{ 'profiles.cooperative.members.search' | translate }}</mat-label>
+                  <input
+                    id="member-search"
+                    matInput
+                    type="search"
+                    [value]="query()"
+                    (input)="search($event.target.value)"
+                  />
+                  @if (query()) {
+                    <button
+                      mat-icon-button
+                      matSuffix
+                      type="button"
+                      [attr.aria-label]="'profiles.cooperative.members.clear-search' | translate"
+                      (click)="search('')"
+                    >
+                      <mat-icon aria-hidden="true">close</mat-icon>
+                    </button>
+                  }
+                </mat-form-field>
+
+                <mat-button-toggle-group
+                  class="status-toggle"
+                  hideSingleSelectionIndicator
+                  [value]="statusFilter()"
+                  (change)="statusFilter.set($event.value)"
+                  [attr.aria-label]="'profiles.cooperative.members.filter-status' | translate"
+                >
+                  @for (f of filters; track f.value) {
+                    <mat-button-toggle [value]="f.value">{{ f.label | translate }}</mat-button-toggle>
+                  }
+                </mat-button-toggle-group>
+
+                <span class="count" aria-live="polite">
+                  {{ visibleMembers().length }} / {{ current?.members?.length }}
+                </span>
+              </div>
+            }
+
+            @if (visibleMembers().length) {
+              <div
+                class="table-scroll"
+                tabindex="0"
+                role="region"
+                [attr.aria-label]="'profiles.cooperative.members.title' | translate"
+              >
+                <table
+                  mat-table
+                  [dataSource]="visibleMembers()"
+                  [attr.aria-label]="'profiles.cooperative.members.title' | translate"
+                >
+                  <ng-container matColumnDef="member">
+                    <th mat-header-cell scope="col" *matHeaderCellDef>
+                      {{ 'profiles.cooperative.members.name' | translate }}
+                    </th>
+                    <td mat-cell *matCellDef="let member">
+                      <div class="member-cell">
+                        <span class="avatar" aria-hidden="true">{{ initials(member.fullName) }}</span>
+                        <div class="member-text">
+                          <a
+                            class="member-link"
+                            [routerLink]="[member.id]"
+                            [state]="{ memberSearch: query() }"
+                          >
+                            {{ member.fullName }}
+                          </a>
+                          @if (member.community) {
+                            <small>{{ member.community }}</small>
+                          }
+                        </div>
+                      </div>
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="dni">
+                    <th mat-header-cell scope="col" *matHeaderCellDef>DNI</th>
+                    <td mat-cell *matCellDef="let member">{{ member.dni || '—' }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="phone">
+                    <th mat-header-cell scope="col" *matHeaderCellDef>
+                      {{ 'profiles.cooperative.members.phone' | translate }}
+                    </th>
+                    <td mat-cell *matCellDef="let member">{{ member.phone || '—' }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="status">
+                    <th mat-header-cell scope="col" *matHeaderCellDef>
+                      {{ 'profiles.cooperative.members.status' | translate }}
+                    </th>
+                    <td mat-cell *matCellDef="let member">
+                      <mat-chip-set>
+                        <mat-chip
+                          class="status-chip"
+                          [class.inactive]="!member.active"
+                          [disableRipple]="true"
+                        >
+                          {{
+                            (member.active
+                                ? 'profiles.cooperative.members.active'
+                                : 'profiles.cooperative.members.inactive'
+                            ) | translate
+                          }}
+                        </mat-chip>
+                      </mat-chip-set>
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="plots">
+                    <th mat-header-cell scope="col" *matHeaderCellDef>
+                      {{ 'profiles.cooperative.members.plots' | translate }}
+                    </th>
+                    <td mat-cell *matCellDef="let member">
+                      <span class="plots-pill">
+                        <mat-icon aria-hidden="true">landscape</mat-icon>
+                        {{ member.plots.length }}
+                      </span>
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="actions">
+                    <th mat-header-cell scope="col" *matHeaderCellDef>
+                      <span class="sr-only">{{ 'common.actions' | translate }}</span>
+                    </th>
+                    <td mat-cell *matCellDef="let member">
+                      <mat-icon class="row-arrow" aria-hidden="true">chevron_right</mat-icon>
+                    </td>
+                  </ng-container>
+
+                  <tr mat-header-row *matHeaderRowDef="columns"></tr>
+                  <tr mat-row *matRowDef="let row; columns: columns"></tr>
+                </table>
+              </div>
+            } @else {
+              <div class="empty" role="status">
+                <span class="empty-icon">
+                  <mat-icon aria-hidden="true">{{ current?.members?.length ? 'search_off' : 'group_add' }}</mat-icon>
+                </span>
+                <p>
+                  {{
+                    (current?.members?.length
+                        ? 'profiles.cooperative.members.no-results'
+                        : 'profiles.cooperative.members.empty'
+                    ) | translate
+                  }}
+                </p>
+                @if (!current?.members?.length) {
+                  <button mat-flat-button type="button" (click)="adding.set(true); error.set('')">
+                    <mat-icon aria-hidden="true">person_add</mat-icon>
+                    {{ 'profiles.cooperative.members.add' | translate }}
+                  </button>
+                }
+              </div>
+            }
+          </mat-card-content>
+        </mat-card>
+      </div>
+    }
+  }
+}

@@ -1,27 +1,30 @@
 import { CooperativeMemberDetails } from './responses/cooperative-member.response';
 import { HttpClient } from '@angular/common/http';
-import { inject, Service } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
 import { BaseApi } from '../../shared/infrastructure/base-api';
 import { CooperativeMember, MemberPlot } from '../domain/model/entities/cooperative-member.entity';
 import { Cooperative } from '../domain/model/entities/cooperative.entity';
 import { CooperativeDashboard } from '../domain/model/entities/cooperative-dashboard.entity';
 import { FarmerProfile } from '../domain/model/entities/farmer-profile.entity';
+import { PlotAdvisorAssignment } from '../domain/model/entities/plot-advisor-assignment';
 import { TechnicalAdvisor } from '../domain/model/entities/technical-advisor.entity';
 import { CooperativeMembersApiEndpoint } from './endpoints/cooperative-members.endpoint';
+import { PlotAdvisorAssignmentsApiEndpoint } from './endpoints/plot-advisor-assignments.endpoint';
 import { CooperativeDashboardApiEndpoint } from './endpoints/cooperative-dashboard.endpoint';
 import { CooperativesApiEndpoint } from './endpoints/cooperatives.endpoint';
 import { FarmerProfilesApiEndpoint } from './endpoints/farmer-profiles.endpoint';
 import { TechnicalAdvisorsApiEndpoint } from './endpoints/technical-advisors.endpoint';
 
 /** Facade that exposes only the Profile data required by its application layer. */
-@Service()
+@Injectable({ providedIn: 'root' })
 export class ProfilesApi extends BaseApi {
   private readonly farmerProfilesEndpoint: FarmerProfilesApiEndpoint;
   private readonly cooperativesEndpoint: CooperativesApiEndpoint;
   private readonly cooperativeMembersEndpoint: CooperativeMembersApiEndpoint;
   private readonly cooperativeDashboardEndpoint: CooperativeDashboardApiEndpoint;
   private readonly technicalAdvisorsEndpoint: TechnicalAdvisorsApiEndpoint;
+  private readonly plotAdvisorAssignmentsEndpoint: PlotAdvisorAssignmentsApiEndpoint;
 
   constructor() {
     super();
@@ -31,6 +34,7 @@ export class ProfilesApi extends BaseApi {
     this.cooperativeMembersEndpoint = new CooperativeMembersApiEndpoint(http);
     this.cooperativeDashboardEndpoint = new CooperativeDashboardApiEndpoint(http);
     this.technicalAdvisorsEndpoint = new TechnicalAdvisorsApiEndpoint(http);
+    this.plotAdvisorAssignmentsEndpoint = new PlotAdvisorAssignmentsApiEndpoint(http);
   }
 
   getFarmerProfile(userId: number): Observable<FarmerProfile> {
@@ -45,7 +49,12 @@ export class ProfilesApi extends BaseApi {
     return this.cooperativesEndpoint.getByDirector(userId);
   }
 
-  registerCooperative(directorUserId: number, legalName: string, ruc: string, region: string): Observable<unknown> {
+  registerCooperative(
+    directorUserId: number,
+    legalName: string,
+    ruc: string,
+    region: string,
+  ): Observable<unknown> {
     return this.cooperativesEndpoint.register(directorUserId, legalName, ruc, region);
   }
 
@@ -53,11 +62,17 @@ export class ProfilesApi extends BaseApi {
     return this.cooperativesEndpoint.update(cooperative, cooperative.id);
   }
 
-  addCooperativeMember(cooperativeId: number, member: CooperativeMemberDetails): Observable<CooperativeMember> {
+  addCooperativeMember(
+    cooperativeId: number,
+    member: CooperativeMemberDetails,
+  ): Observable<CooperativeMember> {
     return this.cooperativeMembersEndpoint.add(cooperativeId, member);
   }
 
-  updateCooperativeMember(id: number | string, details: CooperativeMemberDetails): Observable<CooperativeMember> {
+  updateCooperativeMember(
+    id: number | string,
+    details: CooperativeMemberDetails,
+  ): Observable<CooperativeMember> {
     return this.cooperativeMembersEndpoint.updateDetails(id, details);
   }
 
@@ -119,5 +134,24 @@ export class ProfilesApi extends BaseApi {
 
   deleteTechnicalAdvisor(id: number): Observable<void> {
     return this.technicalAdvisorsEndpoint.delete(id);
+  }
+
+  getAssignmentsByProducer(userId: number): Observable<PlotAdvisorAssignment[]> {
+    return this.plotAdvisorAssignmentsEndpoint.getByProducer(userId);
+  }
+
+  getAssignmentsByAdvisor(userId: number): Observable<PlotAdvisorAssignment[]> {
+    return this.plotAdvisorAssignmentsEndpoint.getByAdvisor(userId);
+  }
+
+  getAssignmentByPlot(plotId: number): Observable<PlotAdvisorAssignment | null> {
+    return this.plotAdvisorAssignmentsEndpoint.getByPlot(plotId);
+  }
+
+  saveAssignment(
+    record: PlotAdvisorAssignment,
+    existing: boolean,
+  ): Observable<PlotAdvisorAssignment> {
+    return this.plotAdvisorAssignmentsEndpoint.save(record, existing);
   }
 }

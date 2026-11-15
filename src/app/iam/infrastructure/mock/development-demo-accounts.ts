@@ -1,5 +1,5 @@
 import { environment } from '../../../../environments/environment';
-import { UserRole } from '../../domain/model/value-objects/user-role';
+import { UserRole } from '../../domain/model/entities/user-role';
 
 export interface DevelopmentDemoAccount {
   readonly id: number;

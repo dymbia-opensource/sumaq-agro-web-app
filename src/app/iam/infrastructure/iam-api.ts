@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { inject, Service } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { BaseApi } from '../../shared/infrastructure/base-api';
 import { SignInCommand } from '../domain/model/commands/sign-in.command';
@@ -15,7 +15,7 @@ import { PasswordRecoveryApiEndpoint } from './endpoints/password-recovery.endpo
 /**
  * Exposes IAM operations to the application layer.
  */
-@Service()
+@Injectable({ providedIn: 'root' })
 export class IamApi extends BaseApi {
   private readonly signInEndpoint: SignInApiEndpoint;
   private readonly signUpEndpoint: SignUpApiEndpoint;

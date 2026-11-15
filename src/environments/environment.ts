@@ -25,6 +25,9 @@ export const environment = {
   platformProviderCooperativesEndpointPath: '/cooperatives',
   platformProviderCooperativeMembersEndpointPath: '/cooperative-members',
   platformProviderAgronomistAssignmentsEndpointPath: '/agronomist-assignments',
+  // The roster of professionals of a cooperative, which the platform does not
+  // serve yet; the supervision of each plot is the resource above.
+  platformProviderTechnicalAdvisorsEndpointPath: '/technical-advisors',
 
   // Subscriptions and Payments
   useMockSubscriptionPayments: true,
@@ -38,6 +41,9 @@ export const environment = {
   platformProviderCampaignLedgersEndpointPath: '/campaign-ledgers',
 
   // Crop Health
+  // Clinical follow-up of a case; neither is served by the platform yet.
+  platformProviderCaseAssessmentsEndpointPath: '/case-assessments',
+  platformProviderTreatmentFollowUpsEndpointPath: '/treatment-follow-ups',
   platformProviderSatelliteObservationsEndpointPath: '/satellite-observations',
   platformProviderClimateForecastsEndpointPath: '/climate-forecasts',
   platformProviderAgroclimaticAlertsEndpointPath: '/agroclimatic-alerts',

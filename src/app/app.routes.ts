@@ -3,44 +3,42 @@ import { inject } from '@angular/core';
 import { RedirectFunction, Router, Routes } from '@angular/router';
 import { iamRoutes } from './iam/iam.routes';
 import { iamGuard } from './iam/infrastructure/iam.guard';
-import {activeSubscriptionGuard} from './subscriptions/infrastructure/active-subscription.guard';
+import { roleGuard } from './shared/infrastructure/role.guard';
+import { activeSubscriptionGuard } from './subscriptions/infrastructure/active-subscription.guard';
 
 const layout = () => import('./shared/presentation/components/layout/layout').then((m) => m.Layout);
 
 const pageNotFound = () =>
   import('./shared/presentation/views/page-not-found/page-not-found').then((m) => m.PageNotFound);
 
-const fieldManagementRoutes = () =>
-  import('./field-management/field-management.routes').then((m) => m.fieldManagementRoutes);
+const farmingRoutes = () => import('./farming/farming.routes').then((m) => m.farmingRoutes);
 
-const cropHealthRoutes = () =>
-  import('./crop-health/crop-health.routes').then((m) => m.cropHealthRoutes);
+const cropRoutes = () => import('./crop/crop.routes').then((m) => m.cropRoutes);
 
 const profilesRoutes = () => import('./profiles/profiles.routes').then((m) => m.profilesRoutes);
 
-const harvestCertificationRoutes = () =>
-  import('./harvest-certification/harvest-certification.routes').then(
-    (m) => m.harvestCertificationRoutes,
-  );
+const certificationRoutes = () =>
+  import('./certification/certification.routes').then((m) => m.certificationRoutes);
 
 const subscriptionsRoutes = () =>
   import('./subscriptions/subscriptions.routes').then((m) => m.subscriptionsRoutes);
 
-const publicTraceabilityView = () =>
-  import('./harvest-certification/presentation/views/public-traceability-view/public-traceability-view').then(
-    (m) => m.PublicTraceabilityView,
+const publicTraceability = () =>
+  import('./certification/presentation/views/public-traceability/public-traceability').then(
+    (m) => m.PublicTraceability,
   );
 
 function redirectLegacyPath(destination: string): RedirectFunction {
   return ({ params, queryParams, fragment }) => {
-    const segments = destination.split('/').map((segment) =>
-      segment.startsWith(':') ? params[segment.slice(1)] : segment,
-    );
-    return inject(Router).createUrlTree(['/', ...segments], { queryParams, fragment: fragment ?? undefined });
+    const segments = destination
+      .split('/')
+      .map((segment) => (segment.startsWith(':') ? params[segment.slice(1)] : segment));
+    return inject(Router).createUrlTree(['/', ...segments], {
+      queryParams,
+      fragment: fragment ?? undefined,
+    });
   };
 }
-
-const baseTitle = 'SumaqAgro';
 
 /**
  * Root routes. Each bounded context adds its own `*.routes.ts` with lazy loading.
@@ -60,8 +58,8 @@ export const routes: Routes = [
   ...iamRoutes,
   {
     path: 'verify/:token',
-    loadComponent: publicTraceabilityView,
-    title: `Verificar certificado | ${baseTitle}`,
+    loadComponent: publicTraceability,
+    title: 'certification.trace.public-verification',
   },
   { path: '', redirectTo: '/sign-in', pathMatch: 'full' },
 
@@ -78,76 +76,208 @@ export const routes: Routes = [
     path: '',
     loadComponent: layout,
     canActivate: [iamGuard],
-    canActivateChild: [iamGuard],
+    canActivateChild: [iamGuard, roleGuard],
     children: [
       {
         path: '',
         canActivateChild: [activeSubscriptionGuard],
         children: [
-          {
-            path: 'advisor',
-            loadComponent: () => import('./crop-health/crop-health.routes').then((m) => m.diagnosisInboxView()),
-            title: 'Consultar al asesor | SumaqAgro',
-          },
+          // The producer used to reach the inbox by its own address.
+          { path: 'advisor', redirectTo: 'pest-reports', pathMatch: 'full' },
           {
             path: 'alerts',
-            loadComponent: () => import('./crop-health/crop-health.routes').then((m) => m.agriculturalAlertsView()),
-            title: 'Alertas agrícolas | SumaqAgro',
+            loadComponent: () =>
+              import('./crop/crop.routes').then((m) => m.agriculturalAlerts()),
+            title: 'crop.alerts-title',
           },
-          { path: 'certificates', loadChildren: harvestCertificationRoutes },
-          { path: 'harvest-certification/certificates', redirectTo: '/certificates', pathMatch: 'full' },
+          { path: 'certificates', loadChildren: certificationRoutes },
+          {
+            path: 'harvest-certification/certificates',
+            redirectTo: '/certificates',
+            pathMatch: 'full',
+          },
           { path: 'harvest-certification', redirectTo: '/certificates', pathMatch: 'full' },
           {
             path: 'dashboard',
             providers: [provideCharts(withDefaultRegisterables())],
-            loadComponent: () => import('./field-management/field-management.routes').then((m) => m.myPlotDashboardView()),
-            title: 'Mi parcela | SumaqAgro',
+            loadComponent: () =>
+              import('./farming/farming.routes').then((m) => m.myPlotDashboard()),
+            title: 'option.my-plot',
           },
           {
             path: 'cooperative/dashboard',
             providers: [provideCharts(withDefaultRegisterables())],
-            loadComponent: () => import('./profiles/profiles.routes').then((m) => m.cooperativeDashboardView()),
-            title: 'Dashboard institucional | SumaqAgro',
+            loadComponent: () =>
+              import('./profiles/profiles.routes').then((m) => m.institutionalDashboard()),
+            title: 'profiles.cooperative.dashboard.tab-title',
           },
-          { path: 'field-management/plots/new', redirectTo: redirectLegacyPath('plots/new'), pathMatch: 'full' },
-          { path: 'field-management/plots/:id/boundary', redirectTo: redirectLegacyPath('plots/:id/boundary'), pathMatch: 'full' },
-          { path: 'field-management/plots/:id/soil', redirectTo: redirectLegacyPath('plots/:id/soil'), pathMatch: 'full' },
-          { path: 'field-management/plots/:id', redirectTo: redirectLegacyPath('plots/:id'), pathMatch: 'full' },
-          { path: 'field-management/plots', redirectTo: redirectLegacyPath('plots'), pathMatch: 'full' },
-          { path: 'field-management/campaigns/new', redirectTo: redirectLegacyPath('campaigns/new'), pathMatch: 'full' },
-          { path: 'field-management/campaigns', redirectTo: redirectLegacyPath('campaigns'), pathMatch: 'full' },
-          { path: 'field-management/finances/expenses/new/inputs', redirectTo: redirectLegacyPath('finances/expenses/new/inputs'), pathMatch: 'full' },
-          { path: 'field-management/finances/expenses/new/labor', redirectTo: redirectLegacyPath('finances/expenses/new/labor'), pathMatch: 'full' },
-          { path: 'field-management/finances/expenses/new/freight', redirectTo: redirectLegacyPath('finances/expenses/new/freight'), pathMatch: 'full' },
-          { path: 'field-management/finances/expenses/new', redirectTo: redirectLegacyPath('finances/expenses/new'), pathMatch: 'full' },
-          { path: 'field-management/finances/reports', redirectTo: redirectLegacyPath('finances/reports'), pathMatch: 'full' },
-          { path: 'field-management/finances', redirectTo: redirectLegacyPath('finances'), pathMatch: 'full' },
-          { path: 'crop-health/assigned-plots', redirectTo: redirectLegacyPath('assigned-plots'), pathMatch: 'full' },
-          { path: 'crop-health/monitoring', redirectTo: redirectLegacyPath('monitoring'), pathMatch: 'full' },
-          { path: 'crop-health/inspections', redirectTo: redirectLegacyPath('inspections'), pathMatch: 'full' },
-          { path: 'crop-health/prescriptions', redirectTo: redirectLegacyPath('prescriptions'), pathMatch: 'full' },
-          { path: 'crop-health/inbox', redirectTo: redirectLegacyPath('pest-reports'), pathMatch: 'full' },
-          { path: 'crop-health/report-pest', redirectTo: redirectLegacyPath('pest-reports/new'), pathMatch: 'full' },
-          { path: 'crop-health/reports/:id', redirectTo: redirectLegacyPath('pest-reports/:id'), pathMatch: 'full' },
-          { path: 'crop-health/prescribe', redirectTo: redirectLegacyPath('prescriptions/new'), pathMatch: 'full' },
-          { path: 'profiles/settings', redirectTo: redirectLegacyPath('settings'), pathMatch: 'full' },
-          { path: 'profiles/cooperative/registration', redirectTo: redirectLegacyPath('cooperative/registration'), pathMatch: 'full' },
-          { path: 'profiles/cooperative/members/:id', redirectTo: redirectLegacyPath('cooperative/members/:id'), pathMatch: 'full' },
-          { path: 'profiles/cooperative/members', redirectTo: redirectLegacyPath('cooperative/members'), pathMatch: 'full' },
-          { path: 'profiles/cooperative/settings', redirectTo: redirectLegacyPath('cooperative/settings'), pathMatch: 'full' },
-          { path: 'field-management/dashboard', redirectTo: redirectLegacyPath('dashboard'), pathMatch: 'full' },
-          { path: 'field-management', redirectTo: redirectLegacyPath('dashboard'), pathMatch: 'full' },
-          { path: 'crop-health/advisor', redirectTo: redirectLegacyPath('advisor'), pathMatch: 'full' },
-          { path: 'crop-health/alerts', redirectTo: redirectLegacyPath('alerts'), pathMatch: 'full' },
+          {
+            path: 'field-management/plots/new',
+            redirectTo: redirectLegacyPath('plots/new'),
+            pathMatch: 'full',
+          },
+          {
+            path: 'field-management/plots/:id/boundary',
+            redirectTo: redirectLegacyPath('plots/:id/boundary'),
+            pathMatch: 'full',
+          },
+          {
+            path: 'field-management/plots/:id/soil',
+            redirectTo: redirectLegacyPath('plots/:id/soil'),
+            pathMatch: 'full',
+          },
+          {
+            path: 'field-management/plots/:id',
+            redirectTo: redirectLegacyPath('plots/:id'),
+            pathMatch: 'full',
+          },
+          {
+            path: 'field-management/plots',
+            redirectTo: redirectLegacyPath('plots'),
+            pathMatch: 'full',
+          },
+          {
+            path: 'field-management/campaigns/new',
+            redirectTo: redirectLegacyPath('campaigns/new'),
+            pathMatch: 'full',
+          },
+          {
+            path: 'field-management/campaigns',
+            redirectTo: redirectLegacyPath('campaigns'),
+            pathMatch: 'full',
+          },
+          {
+            path: 'field-management/finances/expenses/new/inputs',
+            redirectTo: redirectLegacyPath('finances/expenses/new/inputs'),
+            pathMatch: 'full',
+          },
+          {
+            path: 'field-management/finances/expenses/new/labor',
+            redirectTo: redirectLegacyPath('finances/expenses/new/labor'),
+            pathMatch: 'full',
+          },
+          {
+            path: 'field-management/finances/expenses/new/freight',
+            redirectTo: redirectLegacyPath('finances/expenses/new/freight'),
+            pathMatch: 'full',
+          },
+          {
+            path: 'field-management/finances/expenses/new',
+            redirectTo: redirectLegacyPath('finances/expenses/new'),
+            pathMatch: 'full',
+          },
+          {
+            path: 'field-management/finances/reports',
+            redirectTo: redirectLegacyPath('finances/reports'),
+            pathMatch: 'full',
+          },
+          {
+            path: 'field-management/finances',
+            redirectTo: redirectLegacyPath('finances'),
+            pathMatch: 'full',
+          },
+          {
+            path: 'crop-health/assigned-plots',
+            redirectTo: redirectLegacyPath('assigned-plots'),
+            pathMatch: 'full',
+          },
+          {
+            path: 'crop-health/monitoring',
+            redirectTo: redirectLegacyPath('monitoring'),
+            pathMatch: 'full',
+          },
+          {
+            path: 'crop-health/inspections',
+            redirectTo: redirectLegacyPath('inspections'),
+            pathMatch: 'full',
+          },
+          {
+            path: 'crop-health/prescriptions',
+            redirectTo: redirectLegacyPath('prescriptions'),
+            pathMatch: 'full',
+          },
+          {
+            path: 'crop-health/inbox',
+            redirectTo: redirectLegacyPath('pest-reports'),
+            pathMatch: 'full',
+          },
+          {
+            path: 'crop-health/report-pest',
+            redirectTo: redirectLegacyPath('pest-reports/new'),
+            pathMatch: 'full',
+          },
+          {
+            path: 'crop-health/reports/:id',
+            redirectTo: redirectLegacyPath('pest-reports/:id'),
+            pathMatch: 'full',
+          },
+          {
+            path: 'crop-health/prescribe',
+            redirectTo: redirectLegacyPath('prescriptions/new'),
+            pathMatch: 'full',
+          },
+          {
+            path: 'profiles/settings',
+            redirectTo: redirectLegacyPath('settings'),
+            pathMatch: 'full',
+          },
+          {
+            path: 'profiles/cooperative/registration',
+            redirectTo: redirectLegacyPath('cooperative/registration'),
+            pathMatch: 'full',
+          },
+          {
+            path: 'profiles/cooperative/members/:id',
+            redirectTo: redirectLegacyPath('cooperative/members/:id'),
+            pathMatch: 'full',
+          },
+          {
+            path: 'profiles/cooperative/members',
+            redirectTo: redirectLegacyPath('cooperative/members'),
+            pathMatch: 'full',
+          },
+          {
+            path: 'profiles/cooperative/settings',
+            redirectTo: redirectLegacyPath('cooperative/settings'),
+            pathMatch: 'full',
+          },
+          {
+            path: 'field-management/dashboard',
+            redirectTo: redirectLegacyPath('dashboard'),
+            pathMatch: 'full',
+          },
+          {
+            path: 'field-management',
+            redirectTo: redirectLegacyPath('dashboard'),
+            pathMatch: 'full',
+          },
+          {
+            path: 'crop-health/advisor',
+            redirectTo: redirectLegacyPath('advisor'),
+            pathMatch: 'full',
+          },
+          {
+            path: 'crop-health/alerts',
+            redirectTo: redirectLegacyPath('alerts'),
+            pathMatch: 'full',
+          },
           { path: 'crop-health', redirectTo: redirectLegacyPath('monitoring'), pathMatch: 'full' },
-          { path: 'profiles/cooperative/dashboard', redirectTo: redirectLegacyPath('cooperative/dashboard'), pathMatch: 'full' },
-          { path: 'profiles', redirectTo: redirectLegacyPath('cooperative/dashboard'), pathMatch: 'full' },
-          { path: '', loadChildren: fieldManagementRoutes },
-          { path: '', loadChildren: cropHealthRoutes },
+          {
+            path: 'profiles/cooperative/dashboard',
+            redirectTo: redirectLegacyPath('cooperative/dashboard'),
+            pathMatch: 'full',
+          },
+          {
+            path: 'profiles',
+            redirectTo: redirectLegacyPath('cooperative/dashboard'),
+            pathMatch: 'full',
+          },
+          { path: '', loadChildren: farmingRoutes },
+          { path: '', loadChildren: cropRoutes },
           { path: '', loadChildren: profilesRoutes },
         ],
       },
-      { path: '**', loadComponent: pageNotFound, title: `${baseTitle} - Page Not Found` },
+      { path: '**', loadComponent: pageNotFound, title: 'page-not-found.title' },
     ],
   },
 ];

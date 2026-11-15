@@ -1,0 +1,41 @@
+<mat-dialog-content class="saved-dialog">
+  <mat-icon class="saved-icon">check_circle</mat-icon>
+  <h2>{{ 'farming.saved.title' | translate }}</h2>
+  <p class="saved-subtitle">{{ 'farming.saved.subtitle' | translate }}</p>
+
+  <section class="saved-summary">
+    <h3>{{ 'farming.saved.summary' | translate }}</h3>
+    <dl>
+      <dt>{{ 'farming.saved.name' | translate }}</dt>
+      <dd>{{ data.plot.name }}</dd>
+      <dt>{{ 'farming.saved.crop' | translate }}</dt>
+      <dd>{{ data.seedVariety }}</dd>
+      <dt>{{ 'farming.saved.area' | translate }}</dt>
+      <dd>
+        {{ data.plot.areaHectares | number: '1.0-2' }}
+        {{ 'farming.plots.hectares' | translate }}
+      </dd>
+      <dt>{{ 'farming.saved.quota' | translate }}</dt>
+      <dd>
+        {{
+          'farming.saved.quota-value' | translate: { used: data.plotCount, quota: data.plotQuota }
+        }}
+      </dd>
+      <dt>{{ 'farming.saved.sync' | translate }}</dt>
+      <dd>
+        <span class="sync-pill">{{ 'farming.saved.sync-value' | translate }}</span>
+      </dd>
+    </dl>
+  </section>
+
+  <mat-divider />
+  <p class="saved-next">{{ 'farming.saved.next' | translate }}</p>
+</mat-dialog-content>
+<mat-dialog-actions class="saved-actions">
+  <button mat-stroked-button mat-dialog-close="crop-health">
+    {{ 'farming.saved.view-crop-health' | translate }}
+  </button>
+  <button mat-flat-button mat-dialog-close="plots">
+    {{ 'farming.saved.manage-plots' | translate }}
+  </button>
+</mat-dialog-actions>

@@ -14,12 +14,10 @@
         <a
           mat-list-item
           [routerLink]="option.link"
-          routerLinkActive
-          #rla="routerLinkActive"
-          [activated]="rla.isActive"
+          [activated]="option.link === activeLink()"
           (click)="layout.closeSidebarOnHandset()"
         >
-          <mat-icon matListItemIcon [class.icon-filled]="rla.isActive">{{
+          <mat-icon matListItemIcon [class.icon-filled]="option.link === activeLink()">{{
             option.icon
           }}</mat-icon>
           <span matListItemTitle>{{ option.label | translate }}</span>
@@ -37,8 +35,7 @@
           <span matListItemTitle>{{ 'layout.offline-mode' | translate }}</span>
           <span matListItemMeta class="offline-status" [class.offline-on]="!layout.isOnline()">
             {{
-              (layout.isOnline() ? 'layout.offline-mode-off' : 'layout.offline-mode-on')
-                | translate
+              (layout.isOnline() ? 'layout.offline-mode-off' : 'layout.offline-mode-on') | translate
             }}
           </span>
         </mat-list-item>

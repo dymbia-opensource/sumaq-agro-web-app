@@ -22,3 +22,62 @@
 .saved-plot-dialog {
   --mat-dialog-container-shape: 40px;
 }
+
+/* ---------- Forms ---------- */
+
+/*
+ * The shell is tinted (surface-container-low), so a field that keeps the page
+ * color reads as part of the background. Every text field, select and date
+ * field gets the plain surface instead, which is the white of the design.
+ */
+.mat-mdc-form-field .mat-mdc-text-field-wrapper {
+  background: var(--mat-sys-surface);
+  border-radius: 12px;
+}
+
+/* A filled field keeps its underline but not the grey box over the tint. */
+.mat-mdc-form-field .mdc-text-field--filled:not(.mdc-text-field--disabled) {
+  background-color: var(--mat-sys-surface);
+}
+
+/* A disabled field stays readable instead of disappearing into the page. */
+.mat-mdc-form-field .mdc-text-field--disabled {
+  background: var(--mat-sys-surface-container-lowest);
+}
+
+/*
+ * Panel that holds a form: one white surface, the same corner and the same
+ * padding everywhere, tighter on a phone.
+ */
+.form-panel {
+  background: var(--mat-sys-surface);
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 20px;
+  padding: 24px;
+}
+
+/* ---------- Small screens ---------- */
+
+/*
+ * Wide content (images, charts, tables, preformatted text) never forces the
+ * page to scroll sideways on a phone.
+ */
+img,
+svg,
+canvas,
+video,
+pre {
+  max-width: 100%;
+}
+
+/* A table too wide to fit scrolls inside its own card, not with the page. */
+.mat-mdc-table {
+  width: 100%;
+}
+
+@media (max-width: 720px) {
+  .form-panel {
+    border-radius: 16px;
+    padding: 16px;
+  }
+}

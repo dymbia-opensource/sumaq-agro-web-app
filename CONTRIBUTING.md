@@ -27,10 +27,10 @@ The code is organized by **bounded context** under `src/app/`. Each context has 
 | Folder | Bounded context | Responsibility |
 |---|---|---|
 | `shared` | Shared Kernel | Base classes, layout shell, i18n, demo session and reusable components. |
-| `field-management` | Field Management | Plots with their GPS polygon, crop campaigns and the cost ledger (breakeven price). |
-| `crop-health` | Crop Health | Satellite monitoring (NDVI/NDWI), agroclimatic alerts, pest reports, inspections and prescriptions. |
+| `farming` | Farming (Field Management) | Plots with their GPS polygon, crop campaigns and the cost ledger (breakeven price). |
+| `crop` | Crop (Crop Health) | Satellite monitoring (NDVI/NDWI), agroclimatic alerts, pest reports, inspections and prescriptions. |
 | `profiles` | Profiles | Farmer profile, cooperatives, members and the technical team of agronomists. |
-| `harvest-certification` | Harvest Certification | Harvest batches, quality grading and certificates with public QR traceability. |
+| `certification` | Certification (Harvest Certification) | Harvest batches, quality grading and certificates with public QR traceability. |
 | `iam`, `subscriptions` | IAM, Subscriptions and Payments | Designed in the class diagrams; not implemented yet. Until IAM exists, `shared/application/demo-session.service.ts` provides the signed-in user. |
 
 Each bounded context follows the same four layers:
@@ -87,7 +87,7 @@ feature/    ●─────●                   ●────●          
 - `main`: Released code, deployed to Firebase Hosting. Only receives `release/*` and `hotfix/*` branches and is tagged with SemVer (`v1.0.0`).
 - `develop`: Integration branch where finished features are merged.
 - `feature/<context>-<short-description>`: New features, refactors, fixes and documentation (from `develop`, back to `develop`).
-  - *Examples:* `feature/field-management-components`, `feature/crop-health-presentation`, `feature/docs-changelog-contributing`
+  - *Examples:* `feature/farming-components`, `feature/crop-presentation`, `feature/docs-changelog-contributing`
   - Always use the `feature/` prefix: the Git Flow plugin cannot finish branches with other prefixes (such as `fix/`).
 - `release/v<MAJOR.MINOR.PATCH>`: Release preparation (from `develop`, merged to `main` and `develop`).
 - `hotfix/v<MAJOR.MINOR.PATCH>`: Urgent fixes of a released version (from `main`, merged to `main` and `develop`).
@@ -131,11 +131,11 @@ Commit messages follow the [Conventional Commits v1.0.0](https://www.conventiona
 | `chore`    | Maintenance tasks (fake API data, deployment configuration)  |
 
 ### Allowed Scopes
-The scope is the bounded context or the area changed: `shared`, `field-management`, `crop-health`, `profiles`, `harvest-certification`, `iam`, `subscriptions`, `demo-access`, `i18n`, `server`, `deps`, `config`.
+The scope is the bounded context or the area changed: `shared`, `farming`, `crop`, `profiles`, `certification`, `iam`, `subscriptions`, `i18n`, `server`, `deps`, `config`.
 
 ### Examples
-- `feat(field-management): add campaign finances and field expense views with their routes`
-- `fix(crop-health): correct map initialization`
+- `feat(farming): add campaign finances and field expense views with their routes`
+- `fix(crop): correct map initialization`
 - `refactor(shared): split the layout into shell, sidebar and toolbar`
 - `chore(server): add crop health collections to the fake api`
 - `docs: add changelog and contributing guidelines`
@@ -187,9 +187,9 @@ Versions follow [SemVer 2.0.0](https://semver.org/): `MAJOR.MINOR.PATCH`. Every 
 
 ### Internationalization (i18n)
 - Do not hardcode UI text in templates or code.
-- Translations are split by bounded context: `public/i18n/{en,es}/<context>.json` (`shared`, `field-management`, `crop-health`, `profiles`, `harvest-certification`).
+- Translations are split by bounded context: `public/i18n/{en,es}/<context>.json` (`shared`, `farming`, `crop`, `profiles`, `certification`, `subscriptions`, `iam`).
 - Add every key in **English and Spanish**. The application starts in English.
-- Use the `translate` pipe: `{{ 'field-management.plots.title' | translate }}`.
+- Use the `translate` pipe: `{{ 'farming.plots.title' | translate }}`.
 
 ---
 

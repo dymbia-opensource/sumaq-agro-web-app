@@ -136,7 +136,7 @@ sumaqAgro-appweb/
 │   │   │       ├── components/            # layout (+ layout.store), left-sidebar, toolbar, language-switcher, page-header, message-card
 │   │   │       └── views/                 # page-not-found
 │   │   │
-│   │   ├── field-management/              # Plots, GPS polygons, campaigns, and costs
+│   │   ├── farming/                       # Plots, GPS polygons, campaigns, and costs
 │   │   │   ├── domain/model/
 │   │   │   │   ├── entities/              # Entities (*.entity.ts) and enums
 │   │   │   │   └── commands/              # Commands (*.command.ts)
@@ -147,12 +147,13 @@ sumaqAgro-appweb/
 │   │   │   │   ├── responses/             # API contracts (*.response.ts)
 │   │   │   │   └── offline/               # Expenses saved offline (TS-05)
 │   │   │   ├── presentation/views/        # One folder per view (.ts, .html, .css)
-│   │   │   └── field-management.routes.ts # Context routes (lazy loading)
+│   │   │   └── farming.routes.ts          # Context routes (lazy loading)
 │   │   │
-│   │   ├── crop-health/                   # NDVI/NDWI, alerts, pests, and prescriptions
+│   │   ├── crop/                          # NDVI/NDWI, alerts, pests, and prescriptions
 │   │   ├── profiles/                      # Profiles, cooperatives, and members
-│   │   ├── harvest-certification/         # Batches, grading, certificates, and QR verification
-│   │   │                                  # (all three use the same layers as field-management)
+│   │   ├── certification/                 # Batches, grading, certificates, and QR verification
+│   │   ├── subscriptions/                 # Plans, checkout, and billing history
+│   │   │                                  # (all of them use the same layers as farming)
 │   │   ├── app.config.ts                  # Providers: router, HttpClient, translations (ngx-translate)
 │   │   ├── app.routes.ts                  # Root routes: private pages within the layout
 │   │   └── app.ts

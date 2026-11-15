@@ -1,4 +1,4 @@
-import { UserRole } from '../../domain/model/value-objects/user-role';
+import { UserRole } from '../../domain/model/entities/user-role';
 
 /**
  * Maps domain roles to and from the provisional API contract.
