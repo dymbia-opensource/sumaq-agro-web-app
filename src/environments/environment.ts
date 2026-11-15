@@ -1,22 +1,11 @@
-/**
- * Production environment.
- *
- * @remarks
- * Points to the fake API (json-server with `server/db.json`) deployed on Render,
- * until the RESTful API is deployed.
- */
+/** Build served by Firebase Hosting. The REST API runs on Render. */
 export const environment = {
   production: true,
-  /*
-  // API URL version to use when the SumaqAgro RESTful API is deployed
-  platformProviderApiBaseUrl: 'https://sumaqagro-api.example.com/api/v1',
-  */
-  // API URL version to use until the SumaqAgro RESTful API is deployed
-  platformProviderApiBaseUrl: 'https://sumaqagro-fake-api.onrender.com/api/v1',
+  platformProviderApiBaseUrl: 'https://sumaq-agro-platform.onrender.com/api/v1',
 
   // IAM
-  platformProviderSignUpEndpointPath: '/authentication/sign-up',
-  platformProviderSignInEndpointPath: '/authentication/sign-in',
+  platformProviderSignUpEndpointPath: '/users',
+  platformProviderSignInEndpointPath: '/tokens',
   platformProviderPasswordRecoveryEndpointPath: '/authentication/password-recovery',
   useMockAuthentication: false,
 
