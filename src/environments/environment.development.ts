@@ -6,13 +6,13 @@
  */
 export const environment = {
   production: false,
-  platformProviderApiBaseUrl: 'http://localhost:3000/api/v1',
+  platformProviderApiBaseUrl: 'http://localhost:8080/api/v1',
 
   // IAM
-  platformProviderSignUpEndpointPath: '/authentication/sign-up',
-  platformProviderSignInEndpointPath: '/authentication/sign-in',
+  platformProviderSignUpEndpointPath: '/users',
+  platformProviderSignInEndpointPath: '/tokens',
   platformProviderPasswordRecoveryEndpointPath: '/authentication/password-recovery',
-  useMockAuthentication: true,
+  useMockAuthentication: false,
 
   // Profiles
   platformProviderProfilesEndpointPath: '/profiles',
