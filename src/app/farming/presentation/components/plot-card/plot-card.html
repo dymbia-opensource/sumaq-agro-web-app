@@ -28,9 +28,9 @@
         <mat-icon>polyline</mat-icon>
         {{ 'farming.plots.delineate' | translate }}
       </button>
-      <button mat-menu-item [disabled]="deletionDisabled()" (click)="remove.emit(plot())">
+      <button mat-menu-item disabled>
         <mat-icon>delete</mat-icon>
-        {{ 'common.delete' | translate }}
+        {{ 'farming.plots.delete-pending' | translate }}
       </button>
     </mat-menu>
   </mat-card-header>

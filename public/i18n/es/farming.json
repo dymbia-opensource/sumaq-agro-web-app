@@ -61,6 +61,7 @@
       "map-title": "Delimitación del Mapa"
     },
     "plots": {
+      "delete-pending": "Eliminar parcela (pendiente)",
       "manage": "Administrar Parcelas",
       "title": "Mis Parcelas Registradas",
       "subtitle": "Gestiona tus parcelas con el Plan Semilla ({{ used }} de {{ quota }} cupos utilizados).",
@@ -151,6 +152,7 @@
       "manage-plots": "Ir a Administrar Parcelas"
     },
     "errors": {
+      "update-campaign": "No se pudo guardar la campaña.",
       "load-plots": "No pudimos cargar tus parcelas. Revisa tu conexión e inténtalo de nuevo.",
       "load-plot": "No pudimos cargar la campaña de la parcela.",
       "register-plot": "No pudimos registrar la parcela. Inténtalo de nuevo.",
@@ -172,6 +174,7 @@
       "registration-partial": "La parcela ya está registrada y ocupa un cupo, pero no se completó su campaña inicial. Revisa la parcela desde Administrar parcelas antes de volver a registrar."
     },
     "finances": {
+      "pending": "La bitácora, los gastos y los informes de costos estarán disponibles cuando se integre el módulo de finanzas.",
       "subtitle": "{{ plot }} | Campaña {{ season }}",
       "register-expense": "Registrar gasto",
       "no-ledger": "Selecciona una parcela con una campaña activa para ver sus gastos.",
@@ -228,6 +231,7 @@
       "HARVEST": "Cosecha"
     },
     "campaigns": {
+      "edit": "Editar campaña",
       "title": "Mis Campañas",
       "subtitle": "{{ plot }} · {{ count }} campaña(s)",
       "new": "Iniciar Nueva Campaña",
@@ -239,7 +243,7 @@
       "expense-count": "{{ count }} gasto(s) registrado(s)",
       "close": "Cerrar campaña",
       "close-title": "¿Cerrar la temporada {{ season }}?",
-      "close-warning": "La campaña queda de solo lectura y su bitácora de costos ya no acepta gastos.",
+      "close-warning": "La campaña quedará de solo lectura.",
       "actual-yield-hint": "Opcional: lo que cosechaste. También puedes registrarlo después.",
       "one-in-progress": "Esta parcela ya tiene una campaña en curso. Ciérrala antes de iniciar otra.",
       "empty": "Esta parcela aún no tiene campañas."

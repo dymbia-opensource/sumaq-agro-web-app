@@ -11,7 +11,6 @@ import {
   throwError,
 } from 'rxjs';
 import { IamStore, SessionParticipant } from '../../iam/application/iam.store';
-import { UpdateFarmerContactCommand } from '../domain/model/commands/update-farmer-contact.command';
 import { UpdateCooperativeCommand } from '../domain/model/commands/update-cooperative.command';
 import { InviteTechnicalAdvisorCommand } from '../domain/model/commands/invite-technical-advisor.command';
 import { ReassignTechnicalAdvisorCommand } from '../domain/model/commands/reassign-technical-advisor.command';
@@ -81,18 +80,8 @@ export class ProfilesStore {
       });
   }
 
-  /** Validates and persists the farmer's contact data. */
-  saveContact(command: UpdateFarmerContactCommand): void {
-    this.persistFarmerProfile(command);
-  }
-
+  /** Saves the farmer's editable profile fields. */
   saveAccount(command: UpdateFarmerAccountCommand): void {
-    this.persistFarmerProfile(command);
-  }
-
-  private persistFarmerProfile(
-    command: UpdateFarmerContactCommand | UpdateFarmerAccountCommand,
-  ): void {
     this.contactSavedSignal.set(false);
     const current = this.profileSignal();
     if (!current || this.saving()) return;
@@ -106,10 +95,8 @@ export class ProfilesStore {
     });
 
     try {
-      profile.updateContact(command.phoneNumber, command.email);
-      if (command instanceof UpdateFarmerAccountCommand) {
-        profile.updateName(command.firstName, command.lastName);
-      }
+      profile.updateName(command.firstName, command.lastName);
+      profile.updatePhoneNumber(command.phoneNumber);
     } catch (error) {
       this.errorSignal.set(error instanceof Error ? error.message : 'Invalid contact data.');
       return;

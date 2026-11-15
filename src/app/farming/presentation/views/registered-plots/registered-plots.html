@@ -24,13 +24,11 @@
       [plot]="plot"
       [campaign]="campaigns().get(plot.id)"
       [position]="index + 1"
-      [deletionDisabled]="loading() || !ownedPlotsReady()"
       (viewOnDashboard)="onSelectPlot($event)"
       (viewMonitoring)="onViewMonitoring($event)"
       (delineate)="onDelineate($event)"
       (viewDetail)="onViewDetail($event)"
       (recordSoil)="onRecordSoil($event)"
-      (remove)="onDeletePlot($event)"
     />
   }
 

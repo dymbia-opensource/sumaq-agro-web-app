@@ -1,11 +1,10 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
-import { Observable, tap } from 'rxjs';
+import { Observable, tap, throwError } from 'rxjs';
 import { BaseApi } from '../../shared/infrastructure/base-api';
 import { CampaignLedger } from '../domain/model/entities/campaign-ledger.entity';
 import { CropCampaign } from '../domain/model/entities/crop-campaign.entity';
-import { FieldPlot } from '../domain/model/entities/field-plot.entity';
-import { CampaignLedgersApiEndpoint } from './endpoints/campaign-ledgers-api-endpoint';
+import { FieldPlot, GeoCoordinate, SoilBaseline } from '../domain/model/entities/field-plot.entity';
 import { CropCampaignsApiEndpoint } from './endpoints/crop-campaigns-api-endpoint';
 import { FieldPlotsApiEndpoint } from './endpoints/field-plots-api-endpoint';
 
@@ -20,7 +19,6 @@ export class FarmingApi extends BaseApi {
   private readonly http = inject(HttpClient);
   private readonly plotsEndpoint = new FieldPlotsApiEndpoint(this.http);
   private readonly campaignsEndpoint = new CropCampaignsApiEndpoint(this.http);
-  private readonly ledgersEndpoint = new CampaignLedgersApiEndpoint(this.http);
 
   /**
    * Retrieves the plots of one producer.
@@ -54,24 +52,14 @@ export class FarmingApi extends BaseApi {
       .create(plot)
       .pipe(tap(() => this.plotRevision.update((revision) => revision + 1)));
 
-  /**
-   * Updates an existing plot.
-   * @param plot - The plot to update.
-   * @returns An Observable of the updated FieldPlot object.
-   */
-  updatePlot = (plot: FieldPlot): Observable<FieldPlot> =>
+  savePolygon = (id: number, coordinates: readonly GeoCoordinate[]): Observable<FieldPlot> =>
     this.plotsEndpoint
-      .update(plot, plot.id)
+      .savePolygon(id, coordinates)
       .pipe(tap(() => this.plotRevision.update((revision) => revision + 1)));
 
-  /**
-   * Deletes a plot by ID.
-   * @param id - The ID of the plot to delete.
-   * @returns An Observable of void.
-   */
-  deletePlot = (id: number): Observable<void> =>
+  saveSoilBaseline = (id: number, soil: SoilBaseline): Observable<FieldPlot> =>
     this.plotsEndpoint
-      .delete(id)
+      .saveSoilBaseline(id, soil)
       .pipe(tap(() => this.plotRevision.update((revision) => revision + 1)));
 
   /**
@@ -98,56 +86,11 @@ export class FarmingApi extends BaseApi {
   updateCampaign = (campaign: CropCampaign): Observable<CropCampaign> =>
     this.campaignsEndpoint.update(campaign, campaign.id);
 
-  /**
-   * Deletes a campaign by ID.
-   * @param id - The ID of the campaign to delete.
-   * @returns An Observable of void.
-   */
-  deleteCampaign = (id: number): Observable<void> => this.campaignsEndpoint.delete(id);
+  closeCampaign = (id: number): Observable<CropCampaign> => this.campaignsEndpoint.close(id);
 
-  /**
-   * Downloads the cost report of a campaign.
-   * @param campaignId - Campaign of the report.
-   * @returns An Observable of the report file.
-   */
-  downloadCostReport = (campaignId: number): Observable<Blob> =>
-    this.campaignsEndpoint.getCostReport(campaignId);
+  getLedgerById = (_id: number): Observable<CampaignLedger> =>
+    throwError(() => new Error('farming.finances.pending'));
 
-  /**
-   * Retrieves the cost ledger of one campaign.
-   * @param campaignId - Campaign of the ledger.
-   * @returns An Observable of the ledger, or `null` if the campaign has none.
-   */
-  getLedgerByCampaign = (campaignId: number): Observable<CampaignLedger | null> =>
-    this.ledgersEndpoint.getByCampaign(campaignId);
-
-  /**
-   * Retrieves a single cost ledger by ID.
-   * @param id - The ID of the ledger.
-   * @returns An Observable of the CampaignLedger object.
-   */
-  getLedgerById = (id: number): Observable<CampaignLedger> => this.ledgersEndpoint.getById(id);
-
-  /**
-   * Creates a new cost ledger.
-   * @param ledger - The ledger to create.
-   * @returns An Observable of the created CampaignLedger object.
-   */
-  createLedger = (ledger: CampaignLedger): Observable<CampaignLedger> =>
-    this.ledgersEndpoint.create(ledger);
-
-  /**
-   * Updates an existing cost ledger.
-   * @param ledger - The ledger to update.
-   * @returns An Observable of the updated CampaignLedger object.
-   */
-  updateLedger = (ledger: CampaignLedger): Observable<CampaignLedger> =>
-    this.ledgersEndpoint.update(ledger, ledger.id);
-
-  /**
-   * Deletes a cost ledger by ID.
-   * @param id - The ID of the ledger to delete.
-   * @returns An Observable of void.
-   */
-  deleteLedger = (id: number): Observable<void> => this.ledgersEndpoint.delete(id);
+  updateLedger = (_ledger: CampaignLedger): Observable<CampaignLedger> =>
+    throwError(() => new Error('farming.finances.pending'));
 }

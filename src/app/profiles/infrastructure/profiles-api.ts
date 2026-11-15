@@ -42,7 +42,7 @@ export class ProfilesApi extends BaseApi {
   }
 
   updateFarmerProfile(profile: FarmerProfile): Observable<FarmerProfile> {
-    return this.farmerProfilesEndpoint.update(profile, profile.id);
+    return this.farmerProfilesEndpoint.update(profile);
   }
 
   getCooperativeByDirector(userId: number): Observable<Cooperative | null> {

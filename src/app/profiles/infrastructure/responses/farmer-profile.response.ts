@@ -1,16 +1,9 @@
-import { BaseResource, BaseResponse } from '../../../shared/infrastructure/base-response';
-
-/** Farmer profile as it is exchanged with the RESTful API. */
-export interface FarmerProfileResource extends BaseResource {
+/** Profile returned by Spring, including the account email from IAM. */
+export interface FarmerProfileResource {
   id: number;
   userId: number;
   firstName?: string;
   lastName?: string;
-  phoneNumber: string;
-  email: string;
-}
-
-/** Wrapped response returned by the production API. */
-export interface FarmerProfilesResponse extends BaseResponse {
-  profiles: FarmerProfileResource[];
+  phoneNumber: string | null;
+  email: string | null;
 }

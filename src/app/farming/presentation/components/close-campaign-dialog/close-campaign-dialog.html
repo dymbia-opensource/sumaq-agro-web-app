@@ -8,15 +8,6 @@
     {{ 'farming.campaigns.close-warning' | translate }}
   </p>
 
-  <mat-form-field class="yield-field">
-    <mat-label>{{ 'farming.reports.actual-yield' | translate }}</mat-label>
-    <input matInput type="number" min="0" [formControl]="actualYield" />
-    <span matTextSuffix>{{ 'farming.yield-unit.' + data.yieldUnit | translate }}</span>
-    <mat-hint>{{ 'farming.campaigns.actual-yield-hint' | translate }}</mat-hint>
-    @if (actualYield.invalid) {
-      <mat-error>{{ 'farming.expense-form.positive' | translate }}</mat-error>
-    }
-  </mat-form-field>
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">

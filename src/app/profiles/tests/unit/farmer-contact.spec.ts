@@ -1,3 +1,8 @@
+import { provideHttpClient, HttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { environment } from '../../../../environments/environment';
+import { FarmerProfilesApiEndpoint } from '../../infrastructure/endpoints/farmer-profiles.endpoint';
+
 import { UpdateFarmerAccountCommand } from '../../domain/model/commands/update-farmer-account.command';
 import { FarmerProfileAssembler } from '../../infrastructure/assemblers/farmer-profile.assembler';
 import { TestBed } from '@angular/core/testing';
@@ -6,7 +11,6 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ProfilesStore } from '../../application/profiles.store';
 import { ProfilesApi } from '../../infrastructure/profiles-api';
 import { FarmerProfile } from '../../domain/model/entities/farmer-profile.entity';
-import { UpdateFarmerContactCommand } from '../../domain/model/commands/update-farmer-contact.command';
 
 describe('Farmer contact persistence', () => {
   let store: ProfilesStore;
@@ -17,7 +21,11 @@ describe('Farmer contact persistence', () => {
     updateFarmerProfile: ReturnType<typeof vi.fn>;
   };
   const command = () =>
-    new UpdateFarmerContactCommand({ phoneNumber: '987654321', email: 'new@example.com' });
+    new UpdateFarmerAccountCommand({
+      firstName: 'Pedro',
+      lastName: 'García',
+      phoneNumber: '987654321',
+    });
 
   beforeEach(() => {
     original = new FarmerProfile({
@@ -39,19 +47,20 @@ describe('Farmer contact persistence', () => {
   });
 
   it('confirms only after the API returns and does not change the loaded profile while pending', () => {
-    store.saveContact(command());
+    store.saveAccount(command());
     expect(store.saving()).toBe(true);
     expect(store.contactSaved()).toBe(false);
     expect(store.profile()?.email).toBe('old@example.com');
     response.next(api.updateFarmerProfile.mock.calls[0][0]);
     response.complete();
     expect(store.contactSaved()).toBe(true);
-    expect(store.profile()?.email).toBe('new@example.com');
+    expect(store.profile()?.phoneNumber).toBe('987654321');
+    expect(store.profile()?.email).toBe('old@example.com');
     expect(store.saving()).toBe(false);
   });
 
   it('keeps the original profile and reports failure when the API rejects the update', () => {
-    store.saveContact(command());
+    store.saveAccount(command());
     response.error(new Error('Connection failed'));
     expect(store.contactSaved()).toBe(false);
     expect(store.profile()).toBe(original);
@@ -61,14 +70,18 @@ describe('Farmer contact persistence', () => {
   });
 
   it('does not submit a second update while one is pending', () => {
-    store.saveContact(command());
-    store.saveContact(command());
+    store.saveAccount(command());
+    store.saveAccount(command());
     expect(api.updateFarmerProfile).toHaveBeenCalledTimes(1);
   });
 
   it('rejects invalid input without mutating the original profile or sending a request', () => {
-    store.saveContact(
-      new UpdateFarmerContactCommand({ phoneNumber: '987654321', email: 'invalid' }),
+    store.saveAccount(
+      new UpdateFarmerAccountCommand({
+        firstName: 'Pedro',
+        lastName: 'García',
+        phoneNumber: '1234567890123456',
+      }),
     );
     expect(api.updateFarmerProfile).not.toHaveBeenCalled();
     expect(original.phoneNumber).toBe('912345678');
@@ -76,25 +89,22 @@ describe('Farmer contact persistence', () => {
     expect(store.error()).toBeTruthy();
   });
 
-  it('persists names and contact together and maps the names through the API contract', () => {
+  it('persists names and contact together', () => {
     store.saveAccount(
       new UpdateFarmerAccountCommand({
         firstName: '  María José ',
         lastName: ' Quispe Rojas ',
         phoneNumber: '987654321',
-        email: 'new@example.com',
       }),
     );
     const outgoing = api.updateFarmerProfile.mock.calls[0][0] as FarmerProfile;
-    const assembler = new FarmerProfileAssembler();
-    const resource = assembler.toResourceFromEntity(outgoing);
-    expect(resource.firstName).toBe('María José');
-    expect(resource.lastName).toBe('Quispe Rojas');
+    expect(outgoing.firstName).toBe('María José');
+    expect(outgoing.lastName).toBe('Quispe Rojas');
     expect(store.profile()?.fullName).toBe('');
-    response.next(assembler.toEntityFromResource(resource));
+    response.next(outgoing);
     response.complete();
     expect(store.profile()?.fullName).toBe('María José Quispe Rojas');
-    expect(store.profile()?.email).toBe('new@example.com');
+    expect(store.profile()?.email).toBe('old@example.com');
     expect(store.contactSaved()).toBe(true);
   });
 
@@ -104,7 +114,6 @@ describe('Farmer contact persistence', () => {
         firstName: ' ',
         lastName: 'Quispe',
         phoneNumber: '987654321',
-        email: 'new@example.com',
       }),
     );
     expect(api.updateFarmerProfile).not.toHaveBeenCalled();
@@ -113,15 +122,62 @@ describe('Farmer contact persistence', () => {
     expect(store.contactSaved()).toBe(false);
   });
 
-  it('loads old API profiles without name fields', () => {
+  it('loads a profile without a phone number or name fields', () => {
     const profile = new FarmerProfileAssembler().toEntityFromResource({
       id: 1,
       userId: 1,
-      phoneNumber: '912345678',
+      phoneNumber: null,
       email: 'old@example.com',
     });
     expect(profile.firstName).toBe('');
     expect(profile.lastName).toBe('');
     expect(profile.fullName).toBe('');
+    expect(profile.phoneNumber).toBe('');
   });
+});
+
+it('uses the profile ID, sends editable fields only and exposes Spring validation errors', () => {
+  TestBed.configureTestingModule({
+    providers: [provideHttpClient(), provideHttpClientTesting()],
+  });
+  const http = TestBed.inject(HttpTestingController);
+  const endpoint = new FarmerProfilesApiEndpoint(TestBed.inject(HttpClient));
+  const url =
+    environment.platformProviderApiBaseUrl + environment.platformProviderProfilesEndpointPath;
+  const resource = {
+    id: 12,
+    userId: 5,
+    firstName: 'Pedro',
+    lastName: 'García',
+    phoneNumber: null,
+    email: 'profile@example.com',
+  };
+
+  const result = vi.fn();
+  endpoint.getByUser(5).subscribe(result);
+  const get = http.expectOne(url + '?userId=5');
+  expect(get.request.method).toBe('GET');
+  get.flush([resource]);
+  const profile = result.mock.calls[0][0] as FarmerProfile;
+  expect(profile.phoneNumber).toBe('');
+  profile.updatePhoneNumber('987654321');
+
+  const onError = vi.fn();
+  endpoint.update(profile).subscribe({ error: onError });
+  const put = http.expectOne(url + '/12');
+  expect(put.request.method).toBe('PUT');
+  expect(put.request.body).toEqual({
+    firstName: 'Pedro',
+    lastName: 'García',
+    phoneNumber: '987654321',
+  });
+  put.flush(
+    { details: 'Campo phoneNumber: valor inválido' },
+    {
+      status: 400,
+      statusText: 'Bad Request',
+    },
+  );
+  expect(onError).toHaveBeenCalledWith(new Error('Campo phoneNumber: valor inválido'));
+  http.verify();
 });

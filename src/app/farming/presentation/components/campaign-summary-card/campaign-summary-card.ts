@@ -1,4 +1,4 @@
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { Component, input, output } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -81,7 +81,6 @@ export function campaignSummaryOf(
   selector: 'app-campaign-summary-card',
   imports: [
     DatePipe,
-    DecimalPipe,
     MatButtonModule,
     MatCardModule,
     MatChipsModule,
@@ -102,5 +101,5 @@ export class CampaignSummaryCard {
   readonly closeCampaign = output<CampaignSummary>();
 
   /** The producer wants to download the cost report. */
-  readonly exportReport = output<CampaignSummary>();
+  readonly editCampaign = output<CampaignSummary>();
 }

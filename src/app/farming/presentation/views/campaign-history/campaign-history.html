@@ -26,11 +26,21 @@
 
   <section class="campaign-list" [attr.aria-label]="'farming.campaigns.title' | translate">
     @for (summary of summaries(); track summary.campaignId) {
+      @if (editingCampaign(); as campaign) {
+        @if (campaign.id === summary.campaignId) {
+          <app-campaign-form
+            [campaign]="campaign"
+            [saving]="loading()"
+            (submitted)="onSave($event)"
+            (cancel)="editId.set(null)"
+          />
+        }
+      }
       <app-campaign-summary-card
         [summary]="summary"
         [saving]="loading()"
         (closeCampaign)="onClose($event)"
-        (exportReport)="onExport($event)"
+        (editCampaign)="onEdit($event)"
       />
     } @empty {
       <app-message-card icon="agriculture" [message]="'farming.campaigns.empty' | translate">

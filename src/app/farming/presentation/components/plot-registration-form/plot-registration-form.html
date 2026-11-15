@@ -68,15 +68,6 @@
   </mat-form-field>
 
   <mat-form-field>
-    <mat-label>{{ 'farming.plot-form.expected-yield' | translate }}</mat-label>
-    <input matInput type="number" min="1" formControlName="expectedYield" placeholder="280" />
-    <span matTextSuffix>{{ 'farming.yield-unit.' + yieldUnit() | translate }}</span>
-    @if (form.controls.expectedYield.invalid) {
-      <mat-error>{{ 'farming.plot-form.positive' | translate }}</mat-error>
-    }
-  </mat-form-field>
-
-  <mat-form-field>
     <mat-label>{{ 'farming.plot-form.declared-area' | translate }}</mat-label>
     <input
       matInput

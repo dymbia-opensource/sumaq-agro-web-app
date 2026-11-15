@@ -12,7 +12,6 @@ import { FarmingStore } from '../../../application/farming.store';
 import { RecordSowingDateCommand } from '../../../domain/model/commands/record-sowing-date.command';
 import { RegisterFieldPlotCommand } from '../../../domain/model/commands/register-field-plot.command';
 import { SelectCropTypeCommand } from '../../../domain/model/commands/select-crop-type.command';
-import { SetExpectedYieldCommand } from '../../../domain/model/commands/set-expected-yield.command';
 import { SpecifySeedVarietyCommand } from '../../../domain/model/commands/specify-seed-variety.command';
 import { StartCropCampaignCommand } from '../../../domain/model/commands/start-crop-campaign.command';
 import { CropCampaign } from '../../../domain/model/entities/crop-campaign.entity';
@@ -86,13 +85,6 @@ export class PlotRegistration {
           custom: data.customVariety,
         }),
         sowingDate: new RecordSowingDateCommand({ campaignId: 0, sowingDate: data.sowingDate }),
-        expectedYield: data.expectedYield
-          ? new SetExpectedYieldCommand({
-              ledgerId: 0,
-              expectedYield: data.expectedYield,
-              unit: data.yieldUnit,
-            })
-          : undefined,
       },
       (plot) => this.router.navigate(['/plots', plot.id, 'boundary']).then(),
     );

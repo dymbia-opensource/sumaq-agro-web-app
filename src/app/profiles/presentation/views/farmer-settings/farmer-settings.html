@@ -100,6 +100,7 @@
             type="tel"
             formControlName="phoneNumber"
             autocomplete="tel"
+            maxlength="15"
             [readonly]="!editing() || saving()"
           />
           @if (
@@ -113,13 +114,9 @@
           <input
             matInput
             type="email"
-            formControlName="email"
-            autocomplete="email"
-            [readonly]="!editing() || saving()"
+            [value]="profile()?.email || session.currentUser()?.email || ''"
+            readonly
           />
-          @if (contactForm.controls.email.invalid && contactForm.controls.email.touched) {
-            <mat-error>{{ 'profiles.settings.email-error' | translate }}</mat-error>
-          }
         </mat-form-field>
         @if (editing()) {
           <div class="form-actions">

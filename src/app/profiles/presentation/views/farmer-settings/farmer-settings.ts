@@ -103,11 +103,7 @@ export class FarmerSettings {
     }),
     phoneNumber: new FormControl('', {
       nonNullable: true,
-      validators: [Validators.required, Validators.minLength(7)],
-    }),
-    email: new FormControl('', {
-      nonNullable: true,
-      validators: [Validators.required, Validators.email],
+      validators: [Validators.maxLength(15)],
     }),
   });
 
@@ -135,7 +131,6 @@ export class FarmerSettings {
             firstName: profile.firstName,
             lastName: profile.lastName,
             phoneNumber: profile.phoneNumber,
-            email: profile.email,
           },
           { emitEvent: false },
         );
@@ -157,7 +152,6 @@ export class FarmerSettings {
         firstName: profile.firstName,
         lastName: profile.lastName,
         phoneNumber: profile.phoneNumber,
-        email: profile.email,
       });
     this.editing.set(false);
   }

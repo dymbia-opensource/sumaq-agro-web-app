@@ -1,5 +1,4 @@
 @let item = summary();
-@let unit = 'farming.yield-unit.' + item.yieldUnit | translate;
 
 <mat-card appearance="outlined" class="summary-card" [class.active]="item.isActive">
   <mat-card-header>
@@ -29,50 +28,17 @@
           }}
         </dd>
       </div>
-      <div>
-        <dt>{{ 'farming.finances.total-invested' | translate }}</dt>
-        <dd>{{ item.totalInvestment.format() }}</dd>
-      </div>
-      <div>
-        <dt>{{ 'farming.reports.cost-per-hectare' | translate }}</dt>
-        <dd>{{ item.costPerHectare.format() }}</dd>
-      </div>
-      <div>
-        <dt>{{ 'farming.finances.breakeven-title' | translate }}</dt>
-        <dd>{{ item.breakevenPrice.format() }}</dd>
-      </div>
-      <div>
-        <dt>{{ 'farming.finances.expected-yield' | translate }}</dt>
-        <dd>{{ item.expectedYield | number: '1.0-2' }} {{ unit }}</dd>
-      </div>
-      <div>
-        <dt>{{ 'farming.reports.actual-yield' | translate }}</dt>
-        <dd>
-          @if (item.actualYield !== null) {
-            {{ item.actualYield | number: '1.0-2' }} {{ unit }}
-            @if (item.yieldAchievement; as achievement) {
-              <span class="achievement">({{ achievement | number: '1.0-0' }}%)</span>
-            }
-          } @else {
-            —
-          }
-        </dd>
-      </div>
     </dl>
-    <p class="expenses">
-      {{ 'farming.campaigns.expense-count' | translate: { count: item.expenseCount } }}
-    </p>
+    <p class="expenses">{{ 'farming.finances.pending' | translate }}</p>
   </mat-card-content>
 
   <mat-divider />
   <mat-card-actions align="end">
-    @if (item.ledgerId !== null) {
-      <button mat-button (click)="exportReport.emit(item)">
-        <mat-icon>download</mat-icon>
-        {{ 'farming.reports.export' | translate }}
-      </button>
-    }
     @if (item.isActive) {
+      <button mat-button [disabled]="saving()" (click)="editCampaign.emit(item)">
+        <mat-icon>edit</mat-icon>
+        {{ 'farming.campaigns.edit' | translate }}
+      </button>
       <button mat-flat-button [disabled]="saving()" (click)="closeCampaign.emit(item)">
         <mat-icon>task_alt</mat-icon>
         {{ 'farming.campaigns.close' | translate }}
