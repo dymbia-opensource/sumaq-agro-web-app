@@ -1,0 +1,261 @@
+:host {
+  --bg-page: #f7f7f2;
+  --surface: #ffffff;
+  --surface-subtle: #f4f6f2;
+  --frame-border: #c8cec4;
+  --inner-border: #dce1d8;
+  --text-main: #18221e;
+  --text-muted: #5c6862;
+
+  --brand-dark: #00423b;
+  --brand-green: #1a7f37;
+  --brand-tint: #e3f0e4;
+  --brand-tint-border: #c3dfc6;
+
+  --warn-bg: #fffaeb;
+  --warn-border: #fedf89;
+  --warn-text: #b54708;
+
+  --danger-bg: #fef3f2;
+  --danger-border: #fecdca;
+  --danger-text: #b42318;
+
+  display: block;
+  width: 100%;
+  color: var(--text-main);
+}
+
+/* Cabecera y subtítulo */
+h1 {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--text-main);
+  line-height: 1.25;
+}
+
+:host > p:first-of-type {
+  margin: 0.35rem 0 1.25rem;
+  font-size: 0.92rem;
+  color: var(--text-muted);
+}
+
+/* Barra de navegación / acciones superiores */
+nav {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 0.9rem 1.25rem;
+  margin-bottom: 1.5rem;
+  background: var(--surface);
+  border: 1.5px solid var(--frame-border);
+  border-radius: 14px;
+  box-shadow: 0 2px 6px rgba(24, 34, 30, 0.04);
+}
+
+nav a[mat-stroked-button] {
+  background: var(--brand-dark) !important;
+  color: #ffffff !important;
+  border-color: var(--brand-dark) !important;
+  border-radius: 999px !important;
+  font-weight: 600;
+}
+
+nav a[mat-stroked-button]:hover {
+  background: #00574e !important;
+}
+
+nav button[mat-button] {
+  color: var(--brand-green) !important;
+  border: 1px solid var(--brand-tint-border) !important;
+  background: var(--brand-tint) !important;
+  border-radius: 999px !important;
+  padding: 0 1rem !important;
+  font-weight: 600;
+}
+
+nav button[mat-button]:hover:not(:disabled) {
+  background: #d3e8d5 !important;
+}
+
+nav button[mat-button]:disabled {
+  opacity: 0.55;
+}
+
+/* Barra de carga */
+mat-progress-bar {
+  margin: 1rem 0;
+  border-radius: 999px;
+  --mdc-linear-progress-active-indicator-color: var(--brand-green);
+  --mdc-linear-progress-track-color: var(--brand-tint);
+}
+
+/* Alertas y estados */
+p[role="alert"],
+p[role="status"] {
+  width: 100%;
+  box-sizing: border-box;
+  margin: 1rem 0;
+  padding: 1.1rem 1.4rem;
+  border-radius: 14px;
+  font-size: 0.92rem;
+  font-weight: 500;
+}
+
+p[role="alert"] {
+  background: var(--danger-bg);
+  border: 1.5px solid var(--danger-border);
+  color: var(--danger-text);
+}
+
+p[role="status"] {
+  grid-column: 1 / -1;
+  background: var(--surface);
+  border: 1.5px dashed var(--frame-border);
+  color: var(--text-muted);
+  text-align: center;
+  padding: 2.5rem 1.5rem;
+}
+
+/* Grilla de parcelas asignadas */
+.plots {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+  gap: 1.25rem;
+  width: 100%;
+}
+
+/* Tarjeta individual de parcela */
+.plots mat-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background-color: var(--surface) !important;
+  border: 1.5px solid var(--frame-border) !important;
+  border-left: 5px solid var(--brand-green) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 2px 6px rgba(24, 34, 30, 0.05) !important;
+  overflow: hidden;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.plots mat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(24, 34, 30, 0.08) !important;
+}
+
+/* Cabecera de tarjeta */
+.plots mat-card-header {
+  padding: 1.15rem 1.35rem 0.9rem !important;
+  background: var(--surface-subtle);
+  border-bottom: 1px solid var(--inner-border);
+}
+
+.plots mat-card-title {
+  font-size: 1.15rem !important;
+  font-weight: 700 !important;
+  color: var(--brand-dark) !important;
+  margin-bottom: 0.25rem !important;
+}
+
+.plots mat-card-subtitle {
+  font-size: 0.84rem !important;
+  font-weight: 500 !important;
+  color: var(--text-muted) !important;
+  margin: 0 !important;
+}
+
+/* Contenido de tarjeta */
+.plots mat-card-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  padding: 1.25rem 1.35rem !important;
+}
+
+.plots mat-card-content p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text-main);
+  line-height: 1.45;
+}
+
+/* Badge de estado Activo (3er <p>) */
+.plots mat-card-content p:nth-child(3) {
+  align-self: flex-start;
+  margin-top: 0.25rem;
+  padding: 0.22rem 0.75rem;
+  border-radius: 999px;
+  background: var(--brand-tint);
+  border: 1px solid var(--brand-tint-border);
+  color: var(--brand-green);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+/* Fila destacada de casos pendientes (4to <p>) */
+.plots mat-card-content p:nth-child(4) {
+  margin-top: 0.35rem;
+  padding: 0.65rem 0.9rem;
+  border-radius: 10px;
+  background: var(--warn-bg);
+  border: 1px solid var(--warn-border);
+  color: var(--warn-text);
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+/* Pie de tarjeta y botones de acción */
+.plots mat-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.9rem 1.35rem 1.25rem !important;
+  border-top: 1px solid var(--inner-border);
+  background: #fafbf8;
+}
+
+.plots mat-card-actions a[mat-stroked-button] {
+  flex: 1;
+  text-align: center;
+  background: var(--brand-dark) !important;
+  color: #ffffff !important;
+  border-color: var(--brand-dark) !important;
+  border-radius: 999px !important;
+  font-weight: 600;
+  font-size: 0.84rem;
+}
+
+.plots mat-card-actions a[mat-stroked-button]:hover {
+  background: #00574e !important;
+}
+
+.plots mat-card-actions a[mat-button] {
+  color: var(--brand-green) !important;
+  border: 1px solid var(--frame-border) !important;
+  background: var(--surface) !important;
+  border-radius: 999px !important;
+  padding: 0 1rem !important;
+  font-weight: 600;
+  font-size: 0.84rem;
+}
+
+.plots mat-card-actions a[mat-button]:hover {
+  background: var(--brand-tint) !important;
+  border-color: var(--brand-tint-border) !important;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .plots {
+    grid-template-columns: 1fr;
+  }
+
+  .plots mat-card-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

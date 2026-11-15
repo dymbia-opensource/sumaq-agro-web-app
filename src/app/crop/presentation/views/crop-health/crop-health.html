@@ -1,0 +1,131 @@
+@if (store.observationsLoading()) {
+  <mat-progress-bar mode="indeterminate" [attr.aria-label]="'common.loading' | translate" />
+}
+<header class="view-header">
+  <div>
+    <span class="breadcrumb">{{ 'crop.eyebrow' | translate }}</span>
+    <h1>{{ 'crop.viewer-title' | translate }}</h1>
+    <p>{{ store.selectedPlot()?.name }} · {{ store.selectedPlot()?.region }}</p>
+  </div>
+  <app-crop-plot-selector
+    [plots]="store.plots()"
+    [selectedPlotId]="store.selectedPlot()?.id"
+    [disabled]="store.scopeLoading()"
+    (plotSelected)="store.selectPlot(+$event)"
+  />
+</header>
+@if (store.observationsError(); as error) {
+  <mat-card appearance="outlined" role="alert"
+    ><mat-card-content
+      ><p>{{ error | translate }}</p></mat-card-content
+    ></mat-card
+  >
+} @else if (!store.observationsLoading()) {
+  @if (!store.selectedPlot()) {
+    <p role="status">{{ 'crop.no-plots' | translate }}</p>
+  } @else if (!store.selectedPlot()!.hasPolygon) {
+    <p role="status">{{ 'crop.no-polygon' | translate }}</p>
+  } @else if (!store.latestObservation()) {
+    <p role="status">{{ 'crop.no-observations' | translate }}</p>
+  }
+}
+@if (store.canImportObservation()) {
+  <button mat-stroked-button type="button"
+    [disabled]="store.importingObservation() || store.observationsLoading()"
+    (click)="store.importLatestObservation()">
+    {{ (store.importingObservation() ? 'common.loading' : 'crop.import-recent-observation') | translate }}
+  </button>
+}
+@if (store.importError(); as error) {
+  <p role="status">{{ error | translate }}</p>
+}
+<div class="layers-bar">
+  <span>{{ 'crop.layers' | translate }}</span>
+  <mat-radio-group [(ngModel)]="selectedLayer" (change)="onLayerChange()">
+    <mat-radio-button value="ndvi">NDVI</mat-radio-button>
+    <mat-radio-button value="ndwi">NDWI</mat-radio-button>
+  </mat-radio-group>
+</div>
+<p>{{ 'crop.map-boundary-note' | translate }}</p>
+<div class="content-grid">
+  <div class="map-card">
+    <div #mapContainer class="mock-map"></div>
+    <div class="map-toolbar">
+      <span class="boundary-legend"
+        ><mat-icon>crop_free</mat-icon>{{ 'crop.plot-boundary' | translate }}</span
+      >
+      <mat-button-toggle-group
+        [(ngModel)]="selectedBase"
+        (change)="onBaseLayerChange()"
+        [attr.aria-label]="'crop.map-background' | translate"
+      >
+        <mat-button-toggle value="satellite">{{
+          'crop.hybrid-satellite' | translate
+        }}</mat-button-toggle>
+        <mat-button-toggle value="streets">{{ 'crop.street-map' | translate }}</mat-button-toggle>
+      </mat-button-toggle-group>
+    </div>
+  </div>
+  <aside class="diagnosis-aside">
+    <mat-card appearance="outlined" class="diagnosis-card">
+      <mat-card-header>
+        <mat-card-title>{{ 'crop.observation-values' | translate }}</mat-card-title>
+        @if (!store.observationsLoading() && !store.observationsError()) {
+          @if (store.latestObservation(); as observation) {
+            <mat-card-subtitle
+              >{{ 'crop.capture-date' | translate }}:
+              {{ observation.date | date: 'medium' }}</mat-card-subtitle
+            >
+          }
+        }
+      </mat-card-header>
+      <mat-card-content>
+        @if (
+          !store.observationsLoading() && !store.observationsError() && store.latestObservation();
+          as observation
+        ) {
+          <dl class="metrics">
+            <dt>NDVI</dt>
+            <dd>{{ observation.ndviMean === null ? ('crop.no-data' | translate) : (observation.ndviMean | number: '1.2-2') }}</dd>
+            <dt>NDWI</dt>
+            <dd>{{ observation.ndwiMean === null ? ('crop.no-data' | translate) : (observation.ndwiMean | number: '1.2-2') }}</dd>
+            <dt>{{ 'crop.observation-source' | translate }}</dt>
+            <dd>{{ observation.source }}</dd>
+            @if (observation.cloudCoveragePercent !== null) {
+              <dt>{{ 'crop.cloud-coverage' | translate }}</dt>
+              <dd>{{ observation.cloudCoveragePercent | number: '1.0-1' }}%</dd>
+            }
+          </dl>
+        } @else {
+          <dl class="metrics">
+            <dt>NDVI</dt>
+            <dd>{{ 'crop.no-data' | translate }}</dd>
+            <dt>NDWI</dt>
+            <dd>{{ 'crop.no-data' | translate }}</dd>
+          </dl>
+          @if (!store.observationsError()) {
+            <p>{{ 'crop.observation-pending' | translate }}</p>
+          }
+        }
+      </mat-card-content>
+      <mat-card-actions>
+        <button mat-flat-button (click)="consultAgronomist()">
+          {{ 'crop.btn-consult' | translate }}
+        </button>
+        <button
+          mat-stroked-button
+          (click)="downloadImage()"
+          [disabled]="
+            !store.latestObservation() ||
+            store.observationsLoading() ||
+            !!store.observationsError() ||
+            exportingImage()
+          "
+        >
+          <mat-icon>image</mat-icon
+          >{{ (exportingImage() ? 'common.loading' : 'crop.download-image') | translate }}
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </aside>
+</div>

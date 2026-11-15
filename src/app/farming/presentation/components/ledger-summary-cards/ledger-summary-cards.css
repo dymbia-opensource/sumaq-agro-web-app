@@ -1,0 +1,49 @@
+:host {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+  gap: 16px;
+}
+
+mat-card {
+  border-radius: 16px;
+  min-width: 0;
+}
+
+/* Same dark green as the dashboard KPI cards. */
+.total-card {
+  --mat-card-elevated-container-color: var(--mat-sys-on-tertiary-fixed-variant);
+  color: var(--mat-sys-on-tertiary);
+}
+
+mat-icon {
+  font-size: 28px;
+  width: 28px;
+  height: 28px;
+}
+
+.category-card mat-icon {
+  color: var(--mat-sys-primary);
+}
+
+.label {
+  margin: 8px 0 0;
+  font: var(--mat-sys-label-large);
+}
+
+.amount {
+  margin: 4px 0 0;
+  font: var(--mat-sys-headline-small);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.total-card .amount {
+  color: var(--mat-sys-tertiary-fixed-dim);
+}
+
+.share {
+  margin: 4px 0 0;
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-body-small);
+}

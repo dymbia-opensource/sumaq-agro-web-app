@@ -1,0 +1,715 @@
+:host {
+  --bg-page: #f7f7f2;
+  --surface: #ffffff;
+  --surface-subtle: #f4f6f2;
+  --frame-border: #c8cec4;
+  --inner-border: #dce1d8;
+  --text-main: #18221e;
+  --text-muted: #5c6862;
+
+  --brand-dark: #00423b;
+  --brand-green: #1a7f37;
+  --brand-tint: #e3f0e4;
+  --brand-tint-border: #c3dfc6;
+
+  --warn-bg: #fffaeb;
+  --warn-border: #fedf89;
+  --warn-text: #b54708;
+
+  --danger-bg: #fef3f2;
+  --danger-border: #fecdca;
+  --danger-text: #b42318;
+
+  --radius: 16px;
+  --shadow-sm: 0 2px 6px rgb(24 34 30 / 5%);
+
+  display: block;
+  width: 100%;
+  color: var(--text-main);
+}
+
+/* =========================================================
+   CABECERA Y CARGA
+   ========================================================= */
+
+/* Botón principal "Agregar nuevo socio" (tokens de Material, sin !important) */
+app-page-header button[mat-flat-button] {
+  --mat-button-filled-container-color: var(--brand-dark);
+  --mat-button-filled-label-text-color: #ffffff;
+  --mat-button-filled-container-shape: 999px;
+  height: 42px;
+  padding-inline: 1.35rem;
+  font-weight: 600;
+}
+
+mat-progress-bar {
+  margin-top: 1.25rem;
+  border-radius: 999px;
+  --mdc-linear-progress-active-indicator-color: var(--brand-green);
+  --mdc-linear-progress-track-color: var(--brand-tint);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* =========================================================
+   TARJETAS BASE (lista, formulario, expediente, estados)
+   ========================================================= */
+.list-card,
+.form-card,
+.dossier,
+.state-card,
+.kpi {
+  --mat-card-outlined-outline-color: var(--inner-border);
+  --mat-card-outlined-container-color: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+
+.members-view {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-top: 1.5rem;
+}
+
+.form-card,
+.dossier,
+.state-card {
+  margin-top: 1.5rem;
+}
+
+.list-card > mat-card-content {
+  padding: 1.25rem;
+}
+
+/* Estados de error / sin cooperativa / socio no encontrado */
+.state-content {
+  display: grid;
+  justify-items: center;
+  gap: 0.85rem;
+  padding: 2.5rem 1.5rem !important;
+  text-align: center;
+}
+.state-content p {
+  margin: 0;
+  max-width: 46ch;
+  color: var(--text-muted);
+}
+.state-icon,
+.empty-icon {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--brand-tint);
+  color: var(--brand-dark);
+}
+.state-card.error {
+  --mat-card-outlined-outline-color: var(--danger-border);
+  --mat-card-outlined-container-color: var(--danger-bg);
+}
+.state-card.error .state-icon {
+  background: #fee4e2;
+  color: var(--danger-text);
+}
+.state-card.error p {
+  color: var(--danger-text);
+}
+.state-card button[mat-flat-button],
+.state-card a[mat-flat-button],
+.empty button[mat-flat-button] {
+  --mat-button-filled-container-color: var(--brand-dark);
+  --mat-button-filled-label-text-color: #ffffff;
+  --mat-button-filled-container-shape: 999px;
+}
+.state-card button[mat-stroked-button],
+.state-card a[mat-stroked-button] {
+  --mat-button-outlined-outline-color: var(--frame-border);
+  --mat-button-outlined-label-text-color: var(--brand-dark);
+  --mat-button-outlined-container-shape: 999px;
+}
+
+/* =========================================================
+   KPIs
+   ========================================================= */
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+mat-card.kpi > mat-card-content.kpi-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.1rem 1.25rem;
+}
+.kpi-icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--brand-tint);
+  color: var(--brand-dark);
+}
+.kpi p {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+.kpi strong {
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--brand-dark);
+  font-variant-numeric: tabular-nums;
+}
+
+/* =========================================================
+   BARRA DE HERRAMIENTAS: búsqueda + filtro + contador
+   ========================================================= */
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.search-field {
+  flex: 1 1 280px;
+  max-width: 420px;
+  --mat-form-field-container-height: 44px;
+  --mat-form-field-container-vertical-padding: 10px;
+}
+.search-field mat-icon[matPrefix] {
+  margin-left: 12px;
+  color: var(--text-muted);
+}
+
+.status-toggle {
+  --mat-button-toggle-selected-state-background-color: var(--brand-dark);
+  --mat-button-toggle-selected-state-text-color: #ffffff;
+  --mat-button-toggle-height: 40px;
+  --mat-button-toggle-shape: 999px;
+}
+
+.count {
+  margin-left: auto;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* =========================================================
+   TABLA (mat-table)
+   ========================================================= */
+.table-scroll {
+  overflow-x: auto;
+  border: 1px solid var(--inner-border);
+  border-radius: 12px;
+}
+.table-scroll:focus-visible {
+  outline: 2px solid var(--brand-green);
+  outline-offset: -2px;
+}
+
+table {
+  width: 100%;
+  min-width: 720px;
+  background: var(--surface);
+}
+
+th.mat-mdc-header-cell {
+  background: var(--surface-subtle);
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+th.mat-mdc-header-cell,
+td.mat-mdc-cell {
+  padding-inline: 1.25rem;
+  border-bottom-color: var(--inner-border);
+}
+td.mat-mdc-cell {
+  color: var(--text-muted);
+  font-size: 0.92rem;
+  font-variant-numeric: tabular-nums;
+}
+tr.mat-mdc-row:last-child td.mat-mdc-cell {
+  border-bottom-color: transparent;
+}
+
+tr.mat-mdc-row {
+  position: relative;
+  height: 68px;
+}
+tr.mat-mdc-row:hover {
+  background: var(--surface-subtle);
+}
+tr.mat-mdc-row:hover .row-arrow {
+  color: var(--brand-green);
+}
+tr.mat-mdc-row:has(.member-link:focus-visible) {
+  outline: 2px solid var(--brand-green);
+  outline-offset: -2px;
+}
+
+.mat-column-plots {
+  width: 120px;
+}
+.mat-column-actions {
+  width: 56px;
+  text-align: end;
+}
+.row-arrow {
+  color: var(--text-muted);
+}
+
+.member-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  min-width: 0;
+}
+.member-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.member-text small {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+.member-link {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-main);
+  font-weight: 700;
+  text-decoration: none;
+}
+/* Toda la fila abre el expediente; el enlace del nombre sigue siendo el único foco. */
+.member-link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+.member-link:focus-visible {
+  outline: none;
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--brand-tint-border);
+  border-radius: 50%;
+  background: var(--brand-tint);
+  color: var(--brand-dark);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.plots-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.65rem;
+  border: 1px solid var(--inner-border);
+  border-radius: 999px;
+  background: var(--surface-subtle);
+  color: var(--brand-dark);
+  font-weight: 700;
+}
+.plots-pill mat-icon {
+  width: 16px;
+  height: 16px;
+  font-size: 16px;
+}
+
+/* Chip de estado (mismo patrón que plot-card.css) */
+mat-chip-set {
+  margin: 0;
+}
+mat-chip.status-chip {
+  --mdc-chip-elevated-container-color: var(--brand-tint);
+  --mdc-chip-label-text-color: var(--brand-green);
+  --mdc-chip-outline-color: var(--brand-tint-border);
+  border: 1px solid var(--brand-tint-border) !important;
+  font-weight: 600 !important;
+  font-size: 0.78rem !important;
+  height: 28px !important;
+}
+mat-chip.status-chip.inactive {
+  --mdc-chip-elevated-container-color: #f2f4f1;
+  --mdc-chip-label-text-color: var(--text-muted);
+  --mdc-chip-outline-color: var(--inner-border);
+  border-color: var(--inner-border) !important;
+}
+mat-chip.status-chip.revoked {
+  --mdc-chip-elevated-container-color: var(--danger-bg);
+  --mdc-chip-label-text-color: var(--danger-text);
+  --mdc-chip-outline-color: var(--danger-border);
+  border-color: var(--danger-border) !important;
+}
+
+/* =========================================================
+   ESTADO VACÍO
+   ========================================================= */
+.empty {
+  display: grid;
+  justify-items: center;
+  gap: 0.75rem;
+  padding: 3rem 1rem;
+  text-align: center;
+  color: var(--text-muted);
+}
+.empty p {
+  margin: 0;
+}
+
+/* =========================================================
+   FORMULARIO (mat-form-field)
+   ========================================================= */
+.member-form {
+  padding: 1.5rem 1.75rem;
+}
+.member-form h2 {
+  margin: 0 0 1.25rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid var(--inner-border);
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--brand-dark);
+}
+.member-form .fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 0.25rem 1.25rem;
+}
+.member-form mat-icon[matPrefix] {
+  margin-left: 12px;
+  color: var(--text-muted);
+}
+.member-form .actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding-top: 1.1rem;
+  border-top: 1px solid var(--inner-border);
+}
+.member-form .actions button[mat-flat-button] {
+  --mat-button-filled-container-color: var(--brand-dark);
+  --mat-button-filled-label-text-color: #ffffff;
+  --mat-button-filled-container-shape: 999px;
+  padding-inline: 1.4rem;
+  font-weight: 600;
+}
+.member-form .actions button[mat-stroked-button] {
+  --mat-button-outlined-outline-color: var(--frame-border);
+  --mat-button-outlined-label-text-color: var(--text-main);
+  --mat-button-outlined-container-shape: 999px;
+  font-weight: 600;
+}
+
+/* Mensaje de error de guardado o vinculación */
+.form-alert {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0.75rem 0 0;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--danger-border);
+  border-radius: 10px;
+  background: var(--danger-bg);
+  color: var(--danger-text);
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+.form-alert mat-icon {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  font-size: 20px;
+}
+
+/* =========================================================
+   EXPEDIENTE DEL SOCIO
+   ========================================================= */
+.dossier > mat-card-content {
+  padding: 1.5rem;
+}
+
+.back {
+  margin-bottom: 0.75rem;
+  --mat-button-text-label-text-color: var(--text-muted);
+}
+
+.profile {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.5rem 1.1rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--inner-border);
+}
+.avatar-lg {
+  width: 64px;
+  height: 64px;
+  font-size: 1.2rem;
+}
+.profile-main {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.4rem;
+  min-width: 0;
+}
+.profile-main h2 {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--brand-dark);
+}
+
+.edit-btn {
+  --mat-button-outlined-outline-color: var(--frame-border);
+  --mat-button-outlined-label-text-color: var(--brand-dark);
+  --mat-button-outlined-container-shape: 999px;
+  font-weight: 600;
+}
+
+.facts {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.75rem;
+  margin: 1rem 0 0;
+}
+.facts > div {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  column-gap: 0.75rem;
+  padding: 0.7rem 1rem;
+  border: 1px solid var(--inner-border);
+  border-radius: 12px;
+  background: var(--surface-subtle);
+}
+.facts mat-icon {
+  grid-row: span 2;
+  color: var(--brand-green);
+}
+.facts dt {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+.facts dd {
+  margin: 0;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Pestañas */
+.dossier-tabs {
+  margin-top: 1.25rem;
+}
+.tab-count {
+  margin-left: 0.5rem;
+  padding: 0.05rem 0.5rem;
+  border-radius: 999px;
+  background: var(--brand-tint);
+  color: var(--brand-dark);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.tab-content {
+  padding-block: 1.25rem;
+}
+.tab-empty {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 2rem 1rem;
+  border: 1px dashed var(--frame-border);
+  border-radius: 12px;
+  background: var(--surface-subtle);
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.92rem;
+}
+
+/* Vincular parcela / cuenta */
+.link-bar {
+  margin-bottom: 1rem;
+}
+.link-bar button[mat-stroked-button],
+.link-account button[mat-stroked-button],
+.tab-content button[mat-stroked-button] {
+  --mat-button-outlined-outline-color: var(--frame-border);
+  --mat-button-outlined-label-text-color: var(--brand-dark);
+  --mat-button-outlined-container-shape: 999px;
+  font-weight: 600;
+}
+.option-list {
+  margin: 0 0 1rem;
+  padding: 0.35rem;
+  list-style: none;
+  border: 1px solid var(--inner-border);
+  border-radius: 12px;
+  background: var(--surface-subtle);
+}
+.option-list button {
+  width: 100%;
+  justify-content: flex-start;
+}
+.option-empty {
+  padding: 0.75rem 1rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+.link-account {
+  margin-bottom: 1.25rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--inner-border);
+  border-radius: 12px;
+  background: var(--surface-subtle);
+}
+.link-account > p {
+  margin: 0 0 0.85rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+.link-account-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+}
+.link-account-row mat-form-field {
+  flex: 1 1 260px;
+  max-width: 380px;
+}
+
+/* Tarjetas de parcela, lote y certificado */
+.plot-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
+}
+.plot-grid .plot {
+  --mat-card-outlined-outline-color: var(--inner-border);
+  --mat-card-outlined-container-color: var(--surface);
+  border-radius: 12px;
+}
+.plot-icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--brand-tint);
+  color: var(--brand-dark);
+}
+.batch-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  color: var(--text-muted);
+  font-size: 0.86rem;
+}
+.batch-meta strong {
+  color: var(--brand-dark);
+  font-variant-numeric: tabular-nums;
+}
+
+.collection-total {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  margin: 0 0 1rem;
+  padding: 1rem 1.25rem;
+  border-radius: 12px;
+  background: var(--brand-dark);
+  color: #ffffff;
+}
+.collection-total strong {
+  font-size: 1.5rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* =========================================================
+   MÓVIL
+   ========================================================= */
+@media (max-width: 720px) {
+  .kpi-row {
+    grid-template-columns: 1fr;
+  }
+  .member-form,
+  .dossier > mat-card-content {
+    padding: 1.1rem;
+  }
+  .profile {
+    grid-template-columns: auto 1fr;
+  }
+  .edit-btn {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+  .count {
+    margin-left: 0;
+  }
+
+  /* La tabla pasa a tarjetas */
+  table,
+  tbody {
+    display: block;
+    min-width: 0;
+  }
+  tr.mat-mdc-header-row {
+    display: none;
+  }
+  tr.mat-mdc-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.35rem 1rem;
+    align-items: center;
+    height: auto;
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid var(--inner-border);
+  }
+  tr.mat-mdc-row:last-child {
+    border-bottom: 0;
+  }
+  td.mat-mdc-cell {
+    padding: 0;
+    border: 0;
+  }
+  .mat-column-member {
+    grid-column: 1 / -1;
+  }
+  .mat-column-dni,
+  .mat-column-phone,
+  .mat-column-actions {
+    display: none;
+  }
+}

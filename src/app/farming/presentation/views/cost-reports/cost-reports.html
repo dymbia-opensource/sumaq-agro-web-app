@@ -1,0 +1,40 @@
+@if (loading()) {
+  <mat-progress-bar mode="indeterminate" [attr.aria-label]="'common.loading' | translate" />
+}
+
+<app-page-header
+  [breadcrumbs]="breadcrumbs"
+  [title]="'farming.reports.title' | translate"
+  [subtitle]="plot() ? ('farming.finances.subtitle' | translate: subtitleParams()) : ''"
+>
+  @if (ledger()) {
+    <button mat-flat-button class="export" (click)="onExport()">
+      <mat-icon>download</mat-icon>
+      {{ 'farming.reports.export' | translate }}
+    </button>
+  }
+</app-page-header>
+
+@if (error(); as error) {
+  <app-message-card icon="error" [message]="error | translate" [alert]="true" />
+}
+
+@if (ledger(); as ledger) {
+  <div class="reports-grid">
+    <app-breakeven-report-card [ledger]="ledger" />
+    <app-cost-per-hectare-card [ledger]="ledger" [areaHectares]="plot()?.areaHectares ?? 0" />
+  </div>
+  <app-actual-yield-card
+    [ledger]="ledger"
+    [saving]="loading()"
+    (actualYieldChange)="onActualYieldChange($event)"
+  />
+} @else if (!loading()) {
+  <app-message-card icon="receipt_long" [message]="'farming.finances.no-ledger' | translate">
+    <mat-card-actions align="end">
+      <a mat-flat-button routerLink="/plots">
+        {{ 'farming.finances.select-plot' | translate }}
+      </a>
+    </mat-card-actions>
+  </app-message-card>
+}

@@ -1,0 +1,16 @@
+.warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.warning mat-icon {
+  flex-shrink: 0;
+  color: var(--mat-sys-primary);
+}
+
+.yield-field {
+  width: 100%;
+  margin-top: 8px;
+}

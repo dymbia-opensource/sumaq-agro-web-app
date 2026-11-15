@@ -1,6 +1,73 @@
 {
   "profiles": {
     "cooperative": {
+      "integration": {
+        "member-user-id": "Farmer user ID (optional)",
+        "invalid-id": "Enter a positive whole-number ID.",
+        "member-edit-pending": "Edit member (pending)",
+        "account-link-pending": "To link an account, enter the farmer user ID when adding the member.",
+        "certification-pending": "Harvest and certificate information will be integrated in the certification stage.",
+        "advisor-id": "Agronomist user ID",
+        "assigned-advisors": "Agronomists with assigned plots",
+        "invitation-email": "Agronomist email",
+        "invite": "Create invitation",
+        "invitation-created": "Invitation registered.",
+        "invitation-error": "The invitation could not be registered.",
+        "independent-pending": "Direct assignment by independent farmers is pending."
+      },
+      "members": {
+        "demo-account": "Demo farmer account",
+        "link-account": "Link account",
+        "link-account-error": "Could not link the account. Check whether another member of the cooperative already uses it.",
+        "collection": "Collection history",
+        "net-total": "Total net weight",
+        "net-weight": "Net weight",
+        "no-collection": "No collection batches have been recorded for this member yet.",
+        "certificates": "Issued certificates",
+        "no-certificates": "No certificates have been issued for this member yet.",
+        "verify-certificate": "Verify certificate",
+        "certificate-ACTIVE": "Active",
+        "certificate-REVOKED": "Revoked",
+        "edit": "Edit member details",
+        "link-plot": "Add plot",
+        "no-linkable-plots": "No plots with saved boundaries are available to link.",
+        "link-error": "The plot could not be linked. Check that it has an active potato or coffee campaign.",
+        "link-account-first": "The member needs a linked account before their plots can be added.",
+        "not-found": "This member could not be found in your cooperative directory.",
+        "title": "Member directory",
+        "subtitle": "View the members and plots linked to your cooperative.",
+        "search": "Search by name, ID or code",
+        "add": "Add new member",
+        "new-title": "Register new member",
+        "phone": "Phone",
+        "community": "Sector",
+        "save": "Save",
+        "validation": "Enter a name, an eight-digit ID and a valid phone number.",
+        "duplicate": "A member with this ID already exists.",
+        "save-error": "The member could not be saved.",
+        "back": "Back to directory",
+        "dossier": "Member record",
+        "no-plots": "This member has no linked plots yet.",
+        "view": "View",
+        "name": "Member",
+        "status": "Status",
+        "plots": "Plots",
+        "active": "Active",
+        "inactive": "Inactive",
+        "error": "The member directory could not be loaded.",
+        "empty": "There are no registered members yet.",
+        "no-results": "No members match your search.",
+        "kpi-total": "Registered members",
+        "kpi-active": "Active members",
+        "kpi-plots": "Linked plots",
+        "filter-all": "All",
+        "filter-status": "Filter by status",
+        "clear-search": "Clear search",
+        "error-name": "Enter the member's name",
+        "error-dni": "The ID must have 8 digits",
+        "error-phone": "Enter a valid phone number",
+        "dni-hint": "8 digits"
+      },
       "settings": {
         "breadcrumb": "Settings",
         "title": "Institutional details",
@@ -14,6 +81,8 @@
         "address": "Headquarters address"
       },
       "registration": {
+        "existing": "Your account already has a registered cooperative.",
+        "error": "Registration could not be completed. Try again.",
         "back": "Back to dashboard",
         "title": "Register cooperative",
         "subtitle": "Complete the organization's institutional details.",
@@ -32,6 +101,7 @@
         "saving": "Registering..."
       },
       "dashboard": {
+        "no-metrics": "There are no metrics for this cooperative yet.",
         "breadcrumb": "Dashboard",
         "title": "Control Panel - {{ cooperative }}",
         "subtitle": "Oversight of {{ members }} active members | {{ hectares }} hectares under satellite monitoring",
@@ -65,27 +135,144 @@
         "pending": "Coming soon",
         "no-cooperative-title": "You have not registered a cooperative yet",
         "no-cooperative-message": "Register the institutional details to start managing your members.",
-        "register-cooperative": "Register cooperative"
+        "register-cooperative": "Register cooperative",
+        "tab-title": "Institutional dashboard"
+      },
+      "supervision": {
+        "in-charge": "Supervised by",
+        "none": "Without an assigned advisor.",
+        "assign": "Assign",
+        "release": "Remove assignment",
+        "no-team": "Invite agronomists with a linked account to assign supervision."
       }
     },
     "settings": {
       "title": "Account Settings and Farmer Support",
-      "subtitle": "Review and update your plot and account information.",
-      "plot-tab": "My Plot Data",
+      "subtitle": "Manage your account and find guidance for using SumaqAgro.",
       "account-tab": "Account",
       "help-tab": "Help Manuals",
-      "contact-title": "Contact Details",
+      "contact-title": "Personal and contact information",
       "phone": "Phone number",
-      "email": "Email address",
-      "phone-error": "Enter a valid phone number.",
+      "email": "Contact email",
+      "phone-error": "The phone number can have up to 15 characters.",
       "email-error": "Enter a valid email address.",
       "saving": "Saving...",
       "security-title": "Security and Access",
       "current-password": "Current password",
       "new-password": "New password",
       "confirm-password": "Confirm new password",
-      "security-description": "Password changes will be available when platform authentication is added.",
-      "change-password": "Change password"
+      "security-description": "Use your sign-in email to request a password reset through the account recovery flow.",
+      "change-password": "Change password",
+      "profile-title": "Your farmer account",
+      "farmer-role": "Farmer",
+      "manage-plots": "Manage my plots",
+      "contact-description": "You can update your name and phone number. Your sign-in email is read-only.",
+      "saved": "Account details saved.",
+      "preview": "Account recovery currently runs as a preview: it does not send emails or change passwords.",
+      "preferences": "Preferences",
+      "language": "Application language",
+      "language-description": "The language applies during this visit. You can also change it in the side menu.",
+      "help-title": "Learn to use SumaqAgro",
+      "help-description": "Follow the steps for each task and open its section to try it.",
+      "search": "Search guides",
+      "clear": "Clear search",
+      "open-section": "Open section",
+      "no-results": "No guides found. Try plot, expenses, alerts or connection.",
+      "faq-title": "Frequently asked questions",
+      "guides": {
+        "plots": {
+          "title": "Register and view plots",
+          "summary": "Keep your land information organized.",
+          "steps": [
+            "Open My plots and choose to register a plot.",
+            "Enter the plot details and draw its boundary on the map.",
+            "Save and open the plot details or soil analysis."
+          ]
+        },
+        "campaigns": {
+          "title": "Start a campaign",
+          "summary": "Organize the production cycle of your plot.",
+          "steps": [
+            "Register your plot first.",
+            "Open Campaigns and start one with its plot, crop and sowing date.",
+            "Check the details before saving and use the history to follow progress."
+          ]
+        },
+        "expenses": {
+          "title": "Record expenses and review costs",
+          "summary": "Track campaign inputs, labor and freight.",
+          "steps": [
+            "Select the relevant plot and campaign.",
+            "In My expenses choose inputs, labor or freight and fill in the form.",
+            "Save the expense and review the summary and cost reports."
+          ]
+        },
+        "health": {
+          "title": "Review crop health and alerts",
+          "summary": "Review indicators and report field problems.",
+          "steps": [
+            "Select the plot you want to review in Crop health.",
+            "Check available indicators and alerts for that plot.",
+            "If you find a problem, use Report pest and follow up on the case."
+          ]
+        },
+        "certificates": {
+          "title": "View certificates",
+          "summary": "Find quality and traceability information.",
+          "steps": [
+            "Open Certificates and review the available batches.",
+            "Select a record to check its information and status.",
+            "If a certificate has been issued, use its available link or QR for public verification."
+          ]
+        },
+        "offline": {
+          "title": "Work with an unstable connection",
+          "summary": "Check which records are pending.",
+          "steps": [
+            "Open the application online and select the plot and campaign.",
+            "When recording an expense offline, check that it appears as pending synchronization.",
+            "When connection returns, check the synchronization notice and verify there are no remaining pending operations."
+          ]
+        }
+      },
+      "faq": {
+        "connection": {
+          "question": "Can I use the whole application offline?",
+          "answer": "No. Some field operations, such as recording expenses, support a pending queue. API queries and account updates need a connection. Check the synchronization indicator before closing the application."
+        },
+        "contact": {
+          "question": "Does changing my contact email change my login?",
+          "answer": "No. Your contact email belongs to your profile. To recover access, use the sign-in email shown in your account summary."
+        },
+        "alerts": {
+          "question": "Does an alert replace an agronomist assessment?",
+          "answer": "Alerts help you decide what to inspect. Read the details, check conditions in the field and seek technical advice when needed."
+        }
+      },
+      "first-name": "First name",
+      "last-name": "Last name",
+      "name-error": "Enter a valid name up to 100 characters.",
+      "edit-account": "Edit account",
+      "cancel": "Cancel"
+    },
+    "advisory": {
+      "title": "Responsible plot advisor",
+      "unassigned": "This plot has no assigned advisor yet.",
+      "unavailable": "The assigned professional is unavailable in the current catalogue. You may select another.",
+      "demo-notice": "Demo assignment: this does not purchase or activate a plan. Access validation and acceptance will be implemented in the backend.",
+      "select": "Select agronomist",
+      "confirm": "Confirm this responsible advisor? Previous assignments will remain in the history.",
+      "confirm-button": "Confirm assignment",
+      "assign": "Assign or change advisor",
+      "no-advisors": "No professionals with a linked account are available.",
+      "saved": "Advisor assigned successfully.",
+      "errors": {
+        "load": "Advisors and assignments could not be loaded.",
+        "save": "Assignment could not be saved. Your selection is preserved for retry.",
+        "denied": "You may only assign available advisors to your own plots.",
+        "conflict": "Duplicate assignments were found for this plot. Request a data review."
+      },
+      "by-director": "The board of your cooperative assigns the advisor of each plot."
     }
   }
 }

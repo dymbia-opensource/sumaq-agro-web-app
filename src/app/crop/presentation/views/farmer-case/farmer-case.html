@@ -1,0 +1,117 @@
+<app-page-header
+  [breadcrumbs]="breadcrumbs"
+  [title]="'crop.case.title' | translate"
+  [subtitle]="'crop.case.subtitle' | translate"
+>
+  <a mat-stroked-button routerLink="/pest-reports">
+    <span aria-hidden="true">←</span> {{ 'crop.case.back' | translate }}
+  </a>
+</app-page-header>
+@if (store.clinicalLoading() || store.saving()) {
+  <mat-progress-bar mode="indeterminate" [attr.aria-label]="'common.loading' | translate" />
+}
+@if (store.clinicalError(); as error) {
+  <p role="alert">{{ error | translate }}</p>
+  <button mat-stroked-button (click)="reload()">{{ 'common.retry' | translate }}</button>
+}
+@if (store.writeError(); as error) {
+  <p role="alert">{{ error | translate }}</p>
+}
+@if (!store.clinicalLoading() && !store.clinicalError() && loaded()) {
+  @if (report(); as report) {
+    <mat-card appearance="outlined" class="case-summary"
+      ><mat-card-header
+        ><mat-card-title>{{ report.plotName }}</mat-card-title
+        ><mat-card-subtitle
+          ><span class="case-status" [attr.data-status]="report.status">{{
+            'crop.report-statuses.' + report.status | translate
+          }}</span></mat-card-subtitle
+        ></mat-card-header
+      ><mat-card-content
+        ><p>
+          {{ 'crop.advisor.producer' | translate }}: {{ store.producerName(report.reporterId) }} ·
+          #{{ report.reporterId }}
+        </p>
+        <p class="notes">{{ report.description }}</p>
+        @if (report.photo) {
+          <a [href]="report.photo" target="_blank" rel="noopener noreferrer">{{
+            'crop.view-photo' | translate
+          }}</a>
+        }
+        <nav>
+          @if (store.canSchedule() && report.status === 'PENDING') {
+            <a
+              mat-stroked-button
+              [routerLink]="['/pest-reports', report.id, 'inspections']"
+              >{{ 'crop.inspections-title' | translate }}</a
+            >
+          }
+          @if (store.canPrescribe() && store.treatableReports().includes(report)) {
+            <a
+              mat-stroked-button
+              [routerLink]="['/pest-reports', report.id, 'prescriptions', 'new']"
+              >{{ 'crop.btn-prescribe' | translate }}</a
+            >
+          }
+        </nav>
+        <p>
+          {{ 'crop.form-severity' | translate }}:
+          {{ 'crop.severities.' + report.severity | translate }}
+        </p></mat-card-content
+      ></mat-card
+    >
+    <h2 class="section-title">{{ 'crop.inspections-title' | translate }}</h2>
+    @for (visit of inspections(); track visit.id) {
+      <mat-card appearance="outlined"
+        ><mat-card-content
+          ><p>
+            {{ visit.scheduledAt | date: 'medium' : '-0500' : locale() }} ·
+            {{ 'crop.case.' + visit.status | translate }}
+          </p>
+          <p>{{ visit.notes }}</p>
+          @if (visit.completedAt) {
+            <p>
+              {{ visit.completedAt | date: 'medium' : '-0500' : locale() }} ·
+              {{ store.advisorName(visit.inspectorUserId!) }}
+            </p>
+          }
+        </mat-card-content></mat-card
+      >
+    } @empty {
+      <p class="empty-state">{{ 'crop.case.no-inspections' | translate }}</p>
+    }
+    <h2 class="section-title">{{ 'crop.history-title' | translate }}</h2>
+    @for (rx of prescriptions(); track rx.id) {
+      <mat-card appearance="outlined"
+        ><mat-card-header
+          ><mat-card-title>{{ rx.product }}</mat-card-title></mat-card-header
+        ><mat-card-content
+          ><p>{{ rx.dosage }}</p>
+          <p>{{ rx.instructions }}</p>
+          <p>{{ 'crop.prescription-status.' + rx.status | translate }}</p>
+          @if (rx.appliedAt) {
+            <p>{{ 'crop.applied-at' | translate }}: {{ rx.appliedAt | date: 'medium' : '-0500' : locale() }}</p>
+          }
+          @if (store.canApplyPrescription(rx)) {
+            @if (confirming() === rx.id) {
+              <p>{{ 'crop.confirm-application' | translate }}</p>
+              <button mat-flat-button [disabled]="store.saving()" (click)="apply(+rx.id)">{{ 'crop.apply-prescription' | translate }}</button>
+              <button mat-button [disabled]="store.saving()" (click)="confirming.set(null)">{{ 'common.cancel' | translate }}</button>
+            } @else {
+              <button mat-stroked-button [disabled]="store.saving()" (click)="confirming.set(+rx.id)">{{ 'crop.apply-prescription' | translate }}</button>
+            }
+          }
+          <p>
+            {{ rx.applicationDate | date: 'longDate' : undefined : locale() }} ·
+            {{ store.advisorName(rx.agronomistId) }}
+          </p></mat-card-content
+        ></mat-card
+      >
+    } @empty {
+      <p class="empty-state">{{ 'crop.case.no-prescriptions' | translate }}</p>
+    }
+    <p class="follow-up-note">{{ 'crop.case.pending-extra' | translate }}</p>
+  } @else {
+    <p role="status">{{ 'crop.case.not-found' | translate }}</p>
+  }
+}

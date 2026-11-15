@@ -1,26 +1,59 @@
+import { iamGuard } from '../iam/infrastructure/iam.guard';
 import { Routes } from '@angular/router';
-import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 
-const farmerSettingsView = () =>
-  import('./presentation/views/farmer-settings-view/farmer-settings-view').then(
-    (module) => module.FarmerSettingsView,
+const farmerSettings = () =>
+  import('./presentation/views/farmer-settings/farmer-settings').then(
+    (module) => module.FarmerSettings,
   );
-const cooperativeDashboardView = () => import('./presentation/views/cooperative-dashboard-view/cooperative-dashboard-view').then((module) => module.CooperativeDashboardView);
-const cooperativeSettingsView = () => import('./presentation/views/cooperative-settings-view/cooperative-settings-view').then((module) => module.CooperativeSettingsView);
+export const institutionalDashboard = () =>
+  import('./presentation/views/institutional-dashboard/institutional-dashboard').then(
+    (module) => module.InstitutionalDashboard,
+  );
+const cooperativeSettings = () =>
+  import('./presentation/views/cooperative-settings/cooperative-settings').then(
+    (module) => module.CooperativeSettings,
+  );
 
 /** Routes owned by the Profiles bounded context. */
 export const profilesRoutes: Routes = [
   {
     path: 'settings',
-    loadComponent: farmerSettingsView,
-    title: 'Configuración y ayuda | SumaqAgro',
+    loadComponent: farmerSettings,
+    title: 'profiles.settings.title',
   },
   {
-    path: 'cooperative/dashboard',
-    providers: [provideCharts(withDefaultRegisterables())],
-    loadComponent: cooperativeDashboardView,
-    title: 'Dashboard institucional | SumaqAgro',
+    path: 'cooperative/registration',
+    canActivate: [iamGuard],
+    data: { roles: ['COOPERATIVE_DIRECTOR'] },
+    loadComponent: () =>
+      import('./presentation/views/cooperative-registration/cooperative-registration').then(
+        (module) => module.CooperativeRegistration,
+      ),
+    title: 'profiles.cooperative.registration.title',
   },
-  { path: 'cooperative/settings', loadComponent: cooperativeSettingsView, title: 'Configuración institucional | SumaqAgro' },
-  { path: '', redirectTo: 'cooperative/dashboard', pathMatch: 'full' },
+  {
+    path: 'cooperative/members',
+    canActivate: [iamGuard],
+    data: { roles: ['COOPERATIVE_DIRECTOR'] },
+    loadComponent: () =>
+      import('./presentation/views/cooperative-members/cooperative-members').then(
+        (module) => module.CooperativeMembers,
+      ),
+    title: 'profiles.cooperative.members.title',
+  },
+  {
+    path: 'cooperative/members/:id',
+    canActivate: [iamGuard],
+    data: { roles: ['COOPERATIVE_DIRECTOR'] },
+    loadComponent: () =>
+      import('./presentation/views/cooperative-members/cooperative-members').then(
+        (module) => module.CooperativeMembers,
+      ),
+    title: 'profiles.cooperative.members.dossier',
+  },
+  {
+    path: 'cooperative/settings',
+    loadComponent: cooperativeSettings,
+    title: 'profiles.cooperative.settings.title',
+  },
 ];

@@ -1,0 +1,48 @@
+@let item = summary();
+
+<mat-card appearance="outlined" class="summary-card" [class.active]="item.isActive">
+  <mat-card-header>
+    <mat-icon mat-card-avatar>{{ item.isActive ? 'agriculture' : 'inventory_2' }}</mat-icon>
+    <mat-card-title>
+      {{ 'farming.dashboard.campaign' | translate }} {{ item.season }}
+    </mat-card-title>
+    <mat-card-subtitle>
+      {{ 'farming.crop-type.' + item.cropType | translate }} – {{ item.seedVariety }}
+    </mat-card-subtitle>
+    <mat-chip-set class="status">
+      <mat-chip [disableRipple]="true" [highlighted]="item.isActive">
+        {{ 'farming.campaign-status.' + item.status | translate }}
+      </mat-chip>
+    </mat-chip-set>
+  </mat-card-header>
+
+  <mat-card-content>
+    <dl class="figures">
+      <div>
+        <dt>{{ 'farming.campaigns.sowing-date' | translate }}</dt>
+        <dd>
+          {{
+            item.sowingDate
+              ? (item.sowingDate | date: 'mediumDate')
+              : ('farming.campaigns.not-sown' | translate)
+          }}
+        </dd>
+      </div>
+    </dl>
+    <p class="expenses">{{ 'farming.finances.pending' | translate }}</p>
+  </mat-card-content>
+
+  <mat-divider />
+  <mat-card-actions align="end">
+    @if (item.isActive) {
+      <button mat-button [disabled]="saving()" (click)="editCampaign.emit(item)">
+        <mat-icon>edit</mat-icon>
+        {{ 'farming.campaigns.edit' | translate }}
+      </button>
+      <button mat-flat-button [disabled]="saving()" (click)="closeCampaign.emit(item)">
+        <mat-icon>task_alt</mat-icon>
+        {{ 'farming.campaigns.close' | translate }}
+      </button>
+    }
+  </mat-card-actions>
+</mat-card>

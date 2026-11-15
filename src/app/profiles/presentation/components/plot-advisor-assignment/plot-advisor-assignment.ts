@@ -1,0 +1,91 @@
+import { Component, DestroyRef, effect, inject, input, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormsModule } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { TranslatePipe } from '@ngx-translate/core';
+import { HttpErrorResponse } from '@angular/common/http';
+import { ProfilesStore } from '../../../application/profiles.store';
+import { PlotResponsibility } from '../../../domain/model/entities/plot-responsibility';
+
+@Component({
+  selector: 'app-plot-advisor-assignment',
+  imports: [
+    FormsModule,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatProgressBarModule,
+    TranslatePipe,
+  ],
+  templateUrl: './plot-advisor-assignment.html',
+  styleUrl: './plot-advisor-assignment.css',
+})
+export class PlotAdvisorAssignment {
+  readonly cooperativeId = input.required<number>();
+  readonly plotId = input.required<number>();
+  readonly producerUserId = input.required<number>();
+  private readonly store = inject(ProfilesStore);
+  private readonly destroyRef = inject(DestroyRef);
+
+  protected readonly responsibility = signal<PlotResponsibility | null>(null);
+  protected readonly loading = signal(false);
+  protected readonly saving = signal(false);
+  protected readonly error = signal<string | null>(null);
+  protected readonly selected = signal<number | null>(null);
+
+  constructor() {
+    effect((onCleanup) => {
+      const id = this.plotId();
+      this.loading.set(true);
+      this.error.set(null);
+      const request = this.store.responsibilityByPlot(id).subscribe({
+        next: (current) => {
+          const active = current?.status === 'ACTIVE' ? current : null;
+          this.responsibility.set(active);
+          this.selected.set(active?.advisorUserId ?? null);
+          this.loading.set(false);
+        },
+        error: () => {
+          this.loading.set(false);
+          this.error.set('profiles.advisory.errors.load');
+        },
+      });
+      onCleanup(() => request.unsubscribe());
+    });
+  }
+
+  protected validId(): boolean {
+    const id = this.selected();
+    return id !== null && Number.isSafeInteger(id) && id > 0;
+  }
+
+  protected assign(): void {
+    const id = this.selected();
+    if (id === null || !this.validId() || this.saving() || this.loading()) return;
+
+    this.error.set(null);
+    this.saving.set(true);
+    this.store
+      .assignPlotAdvisor(this.cooperativeId(), this.plotId(), this.producerUserId(), id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (saved) => {
+          this.responsibility.set(saved);
+          this.saving.set(false);
+        },
+        error: (reason: unknown) => {
+          this.saving.set(false);
+          const detail =
+            reason instanceof HttpErrorResponse && [400, 409, 422].includes(reason.status)
+              ? reason.error?.details || reason.error?.detail
+              : null;
+          this.error.set(
+            typeof detail === 'string' && detail.trim() ? detail : 'profiles.advisory.errors.save',
+          );
+        },
+      });
+  }
+}

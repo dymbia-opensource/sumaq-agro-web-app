@@ -1,0 +1,40 @@
+<div class="auth-layout" [class.auth-layout-compact]="compact()">
+  <main class="auth-main">
+    <div class="auth-content">
+      <header class="auth-header">
+        <div class="auth-brand">
+          <img class="auth-logo" src="/images/logo-sumaqagro.png" alt="" width="64" height="64" />
+          <div>
+            <span class="brand-name">Sumaq<span>Agro</span></span>
+            <span class="brand-caption">{{ 'iam.layout.brandCaption' | translate }}</span>
+          </div>
+        </div>
+        @if (showLanguageSwitcher()) {
+          <app-language-switcher class="auth-language" />
+        }
+      </header>
+
+      <ng-content />
+
+      <footer class="auth-footer">
+        <mat-icon aria-hidden="true">eco</mat-icon>
+        <span>{{ 'iam.layout.footer' | translate }}</span>
+      </footer>
+    </div>
+  </main>
+
+  <aside class="auth-visual" aria-hidden="true">
+    <img class="auth-cover" [src]="imageSrc()" [style.object-position]="imagePosition()" alt="" />
+    <div class="visual-shade"></div>
+    <div class="visual-content">
+      <span class="visual-eyebrow">{{ 'iam.layout.eyebrow' | translate }}</span>
+      <h2>{{ 'iam.layout.title' | translate }}</h2>
+      <p>{{ 'iam.layout.description' | translate }}</p>
+      <div class="visual-features">
+        <span><mat-icon>monitoring</mat-icon>{{ 'iam.layout.monitor' | translate }}</span>
+        <span><mat-icon>agriculture</mat-icon>{{ 'iam.layout.manage' | translate }}</span>
+        <span><mat-icon>verified</mat-icon>{{ 'iam.layout.certify' | translate }}</span>
+      </div>
+    </div>
+  </aside>
+</div>

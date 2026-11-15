@@ -1,0 +1,113 @@
+{
+  "iam": {
+    "demoAccounts": {
+      "title": "Try with sample data",
+      "description": "Explore SumaqAgro with a test account for each role.",
+      "hint": "Select an account to fill the form, then press Sign in."
+    },
+    "layout": {
+      "brandCaption": "Connected agricultural management",
+      "footer": "For those growing the future of potatoes and coffee.",
+      "eyebrow": "Grow with insight",
+      "title": "Every decision matters. Every harvest, too.",
+      "description": "Your crop health, production costs and harvest quality, together in one place.",
+      "monitor": "Monitor",
+      "manage": "Manage",
+      "certify": "Certify"
+    },
+    "roleDescriptions": {
+      "FARMER": "Manage your plots",
+      "COOPERATIVE_DIRECTOR": "Connect your cooperative",
+      "AGRONOMIST": "Support the grower"
+    },
+    "recovery": {
+      "forgotLink": "Forgot your password?",
+      "backToSignIn": "Back to sign in",
+      "pending": "Processing…",
+      "previewNotice": "Preview: no emails will be sent, the link will not be verified, and your password will not change.",
+      "previewSubmit": "Try form",
+      "previewTitle": "Form validated",
+      "previewReset": "Preview the new password form",
+      "requestNewLink": "Request another link",
+      "passwordMismatch": "The passwords do not match.",
+      "forgot": {
+        "title": "Recover your access",
+        "subtitle": "Enter your account email to request a recovery link.",
+        "submit": "Send instructions",
+        "successTitle": "Check your email",
+        "successMessage": "If an account exists with that email, you will receive instructions to reset your password.",
+        "previewResult": "The email format is valid. No message was sent. You can explore the new password form using the demonstration link."
+      },
+      "reset": {
+        "title": "Create a new password",
+        "subtitle": "Choose a password to access your account again.",
+        "newPassword": "New password",
+        "confirmation": "Confirm password",
+        "submit": "Save password",
+        "invalidTitle": "This link is unavailable",
+        "successTitle": "Password updated",
+        "successMessage": "You can now sign in with your new password.",
+        "previewResult": "The passwords pass form validation. Your current password has not changed and the link has not been verified."
+      },
+      "errors": {
+        "INVALID_LINK": "The link has no recovery token or the server rejected it. Request a new link.",
+        "RATE_LIMITED": "Too many attempts. Please wait before trying again.",
+        "CONNECTION_ERROR": "We could not connect. Check your connection and try again.",
+        "REQUEST_REJECTED": "The server rejected the details. Review the form and password requirements.",
+        "UNEXPECTED_ERROR": "We could not complete your request. Please try again."
+      }
+    },
+    "signIn": {
+      "eyebrow": "Your agricultural workspace",
+      "title": "Welcome back!",
+      "subtitle": "Enter your credentials to access your account.",
+      "submit": "Sign in",
+      "pending": "Signing in…",
+      "success": "You have signed in successfully.",
+      "noAccount": "Don't have an account?",
+      "register": "Sign up"
+    },
+    "signUp": {
+      "eyebrow": "Get started with SumaqAgro",
+      "title": "Create your account",
+      "subtitle": "Start managing your agricultural activity.",
+      "roleLabel": "What is your role?",
+      "passwordHint": "Use at least 8 characters.",
+      "submit": "Create account",
+      "pending": "Creating account…",
+      "hasAccount": "Already have an account?",
+      "successTitle": "Your account is ready",
+      "successMessage": "You can now sign in with your email and password."
+    },
+    "roles": {
+      "FARMER": "Farmer",
+      "COOPERATIVE_DIRECTOR": "Cooperative director",
+      "AGRONOMIST": "Agronomic advisor"
+    },
+    "fields": {
+      "email": "Email address",
+      "password": "Password",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "confirmPassword": "Confirm password"
+    },
+    "actions": {
+      "showPassword": "Show password",
+      "hidePassword": "Hide password"
+    },
+    "validation": {
+      "required": "This field is required.",
+      "email": "Enter a valid email address.",
+      "passwordLength": "The password must contain at least 8 characters.",
+      "nameLength": "Use no more than 100 characters.",
+      "passwordMismatch": "The passwords do not match."
+    },
+    "errors": {
+      "INVALID_CREDENTIALS": "The email or password is incorrect.",
+      "REGISTRATION_CONFLICT": "The account could not be created with those details.",
+      "ACCESS_DENIED": "You do not have permission to perform this action.",
+      "CONNECTION_ERROR": "We could not connect. Check your connection and try again.",
+      "UNEXPECTED_ERROR": "Something went wrong. Please try again."
+    }
+  }
+}

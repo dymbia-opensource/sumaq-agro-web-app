@@ -1,0 +1,47 @@
+<app-page-header [breadcrumbs]="breadcrumbs" [title]="'crop.history-title' | translate" />
+@if (store.writeError(); as error) {
+  <p role="alert">{{ error | translate }}</p>
+}
+@if (store.clinicalLoading() || store.saving()) {
+  <mat-progress-bar mode="indeterminate" [attr.aria-label]="'common.loading' | translate" />
+}
+@if (store.clinicalError(); as error) {
+  <mat-card appearance="outlined" role="alert"
+    ><mat-card-content
+      ><p>{{ error | translate }}</p></mat-card-content
+    ></mat-card
+  >
+}
+
+@if (!store.clinicalLoading() && !store.clinicalError()) {
+  <div class="list-container">
+    @for (rx of store.prescriptions(); track rx.id) {
+      <mat-card appearance="outlined" class="history-card">
+        <mat-card-header>
+          <mat-card-title>{{ rx.product }}</mat-card-title>
+          <mat-card-subtitle
+            >{{ store.reportLabel(rx.reportId) }} ·
+            {{ store.advisorName(rx.agronomistId) }}</mat-card-subtitle
+          >
+        </mat-card-header>
+        <mat-card-content>
+          <p>
+            {{ 'crop.application-date' | translate }}: {{ rx.applicationDate | date: 'mediumDate' }}
+          </p>
+          <p>{{ rx.dosage }}</p>
+          <p class="instructions">{{ rx.instructions }}</p>
+          <p>{{ 'crop.prescription-status.' + rx.status | translate }}</p>
+          @if (rx.appliedAt) {
+            <p>{{ 'crop.applied-at' | translate }}: {{ rx.appliedAt | date: 'medium' }}</p>
+          }
+        </mat-card-content>
+      </mat-card>
+    } @empty {
+      <mat-card appearance="outlined"
+        ><mat-card-content
+          ><p>{{ 'crop.no-prescriptions' | translate }}</p></mat-card-content
+        ></mat-card
+      >
+    }
+  </div>
+}

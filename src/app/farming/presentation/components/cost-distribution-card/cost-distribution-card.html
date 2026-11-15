@@ -1,0 +1,52 @@
+<mat-card appearance="outlined" class="chart-card">
+  <mat-card-header>
+    <mat-icon mat-card-avatar>donut_large</mat-icon>
+    <mat-card-title>{{ 'farming.dashboard.cost-distribution' | translate }}</mat-card-title>
+    @if (since(); as since) {
+      <mat-card-subtitle>
+        {{ 'farming.dashboard.since' | translate }}
+        {{ since | date: 'longDate' : undefined : language() }}
+      </mat-card-subtitle>
+    }
+  </mat-card-header>
+  <mat-divider />
+  <mat-card-content>
+    @if (chartData(); as data) {
+      <div class="cost-body">
+        <div class="doughnut">
+          <canvas
+            baseChart
+            type="doughnut"
+            [data]="data"
+            [options]="chartOptions"
+            [attr.aria-label]="'farming.dashboard.cost-distribution' | translate"
+            role="img"
+          ></canvas>
+        </div>
+        <mat-list
+          class="legend"
+          [attr.aria-label]="'farming.dashboard.cost-distribution' | translate"
+        >
+          @for (item of categories(); track item.label; let i = $index) {
+            <mat-list-item>
+              <span matListItemAvatar [class]="'dot dot-' + i" aria-hidden="true"></span>
+              <span matListItemTitle>{{ item.label | translate }}</span>
+              <span matListItemLine>{{ item.amount.format() }}</span>
+              <span matListItemMeta class="legend-percentage">
+                {{ item.percentage | number: '1.0-0' }}%
+              </span>
+            </mat-list-item>
+            <mat-progress-bar
+              [class]="'share share-' + i"
+              mode="determinate"
+              [value]="item.percentage"
+              [attr.aria-label]="item.label | translate"
+            />
+          }
+        </mat-list>
+      </div>
+    } @else {
+      <p class="empty">{{ 'farming.dashboard.no-expenses' | translate }}</p>
+    }
+  </mat-card-content>
+</mat-card>

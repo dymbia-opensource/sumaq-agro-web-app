@@ -1,0 +1,37 @@
+@if (loading()) {
+  <mat-progress-bar mode="indeterminate" />
+}
+@if (error(); as error) {
+  <p role="alert">{{ error }}</p>
+}
+@if (cooperative(); as cooperative) {
+  <header class="dashboard-header">
+    <div>
+      <h1>{{ cooperative.legalName }}</h1>
+      <p>{{ cooperative.region }} · RUC {{ cooperative.ruc }}</p>
+    </div>
+  </header>
+  <section class="kpi-grid">
+    <mat-card class="kpi-card">
+      <mat-card-content>
+        <h2>{{ 'profiles.cooperative.members.kpi-active' | translate }}</h2>
+        @if (!loading() && !error()) {
+          <strong>{{ activeMembers() }}</strong>
+        }
+        <a mat-button routerLink="/cooperative/members">{{ 'profiles.cooperative.dashboard.view-members' | translate }}</a>
+      </mat-card-content>
+    </mat-card>
+    <mat-card class="kpi-card">
+      <mat-card-content>
+        <h2>{{ 'profiles.cooperative.integration.assigned-advisors' | translate }}</h2>
+        @if (!loading() && !error()) {
+          <strong>{{ advisors().length }}</strong>
+        }
+        <a mat-button routerLink="/cooperative/settings">{{ 'profiles.settings.title' | translate }}</a>
+      </mat-card-content>
+    </mat-card>
+  </section>
+} @else if (!loading() && !error()) {
+  <p>{{ 'profiles.cooperative.dashboard.no-cooperative-message' | translate }}</p>
+  <a mat-flat-button routerLink="/cooperative/registration">{{ 'profiles.cooperative.dashboard.register-cooperative' | translate }}</a>
+}

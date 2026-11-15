@@ -1,0 +1,418 @@
+<app-page-header
+  [breadcrumbs]="breadcrumbs"
+  [title]="'certification.page-title' | translate"
+/>
+
+@let state = store.state(); @if (state.loading) {
+<p role="status">{{ 'certification.loading' | translate }}</p>
+} @else if (state.error) {
+<p role="alert">{{ 'certification.load-save-error' | translate }}</p>
+<button mat-stroked-button type="button" (click)="store.reload()">
+  {{ 'certification.workspace.reload' | translate }}
+</button>
+} @else { @if (store.user()?.experience === 'COOPERATIVE_DIRECTOR' &&
+!store.canManage()) {
+<p>{{ 'certification.scope.missing-cooperative' | translate }}</p>
+}
+<div class="toolbar">
+  @if (store.canManage()) {
+  <button
+    mat-flat-button
+    type="button"
+    [disabled]="busy()"
+    (click)="startRegistration()"
+  >
+    {{ 'certification.workspace.register' | translate }}
+  </button>
+  } @if (store.entries().length) {
+  <form class="lookup" (ngSubmit)="lookup()">
+    <label>
+      {{ 'certification.workspace.number' | translate }}
+      <input name="search" [(ngModel)]="search" required />
+    </label>
+    <button
+      mat-stroked-button
+      type="submit"
+      [disabled]="busy() || !search.trim()"
+    >
+      {{ 'certification.workspace.lookup' | translate }}
+    </button>
+  </form>
+  }
+</div>
+
+@if (error()) {
+<p role="alert">{{ error() | translate }}</p>
+} @if (notice()) {
+<p role="status">{{ notice() | translate }}</p>
+}
+
+<div class="workspace">
+  <section class="card">
+    <h2>{{ 'certification.workspace.batches' | translate }}</h2>
+    @for (entry of store.entries(); track entry.batch.id) {
+    <button
+      class="batch"
+      type="button"
+      [attr.aria-pressed]="selectedId() === entry.batch.id"
+      [disabled]="busy()"
+      (click)="selectBatch(entry.batch.id)"
+    >
+      <strong>{{ entry.batch.batchCode }}</strong>
+      <span
+        >{{ 'certification.workspace.status.' + entry.batch.status | translate
+        }}</span
+      >
+      @if (entry.certificate; as certificate) {
+      <span
+        >{{ certificate.certificateNumber }} · {{
+        'certification.workspace.status.' + certificate.status | translate
+        }}</span
+      >
+      }
+    </button>
+    } @empty {
+    <p>{{ 'certification.workspace.empty' | translate }}</p>
+    }
+  </section>
+
+  @if (registering() && store.canManage()) {
+  <section class="card">
+    <h2>{{ 'certification.workspace.register' | translate }}</h2>
+    <form #registration="ngForm" (ngSubmit)="register()">
+      <label
+        >{{ 'certification.workspace.batchCode' | translate }}
+        <input name="batchCode" [(ngModel)]="form.batchCode" required />
+      </label>
+      <label
+        >{{ 'certification.workspace.member' | translate }}
+        <select
+          name="memberId"
+          [ngModel]="form.memberId"
+          (ngModelChange)="selectMember($event)"
+          required
+        >
+          <option [ngValue]="null">
+            {{ 'certification.workspace.choose' | translate }}
+          </option>
+          @for (member of state.members; track member.id) { @if (member.userId
+          !== null) {
+          <option [ngValue]="+member.id">{{ member.fullName }}</option>
+          } }
+        </select>
+      </label>
+      @if (plots().error) {
+      <p role="alert">
+        {{ 'certification.workspace.plots-error' | translate }}
+      </p>
+      <button
+        mat-stroked-button
+        type="button"
+        (click)="selectMember(form.memberId)"
+      >
+        {{ 'certification.workspace.reload' | translate }}
+      </button>
+      } @else if (plots().loading) {
+      <p role="status">
+        {{ 'certification.workspace.plots-loading' | translate }}
+      </p>
+      } @else if (form.memberId !== null && !plots().items.length) {
+      <p>{{ 'certification.workspace.plots-empty' | translate }}</p>
+      }
+      <label
+        >{{ 'certification.workspace.plot' | translate }}
+        <select name="plotId" [(ngModel)]="form.plotId" required>
+          <option [ngValue]="null">
+            {{ 'certification.workspace.choose' | translate }}
+          </option>
+          @for (plot of plots().items; track plot.id) {
+          <option [ngValue]="plot.id">{{ plot.name }}</option>
+          }
+        </select>
+      </label>
+      <label
+        >{{ 'certification.workspace.crop' | translate }}
+        <select name="cropType" [(ngModel)]="form.cropType" required>
+          @for (crop of crops; track crop) {
+          <option [ngValue]="crop">
+            {{ 'certification.workspace.cropType.' + crop | translate }}
+          </option>
+          }
+        </select>
+      </label>
+      <label
+        >{{ 'certification.workspace.harvestedOn' | translate }}
+        <input
+          type="date"
+          name="harvestedOn"
+          [(ngModel)]="form.harvestedOn"
+          required
+        />
+      </label>
+      <button
+        mat-flat-button
+        type="submit"
+        [disabled]="busy() || registration.invalid"
+      >
+        {{ 'certification.workspace.save' | translate }}
+      </button>
+    </form>
+  </section>
+  } @else if (selected(); as entry) { @let batch = entry.batch;
+  <section class="card">
+    <h2>{{ batch.batchCode }}</h2>
+    <p>
+      {{ 'certification.workspace.cropType.' + batch.cropType | translate }} ·
+      {{ batch.harvestedOn }}
+    </p>
+    <dl>
+      @if (batch.netWeightKg !== null) {
+      <dt>{{ 'certification.workspace.netWeightKg' | translate }}</dt>
+      <dd>{{ batch.netWeightKg | number }} kg</dd>
+      } @if (batch.sampleIdentifier) {
+      <dt>{{ 'certification.workspace.sample' | translate }}</dt>
+      <dd>
+        {{ batch.sampleIdentifier }} · {{ batch.sampleWeightKg | number }} kg
+      </dd>
+      } @if (batch.qualityCategory) {
+      <dt>{{ 'certification.workspace.quality' | translate }}</dt>
+      <dd>{{ batch.qualityCategory }} · {{ batch.qualityScore | number }}</dd>
+      } @if (entry.certificate; as certificate) {
+      <dt>{{ 'certification.workspace.number' | translate }}</dt>
+      <dd>
+        {{ certificate.certificateNumber }} · {{ certificate.issuedAt | date:
+        'mediumDate' }}
+      </dd>
+      <dt>{{ 'certification.workspace.certificate-status' | translate }}</dt>
+      <dd>
+        {{ 'certification.workspace.status.' + certificate.status | translate }}
+      </dd>
+      }
+    </dl>
+
+    @if (entry.certificate; as certificate) {
+    <div class="actions">
+      <a
+        mat-stroked-button
+        routerLink="/verify"
+        [queryParams]="{ number: certificate.certificateNumber, hash: certificate.certificateHash }"
+        target="_blank"
+        rel="noopener"
+      >
+        {{ 'certification.trace.public-verification' | translate }}
+      </a>
+      @if (certificate.status === 'ACTIVE') {
+      <button
+        mat-stroked-button
+        type="button"
+        [disabled]="busy()"
+        (click)="download(certificate.certificateNumber)"
+      >
+        {{ 'certification.farmer.download-pdf' | translate }}
+      </button>
+      @if (store.canManage()) {
+      <button
+        mat-stroked-button
+        type="button"
+        [disabled]="busy()"
+        (click)="revoke(certificate.id)"
+      >
+        {{ (confirmRevocation ? 'certification.workspace.confirm-revoke' :
+        'certification.workspace.revoke') | translate }}
+      </button>
+      @if (confirmRevocation) {
+      <button
+        mat-button
+        type="button"
+        [disabled]="busy()"
+        (click)="confirmRevocation = false"
+      >
+        {{ 'certification.workspace.cancel' | translate }}
+      </button>
+      } } }
+    </div>
+    } @else if (store.canManage()) { @if (batch.netWeightKg === null) {
+    <h3>{{ 'certification.workspace.weigh' | translate }}</h3>
+    <form #weighing="ngForm" (ngSubmit)="weigh(batch.id)">
+      <label
+        >{{ 'certification.workspace.grossWeightKg' | translate }}
+        <input
+          type="number"
+          step="any"
+          min="0.001"
+          name="grossWeightKg"
+          [(ngModel)]="weight.grossWeightKg"
+          required
+        />
+      </label>
+      <label
+        >{{ 'certification.workspace.tareKg' | translate }}
+        <input
+          type="number"
+          step="any"
+          min="0"
+          name="tareKg"
+          [(ngModel)]="weight.tareKg"
+          required
+        />
+      </label>
+      <button
+        mat-flat-button
+        type="submit"
+        [disabled]="busy() || weighing.invalid"
+      >
+        {{ 'certification.workspace.save' | translate }}
+      </button>
+    </form>
+    } @else if (!batch.sampleIdentifier) {
+    <h3>{{ 'certification.workspace.sample' | translate }}</h3>
+    <form #sampling="ngForm" (ngSubmit)="extractSample(batch.id)">
+      <label
+        >{{ 'certification.workspace.sampleIdentifier' | translate }}
+        <input
+          name="sampleIdentifier"
+          [(ngModel)]="sample.sampleIdentifier"
+          required
+        />
+      </label>
+      <label
+        >{{ 'certification.workspace.sampleWeightKg' | translate }}
+        <input
+          type="number"
+          step="any"
+          [min]="batch.cropType === 'SPECIALTY_COFFEE' ? 1 : 0.001"
+          [max]="batch.netWeightKg"
+          name="sampleWeightKg"
+          [(ngModel)]="sample.sampleWeightKg"
+          required
+        />
+      </label>
+      <button
+        mat-flat-button
+        type="submit"
+        [disabled]="busy() || sampling.invalid"
+      >
+        {{ 'certification.workspace.save' | translate }}
+      </button>
+    </form>
+    } @else if (batch.status === 'PENDING') {
+    <h3>
+      {{ (batch.cropType === 'ANDEAN_POTATO' ? 'certification.workspace.grade' :
+      'certification.workspace.cup') | translate }}
+    </h3>
+    <form #grading="ngForm" (ngSubmit)="grade(batch.id, batch.cropType)">
+      @if (batch.cropType === 'ANDEAN_POTATO') {
+      <label
+        >{{ 'certification.workspace.firstPercentage' | translate }}
+        <input
+          type="number"
+          step="any"
+          min="0"
+          max="100"
+          name="firstPercentage"
+          [(ngModel)]="potato.firstPercentage"
+          required
+        />
+      </label>
+      <label
+        >{{ 'certification.workspace.secondPercentage' | translate }}
+        <input
+          type="number"
+          step="any"
+          min="0"
+          max="100"
+          name="secondPercentage"
+          [(ngModel)]="potato.secondPercentage"
+          required
+        />
+      </label>
+      <label
+        >{{ 'certification.workspace.thirdPercentage' | translate }}
+        <input
+          type="number"
+          step="any"
+          min="0"
+          max="100"
+          name="thirdPercentage"
+          [(ngModel)]="potato.thirdPercentage"
+          required
+        />
+      </label>
+      <label
+        >{{ 'certification.workspace.pestDamagePercentage' | translate }}
+        <input
+          type="number"
+          step="any"
+          min="0"
+          max="100"
+          name="pestDamagePercentage"
+          [(ngModel)]="potato.pestDamagePercentage"
+          required
+        />
+      </label>
+      <p>{{ 'certification.workspace.grade-instruction' | translate }}</p>
+      } @else { @for (field of coffeeFields; track field) {
+      <label
+        >{{ 'certification.workspace.' + field | translate }}
+        <input
+          type="number"
+          step="any"
+          min="0"
+          max="100"
+          [name]="field"
+          [(ngModel)]="coffee[field]"
+          required
+        />
+      </label>
+      }
+      <label class="check">
+        <input
+          type="checkbox"
+          name="fermentDefect"
+          [(ngModel)]="coffee.fermentDefect"
+        />
+        {{ 'certification.workspace.fermentDefect' | translate }}
+      </label>
+      }
+      <button
+        mat-flat-button
+        type="submit"
+        [disabled]="busy() || grading.invalid"
+      >
+        {{ 'certification.workspace.save' | translate }}
+      </button>
+    </form>
+    } @else if (batch.status === 'GRADED' && batch.qualityCategory) {
+    <h3>{{ 'certification.workspace.issue' | translate }}</h3>
+    <form #issuing="ngForm" (ngSubmit)="issue(batch.id)">
+      <label
+        >{{ 'certification.workspace.number' | translate }}
+        <input
+          name="certificateNumber"
+          [(ngModel)]="certificateNumber"
+          required
+        />
+      </label>
+      <button
+        mat-flat-button
+        type="submit"
+        [disabled]="busy() || issuing.invalid"
+      >
+        {{ 'certification.workspace.issue' | translate }}
+      </button>
+    </form>
+    } @else {
+    <p>{{ 'certification.workspace.refresh-batch' | translate }}</p>
+    <button
+      mat-stroked-button
+      type="button"
+      [disabled]="busy()"
+      (click)="store.reload()"
+    >
+      {{ 'certification.workspace.reload' | translate }}
+    </button>
+    } }
+  </section>
+  }
+</div>
+}

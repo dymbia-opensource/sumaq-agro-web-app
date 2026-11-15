@@ -5,15 +5,16 @@ import {
   provideBrowserGlobalErrorListeners,
 } from '@angular/core';
 import { registerLocaleData } from '@angular/common';
-import { HttpClient, provideHttpClient, withFetch } from '@angular/common/http';
+import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import localeEsPe from '@angular/common/locales/es-PE';
-import { MatPaginatorIntl } from '@angular/material/paginator';
 import { MatIconRegistry } from '@angular/material/icon';
-import { provideRouter, withComponentInputBinding } from '@angular/router';
-import { provideTranslateLoader, provideTranslateService } from '@ngx-translate/core';
+import { TitleStrategy, provideRouter, withComponentInputBinding } from '@angular/router';
+import { provideTranslateService } from '@ngx-translate/core';
+import { provideTranslateMultiHttpLoader } from '@ngx-translate/http-loader';
 import { routes } from './app.routes';
-import { MultiTranslateHttpLoader } from './shared/infrastructure/i18n/multi-translate-http-loader';
-import { TranslatedPaginatorIntl } from './shared/presentation/i18n/translated-paginator-intl';
+import { iamInterceptor } from './iam/infrastructure/iam.interceptor';
+import { TranslatedTitleStrategy } from './shared/infrastructure/translated-title.strategy';
+import { mockAuthenticationInterceptor } from './iam/infrastructure/mock/mock-authentication.interceptor';
 
 /** Spanish (Peru) data for dates and numbers; English is built in. */
 registerLocaleData(localeEsPe, 'es');
@@ -24,10 +25,12 @@ registerLocaleData(localeEsPe, 'es');
  */
 const TRANSLATION_FILES = [
   'shared',
-  'field-management',
-  'crop-health',
+  'farming',
+  'crop',
   'profiles',
-  'harvest-certification',
+  'certification',
+  'iam',
+  'subscriptions',
 ];
 
 /**
@@ -35,23 +38,28 @@ const TRANSLATION_FILES = [
  *
  * @remarks
  * Registers the router, the HTTP client used by the infrastructure endpoints,
- * ngx-translate (it loads the translation file of each bounded context), the
- * translated texts of the Material paginator and the Material Symbols icon
- * font for `<mat-icon>`.
+ * ngx-translate (it loads the translation file of each bounded context) and
+ * the Material Symbols icon font for `<mat-icon>`.
  */
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes, withComponentInputBinding()),
-    provideHttpClient(withFetch()),
+    provideHttpClient(
+      withFetch(),
+      withInterceptors([iamInterceptor, mockAuthenticationInterceptor]),
+    ),
     provideTranslateService({
-      loader: provideTranslateLoader(
-        () => new MultiTranslateHttpLoader(inject(HttpClient), TRANSLATION_FILES),
-      ),
+      loader: provideTranslateMultiHttpLoader({
+        resources: TRANSLATION_FILES.map((file) => ({
+          prefix: './i18n/',
+          suffix: `/${file}.json`,
+        })),
+      }),
       fallbackLang: 'en',
       lang: 'en',
     }),
-    { provide: MatPaginatorIntl, useClass: TranslatedPaginatorIntl },
+    { provide: TitleStrategy, useClass: TranslatedTitleStrategy },
     provideAppInitializer(() => {
       inject(MatIconRegistry).setDefaultFontSetClass('material-symbols-outlined');
     }),

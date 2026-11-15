@@ -1,0 +1,68 @@
+<app-page-header [breadcrumbs]="breadcrumbs" [title]="'crop.form-title' | translate" />
+@if (loadingPlots() || store.saving()) {
+  <mat-progress-bar mode="indeterminate" />
+}
+@if (optionsError(); as error) {
+  <p role="alert">{{ error | translate }}</p>
+}
+@if (store.writeError(); as error) {
+  <p role="alert">{{ error | translate }}</p>
+}
+@if (saved()) {
+  <div class="success-banner" role="status">
+    <mat-icon>check_circle</mat-icon>
+    <div>
+      <strong>{{ 'crop.report-saved' | translate }}</strong>
+      <p>{{ 'crop.report-next-step' | translate }}</p>
+    </div>
+    <a mat-button routerLink="/pest-reports">{{ 'crop.view-inbox' | translate }}</a>
+  </div>
+}
+@if (!loadingPlots() && !optionsError() && plots().length === 0) {
+  <p>{{ 'crop.no-plots' | translate }}</p>
+}
+<mat-card appearance="outlined" class="form-card"
+  ><mat-card-content>
+    <form [formGroup]="reportForm" (ngSubmit)="onSubmit()">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>{{ 'crop.plot' | translate }}</mat-label>
+        <mat-select formControlName="plotId">
+          @for (plot of plots(); track plot.id) {
+            <mat-option [value]="plot.id">{{ plot.name }}</mat-option>
+          }
+        </mat-select>
+        <mat-error>{{ 'crop.required-field' | translate }}</mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>{{ 'crop.form-describe' | translate }}</mat-label>
+        <textarea matInput formControlName="description" rows="4"></textarea>
+        <mat-error>{{ 'crop.description-length' | translate }}</mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>{{ 'crop.form-severity' | translate }}</mat-label>
+        <mat-select formControlName="severity">
+          <mat-option value="LOW">{{ 'crop.severity-low' | translate }}</mat-option>
+          <mat-option value="MEDIUM">{{ 'crop.severity-medium' | translate }}</mat-option>
+          <mat-option value="HIGH">{{ 'crop.severity-high' | translate }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <div class="form-actions">
+        <button
+          mat-flat-button
+          type="submit"
+          [disabled]="
+            reportForm.invalid ||
+            reportForm.disabled ||
+            store.saving() ||
+            loadingPlots() ||
+            !!optionsError() ||
+            !store.canReport()
+          "
+        >
+          {{ 'crop.btn-send-report' | translate }}
+        </button>
+        <a mat-stroked-button routerLink="/pest-reports">{{ 'crop.inbox-title' | translate }}</a>
+      </div>
+    </form>
+  </mat-card-content></mat-card
+>

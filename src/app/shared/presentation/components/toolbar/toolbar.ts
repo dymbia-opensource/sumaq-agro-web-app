@@ -1,49 +1,77 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { MatBadgeModule } from '@angular/material/badge';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDividerModule } from '@angular/material/divider';
-import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
-import { DemoSessionService } from '../../../application/demo-session.service';
-import { LayoutService } from '../layout/layout.service';
+import { LayoutStore } from '../layout/layout.store';
+import { CropStore } from '../../../../crop/application/crop.store';
+import { IamStore } from '../../../../iam/application/iam.store';
+import { AuthNavigation } from '../../../../iam/infrastructure/auth-navigation';
+import { settingsRouteFor } from '../../../infrastructure/navigation-config';
 
 /**
- * Top bar of the shell: menu button (on phones), search, connection status,
- * notifications and the user menu.
+ * Top bar of the shell: mobile menu, search, connection status and user menu.
  */
 @Component({
   selector: 'app-toolbar',
   imports: [
     RouterLink,
-    MatBadgeModule,
+    MatAutocompleteModule,
     MatButtonModule,
     MatChipsModule,
     MatDividerModule,
-    MatFormFieldModule,
     MatIconModule,
-    MatInputModule,
     MatMenuModule,
     MatToolbarModule,
-    MatTooltipModule,
     TranslatePipe,
   ],
   templateUrl: './toolbar.html',
   styleUrl: './toolbar.css',
 })
 export class Toolbar {
-  protected readonly layout = inject(LayoutService);
-  private readonly demoSession = inject(DemoSessionService);
+  protected readonly layout = inject(LayoutStore);
+  private readonly session = inject(IamStore);
+  private readonly authNavigation = inject(AuthNavigation);
 
-  /** Name shown in the user menu. */
-  readonly userName = computed(() => this.demoSession.activeUser()?.displayName ?? '');
+  private readonly crop = inject(CropStore);
+  private readonly router = inject(Router);
+  protected readonly query = signal('');
+  protected readonly searchLoading = this.crop.scopeLoading;
+  protected readonly plotMatches = computed(() => {
+    const normalize = (value: string) => value.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
+    const query = normalize(this.query().trim());
+    if (!query) return [];
+    const matches = this.crop.plots().filter((plot) => normalize(plot.name).includes(query));
+    return matches.sort((a, b) =>
+      Number(normalize(b.name) === query) - Number(normalize(a.name) === query) ||
+      a.name.localeCompare(b.name),
+    ).slice(0, 8);
+  });
 
-  /** Pending notifications. Connected to the agroclimatic alerts later. */
-  readonly notificationCount = signal(0);
+  protected openPlot(plotId: number, input: HTMLInputElement): void {
+    if (!this.crop.plots().some((plot) => plot.id === plotId)) return;
+    this.crop.selectPlot(plotId);
+    this.query.set('');
+    input.value = '';
+    void this.router.navigate(['/monitoring']);
+  }
+
+  /** Display name provided by the current session projection. */
+  readonly userName = computed(() => this.session.activeUser()?.displayName ?? '');
+
+  /** Account page of the signed-in role; a director manages the cooperative one. */
+  protected readonly settingsRoute = computed(() => {
+    const experience = this.session.activeUser()?.experience;
+
+    return experience ? settingsRouteFor(experience) : '/settings';
+  });
+  protected signOut(): void {
+    this.layout.closeSidebarOnHandset();
+    this.authNavigation.signOut();
+  }
 }

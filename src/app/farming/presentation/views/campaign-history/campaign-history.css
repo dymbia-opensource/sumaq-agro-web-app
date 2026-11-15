@@ -1,0 +1,15 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.start {
+  height: 48px;
+}
+
+.campaign-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}

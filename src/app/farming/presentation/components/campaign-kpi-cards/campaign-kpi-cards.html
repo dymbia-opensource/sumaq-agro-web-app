@@ -1,0 +1,118 @@
+<!-- Leaf health from the selected plot observations -->
+<mat-card class="kpi-card">
+  <mat-card-header>
+    <mat-icon mat-card-avatar>eco</mat-icon>
+    <mat-card-title>{{ 'farming.dashboard.leaf-health' | translate }}</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    @if (satelliteLoading()) {
+      <p class="kpi-note">{{ 'common.loading' | translate }}</p>
+    } @else if (satelliteError()) {
+      <p class="kpi-note" role="alert">{{ 'crop.errors.load-observations' | translate }}</p>
+    } @else if (observation(); as observation) {
+      <p class="kpi-value">
+        {{ observation.ndviMean === null ? ('crop.no-data' | translate) : (observation.ndviMean | number: '1.2-2') }} <span class="kpi-unit">NDVI</span>
+      </p>
+      <p class="kpi-note">
+        {{ 'crop.capture-date' | translate }}: {{ observation.date | date: 'mediumDate' }}
+      </p>
+    } @else {
+      <p class="kpi-note">{{ 'farming.dashboard.leaf-health-pending' | translate }}</p>
+    }
+  </mat-card-content>
+  <mat-card-actions>
+    <a mat-flat-button class="kpi-action" routerLink="/monitoring">
+      <mat-icon>map</mat-icon>
+      {{ 'farming.dashboard.view-satellite-map' | translate }}
+      <mat-icon iconPositionEnd>chevron_right</mat-icon>
+    </a>
+  </mat-card-actions>
+</mat-card>
+
+<!-- Total spend (US-16, US-17, US-19) -->
+<mat-card class="kpi-card">
+  <mat-card-header>
+    <mat-icon mat-card-avatar>monetization_on</mat-icon>
+    <mat-card-title>{{ 'farming.dashboard.total-spend' | translate }}</mat-card-title>
+    @if (campaign(); as campaign) {
+      <mat-chip-set class="kpi-chip">
+        <mat-chip [disableRipple]="true">
+          <mat-icon matChipAvatar>{{ campaign.isActive() ? 'check_circle' : 'lock' }}</mat-icon>
+          {{ 'farming.campaign-status.' + campaign.status | translate }}
+        </mat-chip>
+      </mat-chip-set>
+    }
+  </mat-card-header>
+  <mat-card-content>
+    @if (ledger(); as ledger) {
+      <p class="kpi-label">{{ 'farming.dashboard.total-invested' | translate }}</p>
+      <p class="kpi-value">{{ ledger.totalInvestment().format() }}</p>
+      <p class="kpi-note">
+        @for (share of categoryShares(); track share.label; let last = $last) {
+          {{ share.label | translate }}: {{ share.percentage | number: '1.0-0' }}%
+          @if (!last) {
+            |
+          }
+        }
+      </p>
+    } @else {
+      <p class="kpi-note">{{ 'farming.dashboard.no-expenses' | translate }}</p>
+    }
+  </mat-card-content>
+  <mat-card-actions>
+    <a mat-flat-button class="kpi-action" routerLink="/finances">
+      <mat-icon>receipt_long</mat-icon>
+      {{ 'farming.dashboard.view-expenses' | translate }}
+      <mat-icon iconPositionEnd>chevron_right</mat-icon>
+    </a>
+  </mat-card-actions>
+</mat-card>
+
+<!-- Breakeven price (US-18) -->
+<mat-card class="kpi-card">
+  <mat-card-header>
+    <mat-icon mat-card-avatar>trending_up</mat-icon>
+    <mat-card-title>{{ 'farming.dashboard.breakeven-title' | translate }}</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    @if (ledger(); as ledger) {
+      @if (ledger.expectedYield > 0) {
+        <p class="kpi-label">{{ 'farming.dashboard.breakeven-point' | translate }}</p>
+        <p class="kpi-value">
+          {{ ledger.breakevenPrice().format() }}
+          <span class="kpi-unit">{{
+            'farming.yield-unit.per-' + ledger.yieldUnit | translate
+          }}</span>
+        </p>
+        <p class="kpi-note">
+          {{ 'farming.dashboard.estimated' | translate }}:
+          {{ ledger.expectedYield | number }}
+          {{ 'farming.yield-unit.' + ledger.yieldUnit | translate }}
+        </p>
+      } @else {
+        <p class="kpi-note">{{ 'farming.dashboard.no-expected-yield' | translate }}</p>
+      }
+    } @else {
+      <p class="kpi-note">{{ 'farming.dashboard.no-expenses' | translate }}</p>
+    }
+  </mat-card-content>
+  @if (ledger(); as ledger) {
+    @if (ledger.expectedYield > 0) {
+      <mat-card-actions>
+        <mat-chip-set class="kpi-advice">
+          <mat-chip
+            [highlighted]="true"
+            [disableRipple]="true"
+            [matTooltip]="'farming.dashboard.minimum-price-hint' | translate"
+          >
+            <mat-icon matChipAvatar>trending_up</mat-icon>
+            {{
+              'farming.dashboard.minimum-price'
+                | translate: { price: ledger.suggestedPrice().format() }
+            }}
+          </mat-chip>
+        </mat-chip-set>
+      </mat-card-actions>
+    }
+  }
+</mat-card>

@@ -1,0 +1,78 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.report-card {
+  border-radius: 20px;
+  height: 100%;
+}
+
+.report-card [mat-card-avatar] {
+  color: var(--mat-sys-primary);
+  font-size: 32px;
+  width: 32px;
+  height: 32px;
+}
+
+.total {
+  margin: 16px 0;
+  font: var(--mat-sys-headline-medium);
+  font-weight: 700;
+  color: var(--mat-sys-primary);
+}
+
+.total span {
+  font: var(--mat-sys-body-medium);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row-head {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.category {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font: var(--mat-sys-label-large);
+}
+
+.category mat-icon {
+  color: var(--mat-sys-primary);
+}
+
+.amount {
+  font-weight: 600;
+}
+
+.share {
+  font: var(--mat-sys-body-small);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.yield {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 24px 0 0;
+}
+
+.yield mat-icon {
+  color: var(--mat-sys-primary);
+}
+
+.hint {
+  color: var(--mat-sys-on-surface-variant);
+}

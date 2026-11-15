@@ -1,0 +1,32 @@
+<mat-card appearance="outlined">
+  <mat-card-header
+    ><mat-card-title>{{ 'profiles.advisory.title' | translate }}</mat-card-title></mat-card-header
+  >
+  <mat-card-content>
+    @if (store.advisoryLoading()) {
+      <mat-progress-bar mode="indeterminate" [attr.aria-label]="'common.loading' | translate" />
+    }
+    @if (store.advisoryError(); as error) {
+      <p role="alert">{{ error | translate }}</p>
+      <button mat-button (click)="store.reloadAdvisory()">
+        {{ 'common.retry' | translate }}
+      </button>
+    }
+    @if (!store.advisoryLoading()) {
+      @if (advisor(); as advisor) {
+        <p>
+          <strong>{{ advisor.name }}</strong>
+        </p>
+      } @else if (assignment()) {
+        <p>{{ 'profiles.cooperative.supervision.in-charge' | translate }} #{{ assignment()?.advisorUserId }}</p>
+      } @else {
+        <p>{{ 'profiles.advisory.unassigned' | translate }}</p>
+      }
+      @if (store.advisorAssignedByDirector()) {
+        <p>{{ 'profiles.advisory.by-director' | translate }}</p>
+      } @else {
+        <p>{{ 'profiles.cooperative.integration.independent-pending' | translate }}</p>
+      }
+    }
+  </mat-card-content>
+</mat-card>

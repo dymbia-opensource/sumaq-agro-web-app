@@ -18,17 +18,6 @@ package "src/app/shared" {
       +get id(): number | string
       +set id(value: number | string)
     }
-
-    class Money <<money.ts>> {
-      -_amount: number
-      -_currency: string
-      +constructor(amount: number, currency: string)
-      +get amount(): number
-      +get currency(): string
-      +add(other: Money): Money
-      +multiply(factor: number): Money
-      +format(): string
-    }
   }
 
   package "infrastructure" {
@@ -65,39 +54,12 @@ package "src/app/shared" {
       #handleError(operation: string): (error: HttpErrorResponse) => Observable<never>
     }
 
-    class OfflineSyncService <<offline-sync.service.ts>> {
-      -db: Dexie
-      -pendingCount: WritableSignal<number>
-      +isOnline: Signal<boolean>
-      +enqueue(operation: PendingOperation): Promise<void>
-      +getPending(): Promise<PendingOperation[]>
-      +flush(): Observable<SyncResult>
-      -remove(uuid: string): Promise<void>
-    }
-
-    class PendingOperation <<pending-operation.ts>> {
-      +uuid: string
-      +type: PendingOperationType
-      +payload: unknown
-      +createdAt: Date
-    }
-
-    enum PendingOperationType {
-      FIELD_EXPENSE
-      PEST_REPORT
-    }
-
     class AppUpdateService <<app-update.service.ts>> {
       -swUpdate: SwUpdate
       +checkForUpdate(): Promise<boolean>
       +activateUpdate(): Promise<void>
     }
 
-    class SyncResult <<sync-result.ts>> {
-      +synchronized: number
-      +skippedDuplicates: number
-      +failed: number
-    }
   }
 
   package "presentation" {
@@ -114,11 +76,6 @@ package "src/app/shared" {
       +useLanguage(language: string): void
     }
 
-    class OfflineStatusBanner <<offline-status-banner.ts>> {
-      -offlineSyncService: OfflineSyncService
-      +forceSynchronization(): void
-    }
-
     class PageNotFound <<page-not-found.ts>> {
       +invalidPath: string
       +navigateToHome(): void
@@ -133,12 +90,7 @@ BaseAssembler ..> BaseResource
 BaseAssembler ..> BaseResponse
 BaseApiEndpoint "1" o-- "1" BaseAssembler : "delegates mapping to"
 BaseApiEndpoint ..> BaseEntity
-OfflineSyncService "1" *-- "0..*" PendingOperation : "queues"
-PendingOperation --> "1" PendingOperationType : "is of"
-OfflineSyncService ..> SyncResult
 Layout "1" *-- "1" LanguageSwitcher : "contains"
-Layout "1" *-- "1" OfflineStatusBanner : "contains"
-OfflineStatusBanner --> "1" OfflineSyncService : "observes"
 Layout --> "1" AppUpdateService : "checks new versions with"
 Layout --> "1" IamStore : "reads the role from"
 

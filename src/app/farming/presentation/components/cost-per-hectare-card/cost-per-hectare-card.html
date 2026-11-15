@@ -1,0 +1,60 @@
+@let data = report();
+
+<mat-card appearance="outlined" class="report-card">
+  <mat-card-header>
+    <mat-icon mat-card-avatar>square_foot</mat-icon>
+    <mat-card-title>{{ 'farming.reports.cost-per-hectare' | translate }}</mat-card-title>
+    <mat-card-subtitle>
+      {{ 'farming.reports.area' | translate: { area: (data.areaHectares | number: '1.0-2') } }}
+    </mat-card-subtitle>
+  </mat-card-header>
+
+  <mat-card-content>
+    @if (data.hasArea) {
+      <p class="total">
+        {{ data.totalPerHectare.format() }}
+        <span>{{ 'farming.reports.per-hectare' | translate }}</span>
+      </p>
+
+      <ul class="rows">
+        @for (row of data.rows; track row.category) {
+          <li>
+            <div class="row-head">
+              <span class="category">
+                <mat-icon aria-hidden="true">{{ icons[row.category] }}</mat-icon>
+                {{ 'farming.expense-category.' + row.category | translate }}
+              </span>
+              <span class="amount">{{ row.perHectare.format() }}</span>
+            </div>
+            <mat-progress-bar
+              mode="determinate"
+              [value]="row.percentage"
+              [attr.aria-label]="'farming.expense-category.' + row.category | translate"
+            />
+            <span class="share">
+              {{
+                'farming.finances.of-total'
+                  | translate: { percentage: (row.percentage | number: '1.0-0') }
+              }}
+              · {{ row.total.format() }}
+            </span>
+          </li>
+        }
+      </ul>
+
+      <p class="yield">
+        <mat-icon aria-hidden="true">grass</mat-icon>
+        {{
+          'farming.reports.yield-per-hectare'
+            | translate
+              : {
+                  quantity: (data.yieldPerHectare | number: '1.0-1'),
+                  unit: ('farming.yield-unit.' + data.yieldUnit | translate),
+                }
+        }}
+      </p>
+    } @else {
+      <p class="hint">{{ 'farming.reports.no-area' | translate }}</p>
+    }
+  </mat-card-content>
+</mat-card>

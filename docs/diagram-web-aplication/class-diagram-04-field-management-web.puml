@@ -16,8 +16,6 @@ package "src/app/shared" {
   interface BaseAssembler <<base-assembler.ts>>
   abstract class BaseApiEndpoint <<base-api-endpoint.ts>>
   abstract class BaseApi <<base-api.ts>>
-  class Money <<money.ts>>
-  class OfflineSyncService <<offline-sync.service.ts>>
 }
 
 package "src/app/iam" {
@@ -26,6 +24,14 @@ package "src/app/iam" {
 
 package "src/app/field-management" {
   package "domain/model" {
+    class Money <<money.ts>> {
+      +amount: number
+      +currency: string
+      +add(other: Money): Money
+      +multiply(factor: number): Money
+      +format(): string
+    }
+
     package "entities" {
       class FieldPlot <<field-plot.entity.ts>> {
         -_ownerUserId: number
@@ -194,7 +200,7 @@ package "src/app/field-management" {
       -selectedPlotIdSignal: WritableSignal<number | null>
       -campaignsSignal: WritableSignal<CropCampaign[]>
       -ledgerSignal: WritableSignal<CampaignLedger | null>
-      -offlineSyncService: OfflineSyncService
+      -offlineSync: OfflineSync
       +plots: Signal<FieldPlot[]>
       +selectedPlot: Signal<FieldPlot | undefined>
       +activeCampaign: Signal<CropCampaign | undefined>
@@ -218,6 +224,13 @@ package "src/app/field-management" {
   }
 
   package "infrastructure" {
+    class OfflineSync <<offline/offline-sync.ts>> {
+      +isOnline: Signal<boolean>
+      +enqueue(operation: PendingOperation): void
+      +pendingOf(type: PendingOperationType): PendingOperation[]
+      +remove(uuids: string[]): void
+    }
+
     class FieldManagementApi <<field-management-api.ts>> {
       -plotsEndpoint: FieldPlotsApiEndpoint
       -campaignsEndpoint: CropCampaignsApiEndpoint
@@ -383,7 +396,7 @@ ExpenseEntry --> "1" ExpenseCategory : "belongs to"
 ExpenseEntry --> "1" Money
 
 FieldManagementStore "1" --> "1" FieldManagementApi
-FieldManagementStore "1" --> "1" OfflineSyncService
+FieldManagementStore "1" --> "1" OfflineSync
 FieldManagementStore "1" o-- "0..*" FieldPlot
 FieldManagementStore "1" o-- "0..1" CampaignLedger
 FieldManagementApi "1" *-- "1" FieldPlotsApiEndpoint
@@ -440,8 +453,6 @@ RecordDailyLaborExpenseCommand -[hidden]down- ExportCampaignCostReportCommand
 BaseEntity -[hidden]down- BaseAssembler
 BaseResource -[hidden]down- BaseApiEndpoint
 BaseResponse -[hidden]down- BaseApi
-BaseAssembler -[hidden]down- Money
-BaseApiEndpoint -[hidden]down- OfflineSyncService
 PlotBoundaryMapView -[hidden]down- FieldManagementStore
 FieldExpenseForm -[hidden]down- FieldManagementStore
 FieldManagementStore -[hidden]down- FieldManagementApi

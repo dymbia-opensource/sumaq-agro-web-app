@@ -1,0 +1,56 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="form-grid form-panel">
+  <div class="radio-field full">
+    <span class="field-label">{{ 'farming.plot-form.crop-type' | translate }}</span>
+    <mat-radio-group
+      formControlName="cropType"
+      [attr.aria-label]="'farming.plot-form.crop-type' | translate"
+    >
+      @for (crop of cropTypes; track crop) {
+        <mat-radio-button [value]="crop">
+          {{ 'farming.crop-type.' + crop | translate }}
+        </mat-radio-button>
+      }
+    </mat-radio-group>
+  </div>
+
+  <mat-form-field>
+    <mat-label>{{ 'farming.plot-form.seed-variety' | translate }}</mat-label>
+    <input
+      matInput
+      formControlName="seedVariety"
+      [matAutocomplete]="varietyOptions"
+      [placeholder]="'farming.plot-form.variety-placeholder' | translate"
+      required
+    />
+    <mat-autocomplete #varietyOptions="matAutocomplete">
+      @for (variety of varieties(); track variety) {
+        <mat-option [value]="variety">{{ variety }}</mat-option>
+      }
+    </mat-autocomplete>
+    <mat-hint>{{ 'farming.plot-form.variety-hint' | translate }}</mat-hint>
+    @if (form.controls.seedVariety.touched && form.controls.seedVariety.hasError('required')) {
+      <mat-error>{{ 'common.required' | translate }}</mat-error>
+    }
+  </mat-form-field>
+
+  <mat-form-field>
+    <mat-label>{{ 'farming.plot-form.sowing-date' | translate }}</mat-label>
+    <input matInput type="date" formControlName="sowingDate" [required]="!campaign() || !!campaign()?.sowingDate" />
+    @if (season()) {
+      <mat-hint>{{ 'farming.campaigns.season-hint' | translate: { season: season() } }}</mat-hint>
+    }
+    @if (form.controls.sowingDate.touched && form.controls.sowingDate.hasError('required')) {
+      <mat-error>{{ 'common.required' | translate }}</mat-error>
+    }
+  </mat-form-field>
+
+  <div class="form-actions full">
+    <button mat-stroked-button type="button" (click)="cancel.emit()">
+      {{ 'common.cancel' | translate }}
+    </button>
+    <button mat-flat-button type="submit" [disabled]="saving()">
+      <mat-icon>play_arrow</mat-icon>
+      {{ (campaign() ? 'common.save' : 'farming.campaigns.start') | translate }}
+    </button>
+  </div>
+</form>

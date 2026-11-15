@@ -1,0 +1,51 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  background: var(--mat-sys-surface-container-low);
+}
+
+.shell-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 32px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-name {
+  font: var(--mat-sys-title-large);
+  font-weight: 600;
+}
+
+.brand-accent {
+  color: var(--mat-sys-primary);
+}
+
+.shell-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-name {
+  font: var(--mat-sys-body-medium);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.shell-main {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 16px 24px 64px;
+}
+
+@media (max-width: 599.98px) {
+  .shell-header { padding: 12px 16px; }
+  .user-name { display: none; }
+  .shell-main { padding: 8px 16px 40px; }
+}

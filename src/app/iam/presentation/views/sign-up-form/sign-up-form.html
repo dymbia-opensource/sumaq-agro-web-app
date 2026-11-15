@@ -1,0 +1,219 @@
+<app-auth-layout
+  [showLanguageSwitcher]="true"
+  [compact]="true"
+  imageSrc="/images/img-register.jpeg"
+  imagePosition="65% center"
+>
+  <header class="form-header">
+    <span class="form-eyebrow">{{ 'iam.signUp.eyebrow' | translate }}</span>
+    <h1>{{ 'iam.signUp.title' | translate }}</h1>
+    <p>{{ 'iam.signUp.subtitle' | translate }}</p>
+  </header>
+
+  @if (store.registrationCompleted()) {
+    <div class="success-panel" role="status">
+      <mat-icon>check_circle</mat-icon>
+      <h2>{{ 'iam.signUp.successTitle' | translate }}</h2>
+      <p>{{ 'iam.signUp.successMessage' | translate }}</p>
+    </div>
+
+    <a mat-flat-button class="submit-button" routerLink="/sign-in">
+      {{ 'iam.signIn.submit' | translate }}
+    </a>
+  } @else {
+    <form [formGroup]="form" (ngSubmit)="submit()" [attr.aria-busy]="store.isLoading()" novalidate>
+      <fieldset class="role-fieldset">
+        <legend id="role-label">{{ 'iam.signUp.roleLabel' | translate }}</legend>
+
+        <mat-radio-group formControlName="role" aria-labelledby="role-label">
+          @for (role of roles; track role) {
+            <mat-radio-button
+              [value]="role"
+              [class.role-selected]="form.controls.role.value === role"
+            >
+              <span class="role-option">
+                <mat-icon aria-hidden="true">{{
+                  role === 'FARMER'
+                    ? 'agriculture'
+                    : role === 'COOPERATIVE_DIRECTOR'
+                      ? 'groups'
+                      : 'eco'
+                }}</mat-icon>
+                <strong>{{ 'iam.roles.' + role | translate }}</strong>
+                <span>{{ 'iam.roleDescriptions.' + role | translate }}</span>
+              </span>
+            </mat-radio-button>
+          }
+        </mat-radio-group>
+      </fieldset>
+
+      <div class="name-fields">
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'iam.fields.firstName' | translate }}</mat-label>
+          <mat-icon matPrefix class="field-icon" aria-hidden="true"> person_outline </mat-icon>
+
+          <input
+            matInput
+            type="text"
+            formControlName="firstName"
+            [errorStateMatcher]="fieldErrorMatcher"
+            autocomplete="given-name"
+            autocapitalize="words"
+            maxlength="100"
+            required
+          />
+
+          @if (
+            form.controls.firstName.hasError('required') ||
+            form.controls.firstName.hasError('pattern')
+          ) {
+            <mat-error>{{ 'iam.validation.required' | translate }}</mat-error>
+          } @else if (form.controls.firstName.hasError('maxlength')) {
+            <mat-error>{{ 'iam.validation.nameLength' | translate }}</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'iam.fields.lastName' | translate }}</mat-label>
+          <mat-icon matPrefix class="field-icon" aria-hidden="true"> person_outline </mat-icon>
+
+          <input
+            matInput
+            type="text"
+            formControlName="lastName"
+            [errorStateMatcher]="fieldErrorMatcher"
+            autocomplete="family-name"
+            autocapitalize="words"
+            maxlength="100"
+            required
+          />
+
+          @if (
+            form.controls.lastName.hasError('required') ||
+            form.controls.lastName.hasError('pattern')
+          ) {
+            <mat-error>{{ 'iam.validation.required' | translate }}</mat-error>
+          } @else if (form.controls.lastName.hasError('maxlength')) {
+            <mat-error>{{ 'iam.validation.nameLength' | translate }}</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'iam.fields.email' | translate }}</mat-label>
+        <mat-icon matPrefix class="field-icon" aria-hidden="true">alternate_email</mat-icon>
+
+        <input
+          matInput
+          type="email"
+          formControlName="email"
+          [errorStateMatcher]="fieldErrorMatcher"
+          autocomplete="username"
+          autocapitalize="none"
+          spellcheck="false"
+        />
+
+        @if (form.controls.email.hasError('required')) {
+          <mat-error>{{ 'iam.validation.required' | translate }}</mat-error>
+        } @else if (form.controls.email.hasError('email')) {
+          <mat-error>{{ 'iam.validation.email' | translate }}</mat-error>
+        }
+      </mat-form-field>
+
+      <div class="password-fields">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>{{ 'iam.fields.password' | translate }}</mat-label>
+          <mat-icon matPrefix class="field-icon" aria-hidden="true">lock_outline</mat-icon>
+
+          <input
+            matInput
+            [type]="hidePassword() ? 'password' : 'text'"
+            formControlName="password"
+            [errorStateMatcher]="fieldErrorMatcher"
+            autocomplete="new-password"
+          />
+
+          <button
+            mat-icon-button
+            matSuffix
+            type="button"
+            (click)="togglePassword()"
+            [attr.aria-label]="
+              (hidePassword() ? 'iam.actions.showPassword' : 'iam.actions.hidePassword') | translate
+            "
+          >
+            <mat-icon>
+              {{ hidePassword() ? 'visibility' : 'visibility_off' }}
+            </mat-icon>
+          </button>
+
+          <mat-hint>{{ 'iam.signUp.passwordHint' | translate }}</mat-hint>
+
+          @if (form.controls.password.hasError('required')) {
+            <mat-error>{{ 'iam.validation.required' | translate }}</mat-error>
+          } @else if (form.controls.password.hasError('minlength')) {
+            <mat-error>{{ 'iam.validation.passwordLength' | translate }}</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>{{ 'iam.fields.confirmPassword' | translate }}</mat-label>
+          <mat-icon matPrefix class="field-icon" aria-hidden="true">lock_outline</mat-icon>
+
+          <input
+            matInput
+            [type]="hideConfirmPassword() ? 'password' : 'text'"
+            formControlName="confirmPassword"
+            autocomplete="new-password"
+            [errorStateMatcher]="confirmationErrorMatcher"
+            required
+          />
+
+          <button
+            mat-icon-button
+            matSuffix
+            type="button"
+            (click)="toggleConfirmPassword()"
+            [attr.aria-label]="
+              (hideConfirmPassword() ? 'iam.actions.showPassword' : 'iam.actions.hidePassword')
+                | translate
+            "
+          >
+            <mat-icon aria-hidden="true">
+              {{ hideConfirmPassword() ? 'visibility' : 'visibility_off' }}
+            </mat-icon>
+          </button>
+
+          @if (form.controls.confirmPassword.hasError('required')) {
+            <mat-error>{{ 'iam.validation.required' | translate }}</mat-error>
+          } @else if (form.hasError('passwordMismatch')) {
+            <mat-error>{{ 'iam.validation.passwordMismatch' | translate }}</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      @if (store.error(); as error) {
+        <p class="feedback-error" role="alert">
+          {{ 'iam.errors.' + error | translate }}
+        </p>
+      }
+
+      <button mat-flat-button class="submit-button" type="submit" [disabled]="store.isLoading()">
+        @if (store.isLoading()) {
+          <span class="button-spinner" aria-hidden="true"></span>
+        }
+        {{ (store.isLoading() ? 'iam.signUp.pending' : 'iam.signUp.submit') | translate }}
+        @if (!store.isLoading()) {
+          <mat-icon iconPositionEnd aria-hidden="true">arrow_forward</mat-icon>
+        }
+      </button>
+    </form>
+
+    <p class="auth-link">
+      {{ 'iam.signUp.hasAccount' | translate }}
+      <a routerLink="/sign-in">
+        {{ 'iam.signIn.submit' | translate }}
+      </a>
+    </p>
+  }
+</app-auth-layout>

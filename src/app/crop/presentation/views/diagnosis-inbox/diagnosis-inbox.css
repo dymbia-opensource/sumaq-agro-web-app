@@ -1,0 +1,101 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.workspace { display: grid; gap: 1.5rem; align-items: start; }
+.workspace.with-advisor { grid-template-columns: minmax(0, 1fr) minmax(240px, 300px); }
+.advisor-column { grid-column: 2; grid-row: 1; display: grid; gap: 1rem; }
+.inbox { grid-column: 1; grid-row: 1; min-width: 0; }
+.inbox-toolbar, .workspace-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem; }
+.inbox-toolbar { justify-content: space-between; margin-bottom: 1rem; }
+.inbox-toolbar h2 { margin: 0; font-size: 1.15rem; font-weight: 700; }
+.plot-panel, .inbox {
+  padding: clamp(1rem, 2vw, 1.5rem);
+  border: 1.5px solid #c8cec4;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 2px 6px rgb(24 34 30 / 5%);
+}
+@media (max-width: 1050px) {
+  .workspace.with-advisor { grid-template-columns: minmax(0, 1fr); }
+  .advisor-column, .inbox { grid-column: auto; grid-row: auto; }
+}
+.inbox-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.report-card {
+  border-radius: 16px;
+  border-left: 4px solid var(--mat-sys-primary);
+}
+.report-card[data-status='PENDING'] {
+  border-left-color: #b7791f;
+}
+.report-card[data-status='INSPECTED'] {
+  border-left-color: #0369a1;
+}
+.report-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+.report-details {
+  flex: 1;
+  min-width: 0;
+}
+.report-card mat-card-title,
+.description {
+  overflow-wrap: anywhere;
+}
+.description {
+  white-space: pre-wrap;
+}
+.report-card mat-card-subtitle {
+  margin-top: 8px;
+}
+.status-badge {
+  display: inline-block;
+  border-radius: 20px;
+  padding: 4px 12px;
+  background: var(--mat-sys-surface-container-high);
+  font: var(--mat-sys-label-medium);
+}
+mat-card-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 16px;
+  max-width: 400px;
+}
+.empty-card mat-card-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 24px;
+  color: var(--mat-sys-on-surface-variant);
+}
+@media (max-width: 700px) {
+  .report-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+  }
+  mat-card-actions {
+    max-width: none;
+  }
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+.filters mat-form-field {
+  flex: 1 1 180px;
+}

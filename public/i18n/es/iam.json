@@ -1,0 +1,113 @@
+{
+  "iam": {
+    "demoAccounts": {
+      "title": "Prueba con datos de ejemplo",
+      "description": "Explora SumaqAgro con una cuenta de prueba para cada rol.",
+      "hint": "Selecciona una cuenta para completar el formulario y pulsa Iniciar sesión."
+    },
+    "layout": {
+      "brandCaption": "Gestión agrícola conectada",
+      "footer": "Para quienes cultivan el futuro de la papa y el café.",
+      "eyebrow": "Cultiva con información",
+      "title": "Cada decisión cuenta. Cada cosecha también.",
+      "description": "El estado de tus cultivos, tus costos y la calidad de tu cosecha, en un mismo lugar.",
+      "monitor": "Monitorea",
+      "manage": "Gestiona",
+      "certify": "Certifica"
+    },
+    "roleDescriptions": {
+      "FARMER": "Gestiona tus parcelas",
+      "COOPERATIVE_DIRECTOR": "Conecta tu cooperativa",
+      "AGRONOMIST": "Acompaña al productor"
+    },
+    "recovery": {
+      "forgotLink": "¿Olvidaste tu contraseña?",
+      "backToSignIn": "Volver a iniciar sesión",
+      "pending": "Procesando…",
+      "previewNotice": "Vista previa: no se enviarán correos, no se validará el enlace ni se cambiará tu contraseña.",
+      "previewSubmit": "Probar formulario",
+      "previewTitle": "Formulario validado",
+      "previewReset": "Ver formulario de contraseña nueva",
+      "requestNewLink": "Solicitar otro enlace",
+      "passwordMismatch": "Las contraseñas no coinciden.",
+      "forgot": {
+        "title": "Recupera tu acceso",
+        "subtitle": "Ingresa el correo asociado a tu cuenta para solicitar un enlace de recuperación.",
+        "submit": "Enviar instrucciones",
+        "successTitle": "Revisa tu correo",
+        "successMessage": "Si existe una cuenta con ese correo, recibirás las instrucciones para restablecer tu contraseña.",
+        "previewResult": "El correo tiene un formato válido. No se envió ningún mensaje. Puedes explorar el formulario de contraseña nueva con el enlace de demostración."
+      },
+      "reset": {
+        "title": "Crea una contraseña nueva",
+        "subtitle": "Elige una contraseña para volver a acceder a tu cuenta.",
+        "newPassword": "Nueva contraseña",
+        "confirmation": "Confirmar contraseña",
+        "submit": "Guardar contraseña",
+        "invalidTitle": "El enlace no está disponible",
+        "successTitle": "Contraseña actualizada",
+        "successMessage": "Ya puedes iniciar sesión con tu contraseña nueva.",
+        "previewResult": "Las contraseñas cumplen la validación del formulario. Tu contraseña actual no se ha cambiado y el enlace no se ha validado."
+      },
+      "errors": {
+        "INVALID_LINK": "El enlace no contiene un token de recuperación o el servidor lo ha rechazado. Solicita uno nuevo.",
+        "RATE_LIMITED": "Has realizado demasiados intentos. Espera un momento antes de volver a intentarlo.",
+        "CONNECTION_ERROR": "No pudimos conectarnos. Revisa tu conexión e inténtalo nuevamente.",
+        "REQUEST_REJECTED": "El servidor rechazó los datos. Revisa el formulario y las condiciones de la contraseña.",
+        "UNEXPECTED_ERROR": "No pudimos completar la solicitud. Inténtalo nuevamente."
+      }
+    },
+    "signIn": {
+      "eyebrow": "Tu espacio agrícola",
+      "title": "¡Bienvenido de nuevo!",
+      "subtitle": "Ingresa tus credenciales para acceder a tu cuenta.",
+      "submit": "Iniciar sesión",
+      "pending": "Ingresando…",
+      "success": "Sesión iniciada correctamente.",
+      "noAccount": "¿No tienes una cuenta?",
+      "register": "Regístrate"
+    },
+    "signUp": {
+      "eyebrow": "Comienza con SumaqAgro",
+      "title": "Crea tu cuenta",
+      "subtitle": "Comienza a gestionar tu actividad agrícola.",
+      "roleLabel": "¿Cuál es tu rol?",
+      "passwordHint": "Utiliza al menos 8 caracteres.",
+      "submit": "Crear cuenta",
+      "pending": "Creando cuenta…",
+      "hasAccount": "¿Ya tienes una cuenta?",
+      "successTitle": "Tu cuenta está lista",
+      "successMessage": "Ahora puedes iniciar sesión con tu correo y contraseña."
+    },
+    "roles": {
+      "FARMER": "Agricultor",
+      "COOPERATIVE_DIRECTOR": "Directivo de cooperativa",
+      "AGRONOMIST": "Asesor agrónomo"
+    },
+    "fields": {
+      "email": "Correo electrónico",
+      "password": "Contraseña",
+      "firstName": "Nombres",
+      "lastName": "Apellidos",
+      "confirmPassword": "Confirmar contraseña"
+    },
+    "actions": {
+      "showPassword": "Mostrar contraseña",
+      "hidePassword": "Ocultar contraseña"
+    },
+    "validation": {
+      "required": "Este campo es obligatorio.",
+      "email": "Ingresa un correo electrónico válido.",
+      "passwordLength": "La contraseña debe tener al menos 8 caracteres.",
+      "nameLength": "Utiliza como máximo 100 caracteres.",
+      "passwordMismatch": "Las contraseñas no coinciden."
+    },
+    "errors": {
+      "INVALID_CREDENTIALS": "El correo o la contraseña son incorrectos.",
+      "REGISTRATION_CONFLICT": "No se pudo crear la cuenta con esos datos.",
+      "ACCESS_DENIED": "No tienes permiso para realizar esta operación.",
+      "CONNECTION_ERROR": "No pudimos conectarnos. Revisa tu conexión e inténtalo nuevamente.",
+      "UNEXPECTED_ERROR": "Ocurrió un error. Inténtalo nuevamente."
+    }
+  }
+}

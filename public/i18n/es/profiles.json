@@ -1,6 +1,73 @@
 {
   "profiles": {
     "cooperative": {
+      "integration": {
+        "member-user-id": "ID del usuario productor (opcional)",
+        "invalid-id": "Ingresa un ID entero positivo.",
+        "member-edit-pending": "Editar miembro (pendiente)",
+        "account-link-pending": "Para asociar una cuenta, indica el ID del productor al dar de alta al miembro.",
+        "certification-pending": "La información de cosechas y certificados se integrará en la etapa de certificación.",
+        "advisor-id": "ID de usuario del agrónomo",
+        "assigned-advisors": "Agrónomos con parcelas asignadas",
+        "invitation-email": "Correo del agrónomo",
+        "invite": "Crear invitación",
+        "invitation-created": "Invitación registrada.",
+        "invitation-error": "No se pudo registrar la invitación.",
+        "independent-pending": "La asignación directa por productores independientes está pendiente."
+      },
+      "members": {
+        "demo-account": "Cuenta de agricultor de prueba",
+        "link-account": "Vincular cuenta",
+        "link-account-error": "No se pudo vincular la cuenta. Verifica que no esté vinculada a otro socio de la cooperativa.",
+        "collection": "Historial de acopio",
+        "net-total": "Peso neto acumulado",
+        "net-weight": "Peso neto",
+        "no-collection": "Este socio todavía no tiene lotes de acopio registrados.",
+        "certificates": "Certificados emitidos",
+        "no-certificates": "Este socio todavía no tiene certificados emitidos.",
+        "verify-certificate": "Verificar certificado",
+        "certificate-ACTIVE": "Vigente",
+        "certificate-REVOKED": "Revocado",
+        "edit": "Editar datos del socio",
+        "link-plot": "Añadir lote",
+        "no-linkable-plots": "No hay parcelas delimitadas disponibles para vincular.",
+        "link-error": "No se pudo vincular la parcela. Comprueba que tenga una campaña activa de papa o café.",
+        "link-account-first": "El socio necesita una cuenta vinculada para incorporar sus parcelas.",
+        "not-found": "No encontramos ese socio en el padrón de tu cooperativa.",
+        "title": "Padrón de socios",
+        "subtitle": "Consulta los socios y las parcelas vinculadas a tu cooperativa.",
+        "search": "Buscar por nombre, DNI o código",
+        "add": "Agregar nuevo socio",
+        "new-title": "Incorporar nuevo socio",
+        "phone": "Contacto",
+        "community": "Sector",
+        "save": "Guardar",
+        "validation": "Completa el nombre, un DNI de 8 dígitos y un teléfono válido.",
+        "duplicate": "Ya existe un socio con ese DNI.",
+        "save-error": "No se pudo guardar el socio.",
+        "back": "Volver al padrón",
+        "dossier": "Expediente del socio",
+        "no-plots": "Este socio aún no tiene parcelas vinculadas.",
+        "view": "Ver",
+        "name": "Socio",
+        "status": "Estado",
+        "plots": "Parcelas",
+        "active": "Activo",
+        "inactive": "Inactivo",
+        "error": "No se pudo cargar el padrón.",
+        "empty": "Todavía no hay socios registrados.",
+        "no-results": "Ningún socio coincide con la búsqueda.",
+        "kpi-total": "Socios registrados",
+        "kpi-active": "Socios activos",
+        "kpi-plots": "Parcelas vinculadas",
+        "filter-all": "Todos",
+        "filter-status": "Filtrar por estado",
+        "clear-search": "Limpiar búsqueda",
+        "error-name": "Ingresa el nombre del socio",
+        "error-dni": "El DNI debe tener 8 dígitos",
+        "error-phone": "Ingresa un teléfono válido",
+        "dni-hint": "8 dígitos"
+      },
       "settings": {
         "breadcrumb": "Configuración",
         "title": "Datos institucionales",
@@ -14,6 +81,8 @@
         "address": "Dirección de sede central"
       },
       "registration": {
+        "existing": "Tu cuenta ya tiene una cooperativa registrada.",
+        "error": "No pudimos completar el registro. Inténtalo de nuevo.",
         "back": "Volver al dashboard",
         "title": "Registrar cooperativa",
         "subtitle": "Completa los datos institucionales de la organización.",
@@ -32,6 +101,7 @@
         "saving": "Registrando..."
       },
       "dashboard": {
+        "no-metrics": "Todavía no hay indicadores para esta cooperativa.",
         "breadcrumb": "Dashboard",
         "title": "Panel de Control - {{ cooperative }}",
         "subtitle": "Supervisión de {{ members }} socios activos | {{ hectares }} Hectáreas bajo monitoreo satelital",
@@ -65,27 +135,144 @@
         "pending": "Próximamente",
         "no-cooperative-title": "Aún no registras una cooperativa",
         "no-cooperative-message": "Registra los datos institucionales para comenzar a administrar a tus socios.",
-        "register-cooperative": "Registrar cooperativa"
+        "register-cooperative": "Registrar cooperativa",
+        "tab-title": "Dashboard institucional"
+      },
+      "supervision": {
+        "in-charge": "Supervisada por",
+        "none": "Sin asesor asignado.",
+        "assign": "Asignar",
+        "release": "Quitar asignación",
+        "no-team": "Invita agrónomos con cuenta vinculada para asignar la supervisión."
       }
     },
     "settings": {
       "title": "Ajustes de Cuenta y Asistencia al Agricultor",
-      "subtitle": "Revisa y actualiza los datos de tu parcela y cuenta.",
-      "plot-tab": "Datos de mi Parcela",
+      "subtitle": "Administra tu cuenta y encuentra orientación para usar SumaqAgro.",
       "account-tab": "Cuenta",
       "help-tab": "Manuales de Ayuda",
-      "contact-title": "Datos de Contacto",
+      "contact-title": "Información personal y de contacto",
       "phone": "Número de teléfono",
-      "email": "Correo electrónico",
-      "phone-error": "Ingresa un teléfono válido.",
+      "email": "Correo de contacto",
+      "phone-error": "El teléfono puede tener hasta 15 caracteres.",
       "email-error": "Ingresa un correo válido.",
       "saving": "Guardando...",
       "security-title": "Seguridad y Acceso",
       "current-password": "Contraseña actual",
       "new-password": "Nueva contraseña",
       "confirm-password": "Confirmar nueva contraseña",
-      "security-description": "El cambio de contraseña estará disponible cuando se incorpore la autenticación de la plataforma.",
-      "change-password": "Cambiar contraseña"
+      "security-description": "Usa tu correo de inicio de sesión para solicitar el restablecimiento de tu contraseña mediante el flujo de recuperación de acceso.",
+      "change-password": "Cambiar contraseña",
+      "profile-title": "Tu cuenta de agricultor",
+      "farmer-role": "Agricultor",
+      "manage-plots": "Administrar mis parcelas",
+      "contact-description": "Puedes actualizar tu nombre y teléfono. El correo de inicio de sesión es de solo lectura.",
+      "saved": "Datos de tu cuenta guardados.",
+      "preview": "La recuperación funciona actualmente como vista previa: no envía correos ni cambia contraseñas.",
+      "preferences": "Preferencias",
+      "language": "Idioma de la aplicación",
+      "language-description": "El idioma se aplica durante esta visita. Puedes cambiarlo también desde el menú lateral.",
+      "help-title": "Aprende a usar SumaqAgro",
+      "help-description": "Consulta los pasos de cada tarea y abre su sección para ponerlos en práctica.",
+      "search": "Buscar una guía",
+      "clear": "Limpiar búsqueda",
+      "open-section": "Ir a la sección",
+      "no-results": "No encontramos guías. Prueba con parcela, gastos, alertas o conexión.",
+      "faq-title": "Preguntas frecuentes",
+      "guides": {
+        "plots": {
+          "title": "Registrar y consultar parcelas",
+          "summary": "Mantén organizada la información de tus terrenos.",
+          "steps": [
+            "Abre Mis parcelas y selecciona registrar una parcela.",
+            "Completa los datos del terreno y delimita su polígono en el mapa.",
+            "Guarda y consulta el detalle o el análisis de suelo desde la parcela."
+          ]
+        },
+        "campaigns": {
+          "title": "Iniciar una campaña",
+          "summary": "Organiza el ciclo de producción de tu parcela.",
+          "steps": [
+            "Registra primero tu parcela.",
+            "Abre Campañas e inicia una campaña con su parcela, cultivo y fecha de siembra.",
+            "Revisa los datos antes de guardar y consulta el historial para dar seguimiento."
+          ]
+        },
+        "expenses": {
+          "title": "Registrar gastos y consultar costos",
+          "summary": "Controla insumos, jornales y fletes de campaña.",
+          "steps": [
+            "Selecciona la parcela y campaña correspondientes.",
+            "En Mis gastos elige insumos, jornales o fletes y completa el formulario.",
+            "Guarda el gasto y revisa el resumen y los reportes de costos."
+          ]
+        },
+        "health": {
+          "title": "Consultar salud y alertas",
+          "summary": "Revisa indicadores y reporta problemas en campo.",
+          "steps": [
+            "Selecciona la parcela que deseas revisar en Salud del cultivo.",
+            "Consulta los indicadores disponibles y las alertas de esa parcela.",
+            "Si detectas un problema, usa Reportar plaga y revisa después el seguimiento del caso."
+          ]
+        },
+        "certificates": {
+          "title": "Consultar certificados",
+          "summary": "Encuentra información de calidad y trazabilidad.",
+          "steps": [
+            "Abre Certificados y revisa los lotes disponibles.",
+            "Selecciona un registro para consultar sus datos y estado.",
+            "Si tiene un certificado emitido, consulta su verificación pública mediante el enlace o QR disponible."
+          ]
+        },
+        "offline": {
+          "title": "Trabajar con conexión inestable",
+          "summary": "Comprueba qué registros están pendientes.",
+          "steps": [
+            "Abre la aplicación con conexión y selecciona la parcela y campaña.",
+            "Al registrar un gasto sin conexión, revisa que aparezca como pendiente de sincronización.",
+            "Al recuperar la conexión, revisa el aviso de sincronización y verifica que no queden operaciones pendientes."
+          ]
+        }
+      },
+      "faq": {
+        "connection": {
+          "question": "¿Puedo usar toda la aplicación sin internet?",
+          "answer": "No. Algunas operaciones de campo, como el registro de gastos, admiten una cola pendiente. Las consultas a la API y la actualización de tu cuenta requieren conexión. Revisa el indicador de sincronización antes de cerrar la aplicación."
+        },
+        "contact": {
+          "question": "¿Cambiar mi correo de contacto cambia mi acceso?",
+          "answer": "No. El correo de contacto pertenece a tu perfil. Para recuperar acceso, utiliza el correo con el que inicias sesión, visible en el resumen de tu cuenta."
+        },
+        "alerts": {
+          "question": "¿Una alerta reemplaza la evaluación de un agrónomo?",
+          "answer": "Las alertas orientan la revisión de tu parcela. Consulta el detalle, verifica las condiciones en campo y solicita asesoría técnica cuando corresponda."
+        }
+      },
+      "first-name": "Nombres",
+      "last-name": "Apellidos",
+      "name-error": "Ingresa un nombre válido de hasta 100 caracteres.",
+      "edit-account": "Editar cuenta",
+      "cancel": "Cancelar"
+    },
+    "advisory": {
+      "title": "Asesor responsable de la parcela",
+      "unassigned": "Esta parcela todavía no tiene un asesor asignado.",
+      "unavailable": "El profesional asignado no está disponible en el catálogo actual. Puedes seleccionar otro.",
+      "demo-notice": "Vinculación de demostración: no compra ni activa un plan. La validación de acceso y aceptación se implementará en el backend.",
+      "select": "Seleccionar agrónomo",
+      "confirm": "¿Confirmas este responsable para la parcela? Se conservará el historial anterior.",
+      "confirm-button": "Confirmar vinculación",
+      "assign": "Vincular o cambiar asesor",
+      "no-advisors": "No hay profesionales con una cuenta vinculada disponibles.",
+      "saved": "Asesor vinculado correctamente.",
+      "errors": {
+        "load": "No se pudieron consultar los asesores y sus asignaciones.",
+        "save": "No se pudo guardar la vinculación. Conservamos tu selección para reintentar.",
+        "denied": "Solo puedes vincular asesores disponibles a tus propias parcelas.",
+        "conflict": "Hay asignaciones duplicadas para esta parcela. Solicita revisar los datos."
+      },
+      "by-director": "La directiva de tu cooperativa asigna el asesor de cada parcela."
     }
   }
 }

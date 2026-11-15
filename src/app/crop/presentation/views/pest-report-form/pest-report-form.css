@@ -1,0 +1,26 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 680px;
+}
+
+.form-card {
+  border-radius: 20px;
+}
+
+.full-width {
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.form-actions { flex-wrap: wrap; gap: 12px; }
+
+.success-banner { display: flex; align-items: flex-start; flex-wrap: wrap; gap: 12px; padding: 18px; border-radius: 16px; background: var(--mat-sys-primary-container); color: var(--mat-sys-on-primary-container); }
+.success-banner div { flex: 1; min-width: 200px; }
+.success-banner p { margin: 6px 0 0; }

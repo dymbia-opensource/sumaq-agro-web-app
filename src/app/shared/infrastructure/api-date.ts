@@ -20,6 +20,19 @@ export function fromApiDate(value: string): Date {
  * Writes a date in the `YYYY-MM-DD` format of the API.
  * @param date - Local date.
  */
+/** Today in the time zone of the fields, as `YYYY-MM-DD`. */
+export function todayInLima(): string {
+  const parts = new Intl.DateTimeFormat('en', {
+    timeZone: 'America/Lima',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(new Date());
+  const get = (type: string) => parts.find((part) => part.type === type)?.value;
+
+  return get('year') + '-' + get('month') + '-' + get('day');
+}
+
 export function toApiDate(date: Date): string {
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');

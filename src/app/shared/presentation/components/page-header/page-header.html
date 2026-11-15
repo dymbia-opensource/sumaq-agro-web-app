@@ -1,8 +1,8 @@
 <header class="page-header">
   <div>
-    @if (breadcrumbs().length > 0) {
+    @if (trail().length > 0) {
       <nav class="breadcrumb" [attr.aria-label]="'common.breadcrumb' | translate">
-        @for (crumb of breadcrumbs(); track crumb.label; let last = $last) {
+        @for (crumb of trail(); track crumb.label; let last = $last) {
           @if (crumb.link && !last) {
             <a [routerLink]="crumb.link">{{ crumb.label | translate }}</a>
             <mat-icon aria-hidden="true">chevron_right</mat-icon>

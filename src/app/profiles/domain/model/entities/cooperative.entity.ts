@@ -39,14 +39,30 @@ export class Cooperative extends BaseEntity {
     this._switchboardPhone = props.switchboardPhone;
   }
 
-  get directorUserId(): number { return this._directorUserId; }
-  get legalName(): string { return this._legalName; }
-  get region(): string { return this._region; }
-  get institutionalEmail(): string { return this._institutionalEmail; }
-  get legalRepresentative(): string { return this._legalRepresentative; }
-  get ruc(): string { return this._ruc; }
-  get headquartersAddress(): string { return this._headquartersAddress; }
-  get switchboardPhone(): string { return this._switchboardPhone; }
+  get directorUserId(): number {
+    return this._directorUserId;
+  }
+  get legalName(): string {
+    return this._legalName;
+  }
+  get region(): string {
+    return this._region;
+  }
+  get institutionalEmail(): string {
+    return this._institutionalEmail;
+  }
+  get legalRepresentative(): string {
+    return this._legalRepresentative;
+  }
+  get ruc(): string {
+    return this._ruc;
+  }
+  get headquartersAddress(): string {
+    return this._headquartersAddress;
+  }
+  get switchboardPhone(): string {
+    return this._switchboardPhone;
+  }
 
   /** Updates the legal and contact information managed by the director. */
   updateInstitutionalData(data: {

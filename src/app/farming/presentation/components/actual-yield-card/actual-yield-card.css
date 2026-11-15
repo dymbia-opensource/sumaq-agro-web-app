@@ -1,0 +1,26 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.yield-card {
+  border-radius: 20px;
+}
+
+.yield-card [mat-card-avatar] {
+  color: var(--mat-sys-primary);
+  font-size: 32px;
+  width: 32px;
+  height: 32px;
+}
+
+.yield-form {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.yield-form mat-form-field {
+  flex: 1;
+}

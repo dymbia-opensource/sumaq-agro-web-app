@@ -3,6 +3,8 @@
     {
       "id": 1,
       "userId": 1,
+      "firstName": "Rene",
+      "lastName": "Higuita",
       "phoneNumber": "+51 987 654 2321",
       "email": "guillermoquispe@gmail.com"
     }
@@ -20,7 +22,7 @@
       "switchboardPhone": "+51 64 555 200"
     }
   ],
-  "agronomist-assignments": [
+  "technical-advisors": [
     {
       "id": 1,
       "cooperativeId": 1,
@@ -41,9 +43,9 @@
   ],
   "cooperative-members": [
     {
-      "id": 1,
+      "id": 11,
       "cooperativeId": 1,
-      "name": "Alex Nina Condori",
+      "name": "Guillermo",
       "plots": [
         {
           "id": 1,
@@ -53,16 +55,7 @@
           "campaignId": 2,
           "variety": "Papa Canchan",
           "cropType": "ANDEAN_POTATO"
-        }
-      ],
-      "fullName": "Alex Nina Condori",
-      "active": true
-    },
-    {
-      "id": 2,
-      "cooperativeId": 1,
-      "name": "Mateo Florez",
-      "plots": [
+        },
         {
           "id": 2,
           "name": "Finca San Ramón",
@@ -73,8 +66,24 @@
           "cropType": "SPECIALTY_COFFEE"
         }
       ],
+      "fullName": "Guillermo",
+      "dni": "45218763",
+      "phone": "+51 987 654 321",
+      "community": "Sicaya",
+      "active": true,
+      "userId": 1
+    },
+    {
+      "id": 2,
+      "cooperativeId": 1,
+      "name": "Mateo Florez",
+      "plots": [],
       "fullName": "Mateo Florez",
-      "active": true
+      "dni": "70384915",
+      "phone": "+51 951 274 630",
+      "community": "Chupaca",
+      "active": true,
+      "userId": null
     },
     {
       "id": 3,
@@ -92,7 +101,225 @@
         }
       ],
       "fullName": "Rosa Melgar",
-      "active": true
+      "dni": "42760198",
+      "phone": "+51 989 342 715",
+      "community": "Huando",
+      "active": true,
+      "userId": 2
+    },
+    {
+      "id": 12,
+      "cooperativeId": 1,
+      "name": "Elena Quispe Huamán",
+      "fullName": "Elena Quispe Huamán",
+      "dni": "46029381",
+      "phone": "+51 962 418 530",
+      "community": "Concepción",
+      "active": true,
+      "userId": null,
+      "plots": [
+        {
+          "id": 6,
+          "name": "Chacra El Mirador",
+          "region": "Junín - Valle del Mantaro",
+          "coordinates": "-12.0450, -75.2380",
+          "campaignId": 6,
+          "variety": "Papa Canchan",
+          "cropType": "ANDEAN_POTATO"
+        },
+        {
+          "id": 7,
+          "name": "Parcela Santa Rosa",
+          "region": "Junín - Valle del Mantaro",
+          "coordinates": "-12.0521, -75.2297",
+          "campaignId": 7,
+          "variety": "Papa Yungay",
+          "cropType": "ANDEAN_POTATO"
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "cooperativeId": 1,
+      "name": "Julio Cárdenas Ríos",
+      "fullName": "Julio Cárdenas Ríos",
+      "dni": "40175526",
+      "phone": "+51 945 207 861",
+      "community": "Orcotuna",
+      "active": true,
+      "userId": null,
+      "plots": [
+        {
+          "id": 8,
+          "name": "Fundo Orcotuna Alto",
+          "region": "Junín - Valle del Mantaro",
+          "coordinates": "-11.9702, -75.2831",
+          "campaignId": 8,
+          "variety": "Papa Huayro",
+          "cropType": "ANDEAN_POTATO"
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "cooperativeId": 1,
+      "name": "María Condori Paucar",
+      "fullName": "María Condori Paucar",
+      "dni": "72849035",
+      "phone": "+51 991 635 408",
+      "community": "Pilcomayo",
+      "active": true,
+      "userId": null,
+      "plots": [
+        {
+          "id": 9,
+          "name": "Parcela Pilcomayo Norte",
+          "region": "Junín - Valle del Mantaro",
+          "coordinates": "-12.0352, -75.2504",
+          "campaignId": 9,
+          "variety": "Papa Amarilla",
+          "cropType": "ANDEAN_POTATO"
+        },
+        {
+          "id": 10,
+          "name": "Chacra La Esperanza",
+          "region": "Junín - Valle del Mantaro",
+          "coordinates": "-12.0398, -75.2461",
+          "campaignId": 10,
+          "variety": "Papa Canchan",
+          "cropType": "ANDEAN_POTATO"
+        },
+        {
+          "id": 11,
+          "name": "Parcela Los Andenes",
+          "region": "Junín - Valle del Mantaro",
+          "coordinates": "-12.0310, -75.2562",
+          "campaignId": 11,
+          "variety": "Papa Yungay",
+          "cropType": "ANDEAN_POTATO"
+        }
+      ]
+    },
+    {
+      "id": 15,
+      "cooperativeId": 1,
+      "name": "Pedro Yupanqui Meza",
+      "fullName": "Pedro Yupanqui Meza",
+      "dni": "31952704",
+      "phone": "+51 976 120 349",
+      "community": "Sapallanga",
+      "active": false,
+      "userId": null,
+      "plots": [
+        {
+          "id": 12,
+          "name": "Fundo Sapallanga",
+          "region": "Junín - Valle del Mantaro",
+          "coordinates": "-12.1637, -75.2201",
+          "campaignId": 12,
+          "variety": "Papa Canchan",
+          "cropType": "ANDEAN_POTATO"
+        }
+      ]
+    },
+    {
+      "id": 16,
+      "cooperativeId": 1,
+      "name": "Lucía Rojas Tapia",
+      "fullName": "Lucía Rojas Tapia",
+      "dni": "47315860",
+      "phone": "+51 983 561 072",
+      "community": "Perené",
+      "active": true,
+      "userId": null,
+      "plots": [
+        {
+          "id": 13,
+          "name": "Finca Perené Alto",
+          "region": "Junín - Chanchamayo",
+          "coordinates": "-10.9487, -75.2358",
+          "campaignId": 13,
+          "variety": "Catuaí",
+          "cropType": "SPECIALTY_COFFEE"
+        },
+        {
+          "id": 14,
+          "name": "Finca La Esmeralda",
+          "region": "Junín - Chanchamayo",
+          "coordinates": "-10.9533, -75.2412",
+          "campaignId": 14,
+          "variety": "Caturra",
+          "cropType": "SPECIALTY_COFFEE"
+        }
+      ]
+    },
+    {
+      "id": 17,
+      "cooperativeId": 1,
+      "name": "Dante Huamaní Salas",
+      "fullName": "Dante Huamaní Salas",
+      "dni": "43608197",
+      "phone": "+51 958 774 216",
+      "community": "Pichanaqui",
+      "active": true,
+      "userId": null,
+      "plots": [
+        {
+          "id": 15,
+          "name": "Finca Pichanaqui Verde",
+          "region": "Junín - Chanchamayo",
+          "coordinates": "-10.9261, -74.8714",
+          "campaignId": 15,
+          "variety": "Typica",
+          "cropType": "SPECIALTY_COFFEE"
+        }
+      ]
+    },
+    {
+      "id": 18,
+      "cooperativeId": 1,
+      "name": "Carmen Ccahuana Lazo",
+      "fullName": "Carmen Ccahuana Lazo",
+      "dni": "28740563",
+      "phone": "+51 927 330 485",
+      "community": "Yauli",
+      "active": true,
+      "userId": null,
+      "plots": [
+        {
+          "id": 16,
+          "name": "Parcela Yauli Alto",
+          "region": "Huancavelica",
+          "coordinates": "-12.6704, -74.8419",
+          "campaignId": 16,
+          "variety": "Papa Peruanita",
+          "cropType": "ANDEAN_POTATO"
+        }
+      ]
+    },
+    {
+      "id": 19,
+      "cooperativeId": 1,
+      "name": "Walter Mayta Ochoa",
+      "fullName": "Walter Mayta Ochoa",
+      "dni": "41927348",
+      "phone": "+51 936 092 774",
+      "community": "Izcuchaca",
+      "active": false,
+      "userId": null,
+      "plots": []
+    },
+    {
+      "id": 20,
+      "cooperativeId": 1,
+      "name": "Sofía Vílchez Ames",
+      "fullName": "Sofía Vílchez Ames",
+      "dni": "75103624",
+      "phone": "+51 914 856 203",
+      "community": "Huasicancha",
+      "active": true,
+      "userId": null,
+      "plots": []
     }
   ],
   "cooperative-dashboards": [
@@ -101,7 +328,7 @@
       "directorUserId": 3,
       "cooperativeName": "Cooperativa Agraria Valle del Mantaro",
       "campaignName": "Campaña 2026-I",
-      "activeMembers": 3,
+      "activeMembers": 10,
       "monitoredHectares": 7.8,
       "collectionTons": 19.4,
       "collectionGoalTons": 210,
@@ -122,6 +349,66 @@
   ],
   "field-plots": [
     {
+      "id": 1,
+      "ownerUserId": 1,
+      "name": "Fundo Los Pinos",
+      "region": "Junín - Valle del Mantaro",
+      "status": "ACTIVE_MONITORING",
+      "boundary": [
+        {
+          "latitude": -12.0712,
+          "longitude": -75.2135
+        },
+        {
+          "latitude": -12.0708,
+          "longitude": -75.2111
+        },
+        {
+          "latitude": -12.0741,
+          "longitude": -75.2104
+        },
+        {
+          "latitude": -12.0746,
+          "longitude": -75.2131
+        }
+      ],
+      "areaHectares": 3.5,
+      "agroMonitoringPolygonId": "5f9a1c2b7e1d3a0012ab34cd",
+      "soilBaseline": {
+        "ph": 5.2,
+        "texture": "LOAMY",
+        "organicMatterPercentage": 1.8,
+        "recordedAt": "2026-08-20"
+      }
+    },
+    {
+      "id": 2,
+      "ownerUserId": 1,
+      "name": "Finca San Ramón",
+      "region": "Junín - Chanchamayo",
+      "status": "ACTIVE_MONITORING",
+      "boundary": [
+        {
+          "latitude": -11.1245,
+          "longitude": -75.3561
+        },
+        {
+          "latitude": -11.1241,
+          "longitude": -75.3524
+        },
+        {
+          "latitude": -11.1272,
+          "longitude": -75.3519
+        },
+        {
+          "latitude": -11.1279,
+          "longitude": -75.3557
+        }
+      ],
+      "areaHectares": 2.5,
+      "agroMonitoringPolygonId": "5f9a1c2b7e1d3a0012ab34ce"
+    },
+    {
       "id": 3,
       "ownerUserId": 2,
       "name": "Parcela Pampa Alta",
@@ -138,85 +425,232 @@
       "region": "Huancavelica",
       "status": "ACTIVE_MONITORING",
       "boundary": [
-        [
-          -12.7865,
-          -74.9762
-        ],
-        [
-          -12.7861,
-          -74.9731
-        ],
-        [
-          -12.7889,
-          -74.9728
-        ],
-        [
-          -12.7893,
-          -74.9759
-        ]
+        {
+          "latitude": -12.7865,
+          "longitude": -74.9762
+        },
+        {
+          "latitude": -12.7861,
+          "longitude": -74.9731
+        },
+        {
+          "latitude": -12.7889,
+          "longitude": -74.9728
+        },
+        {
+          "latitude": -12.7893,
+          "longitude": -74.9759
+        }
       ],
       "areaHectares": 1.8,
-      "agroMonitoringPolygonId": "5f9a1c2b7e1d3a0012ab34cf"
+      "agroMonitoringPolygonId": "5f9a1c2b7e1d3a0012ab34cf",
+      "soilBaseline": {
+        "ph": 6.1,
+        "texture": "CLAY_LOAM",
+        "organicMatterPercentage": 3.4,
+        "recordedAt": "2026-02-10"
+      }
+    },
+    {
+      "id": 5,
+      "ownerUserId": 1,
+      "name": "PRUEBA",
+      "region": "LIMA",
+      "status": "WITHOUT_POLYGON",
+      "boundary": [
+        {
+          "latitude": -12.068856310726076,
+          "longitude": -77.08816766738893
+        },
+        {
+          "latitude": -12.068279266772791,
+          "longitude": -77.09505558013917
+        },
+        {
+          "latitude": -12.069160569764769,
+          "longitude": -77.0944118499756
+        }
+      ],
+      "areaHectares": 3.428824609375,
+      "agroMonitoringPolygonId": "",
+      "soilBaseline": null
     },
     {
       "id": 6,
-      "ownerUserId": 1,
-      "name": "Parcela demo Ayacucho",
-      "region": "Ayacucho",
-      "status": "ACTIVE_MONITORING",
-      "boundary": [
-        [
-          -13.18,
-          -74.23
-        ],
-        [
-          -13.18,
-          -74.228
-        ],
-        [
-          -13.182,
-          -74.228
-        ],
-        [
-          -13.182,
-          -74.23
-        ]
-      ],
-      "areaHectares": 4.83,
+      "ownerUserId": null,
+      "name": "Chacra El Mirador",
+      "region": "Junín - Valle del Mantaro",
+      "status": "WITHOUT_POLYGON",
+      "boundary": [],
+      "areaHectares": 0,
       "agroMonitoringPolygonId": ""
     },
     {
       "id": 7,
-      "ownerUserId": 1,
-      "name": "Parcela demo Apurímac",
-      "region": "Apurímac",
-      "status": "ACTIVE_MONITORING",
-      "boundary": [
-        [
-          -13.64,
-          -73.37
-        ],
-        [
-          -13.64,
-          -73.368
-        ],
-        [
-          -13.642,
-          -73.368
-        ],
-        [
-          -13.642,
-          -73.37
-        ]
-      ],
-      "areaHectares": 4.82,
+      "ownerUserId": null,
+      "name": "Parcela Santa Rosa",
+      "region": "Junín - Valle del Mantaro",
+      "status": "WITHOUT_POLYGON",
+      "boundary": [],
+      "areaHectares": 0,
       "agroMonitoringPolygonId": ""
+    },
+    {
+      "id": 8,
+      "ownerUserId": null,
+      "name": "Fundo Orcotuna Alto",
+      "region": "Junín - Valle del Mantaro",
+      "status": "WITHOUT_POLYGON",
+      "boundary": [],
+      "areaHectares": 0,
+      "agroMonitoringPolygonId": ""
+    },
+    {
+      "id": 9,
+      "ownerUserId": null,
+      "name": "Parcela Pilcomayo Norte",
+      "region": "Junín - Valle del Mantaro",
+      "status": "WITHOUT_POLYGON",
+      "boundary": [],
+      "areaHectares": 0,
+      "agroMonitoringPolygonId": ""
+    },
+    {
+      "id": 10,
+      "ownerUserId": null,
+      "name": "Chacra La Esperanza",
+      "region": "Junín - Valle del Mantaro",
+      "status": "WITHOUT_POLYGON",
+      "boundary": [],
+      "areaHectares": 0,
+      "agroMonitoringPolygonId": ""
+    },
+    {
+      "id": 11,
+      "ownerUserId": null,
+      "name": "Parcela Los Andenes",
+      "region": "Junín - Valle del Mantaro",
+      "status": "WITHOUT_POLYGON",
+      "boundary": [],
+      "areaHectares": 0,
+      "agroMonitoringPolygonId": ""
+    },
+    {
+      "id": 12,
+      "ownerUserId": null,
+      "name": "Fundo Sapallanga",
+      "region": "Junín - Valle del Mantaro",
+      "status": "WITHOUT_POLYGON",
+      "boundary": [],
+      "areaHectares": 0,
+      "agroMonitoringPolygonId": ""
+    },
+    {
+      "id": 13,
+      "ownerUserId": null,
+      "name": "Finca Perené Alto",
+      "region": "Junín - Chanchamayo",
+      "status": "WITHOUT_POLYGON",
+      "boundary": [],
+      "areaHectares": 0,
+      "agroMonitoringPolygonId": ""
+    },
+    {
+      "id": 14,
+      "ownerUserId": null,
+      "name": "Finca La Esmeralda",
+      "region": "Junín - Chanchamayo",
+      "status": "WITHOUT_POLYGON",
+      "boundary": [],
+      "areaHectares": 0,
+      "agroMonitoringPolygonId": ""
+    },
+    {
+      "id": 15,
+      "ownerUserId": null,
+      "name": "Finca Pichanaqui Verde",
+      "region": "Junín - Chanchamayo",
+      "status": "WITHOUT_POLYGON",
+      "boundary": [],
+      "areaHectares": 0,
+      "agroMonitoringPolygonId": ""
+    },
+    {
+      "id": 16,
+      "ownerUserId": null,
+      "name": "Parcela Yauli Alto",
+      "region": "Huancavelica",
+      "status": "WITHOUT_POLYGON",
+      "boundary": [],
+      "areaHectares": 0,
+      "agroMonitoringPolygonId": ""
+    },
+    {
+      "id": 17,
+      "ownerUserId": 1794722475009,
+      "name": "Arequipa Parcela",
+      "region": "Arequipa",
+      "status": "WITHOUT_POLYGON",
+      "boundary": [
+        {
+          "latitude": -16.422794581165633,
+          "longitude": -71.57493614122612
+        },
+        {
+          "latitude": -16.423113605512604,
+          "longitude": -71.57590164851518
+        },
+        {
+          "latitude": -16.424235332123864,
+          "longitude": -71.57556908489339
+        },
+        {
+          "latitude": -16.423710488368457,
+          "longitude": -71.57466258082756
+        }
+      ],
+      "areaHectares": 1.27650869140625,
+      "agroMonitoringPolygonId": "",
+      "soilBaseline": {
+        "ph": 6.2,
+        "texture": "CLAY",
+        "organicMatterPercentage": 3.5,
+        "recordedAt": "2026-11-15"
+      }
+    },
+    {
+      "id": 18,
+      "ownerUserId": 1794725179468,
+      "name": "Arequipa",
+      "region": "Arequipa",
+      "status": "WITHOUT_POLYGON",
+      "boundary": [
+        {
+          "latitude": -16.16044632116583,
+          "longitude": -72.47540808488712
+        },
+        {
+          "latitude": -16.160080496968526,
+          "longitude": -72.47381538048879
+        },
+        {
+          "latitude": -16.16059058967726,
+          "longitude": -72.47361696276913
+        },
+        {
+          "latitude": -16.160910041006545,
+          "longitude": -72.47542417281034
+        }
+      ],
+      "areaHectares": 1.0152072265625,
+      "agroMonitoringPolygonId": "",
+      "soilBaseline": null
     }
   ],
   "crop-campaigns": [
     {
       "id": 1,
-      "plotId": 1,
+      "fieldPlotId": 1,
       "season": "2025-II",
       "cropType": "ANDEAN_POTATO",
       "seedVariety": "Papa Yungay",
@@ -225,7 +659,7 @@
     },
     {
       "id": 2,
-      "plotId": 1,
+      "fieldPlotId": 1,
       "season": "2026-I",
       "cropType": "ANDEAN_POTATO",
       "seedVariety": "Papa Canchan",
@@ -234,7 +668,7 @@
     },
     {
       "id": 3,
-      "plotId": 2,
+      "fieldPlotId": 2,
       "season": "2026-I",
       "cropType": "SPECIALTY_COFFEE",
       "seedVariety": "Geisha",
@@ -243,7 +677,7 @@
     },
     {
       "id": 4,
-      "plotId": 4,
+      "fieldPlotId": 4,
       "season": "2026-I",
       "cropType": "ANDEAN_POTATO",
       "seedVariety": "Papa Yungay",
@@ -252,56 +686,141 @@
     },
     {
       "id": 5,
-      "plotId": 5,
-      "season": "2027-I",
-      "cropType": "SPECIALTY_COFFEE",
-      "seedVariety": "Bourbon",
-      "sowingDate": "2027-02-10",
+      "fieldPlotId": 5,
+      "season": "2026-II",
+      "cropType": "ANDEAN_POTATO",
+      "seedVariety": "Papa Yungay",
+      "seedVarietyCustom": false,
+      "sowingDate": "2026-11-17",
       "status": "IN_PROGRESS"
     },
     {
       "id": 6,
-      "plotId": 5,
-      "season": "2026-II",
+      "fieldPlotId": 6,
+      "season": "2026-I",
       "cropType": "ANDEAN_POTATO",
-      "seedVariety": "Papa Canchán",
-      "sowingDate": "2026-11-10",
+      "seedVariety": "Papa Canchan",
+      "sowingDate": "2026-09-12",
       "status": "IN_PROGRESS"
     },
     {
       "id": 7,
-      "plotId": 5,
-      "season": "2026-II",
+      "fieldPlotId": 7,
+      "season": "2026-I",
       "cropType": "ANDEAN_POTATO",
-      "seedVariety": "Papa Canchán",
-      "sowingDate": "2026-10-10",
+      "seedVariety": "Papa Yungay",
+      "sowingDate": "2026-09-18",
       "status": "IN_PROGRESS"
     },
     {
       "id": 8,
-      "plotId": 6,
-      "season": "2026-II",
+      "fieldPlotId": 8,
+      "season": "2026-I",
       "cropType": "ANDEAN_POTATO",
-      "seedVariety": "Papa Canchan",
-      "sowingDate": "2026-09-05",
+      "seedVariety": "Papa Huayro",
+      "sowingDate": "2026-09-25",
       "status": "IN_PROGRESS"
     },
     {
       "id": 9,
-      "plotId": 7,
-      "season": "2026-II",
+      "fieldPlotId": 9,
+      "season": "2026-I",
       "cropType": "ANDEAN_POTATO",
-      "seedVariety": "Papa Yungay",
-      "sowingDate": "2026-09-05",
+      "seedVariety": "Papa Amarilla",
+      "sowingDate": "2026-09-08",
       "status": "IN_PROGRESS"
     },
     {
       "id": 10,
-      "plotId": 8,
-      "season": "2005-I",
+      "fieldPlotId": 10,
+      "season": "2026-I",
+      "cropType": "ANDEAN_POTATO",
+      "seedVariety": "Papa Canchan",
+      "sowingDate": "2026-09-14",
+      "status": "IN_PROGRESS"
+    },
+    {
+      "id": 11,
+      "fieldPlotId": 11,
+      "season": "2026-I",
+      "cropType": "ANDEAN_POTATO",
+      "seedVariety": "Papa Yungay",
+      "sowingDate": "2026-10-02",
+      "status": "IN_PROGRESS"
+    },
+    {
+      "id": 12,
+      "fieldPlotId": 12,
+      "season": "2025-II",
+      "cropType": "ANDEAN_POTATO",
+      "seedVariety": "Papa Canchan",
+      "sowingDate": "2025-10-18",
+      "status": "FINISHED"
+    },
+    {
+      "id": 13,
+      "fieldPlotId": 13,
+      "season": "2026-I",
+      "cropType": "SPECIALTY_COFFEE",
+      "seedVariety": "Catuaí",
+      "sowingDate": "2026-03-14",
+      "status": "IN_PROGRESS"
+    },
+    {
+      "id": 14,
+      "fieldPlotId": 14,
+      "season": "2026-I",
+      "cropType": "SPECIALTY_COFFEE",
+      "seedVariety": "Caturra",
+      "sowingDate": "2026-03-22",
+      "status": "IN_PROGRESS"
+    },
+    {
+      "id": 15,
+      "fieldPlotId": 15,
+      "season": "2026-I",
+      "cropType": "SPECIALTY_COFFEE",
+      "seedVariety": "Typica",
+      "sowingDate": "2026-03-05",
+      "status": "IN_PROGRESS"
+    },
+    {
+      "id": 16,
+      "fieldPlotId": 16,
+      "season": "2026-I",
+      "cropType": "ANDEAN_POTATO",
+      "seedVariety": "Papa Peruanita",
+      "sowingDate": "2026-09-16",
+      "status": "IN_PROGRESS"
+    },
+    {
+      "id": 17,
+      "fieldPlotId": 17,
+      "season": "2026-II",
       "cropType": "ANDEAN_POTATO",
       "seedVariety": "Papa Canchán",
-      "sowingDate": "2005-02-12",
+      "customSeedVariety": false,
+      "sowingDate": "2026-11-20",
+      "status": "FINISHED"
+    },
+    {
+      "id": 18,
+      "fieldPlotId": 17,
+      "season": "2026-II",
+      "cropType": "ANDEAN_POTATO",
+      "seedVariety": "Papa Canchán",
+      "customSeedVariety": false,
+      "sowingDate": "2026-11-20",
+      "status": "IN_PROGRESS"
+    },
+    {
+      "id": 19,
+      "fieldPlotId": 18,
+      "season": "2026-II",
+      "cropType": "ANDEAN_POTATO",
+      "seedVariety": "Papa Canchán",
+      "customSeedVariety": false,
+      "sowingDate": "2026-11-20",
       "status": "IN_PROGRESS"
     }
   ],
@@ -489,25 +1008,25 @@
     {
       "id": 5,
       "campaignId": 5,
-      "expectedYield": 280,
-      "actualYield": null,
-      "yieldUnit": "QUINTAL",
-      "frozen": false,
-      "entries": []
-    },
-    {
-      "id": 6,
-      "campaignId": 6,
-      "expectedYield": 29,
+      "expectedYield": 0,
       "actualYield": null,
       "yieldUnit": "SACK",
       "frozen": false,
       "entries": []
     },
     {
+      "id": 6,
+      "campaignId": 17,
+      "expectedYield": 180,
+      "actualYield": 100,
+      "yieldUnit": "SACK",
+      "frozen": true,
+      "entries": []
+    },
+    {
       "id": 7,
-      "campaignId": 7,
-      "expectedYield": 10,
+      "campaignId": 18,
+      "expectedYield": 200,
       "actualYield": null,
       "yieldUnit": "SACK",
       "frozen": false,
@@ -515,101 +1034,9 @@
     },
     {
       "id": 8,
-      "campaignId": 8,
-      "expectedYield": 300,
-      "actualYield": null,
-      "yieldUnit": "SACK",
-      "frozen": false,
-      "entries": [
-        {
-          "id": 17,
-          "category": "INPUTS",
-          "description": "Demo: semilla de papa",
-          "quantity": 40,
-          "unitPrice": 50,
-          "expenseDate": "2026-09-03",
-          "clientSyncId": ""
-        },
-        {
-          "id": 18,
-          "category": "INPUTS",
-          "description": "Demo: abono orgánico",
-          "quantity": 20,
-          "unitPrice": 60,
-          "expenseDate": "2026-09-04",
-          "clientSyncId": ""
-        },
-        {
-          "id": 19,
-          "category": "LABOR",
-          "description": "Demo: jornales de siembra",
-          "quantity": 24,
-          "unitPrice": 55,
-          "expenseDate": "2026-09-05",
-          "clientSyncId": ""
-        },
-        {
-          "id": 20,
-          "category": "FREIGHT",
-          "description": "Demo: transporte de insumos",
-          "quantity": 1,
-          "unitPrice": 350,
-          "expenseDate": "2026-09-04",
-          "clientSyncId": ""
-        }
-      ]
-    },
-    {
-      "id": 9,
-      "campaignId": 9,
-      "expectedYield": 280,
-      "actualYield": null,
-      "yieldUnit": "SACK",
-      "frozen": false,
-      "entries": [
-        {
-          "id": 21,
-          "category": "INPUTS",
-          "description": "Demo: semilla de papa",
-          "quantity": 40,
-          "unitPrice": 45,
-          "expenseDate": "2026-09-03",
-          "clientSyncId": ""
-        },
-        {
-          "id": 22,
-          "category": "INPUTS",
-          "description": "Demo: abono orgánico",
-          "quantity": 20,
-          "unitPrice": 60,
-          "expenseDate": "2026-09-04",
-          "clientSyncId": ""
-        },
-        {
-          "id": 23,
-          "category": "LABOR",
-          "description": "Demo: jornales de siembra",
-          "quantity": 24,
-          "unitPrice": 55,
-          "expenseDate": "2026-09-05",
-          "clientSyncId": ""
-        },
-        {
-          "id": 24,
-          "category": "FREIGHT",
-          "description": "Demo: transporte de insumos",
-          "quantity": 1,
-          "unitPrice": 350,
-          "expenseDate": "2026-09-04",
-          "clientSyncId": ""
-        }
-      ]
-    },
-    {
-      "id": 10,
-      "campaignId": 10,
-      "expectedYield": 2,
-      "actualYield": null,
+      "campaignId": 19,
+      "expectedYield": 200,
+      "actualYield": 100,
       "yieldUnit": "SACK",
       "frozen": false,
       "entries": []
@@ -620,8 +1047,8 @@
       "id": 1,
       "code": "BATCH-2026-08",
       "cooperativeId": 1,
-      "memberId": 1,
-      "memberName": "Alex Nina Condori",
+      "memberId": 11,
+      "memberName": "Guillermo",
       "plotId": 1,
       "plotName": "Fundo Los Pinos",
       "plotRegion": "Junín - Valle del Mantaro",
@@ -647,8 +1074,8 @@
       "id": 2,
       "code": "BATCH-2026-07",
       "cooperativeId": 1,
-      "memberId": 2,
-      "memberName": "Mateo Florez",
+      "memberId": 11,
+      "memberName": "Guillermo",
       "plotId": 2,
       "plotName": "Finca San Ramón",
       "plotRegion": "Junín - Chanchamayo",
@@ -790,120 +1217,219 @@
     },
     {
       "id": 2,
-      "plotId": 6,
-      "date": "2026-10-08T15:00:00Z",
-      "ndviMean": 0.76,
-      "ndwiMean": 0.42,
-      "surfaceTempKelvin": 291.15,
+      "plotId": 1,
+      "date": "2026-09-26T10:00:00Z",
+      "ndviMean": 0.21,
+      "ndwiMean": 0.38,
+      "surfaceTempKelvin": 296.45,
       "cloudCoveragePercent": 8,
-      "stressAreaHectares": 0.25,
-      "recommendation": "Datos simulados para la demostración. Revisar el vigor del follaje y mantener el seguimiento del cultivo."
+      "stressAreaHectares": 1.2,
+      "recommendation": "Emergence in progress; keep the irrigation schedule of the first weeks."
     },
     {
       "id": 3,
-      "plotId": 7,
-      "date": "2026-10-08T15:00:00Z",
-      "ndviMean": 0.58,
-      "ndwiMean": 0.18,
-      "surfaceTempKelvin": 297.15,
+      "plotId": 1,
+      "date": "2026-10-03T10:00:00Z",
+      "ndviMean": 0.34,
+      "ndwiMean": 0.44,
+      "surfaceTempKelvin": 295.95,
       "cloudCoveragePercent": 12,
-      "stressAreaHectares": 0.85,
-      "recommendation": "Datos simulados para la demostración. Revisar la humedad del suelo y verificar en campo las zonas con posible estrés hídrico."
+      "stressAreaHectares": 0.9,
+      "recommendation": "Uniform emergence; start monitoring for early blight."
     },
     {
       "id": 4,
-      "plotId": 6,
-      "date": "2026-09-10T15:00:00Z",
+      "plotId": 1,
+      "date": "2026-10-10T10:00:00Z",
       "ndviMean": 0.48,
-      "ndwiMean": 0.28,
-      "surfaceTempKelvin": 294.15,
-      "cloudCoveragePercent": 8,
-      "stressAreaHectares": 0.25,
-      "recommendation": "Datos simulados para la demostración del historial del cultivo."
+      "ndwiMean": 0.52,
+      "surfaceTempKelvin": 295.65,
+      "cloudCoveragePercent": 6,
+      "stressAreaHectares": 0.7,
+      "recommendation": "Vegetative growth as expected for the season."
     },
     {
       "id": 5,
-      "plotId": 6,
-      "date": "2026-09-17T15:00:00Z",
-      "ndviMean": 0.57,
-      "ndwiMean": 0.32,
-      "surfaceTempKelvin": 294.15,
-      "cloudCoveragePercent": 8,
-      "stressAreaHectares": 0.25,
-      "recommendation": "Datos simulados para la demostración del historial del cultivo."
+      "plotId": 1,
+      "date": "2026-10-17T10:00:00Z",
+      "ndviMean": 0.61,
+      "ndwiMean": 0.58,
+      "surfaceTempKelvin": 295.45,
+      "cloudCoveragePercent": 10,
+      "stressAreaHectares": 0.6,
+      "recommendation": "Canopy closing; check the nitrogen supply."
     },
     {
       "id": 6,
-      "plotId": 6,
-      "date": "2026-09-24T15:00:00Z",
-      "ndviMean": 0.65,
-      "ndwiMean": 0.36,
-      "surfaceTempKelvin": 294.15,
-      "cloudCoveragePercent": 8,
-      "stressAreaHectares": 0.25,
-      "recommendation": "Datos simulados para la demostración del historial del cultivo."
+      "plotId": 1,
+      "date": "2026-10-24T10:00:00Z",
+      "ndviMean": 0.7,
+      "ndwiMean": 0.62,
+      "surfaceTempKelvin": 295.25,
+      "cloudCoveragePercent": 4,
+      "stressAreaHectares": 0.5,
+      "recommendation": "Vigor close to the peak of the campaign."
     },
     {
       "id": 7,
-      "plotId": 6,
-      "date": "2026-10-01T15:00:00Z",
-      "ndviMean": 0.71,
-      "ndwiMean": 0.39,
-      "surfaceTempKelvin": 294.15,
-      "cloudCoveragePercent": 8,
-      "stressAreaHectares": 0.25,
-      "recommendation": "Datos simulados para la demostración del historial del cultivo."
+      "plotId": 1,
+      "date": "2026-10-31T10:00:00Z",
+      "ndviMean": 0.76,
+      "ndwiMean": 0.66,
+      "surfaceTempKelvin": 295.05,
+      "cloudCoveragePercent": 7,
+      "stressAreaHectares": 0.4,
+      "recommendation": "Peak vigor reached; keep the moisture stable until tuber filling."
     },
     {
       "id": 8,
-      "plotId": 7,
-      "date": "2026-09-10T15:00:00Z",
-      "ndviMean": 0.68,
-      "ndwiMean": 0.35,
-      "surfaceTempKelvin": 294.15,
-      "cloudCoveragePercent": 8,
-      "stressAreaHectares": 0.85,
-      "recommendation": "Datos simulados para la demostración del historial del cultivo."
+      "plotId": 1,
+      "date": "2026-11-07T10:00:00Z",
+      "ndviMean": 0.74,
+      "ndwiMean": 0.65,
+      "surfaceTempKelvin": 295.15,
+      "cloudCoveragePercent": 5,
+      "stressAreaHectares": 0.4,
+      "recommendation": "Check the area for signs of the onset of wilting."
     },
     {
       "id": 9,
-      "plotId": 7,
-      "date": "2026-09-17T15:00:00Z",
-      "ndviMean": 0.65,
-      "ndwiMean": 0.3,
-      "surfaceTempKelvin": 294.15,
-      "cloudCoveragePercent": 8,
-      "stressAreaHectares": 0.85,
-      "recommendation": "Datos simulados para la demostración del historial del cultivo."
+      "plotId": 2,
+      "date": "2026-04-18T10:00:00Z",
+      "ndviMean": 0.58,
+      "ndwiMean": 0.55,
+      "surfaceTempKelvin": 297.35,
+      "cloudCoveragePercent": 22,
+      "stressAreaHectares": 0.8,
+      "recommendation": "Post-harvest recovery of the coffee plantation."
     },
     {
       "id": 10,
-      "plotId": 7,
-      "date": "2026-09-24T15:00:00Z",
-      "ndviMean": 0.62,
-      "ndwiMean": 0.25,
-      "surfaceTempKelvin": 294.15,
-      "cloudCoveragePercent": 8,
-      "stressAreaHectares": 0.85,
-      "recommendation": "Datos simulados para la demostración del historial del cultivo."
+      "plotId": 2,
+      "date": "2026-05-23T10:00:00Z",
+      "ndviMean": 0.64,
+      "ndwiMean": 0.59,
+      "surfaceTempKelvin": 296.85,
+      "cloudCoveragePercent": 18,
+      "stressAreaHectares": 0.6,
+      "recommendation": "Steady regrowth; keep the shade of the plantation."
     },
     {
       "id": 11,
-      "plotId": 7,
-      "date": "2026-10-01T15:00:00Z",
-      "ndviMean": 0.6,
-      "ndwiMean": 0.21,
-      "surfaceTempKelvin": 294.15,
-      "cloudCoveragePercent": 8,
-      "stressAreaHectares": 0.85,
-      "recommendation": "Datos simulados para la demostración del historial del cultivo."
+      "plotId": 2,
+      "date": "2026-06-27T10:00:00Z",
+      "ndviMean": 0.71,
+      "ndwiMean": 0.63,
+      "surfaceTempKelvin": 296.25,
+      "cloudCoveragePercent": 14,
+      "stressAreaHectares": 0.5,
+      "recommendation": "Flowering under way; watch the water supply."
+    },
+    {
+      "id": 12,
+      "plotId": 2,
+      "date": "2026-08-01T10:00:00Z",
+      "ndviMean": 0.78,
+      "ndwiMean": 0.68,
+      "surfaceTempKelvin": 295.85,
+      "cloudCoveragePercent": 9,
+      "stressAreaHectares": 0.3,
+      "recommendation": "Grain filling with a healthy canopy."
+    },
+    {
+      "id": 13,
+      "plotId": 2,
+      "date": "2026-09-05T10:00:00Z",
+      "ndviMean": 0.82,
+      "ndwiMean": 0.71,
+      "surfaceTempKelvin": 295.55,
+      "cloudCoveragePercent": 11,
+      "stressAreaHectares": 0.2,
+      "recommendation": "Peak vigor of the plantation."
+    },
+    {
+      "id": 14,
+      "plotId": 2,
+      "date": "2026-10-10T10:00:00Z",
+      "ndviMean": 0.79,
+      "ndwiMean": 0.69,
+      "surfaceTempKelvin": 295.95,
+      "cloudCoveragePercent": 16,
+      "stressAreaHectares": 0.3,
+      "recommendation": "Ripening started; plan the selective picking."
+    },
+    {
+      "id": 15,
+      "plotId": 2,
+      "date": "2026-11-07T10:00:00Z",
+      "ndviMean": 0.75,
+      "ndwiMean": 0.66,
+      "surfaceTempKelvin": 296.15,
+      "cloudCoveragePercent": 13,
+      "stressAreaHectares": 0.4,
+      "recommendation": "Check the lower rows for signs of coffee rust."
     }
   ],
-  "agroclimatic-alerts": [],
+  "agroclimatic-alerts": [
+    {
+      "id": 1,
+      "title": "Posible descenso de temperatura nocturna",
+      "description": "Ejemplo simulado: se reporta riesgo de bajas temperaturas en parcelas del valle. Revisa las condiciones de tu terreno y coordina con tu asesor las medidas adecuadas para tu cultivo.",
+      "severity": "HIGH",
+      "region": "Junín - Valle del Mantaro",
+      "issuedAt": "2026-10-30T08:00:00-05:00",
+      "source": "SumaqAgro · Datos de demostración"
+    },
+    {
+      "id": 2,
+      "title": "Vigilancia de humedad en el suelo",
+      "description": "Ejemplo simulado: algunas parcelas presentan señales de menor disponibilidad de agua. Consulta los indicadores de salud de tu parcela y verifica la humedad en campo antes de ajustar el riego.",
+      "severity": "MEDIUM",
+      "region": "Junín - Valle del Mantaro",
+      "issuedAt": "2026-10-29T10:30:00-05:00",
+      "source": "SumaqAgro · Datos de demostración"
+    },
+    {
+      "id": 3,
+      "title": "Lluvias intensas y revisión de drenajes",
+      "description": "Ejemplo simulado: se prevé un periodo de lluvias intensas. Revisa los drenajes y los accesos a la parcela, y coordina las labores de campo según las condiciones locales.",
+      "severity": "HIGH",
+      "region": "Junín - Chanchamayo",
+      "issuedAt": "2026-10-30T07:30:00-05:00",
+      "source": "SumaqAgro · Datos de demostración"
+    },
+    {
+      "id": 4,
+      "title": "Revisión preventiva de la salud del cafetal",
+      "description": "Ejemplo simulado: condiciones de humedad elevada requieren mayor seguimiento del cultivo. Inspecciona las hojas y, si observas síntomas, registra un reporte con fotografías para tu asesor.",
+      "severity": "MEDIUM",
+      "region": "Junín - Chanchamayo",
+      "issuedAt": "2026-10-29T09:00:00-05:00",
+      "source": "SumaqAgro · Datos de demostración"
+    },
+    {
+      "id": 5,
+      "title": "Riesgo de helada en zonas altas",
+      "description": "Ejemplo simulado: se informa un escenario de helada en zonas altas. Verifica las condiciones de tu parcela y consulta con tu asesor las acciones apropiadas para la etapa de tu cultivo.",
+      "severity": "CRITICAL",
+      "region": "Huancavelica",
+      "issuedAt": "2026-10-30T06:00:00-05:00",
+      "source": "SumaqAgro · Datos de demostración"
+    },
+    {
+      "id": 6,
+      "title": "Seguimiento preventivo de parcelas",
+      "description": "Ejemplo simulado: realiza una inspección de rutina y revisa los últimos indicadores disponibles. Registra cambios visibles del cultivo para mantener actualizado su seguimiento.",
+      "severity": "LOW",
+      "region": "Huancavelica",
+      "issuedAt": "2026-10-28T11:00:00-05:00",
+      "source": "SumaqAgro · Datos de demostración"
+    }
+  ],
   "climate-forecasts": [],
   "pest-reports": [
     {
-      "plotId": 5,
+      "plotId": 4,
       "plotName": "Apurimac",
       "reporterId": 1,
       "description": "Muchas polillas",
@@ -914,7 +1440,7 @@
       "id": 1
     },
     {
-      "plotId": 5,
+      "plotId": 4,
       "plotName": "Apurimac",
       "reporterId": 1,
       "description": "Muchas polillas hay en mi parcela",
@@ -925,7 +1451,7 @@
       "id": 2
     },
     {
-      "plotId": 5,
+      "plotId": 4,
       "plotName": "Apurimac",
       "reporterId": 1,
       "description": "Muchas polillas hay en mi parcela. Hay demasiadas",
@@ -934,8 +1460,277 @@
       "photo": "https://www.facebook.com/AgenciaAgrariaViru/posts/agencia-agraria-vir%C3%BA-te-recomienda-a-conocer-a-los-insectos-qu%C3%A9-se-encuentran-en/1101984545288457/",
       "clientSyncId": "96aced2b-2c22-4bb6-9139-82757749a7ec",
       "id": 3
+    },
+    {
+      "id": 4,
+      "plotId": 1,
+      "plotName": "Fundo Los Pinos",
+      "reporterId": 1,
+      "description": "Caso de demostración para consultar visita, receta y registrar seguimiento del cultivo.",
+      "severity": "LOW",
+      "status": "INSPECTED",
+      "photo": "",
+      "clientSyncId": "demo-farmer-follow-up"
     }
   ],
-  "field-inspections": [],
-  "technical-prescriptions": []
+  "field-inspections": [
+    {
+      "id": 1,
+      "reportId": 4,
+      "scheduledAt": "2026-10-15T14:00:00Z",
+      "completedAt": "2026-10-15T15:00:00Z",
+      "notes": "Visita de demostración completada para probar el seguimiento de la incidencia.",
+      "status": "COMPLETED",
+      "inspectorUserId": 4
+    }
+  ],
+  "technical-prescriptions": [
+    {
+      "id": 1,
+      "reportId": 4,
+      "agronomistId": 4,
+      "recommendedProducts": "Medida de manejo — demostración",
+      "dosageInstructions": "Indicaciones ficticias para probar el formulario de seguimiento; no utilizar como recomendación de campo.",
+      "applicationDate": "2026-10-15"
+    }
+  ],
+  "agronomist-assignments": [
+    {
+      "id": 1,
+      "plotId": 1,
+      "producerUserId": 1,
+      "agronomistUserId": 4,
+      "status": "ACTIVE",
+      "assignedAt": "2026-10-15T14:00:00Z",
+      "history": []
+    },
+    {
+      "id": 2,
+      "plotId": 2,
+      "producerUserId": 1,
+      "agronomistUserId": 4,
+      "status": "ACTIVE",
+      "assignedAt": "2026-11-14T21:51:38.586Z",
+      "history": []
+    },
+    {
+      "id": 17,
+      "plotId": 17,
+      "producerUserId": 1794722475009,
+      "agronomistUserId": 4,
+      "status": "ACTIVE",
+      "assignedAt": "2026-11-15T06:07:44.288Z",
+      "history": []
+    }
+  ],
+  "treatment-follow-ups": [
+    {
+      "prescriptionId": 1,
+      "kind": "APPLICATION",
+      "occurredOn": "2026-10-21",
+      "notes": "Registro de prueba visual: aplicación confirmada en la copia temporal.",
+      "id": "application-1-1",
+      "reportId": 4,
+      "producerUserId": 1,
+      "recordedAt": "2026-10-21T22:11:52.750Z"
+    },
+    {
+      "prescriptionId": 1,
+      "kind": "EVOLUTION",
+      "occurredOn": "2026-10-21",
+      "notes": "Registro de prueba visual: evolución del cultivo documentada por el agricultor.",
+      "id": "8fdbe294-9373-4c81-b6a5-6500cdb18a87",
+      "reportId": 4,
+      "producerUserId": 1,
+      "recordedAt": "2026-10-21T22:14:12.101Z"
+    }
+  ],
+  "case-assessments": [],
+  "plans": [
+    {
+      "id": 1,
+      "code": "SEED",
+      "name": "Seed",
+      "monthlyPrice": 49,
+      "annualPrice": 490,
+      "currency": "PEN",
+      "plotQuota": 4,
+      "features": [
+        "campaigns-by-plot",
+        "ndvi-ndwi",
+        "expenses",
+        "unit-cost",
+        "agroclimatic-alerts"
+      ]
+    },
+    {
+      "id": 2,
+      "code": "COOPERATIVE_PRO",
+      "name": "Cooperative Pro",
+      "monthlyPrice": 189,
+      "annualPrice": 1890,
+      "currency": "PEN",
+      "plotQuota": 50,
+      "features": [
+        "members-registry",
+        "ndvi-ndwi",
+        "incidents-inspections",
+        "harvest-lots",
+        "qr-certificates"
+      ]
+    },
+    {
+      "id": 3,
+      "code": "TECHNICAL_ADVISOR",
+      "name": "Technical Advisor",
+      "monthlyPrice": 89,
+      "annualPrice": 890,
+      "currency": "PEN",
+      "plotQuota": 20,
+      "features": [
+        "ndvi-ndwi",
+        "pest-reports",
+        "inspections",
+        "prescriptions",
+        "visit-history"
+      ]
+    }
+  ],
+  "subscriptions": [
+    {
+      "id": 1,
+      "userId": 1,
+      "planId": 1,
+      "status": "ACTIVE",
+      "billingCycle": "MONTHLY",
+      "startDate": "2026-10-01",
+      "endDate": "2027-11-01",
+      "autoRenew": true
+    },
+    {
+      "id": 2,
+      "userId": 3,
+      "planId": 2,
+      "status": "ACTIVE",
+      "billingCycle": "MONTHLY",
+      "startDate": "2026-10-01",
+      "endDate": "2027-11-01",
+      "autoRenew": true
+    },
+    {
+      "id": 3,
+      "userId": 4,
+      "planId": 3,
+      "status": "ACTIVE",
+      "billingCycle": "MONTHLY",
+      "startDate": "2026-10-31",
+      "endDate": "2027-11-30",
+      "autoRenew": true
+    },
+    {
+      "id": 4,
+      "userId": 1794636280390,
+      "planId": 1,
+      "status": "ACTIVE",
+      "billingCycle": "MONTHLY",
+      "startDate": "2026-11-14",
+      "endDate": "2026-12-14",
+      "autoRenew": true
+    },
+    {
+      "id": 5,
+      "userId": 1794722475009,
+      "planId": 1,
+      "status": "ACTIVE",
+      "billingCycle": "MONTHLY",
+      "startDate": "2026-11-15",
+      "endDate": "2026-12-15",
+      "autoRenew": true
+    },
+    {
+      "id": 6,
+      "userId": 1794722649023,
+      "planId": 2,
+      "status": "ACTIVE",
+      "billingCycle": "MONTHLY",
+      "startDate": "2026-11-15",
+      "endDate": "2026-12-15",
+      "autoRenew": true
+    },
+    {
+      "id": 7,
+      "userId": 1794725179468,
+      "planId": 1,
+      "status": "ACTIVE",
+      "billingCycle": "MONTHLY",
+      "startDate": "2026-11-15",
+      "endDate": "2026-12-15",
+      "autoRenew": true
+    }
+  ],
+  "payments": [
+    {
+      "id": 1,
+      "subscriptionId": 1,
+      "amount": 49,
+      "currency": "PEN",
+      "transactionToken": "demo-tx-0001",
+      "status": "COMPLETED",
+      "paidAt": "2026-10-01T10:00:00Z"
+    },
+    {
+      "id": 2,
+      "subscriptionId": 2,
+      "amount": 189,
+      "currency": "PEN",
+      "transactionToken": "demo-tx-0002",
+      "status": "COMPLETED",
+      "paidAt": "2026-10-01T10:05:00Z"
+    },
+    {
+      "id": 3,
+      "subscriptionId": 3,
+      "amount": 89,
+      "currency": "PEN",
+      "transactionToken": "demo-tx-1793459706235",
+      "status": "COMPLETED",
+      "paidAt": "2026-10-31T15:15:06.235Z"
+    },
+    {
+      "id": 4,
+      "subscriptionId": 4,
+      "amount": 49,
+      "currency": "PEN",
+      "transactionToken": "demo-tx-a7f2453d-82ec-4554-8ff1-24d6fcfdecf6",
+      "status": "COMPLETED",
+      "paidAt": "2026-11-14T06:08:56.417Z"
+    },
+    {
+      "id": 5,
+      "subscriptionId": 5,
+      "amount": 49,
+      "currency": "PEN",
+      "transactionToken": "demo-tx-bbe350a2-c98e-4e37-b89a-4f86aeacd266",
+      "status": "COMPLETED",
+      "paidAt": "2026-11-15T06:04:21.709Z"
+    },
+    {
+      "id": 6,
+      "subscriptionId": 6,
+      "amount": 189,
+      "currency": "PEN",
+      "transactionToken": "demo-tx-f1bae5d7-f5ff-4e81-a713-96e1935a759e",
+      "status": "COMPLETED",
+      "paidAt": "2026-11-15T06:13:43.518Z"
+    },
+    {
+      "id": 7,
+      "subscriptionId": 7,
+      "amount": 49,
+      "currency": "PEN",
+      "transactionToken": "demo-tx-8ead913d-59aa-4614-ac2e-7d392078db12",
+      "status": "COMPLETED",
+      "paidAt": "2026-11-15T06:51:21.790Z"
+    }
+  ]
 }

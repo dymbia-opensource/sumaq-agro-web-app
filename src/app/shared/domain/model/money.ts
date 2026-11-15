@@ -2,8 +2,8 @@
  * Value object that represents an amount of money in a given currency.
  *
  * @remarks
- * It is immutable: every operation returns a new instance. It is used by the
- * cost ledger (expenses, total investment and breakeven price).
+ * It is immutable: every operation returns a new instance. The cost ledger
+ * uses it for expenses, total investment and breakeven price.
  */
 export class Money {
   private readonly _amount: number;

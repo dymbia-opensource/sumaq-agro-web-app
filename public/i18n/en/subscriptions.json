@@ -1,0 +1,128 @@
+{
+  "subscriptions": {
+    "nav-title": "My subscription",
+    "plan-code": {
+      "SEED": "Seed",
+      "COOPERATIVE_PRO": "Cooperative Pro",
+      "TECHNICAL_ADVISOR": "Technical Advisor"
+    },
+    "segment": {
+      "SEED": "For independent farmers",
+      "COOPERATIVE_PRO": "For cooperatives",
+      "TECHNICAL_ADVISOR": "For technical advisors"
+    },
+    "billing-cycle": {
+      "MONTHLY": "Monthly",
+      "ANNUAL": "Annual"
+    },
+    "subscription-status": {
+      "ACTIVE": "Active",
+      "CANCELLED": "Cancelled"
+    },
+    "payment-status": {
+      "PENDING": "Pending",
+      "COMPLETED": "Completed",
+      "REJECTED": "Rejected"
+    },
+    "features": {
+      "campaigns-by-plot": "Crop campaigns per plot",
+      "ndvi-ndwi": "NDVI and NDWI satellite monitoring",
+      "expenses": "Expense tracking",
+      "unit-cost": "Production unit cost",
+      "agroclimatic-alerts": "Agroclimatic alerts",
+      "members-registry": "Member directory",
+      "incidents-inspections": "Incidents and inspections",
+      "harvest-lots": "Harvest batch management",
+      "qr-certificates": "QR-code certificates",
+      "pest-reports": "Pest reports",
+      "inspections": "Field visits",
+      "prescriptions": "Technical prescriptions",
+      "visit-history": "Visit history"
+    },
+    "plans": {
+      "current": "Current plan",
+      "selected": "Plan selected",
+      "annual-savings": "Save {{amount}} per year",
+      "plot-quota": "Up to {{quota}} plots",
+      "choose": "Continue to payment",
+      "cancel-note": "Cancel anytime. You keep access until the end of the paid period."
+    },
+    "catalog": {
+      "title": "Activate your plan",
+      "subtitle": "You need an active plan to start using SumaqAgro. Choose how you'd like to pay.",
+      "billing-cycle": "Billing cycle",
+      "empty": "No plans are available right now.",
+      "eyebrow": "Last step",
+      "back": "Back to my subscription",
+      "annual-tag": "Save",
+      "breadcrumb": "Plans"
+    },
+    "billing": {
+      "title": "Subscription and payments",
+      "subtitle": "Review your current plan and payment history.",
+      "unknown-plan": "Plan unavailable",
+      "change-plan": "Change plan",
+      "cycle": "Billing cycle",
+      "started": "Start date",
+      "ends": "End date",
+      "no-end-date": "No end date",
+      "plot-quota": "Plot quota",
+      "cancel": "Cancel renewal",
+      "cancel-confirmation": "When you cancel, you will keep access until the end of the current period.",
+      "keep": "Keep subscription",
+      "confirm-cancel": "Confirm cancellation",
+      "expired": "Your subscription has expired. Choose a plan to restore access.",
+      "cancelled-until": "Renewal is cancelled; you will keep access until the end date.",
+      "no-subscription": "You do not have a subscription yet.",
+      "browse-plans": "Browse plans",
+      "payment-history": "Payment history",
+      "amount": "Amount",
+      "date": "Date",
+      "status": "Status",
+      "transaction": "Transaction token",
+      "no-payments": "There are no payments recorded yet.",
+      "download-receipt": "Download receipt",
+      "receipt": "Receipt",
+      "next-renewal": "Next renewal",
+      "access-until": "Access until",
+      "expired-on": "Expired on",
+      "expired-badge": "Expired",
+      "period-progress": "Billing period progress",
+      "reactivate": "Reactivate subscription"
+    },
+    "checkout": {
+      "title": "Confirm your plan",
+      "subtitle": "Review the details before continuing.",
+      "summary": "Plan summary",
+      "plan": "Plan",
+      "billing-cycle": "Billing cycle",
+      "plot-quota": "Plot quota",
+      "coupon": "Coupon",
+      "coupon-label": "Promotional code",
+      "coupon-required": "Enter a promotional code.",
+      "apply-coupon": "Apply coupon",
+      "total": "Total due",
+      "payment-title": "Payment",
+      "demo-notice": "Demo payment. You will not be charged.",
+      "unavailable": "Demo payments are disabled.",
+      "back": "Back to plans",
+      "simulate-payment": "Simulate approved payment",
+      "payment-approved": "Demo payment approved. Your plan has been updated.",
+      "payment-rejected": "Demo payment rejected. Your plan was not changed.",
+      "view-billing": "View subscription and payments",
+      "go-to-dashboard": "Go to my dashboard",
+      "simulate-rejection": "Simulate rejected payment",
+      "no-plan": "Choose a plan before continuing.",
+      "choose-plan": "Browse plans"
+    },
+    "errors": {
+      "load-plans": "The plans could not be loaded.",
+      "load-subscription": "Your subscription could not be loaded.",
+      "select-plan": "The plan could not be selected.",
+      "invalid-coupon": "The promotional code is not valid.",
+      "payment": "The payment could not be processed. Your plan was not changed.",
+      "cancel": "The subscription could not be cancelled.",
+      "receipt": "The receipt could not be found."
+    }
+  }
+}

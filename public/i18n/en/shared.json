@@ -20,16 +20,17 @@
     "cooperative-dashboard": "Dashboard",
     "member-directory": "Member directory",
     "cooperative-plot-health": "Plot health",
-    "cooperative-costs": "Costs",
     "cooperative-certificates": "Certificates",
     "cooperative-alerts": "Alerts",
     "cooperative-settings": "Settings",
     "diagnosis-inbox": "Pest reports",
     "field-inspections": "Inspections",
-    "prescriptions": "Technical prescriptions"
+    "prescriptions": "Technical prescriptions",
+    "assigned-plots": "Assigned plots"
   },
   "layout": {
-    "search": "Search within my plot...",
+    "search": "Search plots…",
+    "no-plot-matches": "No plots found",
     "menu": "Open menu",
     "connection": "Connection status",
     "connected": "Connected",
@@ -66,14 +67,5 @@
     "title": "Page not found",
     "message": "The path {{ path }} does not exist.",
     "go-home": "Go to home"
-  },
-  "paginator": {
-    "items-per-page": "Items per page",
-    "next-page": "Next page",
-    "previous-page": "Previous page",
-    "first-page": "First page",
-    "last-page": "Last page",
-    "range": "{{ start }} – {{ end }} of {{ length }}",
-    "range-empty": "0 of {{ length }}"
   }
 }

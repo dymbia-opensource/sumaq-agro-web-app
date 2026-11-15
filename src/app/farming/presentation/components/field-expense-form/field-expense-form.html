@@ -1,0 +1,111 @@
+@switch (category()) {
+  <!-- Inputs: product, quantity and unit price (US-37) -->
+  @case (categories.INPUTS) {
+    <form [formGroup]="inputForm" (ngSubmit)="onSubmit()" class="form-grid form-panel" id="expense-form">
+      <mat-form-field class="full">
+        <mat-label>{{ 'farming.expense-form.input-name' | translate }}</mat-label>
+        <input
+          matInput
+          formControlName="inputName"
+          [placeholder]="'farming.expense-form.input-name-placeholder' | translate"
+        />
+        <mat-error>{{ 'farming.expense-form.required' | translate }}</mat-error>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>{{ 'farming.expense-form.quantity' | translate }}</mat-label>
+        <input matInput type="number" min="0" step="0.01" formControlName="quantity" />
+        <mat-error>{{ 'farming.expense-form.positive' | translate }}</mat-error>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>{{ 'farming.expense-form.unit-price' | translate }}</mat-label>
+        <span matTextPrefix>S/&nbsp;</span>
+        <input matInput type="number" min="0" step="0.01" formControlName="unitPrice" />
+        <mat-error>{{ 'farming.expense-form.positive' | translate }}</mat-error>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>{{ 'farming.expense-form.date' | translate }}</mat-label>
+        <input matInput type="date" formControlName="expenseDate" />
+        <mat-error>{{ 'farming.expense-form.required' | translate }}</mat-error>
+      </mat-form-field>
+    </form>
+  }
+
+  <!-- Labor: task, workers, days and daily wage (US-38) -->
+  @case (categories.LABOR) {
+    <form [formGroup]="laborForm" (ngSubmit)="onSubmit()" class="form-grid form-panel" id="expense-form">
+      <mat-form-field class="full">
+        <mat-label>{{ 'farming.expense-form.activity' | translate }}</mat-label>
+        <mat-select formControlName="activity">
+          @for (activity of activities; track activity) {
+            <mat-option [value]="'farming.labor-activity.' + activity | translate">
+              {{ 'farming.labor-activity.' + activity | translate }}
+            </mat-option>
+          }
+        </mat-select>
+        <mat-error>{{ 'farming.expense-form.required' | translate }}</mat-error>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>{{ 'farming.expense-form.workers' | translate }}</mat-label>
+        <input matInput type="number" min="1" formControlName="workers" />
+        <mat-error>{{ 'farming.expense-form.positive' | translate }}</mat-error>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>{{ 'farming.expense-form.days' | translate }}</mat-label>
+        <input matInput type="number" min="0.5" step="0.5" formControlName="days" />
+        <mat-error>{{ 'farming.expense-form.positive' | translate }}</mat-error>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>{{ 'farming.expense-form.daily-wage' | translate }}</mat-label>
+        <span matTextPrefix>S/&nbsp;</span>
+        <input matInput type="number" min="0" step="0.01" formControlName="dailyWage" />
+        <mat-error>{{ 'farming.expense-form.positive' | translate }}</mat-error>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>{{ 'farming.expense-form.date' | translate }}</mat-label>
+        <input matInput type="date" formControlName="expenseDate" />
+        <mat-error>{{ 'farming.expense-form.required' | translate }}</mat-error>
+      </mat-form-field>
+    </form>
+  }
+
+  <!-- Freight: route and cost (US-39) -->
+  @default {
+    <form [formGroup]="freightForm" (ngSubmit)="onSubmit()" class="form-grid form-panel" id="expense-form">
+      <mat-form-field class="full">
+        <mat-label>{{ 'farming.expense-form.route' | translate }}</mat-label>
+        <input
+          matInput
+          formControlName="route"
+          [placeholder]="'farming.expense-form.route-placeholder' | translate"
+        />
+        <mat-error>{{ 'farming.expense-form.required' | translate }}</mat-error>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>{{ 'farming.expense-form.cost' | translate }}</mat-label>
+        <span matTextPrefix>S/&nbsp;</span>
+        <input matInput type="number" min="0" step="0.01" formControlName="cost" />
+        <mat-error>{{ 'farming.expense-form.positive' | translate }}</mat-error>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>{{ 'farming.expense-form.date' | translate }}</mat-label>
+        <input matInput type="date" formControlName="expenseDate" />
+        <mat-error>{{ 'farming.expense-form.required' | translate }}</mat-error>
+      </mat-form-field>
+    </form>
+  }
+}
+
+<div class="total" aria-live="polite">
+  <span>{{ 'farming.expense-form.total' | translate }}</span>
+  <strong>{{ total().format() }}</strong>
+</div>
+
+<div class="actions">
+  <button mat-stroked-button type="button" (click)="cancel.emit()">
+    {{ 'farming.expense-form.cancel' | translate }}
+  </button>
+  <button mat-flat-button type="submit" form="expense-form" [disabled]="saving()">
+    <mat-icon>save</mat-icon>
+    {{ 'farming.expense-form.save' | translate }}
+  </button>
+</div>

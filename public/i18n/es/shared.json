@@ -20,16 +20,17 @@
     "cooperative-dashboard": "Dashboard",
     "member-directory": "Padrón",
     "cooperative-plot-health": "Salud de Parcelas",
-    "cooperative-costs": "Costos",
     "cooperative-certificates": "Certificados",
     "cooperative-alerts": "Alertas",
     "cooperative-settings": "Configuración",
     "diagnosis-inbox": "Reportes de plagas",
     "field-inspections": "Inspecciones",
-    "prescriptions": "Recetas técnicas"
+    "prescriptions": "Recetas técnicas",
+    "assigned-plots": "Parcelas asignadas"
   },
   "layout": {
-    "search": "Buscar en mi parcela...",
+    "search": "Buscar parcela…",
+    "no-plot-matches": "No se encontraron parcelas",
     "menu": "Abrir menú",
     "connection": "Estado de conexión",
     "connected": "Conectado",
@@ -66,14 +67,5 @@
     "title": "Página no encontrada",
     "message": "La ruta {{ path }} no existe.",
     "go-home": "Ir al inicio"
-  },
-  "paginator": {
-    "items-per-page": "Elementos por página",
-    "next-page": "Página siguiente",
-    "previous-page": "Página anterior",
-    "first-page": "Primera página",
-    "last-page": "Última página",
-    "range": "{{ start }} – {{ end }} de {{ length }}",
-    "range-empty": "0 de {{ length }}"
   }
 }
