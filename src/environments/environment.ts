@@ -30,10 +30,9 @@ export const environment = {
   platformProviderTechnicalAdvisorsEndpointPath: '/technical-advisors',
 
   // Subscriptions and Payments
-  useMockSubscriptionPayments: true,
+  demoCheckoutEnabled: false,
   platformProviderPlansEndpointPath: '/plans',
   platformProviderSubscriptionsEndpointPath: '/subscriptions',
-  platformProviderPaymentsEndpointPath: '/payments',
 
   // Field Management
   platformProviderFieldPlotsEndpointPath: '/field-plots',
