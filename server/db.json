@@ -67,6 +67,9 @@
         }
       ],
       "fullName": "Guillermo",
+      "dni": "45218763",
+      "phone": "+51 987 654 321",
+      "community": "Sicaya",
       "active": true,
       "userId": 1
     },
@@ -76,6 +79,9 @@
       "name": "Mateo Florez",
       "plots": [],
       "fullName": "Mateo Florez",
+      "dni": "70384915",
+      "phone": "+51 951 274 630",
+      "community": "Chupaca",
       "active": true,
       "userId": null
     },
@@ -95,8 +101,225 @@
         }
       ],
       "fullName": "Rosa Melgar",
+      "dni": "42760198",
+      "phone": "+51 989 342 715",
+      "community": "Huando",
       "active": true,
       "userId": 2
+    },
+    {
+      "id": 12,
+      "cooperativeId": 1,
+      "name": "Elena Quispe Huamán",
+      "fullName": "Elena Quispe Huamán",
+      "dni": "46029381",
+      "phone": "+51 962 418 530",
+      "community": "Concepción",
+      "active": true,
+      "userId": null,
+      "plots": [
+        {
+          "id": 6,
+          "name": "Chacra El Mirador",
+          "region": "Junín - Valle del Mantaro",
+          "coordinates": "-12.0450, -75.2380",
+          "campaignId": 6,
+          "variety": "Papa Canchan",
+          "cropType": "ANDEAN_POTATO"
+        },
+        {
+          "id": 7,
+          "name": "Parcela Santa Rosa",
+          "region": "Junín - Valle del Mantaro",
+          "coordinates": "-12.0521, -75.2297",
+          "campaignId": 7,
+          "variety": "Papa Yungay",
+          "cropType": "ANDEAN_POTATO"
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "cooperativeId": 1,
+      "name": "Julio Cárdenas Ríos",
+      "fullName": "Julio Cárdenas Ríos",
+      "dni": "40175526",
+      "phone": "+51 945 207 861",
+      "community": "Orcotuna",
+      "active": true,
+      "userId": null,
+      "plots": [
+        {
+          "id": 8,
+          "name": "Fundo Orcotuna Alto",
+          "region": "Junín - Valle del Mantaro",
+          "coordinates": "-11.9702, -75.2831",
+          "campaignId": 8,
+          "variety": "Papa Huayro",
+          "cropType": "ANDEAN_POTATO"
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "cooperativeId": 1,
+      "name": "María Condori Paucar",
+      "fullName": "María Condori Paucar",
+      "dni": "72849035",
+      "phone": "+51 991 635 408",
+      "community": "Pilcomayo",
+      "active": true,
+      "userId": null,
+      "plots": [
+        {
+          "id": 9,
+          "name": "Parcela Pilcomayo Norte",
+          "region": "Junín - Valle del Mantaro",
+          "coordinates": "-12.0352, -75.2504",
+          "campaignId": 9,
+          "variety": "Papa Amarilla",
+          "cropType": "ANDEAN_POTATO"
+        },
+        {
+          "id": 10,
+          "name": "Chacra La Esperanza",
+          "region": "Junín - Valle del Mantaro",
+          "coordinates": "-12.0398, -75.2461",
+          "campaignId": 10,
+          "variety": "Papa Canchan",
+          "cropType": "ANDEAN_POTATO"
+        },
+        {
+          "id": 11,
+          "name": "Parcela Los Andenes",
+          "region": "Junín - Valle del Mantaro",
+          "coordinates": "-12.0310, -75.2562",
+          "campaignId": 11,
+          "variety": "Papa Yungay",
+          "cropType": "ANDEAN_POTATO"
+        }
+      ]
+    },
+    {
+      "id": 15,
+      "cooperativeId": 1,
+      "name": "Pedro Yupanqui Meza",
+      "fullName": "Pedro Yupanqui Meza",
+      "dni": "31952704",
+      "phone": "+51 976 120 349",
+      "community": "Sapallanga",
+      "active": false,
+      "userId": null,
+      "plots": [
+        {
+          "id": 12,
+          "name": "Fundo Sapallanga",
+          "region": "Junín - Valle del Mantaro",
+          "coordinates": "-12.1637, -75.2201",
+          "campaignId": 12,
+          "variety": "Papa Canchan",
+          "cropType": "ANDEAN_POTATO"
+        }
+      ]
+    },
+    {
+      "id": 16,
+      "cooperativeId": 1,
+      "name": "Lucía Rojas Tapia",
+      "fullName": "Lucía Rojas Tapia",
+      "dni": "47315860",
+      "phone": "+51 983 561 072",
+      "community": "Perené",
+      "active": true,
+      "userId": null,
+      "plots": [
+        {
+          "id": 13,
+          "name": "Finca Perené Alto",
+          "region": "Junín - Chanchamayo",
+          "coordinates": "-10.9487, -75.2358",
+          "campaignId": 13,
+          "variety": "Catuaí",
+          "cropType": "SPECIALTY_COFFEE"
+        },
+        {
+          "id": 14,
+          "name": "Finca La Esmeralda",
+          "region": "Junín - Chanchamayo",
+          "coordinates": "-10.9533, -75.2412",
+          "campaignId": 14,
+          "variety": "Caturra",
+          "cropType": "SPECIALTY_COFFEE"
+        }
+      ]
+    },
+    {
+      "id": 17,
+      "cooperativeId": 1,
+      "name": "Dante Huamaní Salas",
+      "fullName": "Dante Huamaní Salas",
+      "dni": "43608197",
+      "phone": "+51 958 774 216",
+      "community": "Pichanaqui",
+      "active": true,
+      "userId": null,
+      "plots": [
+        {
+          "id": 15,
+          "name": "Finca Pichanaqui Verde",
+          "region": "Junín - Chanchamayo",
+          "coordinates": "-10.9261, -74.8714",
+          "campaignId": 15,
+          "variety": "Typica",
+          "cropType": "SPECIALTY_COFFEE"
+        }
+      ]
+    },
+    {
+      "id": 18,
+      "cooperativeId": 1,
+      "name": "Carmen Ccahuana Lazo",
+      "fullName": "Carmen Ccahuana Lazo",
+      "dni": "28740563",
+      "phone": "+51 927 330 485",
+      "community": "Yauli",
+      "active": true,
+      "userId": null,
+      "plots": [
+        {
+          "id": 16,
+          "name": "Parcela Yauli Alto",
+          "region": "Huancavelica",
+          "coordinates": "-12.6704, -74.8419",
+          "campaignId": 16,
+          "variety": "Papa Peruanita",
+          "cropType": "ANDEAN_POTATO"
+        }
+      ]
+    },
+    {
+      "id": 19,
+      "cooperativeId": 1,
+      "name": "Walter Mayta Ochoa",
+      "fullName": "Walter Mayta Ochoa",
+      "dni": "41927348",
+      "phone": "+51 936 092 774",
+      "community": "Izcuchaca",
+      "active": false,
+      "userId": null,
+      "plots": []
+    },
+    {
+      "id": 20,
+      "cooperativeId": 1,
+      "name": "Sofía Vílchez Ames",
+      "fullName": "Sofía Vílchez Ames",
+      "dni": "75103624",
+      "phone": "+51 914 856 203",
+      "community": "Huasicancha",
+      "active": true,
+      "userId": null,
+      "plots": []
     }
   ],
   "cooperative-dashboards": [
@@ -105,7 +328,7 @@
       "directorUserId": 3,
       "cooperativeName": "Cooperativa Agraria Valle del Mantaro",
       "campaignName": "Campaña 2026-I",
-      "activeMembers": 3,
+      "activeMembers": 10,
       "monitoredHectares": 7.8,
       "collectionTons": 19.4,
       "collectionGoalTons": 210,
@@ -251,6 +474,116 @@
       "areaHectares": 3.428824609375,
       "agroMonitoringPolygonId": "",
       "soilBaseline": null
+    },
+    {
+      "id": 6,
+      "ownerUserId": null,
+      "name": "Chacra El Mirador",
+      "region": "Junín - Valle del Mantaro",
+      "status": "WITHOUT_POLYGON",
+      "boundary": [],
+      "areaHectares": 0,
+      "agroMonitoringPolygonId": ""
+    },
+    {
+      "id": 7,
+      "ownerUserId": null,
+      "name": "Parcela Santa Rosa",
+      "region": "Junín - Valle del Mantaro",
+      "status": "WITHOUT_POLYGON",
+      "boundary": [],
+      "areaHectares": 0,
+      "agroMonitoringPolygonId": ""
+    },
+    {
+      "id": 8,
+      "ownerUserId": null,
+      "name": "Fundo Orcotuna Alto",
+      "region": "Junín - Valle del Mantaro",
+      "status": "WITHOUT_POLYGON",
+      "boundary": [],
+      "areaHectares": 0,
+      "agroMonitoringPolygonId": ""
+    },
+    {
+      "id": 9,
+      "ownerUserId": null,
+      "name": "Parcela Pilcomayo Norte",
+      "region": "Junín - Valle del Mantaro",
+      "status": "WITHOUT_POLYGON",
+      "boundary": [],
+      "areaHectares": 0,
+      "agroMonitoringPolygonId": ""
+    },
+    {
+      "id": 10,
+      "ownerUserId": null,
+      "name": "Chacra La Esperanza",
+      "region": "Junín - Valle del Mantaro",
+      "status": "WITHOUT_POLYGON",
+      "boundary": [],
+      "areaHectares": 0,
+      "agroMonitoringPolygonId": ""
+    },
+    {
+      "id": 11,
+      "ownerUserId": null,
+      "name": "Parcela Los Andenes",
+      "region": "Junín - Valle del Mantaro",
+      "status": "WITHOUT_POLYGON",
+      "boundary": [],
+      "areaHectares": 0,
+      "agroMonitoringPolygonId": ""
+    },
+    {
+      "id": 12,
+      "ownerUserId": null,
+      "name": "Fundo Sapallanga",
+      "region": "Junín - Valle del Mantaro",
+      "status": "WITHOUT_POLYGON",
+      "boundary": [],
+      "areaHectares": 0,
+      "agroMonitoringPolygonId": ""
+    },
+    {
+      "id": 13,
+      "ownerUserId": null,
+      "name": "Finca Perené Alto",
+      "region": "Junín - Chanchamayo",
+      "status": "WITHOUT_POLYGON",
+      "boundary": [],
+      "areaHectares": 0,
+      "agroMonitoringPolygonId": ""
+    },
+    {
+      "id": 14,
+      "ownerUserId": null,
+      "name": "Finca La Esmeralda",
+      "region": "Junín - Chanchamayo",
+      "status": "WITHOUT_POLYGON",
+      "boundary": [],
+      "areaHectares": 0,
+      "agroMonitoringPolygonId": ""
+    },
+    {
+      "id": 15,
+      "ownerUserId": null,
+      "name": "Finca Pichanaqui Verde",
+      "region": "Junín - Chanchamayo",
+      "status": "WITHOUT_POLYGON",
+      "boundary": [],
+      "areaHectares": 0,
+      "agroMonitoringPolygonId": ""
+    },
+    {
+      "id": 16,
+      "ownerUserId": null,
+      "name": "Parcela Yauli Alto",
+      "region": "Huancavelica",
+      "status": "WITHOUT_POLYGON",
+      "boundary": [],
+      "areaHectares": 0,
+      "agroMonitoringPolygonId": ""
     }
   ],
   "crop-campaigns": [
@@ -298,6 +631,105 @@
       "seedVariety": "Papa Yungay",
       "seedVarietyCustom": false,
       "sowingDate": "2026-11-17",
+      "status": "IN_PROGRESS"
+    },
+    {
+      "id": 6,
+      "fieldPlotId": 6,
+      "season": "2026-I",
+      "cropType": "ANDEAN_POTATO",
+      "seedVariety": "Papa Canchan",
+      "sowingDate": "2026-09-12",
+      "status": "IN_PROGRESS"
+    },
+    {
+      "id": 7,
+      "fieldPlotId": 7,
+      "season": "2026-I",
+      "cropType": "ANDEAN_POTATO",
+      "seedVariety": "Papa Yungay",
+      "sowingDate": "2026-09-18",
+      "status": "IN_PROGRESS"
+    },
+    {
+      "id": 8,
+      "fieldPlotId": 8,
+      "season": "2026-I",
+      "cropType": "ANDEAN_POTATO",
+      "seedVariety": "Papa Huayro",
+      "sowingDate": "2026-09-25",
+      "status": "IN_PROGRESS"
+    },
+    {
+      "id": 9,
+      "fieldPlotId": 9,
+      "season": "2026-I",
+      "cropType": "ANDEAN_POTATO",
+      "seedVariety": "Papa Amarilla",
+      "sowingDate": "2026-09-08",
+      "status": "IN_PROGRESS"
+    },
+    {
+      "id": 10,
+      "fieldPlotId": 10,
+      "season": "2026-I",
+      "cropType": "ANDEAN_POTATO",
+      "seedVariety": "Papa Canchan",
+      "sowingDate": "2026-09-14",
+      "status": "IN_PROGRESS"
+    },
+    {
+      "id": 11,
+      "fieldPlotId": 11,
+      "season": "2026-I",
+      "cropType": "ANDEAN_POTATO",
+      "seedVariety": "Papa Yungay",
+      "sowingDate": "2026-10-02",
+      "status": "IN_PROGRESS"
+    },
+    {
+      "id": 12,
+      "fieldPlotId": 12,
+      "season": "2025-II",
+      "cropType": "ANDEAN_POTATO",
+      "seedVariety": "Papa Canchan",
+      "sowingDate": "2025-10-18",
+      "status": "FINISHED"
+    },
+    {
+      "id": 13,
+      "fieldPlotId": 13,
+      "season": "2026-I",
+      "cropType": "SPECIALTY_COFFEE",
+      "seedVariety": "Catuaí",
+      "sowingDate": "2026-03-14",
+      "status": "IN_PROGRESS"
+    },
+    {
+      "id": 14,
+      "fieldPlotId": 14,
+      "season": "2026-I",
+      "cropType": "SPECIALTY_COFFEE",
+      "seedVariety": "Caturra",
+      "sowingDate": "2026-03-22",
+      "status": "IN_PROGRESS"
+    },
+    {
+      "id": 15,
+      "fieldPlotId": 15,
+      "season": "2026-I",
+      "cropType": "SPECIALTY_COFFEE",
+      "seedVariety": "Typica",
+      "sowingDate": "2026-03-05",
+      "status": "IN_PROGRESS"
+    },
+    {
+      "id": 16,
+      "fieldPlotId": 16,
+      "season": "2026-I",
+      "cropType": "ANDEAN_POTATO",
+      "seedVariety": "Papa Peruanita",
+      "sowingDate": "2026-09-16",
       "status": "IN_PROGRESS"
     }
   ],
@@ -996,13 +1428,7 @@
       "annualPrice": 490,
       "currency": "PEN",
       "plotQuota": 4,
-      "features": [
-        "campaigns-by-plot",
-        "ndvi-ndwi",
-        "expenses",
-        "unit-cost",
-        "agroclimatic-alerts"
-      ]
+      "features": ["campaigns-by-plot", "ndvi-ndwi", "expenses", "unit-cost", "agroclimatic-alerts"]
     },
     {
       "id": 2,
@@ -1028,13 +1454,7 @@
       "annualPrice": 890,
       "currency": "PEN",
       "plotQuota": 20,
-      "features": [
-        "ndvi-ndwi",
-        "pest-reports",
-        "inspections",
-        "prescriptions",
-        "visit-history"
-      ]
+      "features": ["ndvi-ndwi", "pest-reports", "inspections", "prescriptions", "visit-history"]
     }
   ],
   "subscriptions": [
