@@ -1,6 +1,20 @@
 {
   "profiles": {
     "cooperative": {
+      "integration": {
+        "member-user-id": "Farmer user ID (optional)",
+        "invalid-id": "Enter a positive whole-number ID.",
+        "member-edit-pending": "Edit member (pending)",
+        "account-link-pending": "To link an account, enter the farmer user ID when adding the member.",
+        "certification-pending": "Harvest and certificate information will be integrated in the certification stage.",
+        "advisor-id": "Agronomist user ID",
+        "assigned-advisors": "Agronomists with assigned plots",
+        "invitation-email": "Agronomist email",
+        "invite": "Create invitation",
+        "invitation-created": "Invitation registered.",
+        "invitation-error": "The invitation could not be registered.",
+        "independent-pending": "Direct assignment by independent farmers is pending."
+      },
       "members": {
         "demo-account": "Demo farmer account",
         "link-account": "Link account",

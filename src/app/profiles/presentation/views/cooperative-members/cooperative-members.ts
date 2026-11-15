@@ -1,13 +1,9 @@
-import { DatePipe, DecimalPipe } from '@angular/common';
-import { MatTabsModule } from '@angular/material/tabs';
-import { CertificationStore } from '../../../../certification/application/certification.store';
 import { CooperativeMember } from '../../../domain/model/entities/cooperative-member.entity';
 import { FarmingStore } from '../../../../farming/application/farming.store';
-import { PlotSummary } from '../../../../farming/domain/model/entities/plot-summary';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { Location } from '@angular/common';
-import { Component, DestroyRef, computed, effect, inject, signal, untracked } from '@angular/core';
+import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
@@ -24,15 +20,11 @@ import { catchError, finalize, map, of, startWith, switchMap } from 'rxjs';
 import { IamStore } from '../../../../iam/application/iam.store';
 import { PageHeader } from '../../../../shared/presentation/components/page-header/page-header';
 import { PlotAdvisorAssignment } from '../../components/plot-advisor-assignment/plot-advisor-assignment';
-import { ProfilesStore } from '../../../application/profiles.store';
 import { ProfilesApi } from '../../../infrastructure/profiles-api';
 
 @Component({
   selector: 'app-cooperative-members',
   imports: [
-    DatePipe,
-    DecimalPipe,
-    MatTabsModule,
     ReactiveFormsModule,
     MatIconModule,
     MatButtonModule,
@@ -55,17 +47,6 @@ import { ProfilesApi } from '../../../infrastructure/profiles-api';
 export class CooperativeMembers {
   private readonly api = inject(ProfilesApi);
   private readonly session = inject(IamStore);
-  private readonly profiles = inject(ProfilesStore);
-
-  constructor() {
-    // The team of advisors is what the director assigns from, in every member file.
-    effect(() => {
-      const state = this.state();
-      untracked(() => {
-        if (state?.status === 'ready') this.profiles.loadTechnicalAdvisors(state.cooperativeId);
-      });
-    });
-  }
   private readonly refresh = signal(0);
   private readonly request = computed(() => ({
     user: this.session.activeUser(),
@@ -74,25 +55,7 @@ export class CooperativeMembers {
 
   private readonly destroyRef = inject(DestroyRef);
   protected readonly adding = signal(false);
-  private readonly editingMember = signal<CooperativeMember | null>(null);
-  protected readonly editing = computed(() => {
-    const member = this.editingMember();
-    return member !== null && this.selected() === member;
-  });
-
-  protected editMember(member: CooperativeMember): void {
-    this.error.set('');
-    this.form.reset({
-      fullName: member.fullName,
-      dni: member.dni,
-      phone: member.phone,
-      community: member.community,
-    });
-    this.editingMember.set(member);
-  }
-
   protected closeForm(): void {
-    this.editingMember.set(null);
     this.adding.set(false);
     this.form.reset();
     this.error.set('');
@@ -109,10 +72,11 @@ export class CooperativeMembers {
     },
   );
   protected readonly form = inject(FormBuilder).nonNullable.group({
-    fullName: ['', [Validators.required, Validators.pattern(/\S/), Validators.maxLength(200)]],
+    firstName: ['', [Validators.required, Validators.pattern(/\S/), Validators.maxLength(100)]],
+    lastName: ['', [Validators.required, Validators.pattern(/\S/), Validators.maxLength(100)]],
     dni: ['', [Validators.required, Validators.pattern(/^\d{8}$/)]],
-    phone: ['', [Validators.required, Validators.pattern(/^[+\d][\d\s()-]{6,19}$/)]],
-    community: ['', Validators.maxLength(100)],
+    userId: [null as number | null, [Validators.min(1), Validators.pattern(/^\d+$/)]],
+    community: ['', [Validators.required, Validators.pattern(/\S/), Validators.maxLength(100)]],
   });
 
   protected readonly query = signal(this.readSearch());
@@ -168,7 +132,7 @@ export class CooperativeMembers {
   });
 
   /** Columns of the member table, in display order. */
-  protected readonly columns: string[] = ['member', 'dni', 'phone', 'status', 'plots', 'actions'];
+  protected readonly columns: string[] = ['member', 'dni', 'status', 'actions'];
 
   protected readonly statusFilter = signal<'all' | 'active' | 'inactive'>('all');
   protected readonly filters = [
@@ -184,7 +148,6 @@ export class CooperativeMembers {
     return {
       total: state.members.length,
       active: state.members.filter((member) => member.active).length,
-      plots: state.members.reduce((total, member) => total + member.plots.length, 0),
     };
   });
 
@@ -198,153 +161,19 @@ export class CooperativeMembers {
   }
 
   private readonly fields = inject(FarmingStore);
-  private readonly plotSelection = signal<{ memberId: string; options: PlotSummary[] } | null>(
-    null,
-  );
-  protected readonly plotOptions = computed(() => {
-    const selection = this.plotSelection();
-    return selection && selection.memberId === this.memberId() ? selection.options : null;
-  });
-  protected readonly plotError = signal(false);
-  protected readonly linking = signal(false);
-
-  protected readonly demoFarmers = this.session.demoFarmerAccounts;
-  protected readonly accountError = signal(false);
-  protected readonly accountBusy = signal(false);
-
-  protected linkAccount(userId: number): void {
-    const member = this.selected();
-    const state = this.state();
-    if (
-      !member ||
-      member.userId ||
-      !member.active ||
-      state?.status !== 'ready' ||
-      this.accountBusy() ||
-      !this.demoFarmers.some((account) => account.id === userId)
-    )
-      return;
-
-    this.accountError.set(false);
-    this.accountBusy.set(true);
-    this.api
-      .getCooperativeMembers(state.cooperativeId)
-      .pipe(
-        switchMap((members) => {
-          if (this.selected() !== member) return of(null);
-          const current = members.find((item) => item.id === member.id);
-          if (
-            !current?.active ||
-            current.userId ||
-            members.some((item) => item.userId === userId)
-          ) {
-            this.accountError.set(true);
-            return of(null);
-          }
-          return this.api.linkMemberAccount(member.id, userId);
-        }),
-        takeUntilDestroyed(this.destroyRef),
-        finalize(() => this.accountBusy.set(false)),
-      )
-      .subscribe({
-        next: (updated) => {
-          if (updated && this.selected() === member) this.retry();
-        },
-        error: () => this.accountError.set(true),
-      });
-  }
-
-  protected loadPlots(): void {
-    const member = this.selected();
-    if (!member?.userId || this.linking()) return;
-    this.plotError.set(false);
-    this.linking.set(true);
-    this.fields
-      .plotSummariesByOwner(member.userId)
-      .pipe(
-        takeUntilDestroyed(this.destroyRef),
-        finalize(() => this.linking.set(false)),
-      )
-      .subscribe({
-        next: (plots) => {
-          if (this.selected() !== member) return;
-          this.plotSelection.set({
-            memberId: String(member.id),
-            options: plots.filter(
-              (plot) => plot.hasPolygon && !member.plots.some((linked) => linked.id === plot.id),
+  protected readonly memberPlots = toSignal(
+    toObservable(this.selected).pipe(
+      switchMap((member) =>
+        !member?.active || member.userId === null
+          ? of({ status: 'ready' as const, plots: [] })
+          : this.fields.plotSummariesByOwner(member.userId).pipe(
+              map((plots) => ({ status: 'ready' as const, plots })),
+              startWith({ status: 'loading' as const, plots: [] }),
+              catchError(() => of({ status: 'error' as const, plots: [] })),
             ),
-          });
-        },
-        error: () => this.plotError.set(true),
-      });
-  }
-
-  protected linkPlot(plot: PlotSummary): void {
-    const member = this.selected();
-    const point = plot.boundary[0];
-    if (!member || !point || this.linking() || !this.plotOptions()?.includes(plot)) return;
-    this.plotError.set(false);
-    this.linking.set(true);
-    this.fields
-      .activeCampaignByPlot(plot.id)
-      .pipe(
-        switchMap((campaign) => {
-          if (this.selected() !== member) return of(null);
-          const cropType = campaign?.cropType;
-          if (!campaign || (cropType !== 'ANDEAN_POTATO' && cropType !== 'SPECIALTY_COFFEE')) {
-            this.plotError.set(true);
-            return of(null);
-          }
-          return this.api.linkMemberPlot(member, {
-            id: plot.id,
-            name: plot.name,
-            region: plot.region,
-            coordinates: point.latitude + ', ' + point.longitude,
-            campaignId: campaign.id,
-            variety: campaign.seedVariety,
-            cropType,
-          });
-        }),
-        takeUntilDestroyed(this.destroyRef),
-        finalize(() => this.linking.set(false)),
-      )
-      .subscribe({
-        next: (updated) => {
-          if (!updated || this.selected() !== member) return;
-          this.plotSelection.set(null);
-          this.retry();
-        },
-        error: () => this.plotError.set(true),
-      });
-  }
-
-  protected readonly harvest = inject(CertificationStore);
-  protected readonly memberBatches = computed(() => {
-    const member = this.selected();
-    if (!member || this.harvest.cooperativeId() !== member.cooperativeId) return [];
-
-    return this.harvest
-      .batches()
-      .filter(
-        ({ data }) => data.memberId === member.id && data.cooperativeId === member.cooperativeId,
-      )
-      .sort((a, b) => b.data.collectedAt.localeCompare(a.data.collectedAt));
-  });
-
-  protected readonly collectedKg = computed(() =>
-    this.memberBatches().reduce((total, batch) => total + batch.netKg, 0),
+      ),
+    ),
   );
-
-  protected readonly issuedCertificates = computed(() => {
-    const batches = new Map(this.memberBatches().map((batch) => [batch.id, batch.data]));
-    return this.harvest
-      .certificates()
-      .flatMap(({ data }) => {
-        const batch = batches.get(data.harvestBatchId);
-        return batch ? [{ certificate: data, batch }] : [];
-      })
-      .sort((a, b) => b.certificate.issuedAt.localeCompare(a.certificate.issuedAt));
-  });
 
   protected readonly visibleMembers = computed(() => {
     const state = this.state();
@@ -370,27 +199,24 @@ export class CooperativeMembers {
       this.saving()
     )
       return;
-    const editing = this.editing() ? this.editingMember() : null;
-    if (!editing && (!this.adding() || this.memberId() !== null)) return;
+    if (!this.adding() || this.memberId() !== null) return;
     this.form.markAllAsTouched();
     if (this.form.invalid) return;
-    const { fullName, dni, phone, community } = this.form.getRawValue();
-    if (state.members.some((member) => member.dni === dni && member.id !== editing?.id)) {
+    const { firstName, lastName, dni, community, userId } = this.form.getRawValue();
+    if (state.members.some((member) => member.dni === dni)) {
       this.error.set('profiles.cooperative.members.duplicate');
       return;
     }
     this.error.set('');
     this.saving.set(true);
-    const details = {
-      fullName: fullName.trim(),
-      dni,
-      phone: phone.trim(),
-      community: community.trim(),
-    };
-    const request = editing
-      ? this.api.updateCooperativeMember(editing.id, details)
-      : this.api.addCooperativeMember(state.cooperativeId, details);
-    request
+    this.api
+      .addCooperativeMember(state.cooperativeId, {
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        dni,
+        community: community.trim(),
+        ...(userId === null ? {} : { userId }),
+      })
       .pipe(
         takeUntilDestroyed(this.destroyRef),
         finalize(() => this.saving.set(false)),
@@ -399,10 +225,6 @@ export class CooperativeMembers {
         next: (member) => {
           if (state.directorId !== this.session.activeUser()?.id) return;
           this.closeForm();
-          if (editing) {
-            this.retry();
-            return;
-          }
           void this.router.navigate(['/cooperative/members', member.id], {
             state: { memberSearch: this.query() },
           });

@@ -3,14 +3,14 @@ import { BaseResource, BaseResponse } from '../../../shared/infrastructure/base-
 /** API representation of a cooperative. */
 export interface CooperativeResource extends BaseResource {
   id: number;
-  directorUserId: number;
-  legalName: string;
+  managerUserId: number;
+  businessName: string;
   region: string;
-  institutionalEmail: string;
-  legalRepresentative: string;
+  institutionalEmail: string | null;
+  legalRepresentative: string | null;
   ruc: string;
-  headquartersAddress: string;
-  switchboardPhone: string;
+  headquartersAddress: string | null;
+  switchboardPhone: string | null;
 }
 
 /** API response used by the production service when it wraps cooperatives. */

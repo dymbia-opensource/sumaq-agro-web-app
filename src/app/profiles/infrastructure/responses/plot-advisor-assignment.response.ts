@@ -15,6 +15,7 @@ export interface AgronomistAssignmentHistoryResource {
  */
 export interface PlotAdvisorAssignmentResource {
   id: number;
+  cooperativeId: number;
   plotId: number;
   producerUserId: number;
   agronomistUserId: number;

@@ -38,14 +38,30 @@ export class PlotAdvisorAssignmentsApiEndpoint {
     );
   }
 
-  /** Creates the record of a plot, or replaces the one it already has. */
-  save(record: PlotAdvisorAssignment, existing: boolean): Observable<PlotAdvisorAssignment> {
-    const resource = PlotAdvisorAssignmentAssembler.toResource(record);
-    const saved = existing
-      ? this.http.put<PlotAdvisorAssignmentResource>(`${this.url}/${record.id}`, resource)
-      : this.http.post<PlotAdvisorAssignmentResource>(this.url, resource);
+  getByCooperative(cooperativeId: number): Observable<PlotAdvisorAssignment[]> {
+    return this.query(new HttpParams().set('cooperativeId', cooperativeId));
+  }
 
-    return saved.pipe(map(PlotAdvisorAssignmentAssembler.toEntity));
+  assign(
+    cooperativeId: number,
+    plotId: number,
+    agronomistUserId: number,
+  ): Observable<PlotAdvisorAssignment> {
+    return this.http
+      .post<PlotAdvisorAssignmentResource>(this.url, {
+        cooperativeId,
+        plotId,
+        agronomistUserId,
+      })
+      .pipe(map(PlotAdvisorAssignmentAssembler.toEntity));
+  }
+
+  reassign(assignmentId: number, agronomistUserId: number): Observable<PlotAdvisorAssignment> {
+    return this.http
+      .put<PlotAdvisorAssignmentResource>(this.url + '/' + assignmentId, {
+        agronomistUserId,
+      })
+      .pipe(map(PlotAdvisorAssignmentAssembler.toEntity));
   }
 
   private query(params: HttpParams): Observable<PlotAdvisorAssignment[]> {

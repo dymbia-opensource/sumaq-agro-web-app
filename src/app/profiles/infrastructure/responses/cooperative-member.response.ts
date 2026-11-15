@@ -17,10 +17,11 @@ export interface CooperativeMemberResource extends BaseResource {
 }
 
 export interface CooperativeMemberDetails {
-  fullName: string;
+  firstName: string;
+  lastName: string;
   dni: string;
-  phone: string;
   community: string;
+  userId?: number;
 }
 
 /** API response used by the production service when it wraps members. */

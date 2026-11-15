@@ -1,6 +1,20 @@
 {
   "profiles": {
     "cooperative": {
+      "integration": {
+        "member-user-id": "ID del usuario productor (opcional)",
+        "invalid-id": "Ingresa un ID entero positivo.",
+        "member-edit-pending": "Editar miembro (pendiente)",
+        "account-link-pending": "Para asociar una cuenta, indica el ID del productor al dar de alta al miembro.",
+        "certification-pending": "La información de cosechas y certificados se integrará en la etapa de certificación.",
+        "advisor-id": "ID de usuario del agrónomo",
+        "assigned-advisors": "Agrónomos con parcelas asignadas",
+        "invitation-email": "Correo del agrónomo",
+        "invite": "Crear invitación",
+        "invitation-created": "Invitación registrada.",
+        "invitation-error": "No se pudo registrar la invitación.",
+        "independent-pending": "La asignación directa por productores independientes está pendiente."
+      },
       "members": {
         "demo-account": "Cuenta de agricultor de prueba",
         "link-account": "Vincular cuenta",

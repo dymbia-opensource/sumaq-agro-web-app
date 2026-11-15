@@ -3,18 +3,14 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
 import { BaseApi } from '../../shared/infrastructure/base-api';
-import { CooperativeMember, MemberPlot } from '../domain/model/entities/cooperative-member.entity';
+import { CooperativeMember } from '../domain/model/entities/cooperative-member.entity';
 import { Cooperative } from '../domain/model/entities/cooperative.entity';
-import { CooperativeDashboard } from '../domain/model/entities/cooperative-dashboard.entity';
 import { FarmerProfile } from '../domain/model/entities/farmer-profile.entity';
 import { PlotAdvisorAssignment } from '../domain/model/entities/plot-advisor-assignment';
-import { TechnicalAdvisor } from '../domain/model/entities/technical-advisor.entity';
 import { CooperativeMembersApiEndpoint } from './endpoints/cooperative-members.endpoint';
 import { PlotAdvisorAssignmentsApiEndpoint } from './endpoints/plot-advisor-assignments.endpoint';
-import { CooperativeDashboardApiEndpoint } from './endpoints/cooperative-dashboard.endpoint';
 import { CooperativesApiEndpoint } from './endpoints/cooperatives.endpoint';
 import { FarmerProfilesApiEndpoint } from './endpoints/farmer-profiles.endpoint';
-import { TechnicalAdvisorsApiEndpoint } from './endpoints/technical-advisors.endpoint';
 
 /** Facade that exposes only the Profile data required by its application layer. */
 @Injectable({ providedIn: 'root' })
@@ -22,8 +18,6 @@ export class ProfilesApi extends BaseApi {
   private readonly farmerProfilesEndpoint: FarmerProfilesApiEndpoint;
   private readonly cooperativesEndpoint: CooperativesApiEndpoint;
   private readonly cooperativeMembersEndpoint: CooperativeMembersApiEndpoint;
-  private readonly cooperativeDashboardEndpoint: CooperativeDashboardApiEndpoint;
-  private readonly technicalAdvisorsEndpoint: TechnicalAdvisorsApiEndpoint;
   private readonly plotAdvisorAssignmentsEndpoint: PlotAdvisorAssignmentsApiEndpoint;
 
   constructor() {
@@ -32,8 +26,6 @@ export class ProfilesApi extends BaseApi {
     this.farmerProfilesEndpoint = new FarmerProfilesApiEndpoint(http);
     this.cooperativesEndpoint = new CooperativesApiEndpoint(http);
     this.cooperativeMembersEndpoint = new CooperativeMembersApiEndpoint(http);
-    this.cooperativeDashboardEndpoint = new CooperativeDashboardApiEndpoint(http);
-    this.technicalAdvisorsEndpoint = new TechnicalAdvisorsApiEndpoint(http);
     this.plotAdvisorAssignmentsEndpoint = new PlotAdvisorAssignmentsApiEndpoint(http);
   }
 
@@ -69,21 +61,6 @@ export class ProfilesApi extends BaseApi {
     return this.cooperativeMembersEndpoint.add(cooperativeId, member);
   }
 
-  updateCooperativeMember(
-    id: number | string,
-    details: CooperativeMemberDetails,
-  ): Observable<CooperativeMember> {
-    return this.cooperativeMembersEndpoint.updateDetails(id, details);
-  }
-
-  linkMemberAccount(memberId: number | string, userId: number): Observable<CooperativeMember> {
-    return this.cooperativeMembersEndpoint.linkAccount(memberId, userId);
-  }
-
-  linkMemberPlot(member: CooperativeMember, plot: MemberPlot): Observable<CooperativeMember> {
-    return this.cooperativeMembersEndpoint.linkPlot(member, plot);
-  }
-
   getCooperativeMembers(cooperativeId: number): Observable<CooperativeMember[]> {
     return this.cooperativeMembersEndpoint.getByCooperative(cooperativeId);
   }
@@ -97,43 +74,12 @@ export class ProfilesApi extends BaseApi {
     return this.cooperativeMembersEndpoint.getByUser(userId);
   }
 
-  getInstitutionalDashboard(directorUserId: number): Observable<CooperativeDashboard | null> {
-    return this.cooperativeDashboardEndpoint.getByDirector(directorUserId);
+  inviteAgronomist(cooperativeId: number, email: string): Observable<unknown> {
+    return this.cooperativesEndpoint.inviteAgronomist(cooperativeId, email);
   }
 
-  getAdvisorByUser(userId: number): Observable<TechnicalAdvisor | null> {
-    return this.technicalAdvisorsEndpoint.getByUser(userId);
-  }
-
-  getTechnicalAdvisors(cooperativeId: number): Observable<TechnicalAdvisor[]> {
-    return this.technicalAdvisorsEndpoint.getByCooperative(cooperativeId);
-  }
-
-  /** Lists demo professionals with a linked account, without requiring cooperative membership. */
-  getAvailableAdvisors(): Observable<TechnicalAdvisor[]> {
-    return this.technicalAdvisorsEndpoint
-      .getAll()
-      .pipe(
-        map((items) => [
-          ...new Map(
-            items
-              .filter((item) => Number.isSafeInteger(item.userId) && item.userId! > 0)
-              .map((item) => [item.userId!, item]),
-          ).values(),
-        ]),
-      );
-  }
-
-  createTechnicalAdvisor(advisor: TechnicalAdvisor): Observable<TechnicalAdvisor> {
-    return this.technicalAdvisorsEndpoint.create(advisor);
-  }
-
-  updateTechnicalAdvisor(advisor: TechnicalAdvisor): Observable<TechnicalAdvisor> {
-    return this.technicalAdvisorsEndpoint.update(advisor, advisor.id);
-  }
-
-  deleteTechnicalAdvisor(id: number): Observable<void> {
-    return this.technicalAdvisorsEndpoint.delete(id);
+  getAssignmentsByCooperative(cooperativeId: number): Observable<PlotAdvisorAssignment[]> {
+    return this.plotAdvisorAssignmentsEndpoint.getByCooperative(cooperativeId);
   }
 
   getAssignmentsByProducer(userId: number): Observable<PlotAdvisorAssignment[]> {
@@ -148,10 +94,15 @@ export class ProfilesApi extends BaseApi {
     return this.plotAdvisorAssignmentsEndpoint.getByPlot(plotId);
   }
 
-  saveAssignment(
-    record: PlotAdvisorAssignment,
-    existing: boolean,
+  assign(
+    cooperativeId: number,
+    plotId: number,
+    advisorUserId: number,
   ): Observable<PlotAdvisorAssignment> {
-    return this.plotAdvisorAssignmentsEndpoint.save(record, existing);
+    return this.plotAdvisorAssignmentsEndpoint.assign(cooperativeId, plotId, advisorUserId);
+  }
+
+  reassign(assignmentId: number, advisorUserId: number): Observable<PlotAdvisorAssignment> {
+    return this.plotAdvisorAssignmentsEndpoint.reassign(assignmentId, advisorUserId);
   }
 }
