@@ -42,7 +42,17 @@
         "inactive": "Inactivo",
         "error": "No se pudo cargar el padrón.",
         "empty": "Todavía no hay socios registrados.",
-        "no-results": "Ningún socio coincide con la búsqueda."
+        "no-results": "Ningún socio coincide con la búsqueda.",
+        "kpi-total": "Socios registrados",
+        "kpi-active": "Socios activos",
+        "kpi-plots": "Parcelas vinculadas",
+        "filter-all": "Todos",
+        "filter-status": "Filtrar por estado",
+        "clear-search": "Limpiar búsqueda",
+        "error-name": "Ingresa el nombre del socio",
+        "error-dni": "El DNI debe tener 8 dígitos",
+        "error-phone": "Ingresa un teléfono válido",
+        "dni-hint": "8 dígitos"
       },
       "settings": {
         "breadcrumb": "Configuración",

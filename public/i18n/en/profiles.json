@@ -42,7 +42,17 @@
         "inactive": "Inactive",
         "error": "The member directory could not be loaded.",
         "empty": "There are no registered members yet.",
-        "no-results": "No members match your search."
+        "no-results": "No members match your search.",
+        "kpi-total": "Registered members",
+        "kpi-active": "Active members",
+        "kpi-plots": "Linked plots",
+        "filter-all": "All",
+        "filter-status": "Filter by status",
+        "clear-search": "Clear search",
+        "error-name": "Enter the member's name",
+        "error-dni": "The ID must have 8 digits",
+        "error-phone": "Enter a valid phone number",
+        "dni-hint": "8 digits"
       },
       "settings": {
         "breadcrumb": "Settings",
