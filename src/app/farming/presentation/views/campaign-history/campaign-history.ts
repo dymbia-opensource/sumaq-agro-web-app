@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialog } from '@angular/material/dialog';
@@ -11,10 +11,9 @@ import {
   Breadcrumb,
   PageHeader,
 } from '../../../../shared/presentation/components/page-header/page-header';
+import { CampaignForm, CampaignFormData } from '../../components/campaign-form/campaign-form';
 import { FarmingStore } from '../../../application/farming.store';
 import { CloseCropCampaignCommand } from '../../../domain/model/commands/close-crop-campaign.command';
-import { ExportCampaignCostReportCommand } from '../../../domain/model/commands/export-campaign-cost-report.command';
-import { RecordActualYieldCommand } from '../../../domain/model/commands/record-actual-yield.command';
 import {
   CampaignSummary,
   CampaignSummaryCard,
@@ -23,7 +22,6 @@ import {
 import {
   CloseCampaignDialog,
   CloseCampaignDialogData,
-  CloseCampaignDialogResult,
 } from '../../components/close-campaign-dialog/close-campaign-dialog';
 
 /**
@@ -42,6 +40,7 @@ import {
     PageHeader,
     MessageCard,
     CampaignSummaryCard,
+    CampaignForm,
   ],
   templateUrl: './campaign-history.html',
   styleUrl: './campaign-history.css',
@@ -74,10 +73,13 @@ export class CampaignHistory {
   });
   readonly hasCampaignInProgress = this.store.hasCampaignInProgress;
 
+  readonly editId = signal<number | null>(null);
+  readonly editingCampaign = computed(() =>
+    this.campaigns().find((campaign) => campaign.id === this.editId() && campaign.isActive()),
+  );
+
   // UI state
-  protected readonly breadcrumbs: Breadcrumb[] = [
-    { label: 'farming.campaigns.title' },
-  ];
+  protected readonly breadcrumbs: Breadcrumb[] = [{ label: 'farming.campaigns.title' }];
 
   /** Subtitle, e.g. "Pampa Alta · 3 campaigns". */
   readonly subtitleParams = computed(() => ({
@@ -85,43 +87,40 @@ export class CampaignHistory {
     count: this.summaries().length,
   }));
 
-  // Actions
-  /** Asks for confirmation (and the harvested yield) before closing the campaign. */
-  onClose(summary: CampaignSummary) {
-    this.dialog
-      .open<CloseCampaignDialog, CloseCampaignDialogData, CloseCampaignDialogResult>(
-        CloseCampaignDialog,
-        {
-          data: {
-            season: summary.season,
-            yieldUnit: summary.yieldUnit,
-            actualYield: summary.actualYield,
-          },
-          width: 'calc(100vw - 32px)',
-          maxWidth: '480px',
-        },
-      )
-      .afterClosed()
-      .subscribe((result) => {
-        if (!result) return;
-        const actualYield =
-          result.actualYield && summary.ledgerId !== null
-            ? new RecordActualYieldCommand({
-                ledgerId: summary.ledgerId,
-                actualYield: result.actualYield,
-                unit: summary.yieldUnit,
-              })
-            : undefined;
-        this.store.closeCampaign(
-          new CloseCropCampaignCommand({ campaignId: summary.campaignId }),
-          actualYield,
-        );
-      });
+  onEdit(summary: CampaignSummary): void {
+    this.editId.set(summary.campaignId);
   }
 
-  onExport(summary: CampaignSummary) {
-    this.store.exportCostReport(
-      new ExportCampaignCostReportCommand({ campaignId: summary.campaignId }),
+  onSave(data: CampaignFormData): void {
+    const current = this.editingCampaign();
+    if (!current) return;
+    this.store.updateCampaign(
+      Number(current.id),
+      {
+        cropType: data.cropType,
+        seedVariety: data.seedVariety,
+        customSeedVariety: data.customVariety,
+        sowingDate:
+          data.sowingDate?.getTime() === current.sowingDate?.getTime() ? null : data.sowingDate,
+      },
+      () => this.editId.set(null),
     );
+  }
+
+  onClose(summary: CampaignSummary): void {
+    this.dialog
+      .open<CloseCampaignDialog, CloseCampaignDialogData, boolean>(CloseCampaignDialog, {
+        data: { season: summary.season },
+        width: 'calc(100vw - 32px)',
+        maxWidth: '480px',
+      })
+      .afterClosed()
+      .subscribe((confirmed) => {
+        if (confirmed) {
+          this.store.closeCampaign(
+            new CloseCropCampaignCommand({ campaignId: summary.campaignId }),
+          );
+        }
+      });
   }
 }

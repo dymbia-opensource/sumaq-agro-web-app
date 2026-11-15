@@ -1,12 +1,10 @@
 @if (loading()) {
-  <mat-progress-bar mode="indeterminate" [attr.aria-label]="'common.loading' | translate" />
-}
-
-@if (subscription()?.hasAccess()) {
-  <a mat-button class="back" routerLink="/subscriptions">
-    <mat-icon>arrow_back</mat-icon>
-    {{ 'subscriptions.catalog.back' | translate }}
-  </a>
+<mat-progress-bar mode="indeterminate" [attr.aria-label]="'common.loading' | translate" />
+} @if (subscription()?.hasAccess()) {
+<a mat-button class="back" routerLink="/subscriptions">
+  <mat-icon>arrow_back</mat-icon>
+  {{ 'subscriptions.catalog.back' | translate }}
+</a>
 }
 
 <header class="intro">
@@ -16,13 +14,13 @@
 </header>
 
 @if (error(); as error) {
-  <app-message-card icon="error" [message]="error | translate" [alert]="true" />
+<app-message-card icon="error" [message]="error | translate" [alert]="true" />
 } @else if (accessCheckFailed()) {
-  <app-message-card
-    icon="warning"
-    [message]="'subscriptions.errors.load-subscription' | translate"
-    [alert]="true"
-  />
+<app-message-card
+  icon="warning"
+  [message]="'subscriptions.errors.load-subscription' | translate"
+  [alert]="true"
+/>
 }
 
 <section class="cycle-picker" [attr.aria-label]="'subscriptions.catalog.billing-cycle' | translate">
@@ -35,27 +33,24 @@
       {{ 'subscriptions.billing-cycle.MONTHLY' | translate }}
     </mat-button-toggle>
     <mat-button-toggle [value]="cycles.ANNUAL">
-      {{ 'subscriptions.billing-cycle.ANNUAL' | translate }}
-      @if (hasAnnualSavings()) {
-        <span class="tag">{{ 'subscriptions.catalog.annual-tag' | translate }}</span>
+      {{ 'subscriptions.billing-cycle.ANNUAL' | translate }} @if (hasAnnualSavings()) {
+      <span class="tag">{{ 'subscriptions.catalog.annual-tag' | translate }}</span>
       }
     </mat-button-toggle>
   </mat-button-toggle-group>
 </section>
 
 <section class="plan-grid" [attr.aria-label]="'subscriptions.catalog.title' | translate">
-  @for (plan of plans(); track plan.id) {
-    <app-plan-card
-      [plan]="plan"
-      [cycle]="cycle()"
-      [current]="subscription()?.hasAccess() === true && subscription()?.planId === plan.id"
-      [selected]="selectedPlan()?.code === plan.code"
-      [disabled]="loading()"
-      (choose)="onSelectPlan($event)"
-    />
-  } @empty {
-    @if (!loading() && !error()) {
-      <app-message-card icon="inventory_2" [message]="'subscriptions.catalog.empty' | translate" />
-    }
-  }
+  @for (plan of plans(); track plan.code) {
+  <app-plan-card
+    [plan]="plan"
+    [cycle]="cycle()"
+    [current]="subscription()?.hasAccess() === true && subscription()?.planCode === plan.code"
+    [selected]="selectedPlan()?.code === plan.code"
+    [disabled]="loading()"
+    (choose)="onSelectPlan($event)"
+  />
+  } @empty { @if (!loading() && !error()) {
+  <app-message-card icon="inventory_2" [message]="'subscriptions.catalog.empty' | translate" />
+  } }
 </section>

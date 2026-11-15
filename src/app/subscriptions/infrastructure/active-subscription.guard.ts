@@ -21,7 +21,7 @@ export const activeSubscriptionGuard: CanActivateChildFn = (_route, state) => {
 
   const plans = router.createUrlTree(['/subscriptions/plans']);
 
-  return subscriptionsApi.getSubscriptionByUserId(user.id).pipe(
+  return subscriptionsApi.getMySubscription().pipe(
     map((subscription) => {
       if (iam.activeUser()?.id !== user.id) return signIn();
       return subscription?.hasAccess() === true ? true : plans;

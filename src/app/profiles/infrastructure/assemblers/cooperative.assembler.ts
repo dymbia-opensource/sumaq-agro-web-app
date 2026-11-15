@@ -9,14 +9,22 @@ export class CooperativeAssembler implements BaseAssembler<
   CooperativesResponse
 > {
   toEntityFromResource(resource: CooperativeResource): Cooperative {
-    return new Cooperative(resource);
+    return new Cooperative({
+      ...resource,
+      directorUserId: resource.managerUserId,
+      legalName: resource.businessName,
+      institutionalEmail: resource.institutionalEmail ?? '',
+      legalRepresentative: resource.legalRepresentative ?? '',
+      headquartersAddress: resource.headquartersAddress ?? '',
+      switchboardPhone: resource.switchboardPhone ?? '',
+    });
   }
 
   toResourceFromEntity(entity: Cooperative): CooperativeResource {
     return {
       id: entity.id as number,
-      directorUserId: entity.directorUserId,
-      legalName: entity.legalName,
+      managerUserId: entity.directorUserId,
+      businessName: entity.legalName,
       region: entity.region,
       institutionalEmail: entity.institutionalEmail,
       legalRepresentative: entity.legalRepresentative,

@@ -1,5 +1,13 @@
 import { FarmerAdvisoryPanel } from '../../../../profiles/presentation/components/farmer-advisory-panel/farmer-advisory-panel';
-import { Component, computed, inject, input, numberAttribute } from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  inject,
+  input,
+  numberAttribute,
+  untracked,
+} from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -58,6 +66,15 @@ export class PlotDetail {
     { label: 'farming.plots.manage', link: '/plots' },
     { label: 'farming.plot-detail.title' },
   ];
+
+  constructor() {
+    effect(() => {
+      const id = this.id();
+      if (!this.plotsLoading() && this.store.currentUserId() !== null) {
+        untracked(() => this.store.refreshPlot(id));
+      }
+    });
+  }
 
   // Actions
   onViewOnDashboard() {

@@ -89,3 +89,70 @@
     </div>
   }
 }
+
+@if (store.selectedPlot()) {
+  <section class="alerts-section">
+    <h2>{{ 'crop.forecast-title' | translate }}</h2>
+    @if (store.forecastsLoading()) {
+      <mat-progress-bar mode="indeterminate" />
+    } @else if (store.forecastsError(); as error) {
+      <p role="alert">{{ error | translate }}</p>
+      <button mat-button (click)="reloadAlerts()">{{ 'common.retry' | translate }}</button>
+    } @else {
+      <div class="alerts-list">
+        @for (forecast of store.forecasts(); track forecast.id) {
+          <article class="alert-card">
+            <h3>{{ forecast.forecastDate | date: 'medium' : '-0500' }}</h3>
+            <p>{{ forecast.temperature | number: '1.0-1' }} °C</p>
+            <p>{{ 'crop.rain-chance' | translate }}: {{ forecast.rainChance | number: '1.0-1' }}%</p>
+            <p>{{ forecast.source }}</p>
+          </article>
+        } @empty {
+          <p>{{ 'crop.no-forecasts' | translate }}</p>
+        }
+      </div>
+    }
+  </section>
+
+  <section class="alerts-section">
+    <h2>{{ 'crop.bulletins-title' | translate }}</h2>
+    @if (store.canPrescribe()) {
+      <form class="alerts-list" [formGroup]="bulletinForm" (ngSubmit)="publish()">
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'crop.bulletin-title' | translate }}</mat-label>
+          <input matInput formControlName="title" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'crop.bulletin-content' | translate }}</mat-label>
+          <textarea matInput rows="4" formControlName="content"></textarea>
+        </mat-form-field>
+        <button mat-flat-button type="submit" [disabled]="bulletinForm.invalid || store.saving()">
+          {{ 'crop.publish-bulletin' | translate }}
+        </button>
+        @if (store.writeError(); as error) {
+          <p role="alert">{{ error | translate }}</p>
+        } @else if (published()) {
+          <p role="status">{{ 'crop.bulletin-saved' | translate }}</p>
+        }
+      </form>
+    }
+    @if (store.bulletinsLoading()) {
+      <mat-progress-bar mode="indeterminate" />
+    } @else if (store.bulletinsError(); as error) {
+      <p role="alert">{{ error | translate }}</p>
+      <button mat-button (click)="reloadAlerts()">{{ 'common.retry' | translate }}</button>
+    } @else {
+      <div class="alerts-list">
+        @for (bulletin of store.bulletins(); track bulletin.id) {
+          <article class="alert-card">
+            <h3>{{ bulletin.title }}</h3>
+            <p>{{ bulletin.content }}</p>
+            <p>{{ bulletin.publishedAt | date: 'mediumDate' : '-0500' }}</p>
+          </article>
+        } @empty {
+          <p>{{ 'crop.no-bulletins' | translate }}</p>
+        }
+      </div>
+    }
+  </section>
+}

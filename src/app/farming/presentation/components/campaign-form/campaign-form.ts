@@ -10,7 +10,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatRadioModule } from '@angular/material/radio';
 import { TranslatePipe } from '@ngx-translate/core';
 import { startWith } from 'rxjs';
-import { CampaignLedger, YieldUnit } from '../../../domain/model/entities/campaign-ledger.entity';
+import { toApiDate } from '../../../../shared/infrastructure/api-date';
 import { CropCampaign, CropType } from '../../../domain/model/entities/crop-campaign.entity';
 
 /** Seed varieties suggested for each crop (US-34). */
@@ -36,10 +36,8 @@ export interface CampaignFormData {
   seedVariety: string;
   /** `true` when the variety is not in the catalog. */
   customVariety: boolean;
-  sowingDate: Date;
+  sowingDate: Date | null;
   season: string;
-  expectedYield: number | null;
-  yieldUnit: YieldUnit;
 }
 
 /**
@@ -71,6 +69,8 @@ export class CampaignForm implements OnInit {
   /** Crop of the previous campaign, suggested for the new one. */
   readonly initialCropType = input<CropType>(CropType.ANDEAN_POTATO);
 
+  readonly campaign = input<CropCampaign>();
+
   /** `true` while the campaign is being saved. */
   readonly saving = input(false);
 
@@ -83,8 +83,7 @@ export class CampaignForm implements OnInit {
   protected readonly form = this.fb.group({
     cropType: [CropType.ANDEAN_POTATO],
     seedVariety: ['', [Validators.required, Validators.maxLength(60)]],
-    sowingDate: ['', Validators.required],
-    expectedYield: [null as number | null, [Validators.min(1)]],
+    sowingDate: [''],
   });
 
   private readonly cropType = toSignal(
@@ -109,34 +108,40 @@ export class CampaignForm implements OnInit {
     searchSeedVarieties(this.cropType(), this.varietyText()),
   );
 
-  /** Unit of the expected yield: sacks for potato, quintals for coffee. */
-  protected readonly yieldUnit = computed(() => this.store.yieldUnitOf(this.cropType()));
-
   /** Season of the sowing date, e.g. `2026-II`. */
   protected readonly season = computed(() => {
+    const existing = this.campaign();
+    if (existing) return existing.season;
     const date = CampaignForm.toDate(this.sowingDateText());
     return date ? this.store.seasonOf(date) : '';
   });
 
   ngOnInit(): void {
-    this.form.controls.cropType.setValue(this.initialCropType());
+    const campaign = this.campaign();
+    if (!campaign || campaign.sowingDate) {
+      this.form.controls.sowingDate.addValidators(Validators.required);
+    }
+    this.form.setValue({
+      cropType: campaign?.cropType ?? this.initialCropType(),
+      seedVariety: campaign?.seedVariety ?? '',
+      sowingDate: campaign?.sowingDate ? toApiDate(campaign.sowingDate) : '',
+    });
   }
 
   protected onSubmit() {
+    if (this.saving()) return;
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
     const value = this.form.getRawValue();
-    const sowingDate = CampaignForm.toDate(value.sowingDate)!;
+    const sowingDate = CampaignForm.toDate(value.sowingDate);
     this.submitted.emit({
       cropType: value.cropType,
       seedVariety: value.seedVariety,
       customVariety: isCustomSeedVariety(value.cropType, value.seedVariety),
       sowingDate,
-      season: this.store.seasonOf(sowingDate),
-      expectedYield: value.expectedYield,
-      yieldUnit: this.yieldUnit(),
+      season: this.season(),
     });
   }
 

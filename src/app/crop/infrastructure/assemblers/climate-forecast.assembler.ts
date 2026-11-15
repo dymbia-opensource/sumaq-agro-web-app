@@ -14,7 +14,7 @@ export class ClimateForecastAssembler implements BaseAssembler<
     return new ClimateForecast({
       id: resource.id,
       region: resource.region,
-      temperature: resource.temperature,
+      temperature: resource.temperatureCelsius,
       rainChance: resource.rainChance,
       forecastDate: resource.forecastDate,
       source: resource.source,
@@ -24,7 +24,7 @@ export class ClimateForecastAssembler implements BaseAssembler<
     return {
       id: entity.id as number,
       region: entity.region,
-      temperature: entity.temperature,
+      temperatureCelsius: entity.temperature,
       rainChance: entity.rainChance,
       forecastDate: entity.forecastDate,
       source: entity.source,

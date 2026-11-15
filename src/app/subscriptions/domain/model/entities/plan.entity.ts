@@ -1,29 +1,23 @@
-import { BaseEntity } from '../../../../shared/domain/model/base-entity';
 import { Money } from '../../../../shared/domain/model/money';
 import { BillingCycle } from './billing-cycle';
 import { PlanCode } from './plan-code';
 
 /** Plan of the catalog with its prices and plot quota. */
-export class Plan extends BaseEntity {
+export class Plan {
   private _code: PlanCode;
-  private _name: string;
   private _monthlyPrice: Money;
   private _annualPrice: Money;
   private _plotQuota: number;
   private _features: string[];
 
   constructor(props: {
-    id: number;
     code: PlanCode;
-    name: string;
     monthlyPrice: Money;
     annualPrice: Money;
     plotQuota: number;
     features?: string[];
   }) {
-    super({ id: props.id });
     this._code = props.code;
-    this._name = props.name;
     this._monthlyPrice = props.monthlyPrice;
     this._annualPrice = props.annualPrice;
     this._plotQuota = props.plotQuota;
@@ -32,10 +26,6 @@ export class Plan extends BaseEntity {
 
   get code(): PlanCode {
     return this._code;
-  }
-
-  get name(): string {
-    return this._name;
   }
 
   get monthlyPrice(): Money {

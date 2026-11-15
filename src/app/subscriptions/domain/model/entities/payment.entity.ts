@@ -1,57 +1,30 @@
-import { BaseEntity } from '../../../../shared/domain/model/base-entity';
 import { Money } from '../../../../shared/domain/model/money';
 import { PaymentStatus } from './payment-status';
+import { PlanCode } from './plan-code';
 
-/** One charge of a subscription, confirmed by the payment gateway */
-export class Payment extends BaseEntity {
-  private _subscriptionId: number;
-  private _amount: Money;
-  private _transactionToken: string;
-  private _status: PaymentStatus;
-  private _paidAt: Date;
+/** One checkout attempt recorded by the server. */
+export class Payment {
+  readonly reference: string;
+  readonly planCode: PlanCode;
+  readonly amount: Money;
+  readonly status: PaymentStatus;
+  readonly attemptedAt: Date;
 
   constructor(props: {
-    id: number;
-    subscriptionId: number;
+    reference: string;
+    planCode: PlanCode;
     amount: Money;
-    transactionToken: string;
     status: PaymentStatus;
-    paidAt: Date;
+    attemptedAt: Date;
   }) {
-    super({ id: props.id });
-    this._subscriptionId = props.subscriptionId;
-    this._amount = props.amount;
-    this._transactionToken = props.transactionToken;
-    this._status = props.status;
-    this._paidAt = props.paidAt;
-  }
-
-  get subscriptionId(): number {
-    return this._subscriptionId;
-  }
-
-  get amount(): Money {
-    return this._amount;
-  }
-
-  /** Token returned by the gateway; the card number is never stored. */
-  get transactionToken(): string {
-    return this._transactionToken;
-  }
-
-  get status(): PaymentStatus {
-    return this._status;
-  }
-
-  get paidAt(): Date {
-    return this._paidAt;
+    this.reference = props.reference;
+    this.planCode = props.planCode;
+    this.amount = props.amount;
+    this.status = props.status;
+    this.attemptedAt = props.attemptedAt;
   }
 
   isCompleted(): boolean {
-    return this._status === PaymentStatus.COMPLETED;
-  }
-
-  isRejected(): boolean {
-    return this._status === PaymentStatus.REJECTED;
+    return this.status === PaymentStatus.COMPLETED;
   }
 }

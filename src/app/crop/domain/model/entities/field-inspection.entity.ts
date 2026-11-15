@@ -7,6 +7,7 @@ import { BaseEntity } from '../../../../shared/domain/model/base-entity';
 export interface FieldInspectionProps {
   id?: number | string;
   reportId: number;
+  plotId: number;
   scheduledAt: string;
   notes?: string;
   status?: 'SCHEDULED' | 'COMPLETED';
@@ -18,6 +19,7 @@ export interface FieldInspectionProps {
  * Domain entity representing an agronomist technical on-site visit to inspect a reported issue.
  */
 export class FieldInspection extends BaseEntity {
+  readonly plotId: number;
   private _reportId: number;
   private _scheduledAt: string;
   private _notes: string;
@@ -33,6 +35,8 @@ export class FieldInspection extends BaseEntity {
   constructor(props: FieldInspectionProps) {
     super({ id: props.id ?? 0 });
     requireId(props.reportId);
+    requireId(props.plotId);
+    this.plotId = props.plotId;
     requireDate(props.scheduledAt);
     requireChoice(props.status ?? 'SCHEDULED', ['SCHEDULED', 'COMPLETED']);
     if (props.status === 'COMPLETED') {
@@ -72,17 +76,5 @@ export class FieldInspection extends BaseEntity {
   }
   get inspectorUserId(): number | null {
     return this._inspectorUserId;
-  }
-  complete(notes: string, inspectorUserId: number, completedAt = new Date().toISOString()): void {
-    if (this._status !== 'SCHEDULED') throw new Error('crop.errors.invalid-transition');
-    requireText(notes, 10);
-    requireId(inspectorUserId);
-    requireDate(completedAt);
-    if (Date.parse(completedAt) < Date.parse(this._scheduledAt))
-      throw new Error('crop.errors.visit-not-due');
-    this._notes = notes.trim();
-    this._inspectorUserId = inspectorUserId;
-    this._completedAt = completedAt;
-    this._status = 'COMPLETED';
   }
 }

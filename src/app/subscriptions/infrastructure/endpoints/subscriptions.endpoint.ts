@@ -1,34 +1,51 @@
 import { HttpClient } from '@angular/common/http';
-import { map, Observable } from 'rxjs';
+import { map } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { BaseApiEndpoint } from '../../../shared/infrastructure/base-api-endpoint';
-import { Subscription } from '../../domain/model/entities/subscription.entity';
+import { BillingCycle } from '../../domain/model/entities/billing-cycle';
+import { PaymentStatus } from '../../domain/model/entities/payment-status';
+import { PlanCode } from '../../domain/model/entities/plan-code';
+import { PaymentAssembler } from '../assemblers/payment.assembler';
 import { SubscriptionAssembler } from '../assemblers/subscription.assembler';
-import { SubscriptionResource, SubscriptionsResponse } from '../responses/subscription.response';
+import { PaymentResource } from '../responses/payment.response';
+import { SubscriptionResource } from '../responses/subscription.response';
 
-/** HTTP endpoint for the subscriptions resource (`/subscriptions`). */
-export class SubscriptionsApiEndpoint extends BaseApiEndpoint<
-  Subscription,
-  SubscriptionResource,
-  SubscriptionsResponse,
-  SubscriptionAssembler
-> {
-  constructor(http: HttpClient) {
-    super(
-      http,
-      `${environment.platformProviderApiBaseUrl}${environment.platformProviderSubscriptionsEndpointPath}`,
-      new SubscriptionAssembler(),
-    );
+export class SubscriptionsApiEndpoint {
+  private readonly url =
+    environment.platformProviderApiBaseUrl +
+    environment.platformProviderSubscriptionsEndpointPath +
+    '/me';
+  private readonly assembler = new SubscriptionAssembler();
+  private readonly paymentAssembler = new PaymentAssembler();
+
+  constructor(private readonly http: HttpClient) {}
+
+  getMine() {
+    return this.http
+      .get<SubscriptionResource | null>(this.url)
+      .pipe(
+        map((resource) =>
+          resource === null ? null : this.assembler.toEntityFromResource(resource),
+        ),
+      );
   }
 
-  /**
-   * Loads the subscription of one user. Each user has only one.
-   * @param userId - Owner of the subscription.
-   * @returns The subscription, or `null` if the user has none yet.
-   */
-  getByUser(userId: number): Observable<Subscription | null> {
-    return this.getAllBy({ userId }, 'Failed to fetch the subscription of the user').pipe(
-      map((subscriptions) => subscriptions[0] ?? null),
-    );
+  cancel() {
+    return this.http
+      .post<SubscriptionResource>(this.url + '/cancel', null)
+      .pipe(map(this.assembler.toEntityFromResource));
+  }
+
+  checkout(
+    planCode: PlanCode,
+    billingCycle: BillingCycle,
+    simulatedOutcome: PaymentStatus.COMPLETED | PaymentStatus.REJECTED,
+  ) {
+    return this.http
+      .post<PaymentResource>(this.url + '/checkout', {
+        planCode,
+        billingCycle,
+        simulatedOutcome,
+      })
+      .pipe(map(this.paymentAssembler.toEntityFromResource));
   }
 }

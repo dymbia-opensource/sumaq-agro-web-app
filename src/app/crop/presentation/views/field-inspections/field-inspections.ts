@@ -80,7 +80,6 @@ export class FieldInspections {
   readonly inspectionForm = this.fb.group({
     reportId: [0, Validators.min(1)],
     scheduledAt: ['', Validators.required],
-    notes: [''],
   });
   constructor() {
     effect(() => {
@@ -125,7 +124,6 @@ export class FieldInspections {
       new ScheduleFieldInspectionCommand({
         reportId: value.reportId,
         scheduledAt: date.toISOString(),
-        notes: value.notes.trim(),
       }),
       () => {
         this.formDirective()?.resetForm({ reportId: value.reportId });

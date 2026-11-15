@@ -14,6 +14,7 @@ export interface AdvisorAssignmentHistory {
  */
 export interface PlotAdvisorAssignment {
   id: number;
+  cooperativeId: number;
   plotId: number;
   producerUserId: number;
   advisorUserId: number;

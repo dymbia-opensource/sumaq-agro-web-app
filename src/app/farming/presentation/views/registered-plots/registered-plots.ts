@@ -2,7 +2,7 @@ import { PlotQuotaSummary } from '../../components/plot-quota-summary/plot-quota
 import { Component, computed, inject, Signal } from '@angular/core';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { Router } from '@angular/router';
-import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import {
   Breadcrumb,
   PageHeader,
@@ -31,7 +31,6 @@ import { PlotSlotCard } from '../../components/plot-slot-card/plot-slot-card';
 export class RegisteredPlots {
   private readonly farmingStore = inject(FarmingStore);
   private readonly router = inject(Router);
-  private readonly translate = inject(TranslateService);
 
   // Store state
   /** Account-scoped plot collection exposed with an explicit template contract. */
@@ -42,14 +41,11 @@ export class RegisteredPlots {
   readonly plotQuota = this.farmingStore.plotQuota;
   readonly canRegisterPlot = this.farmingStore.canRegisterPlot;
   readonly plotQuotaReady = this.farmingStore.plotQuotaReady;
-  readonly ownedPlotsReady = this.farmingStore.ownedPlotsReady;
   readonly plotQuotaReached = this.farmingStore.plotQuotaReached;
   readonly registrationIncomplete = this.farmingStore.registrationIncomplete;
 
   // UI state
-  protected readonly breadcrumbs: Breadcrumb[] = [
-    { label: 'farming.plots.manage' },
-  ];
+  protected readonly breadcrumbs: Breadcrumb[] = [{ label: 'farming.plots.manage' }];
 
   /** Free slot numbers are shown only after the current producer quota has loaded. */
   readonly freeSlots: Signal<number[]> = computed<number[]>(() =>
@@ -98,15 +94,5 @@ export class RegisteredPlots {
 
   onRecordSoil(plot: FieldPlot) {
     this.router.navigate(['/plots', plot.id, 'soil']).then();
-  }
-
-  /** Deletes the plot only if the producer confirms. */
-  onDeletePlot(plot: FieldPlot) {
-    const message = this.translate.instant('farming.plots.delete-confirm', {
-      name: plot.name,
-    });
-    if (confirm(message)) {
-      this.farmingStore.deletePlot(plot.id as number);
-    }
   }
 }

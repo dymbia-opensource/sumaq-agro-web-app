@@ -1,21 +1,12 @@
-import { BaseResource, BaseResponse } from '../../../shared/infrastructure/base-response';
+import { BillingCycle } from '../../domain/model/entities/billing-cycle';
+import { PlanCode } from '../../domain/model/entities/plan-code';
+import { SubscriptionStatus } from '../../domain/model/entities/subscription-status';
 
-/** Subscription of a user as the API sends it. */
-export interface SubscriptionResource extends BaseResource {
+export interface SubscriptionResource {
   id: number;
-  userId: number;
-  planId: number;
-  /** `ACTIVE` or `CANCELLED`. */
-  status: string;
-  /** `MONTHLY` or `ANNUAL`. */
-  billingCycle: string;
-  /** Date in `YYYY-MM-DD` format. */
+  planCode: PlanCode;
+  billingCycle: BillingCycle;
+  status: SubscriptionStatus;
   startDate: string;
-  /** Date in `YYYY-MM-DD` format, or `null`. */
-  endDate: string | null;
-  autoRenew: boolean;
-}
-
-export interface SubscriptionsResponse extends BaseResponse {
-  subscriptions: SubscriptionResource[];
+  endDate: string;
 }

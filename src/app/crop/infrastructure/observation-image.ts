@@ -30,9 +30,8 @@ export async function observationImage(
   context.font = '26px Arial';
   const nameLines = wrap(plot.name, 1020);
   const regionLines = wrap(plot.region, 1020);
-  const recommendationLines = wrap(observation.recommendation || labels['noData'], 1020);
   const detailsHeight = (nameLines.length + regionLines.length) * 36;
-  canvas.height = 1000 + detailsHeight + recommendationLines.length * 36;
+  canvas.height = 940 + detailsHeight;
   context.fillStyle = '#f4f6ee';
   context.fillRect(0, 0, canvas.width, canvas.height);
   context.fillStyle = '#ffffff';
@@ -102,27 +101,20 @@ export async function observationImage(
     text(label, x + 26, y + 45, 26, true, color);
     text(value, x + 26, y + 120, 62, true, color);
   };
-  metric('NDVI', observation.ndviMean.toFixed(2), 90, '#16803c');
-  metric('NDWI', observation.ndwiMean.toFixed(2), 620, '#0369a1');
+  metric('NDVI', observation.ndviMean?.toFixed(2) ?? labels['noData'], 90, '#16803c');
+  metric('NDWI', observation.ndwiMean?.toFixed(2) ?? labels['noData'], 620, '#0369a1');
   y += 220;
   text(labels['area'] + ': ' + plot.areaHectares.toFixed(2) + ' ha', 90, y);
   y += 45;
-  text(labels['stress'] + ': ' + observation.stressAreaHectares.toFixed(2) + ' ha', 90, y);
+  text(labels['source'] + ': ' + observation.source, 90, y);
   y += 45;
-  text(labels['clouds'] + ': ' + observation.cloudCoveragePercent.toFixed(1) + '%', 90, y);
+  text(labels['clouds'] + ': ' + (observation.cloudCoveragePercent === null ? labels['noData'] : observation.cloudCoveragePercent.toFixed(1) + '%'), 90, y);
   y += 45;
   text(
-    labels['temperature'] + ': ' + (observation.surfaceTempKelvin - 273.15).toFixed(1) + ' °C',
+    labels['temperature'] + ': ' + (observation.surfaceTempKelvin === null ? labels['noData'] : (observation.surfaceTempKelvin - 273.15).toFixed(1) + ' °C'),
     90,
     y,
   );
-  y += 70;
-  text(labels['recommendation'], 90, y, 28, true);
-  y += 45;
-  for (const line of recommendationLines) {
-    text(line, 90, y);
-    y += 36;
-  }
   context.strokeStyle = '#d3dfd5';
   context.beginPath();
   context.moveTo(90, canvas.height - 160);

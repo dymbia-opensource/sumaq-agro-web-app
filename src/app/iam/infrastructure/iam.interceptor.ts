@@ -1,12 +1,13 @@
-import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
-import { inject } from '@angular/core';
-import { catchError, throwError } from 'rxjs';
-import { environment } from '../../../environments/environment';
-import { IamStore } from '../application/iam.store';
+import { HttpErrorResponse, HttpInterceptorFn } from "@angular/common/http";
+import { inject } from "@angular/core";
+import { catchError, throwError } from "rxjs";
+import { environment } from "../../../environments/environment";
+import { IamStore } from "../application/iam.store";
 
-const apiBaseUrl = environment.platformProviderApiBaseUrl.replace(/\/+$/, '');
+const apiBaseUrl = environment.platformProviderApiBaseUrl.replace(/\/+$/, "");
 
-const publicAuthenticationUrls = new Set([
+const publicUrls = new Set([
+  apiBaseUrl + "/public/traceability",
   `${apiBaseUrl}${environment.platformProviderSignInEndpointPath}`,
   `${apiBaseUrl}${environment.platformProviderSignUpEndpointPath}`,
   `${apiBaseUrl}${environment.platformProviderPasswordRecoveryEndpointPath}`,
@@ -19,9 +20,10 @@ const publicAuthenticationUrls = new Set([
 export const iamInterceptor: HttpInterceptorFn = (request, next) => {
   const requestUrl = request.url.split(/[?#]/, 1)[0];
 
-  const targetsPlatformApi = requestUrl === apiBaseUrl || requestUrl.startsWith(`${apiBaseUrl}/`);
+  const targetsPlatformApi =
+    requestUrl === apiBaseUrl || requestUrl.startsWith(`${apiBaseUrl}/`);
 
-  if (!targetsPlatformApi || publicAuthenticationUrls.has(requestUrl)) {
+  if (!targetsPlatformApi || publicUrls.has(requestUrl)) {
     return next(request);
   }
 
@@ -30,7 +32,7 @@ export const iamInterceptor: HttpInterceptorFn = (request, next) => {
   const token = store.currentToken();
   const participant = store.currentUser();
 
-  if (!token || request.headers.has('Authorization')) {
+  if (!token || request.headers.has("Authorization")) {
     return next(request);
   }
 

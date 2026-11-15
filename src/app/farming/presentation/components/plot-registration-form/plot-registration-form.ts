@@ -10,7 +10,6 @@ import { MatInputModule } from '@angular/material/input';
 import { MatRadioModule } from '@angular/material/radio';
 import { TranslatePipe } from '@ngx-translate/core';
 import { startWith } from 'rxjs';
-import { CampaignLedger, YieldUnit } from '../../../domain/model/entities/campaign-ledger.entity';
 import { CropType } from '../../../domain/model/entities/crop-campaign.entity';
 import { isCustomSeedVariety, searchSeedVarieties } from '../campaign-form/campaign-form';
 
@@ -23,8 +22,6 @@ export interface PlotRegistrationData {
   /** `true` when the variety is not one of the suggested ones. */
   customVariety: boolean;
   sowingDate: Date;
-  expectedYield: number | null;
-  yieldUnit: YieldUnit;
   declaredAreaHectares: number;
 }
 
@@ -81,7 +78,6 @@ export class PlotRegistrationForm {
       nonNullable: true,
       validators: [Validators.required],
     }),
-    expectedYield: new FormControl<number | null>(null, [Validators.min(1)]),
     declaredArea: new FormControl<number | null>(null, [Validators.min(0.01)]),
   });
 
@@ -100,9 +96,6 @@ export class PlotRegistrationForm {
   /** Varieties of the selected crop that match what the producer typed (US-34). */
   readonly varieties = computed(() => searchSeedVarieties(this.cropType(), this.varietyText()));
 
-  /** Unit of the expected yield: sacks for potato, quintals for coffee. */
-  readonly yieldUnit = computed(() => this.store.yieldUnitOf(this.cropType()));
-
   /** Sends the data when the form is valid; otherwise shows the errors. */
   onSubmit() {
     if (this.saving()) return;
@@ -119,8 +112,6 @@ export class PlotRegistrationForm {
       seedVariety: value.seedVariety,
       customVariety: isCustomSeedVariety(value.cropType, value.seedVariety),
       sowingDate: new Date(year, month - 1, day),
-      expectedYield: value.expectedYield,
-      yieldUnit: this.yieldUnit(),
       declaredAreaHectares: value.declaredArea ?? 0,
     });
   }

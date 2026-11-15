@@ -91,80 +91,29 @@
   </mat-card>
 }
 
-@if (activeTab() === 'technical-team') {
-  <mat-card class="settings-card team-card">
+@if (activeTab() === 'technical-team' && cooperative()) {
+  <mat-card class="settings-card">
     <mat-card-content>
-      <div class="team-card__header">
-        <div>
-          <h2>Equipo de Asesoría Agronómica Vinculado</h2>
-          <p class="settings-card__description">
-            Supervisión técnica de campo sobre parcelas de socios
-          </p>
-        </div>
-        <button
-          mat-flat-button
-          class="btn-invite"
-          (click)="openInviteAdvisorDialog()"
-          type="button"
-        >
-          <mat-icon>add</mat-icon> Invitar Nuevo Asesor
+      <h2>{{ 'profiles.cooperative.integration.assigned-advisors' | translate }}</h2>
+      @for (advisor of technicalAdvisors(); track advisor.id) {
+        <p>{{ advisor.name }} · #{{ advisor.userId }} · {{ advisor.assignedPlotsCount }}</p>
+      } @empty {
+        @if (!loading() && !error()) {
+          <p>{{ 'profiles.cooperative.supervision.none' | translate }}</p>
+        }
+      }
+      <form (submit)="$event.preventDefault(); invite()">
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'profiles.cooperative.integration.invitation-email' | translate }}</mat-label>
+          <input matInput type="email" [formControl]="invitationEmail" />
+        </mat-form-field>
+        <button mat-flat-button type="submit" [disabled]="invitationEmail.invalid || invitationBusy()">
+          {{ 'profiles.cooperative.integration.invite' | translate }}
         </button>
-      </div>
-
-      <div class="table-container">
-        <table class="advisor-table">
-          <thead>
-            <tr>
-              <th>Nombre del Asesor</th>
-              <th>Colegiatura CIP</th>
-              <th>Teléfono</th>
-              <th>Parcelas</th>
-              <th class="text-right">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (advisor of technicalAdvisors(); track advisor.id ?? advisor.cipCode) {
-              <tr>
-                <td class="font-medium">{{ advisor.name }}</td>
-                <td class="cip-cell">
-                  {{
-                    advisor.cipCode.startsWith('CIP:') ? advisor.cipCode : 'CIP: ' + advisor.cipCode
-                  }}
-                </td>
-                <td>{{ advisor.phone }}</td>
-                <td>
-                  {{ advisor.assignedPlotsCount }}
-                  {{ advisor.assignedPlotsCount === 1 ? 'lote' : 'lotes' }}
-                </td>
-                <td class="text-right actions-cell">
-                  <button
-                    mat-stroked-button
-                    class="btn-action"
-                    (click)="openReassignAdvisorDialog(advisor)"
-                    type="button"
-                  >
-                    Reasignar
-                  </button>
-                  <button
-                    mat-stroked-button
-                    class="btn-action"
-                    (click)="openRetirarAdvisorDialog(advisor)"
-                    type="button"
-                  >
-                    Retirar
-                  </button>
-                </td>
-              </tr>
-            } @empty {
-              <tr>
-                <td colspan="5" class="empty-state">
-                  No se encontraron asesores técnicos en el equipo.
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
+        @if (invitationFeedback(); as feedback) {
+          <p role="status">{{ feedback | translate }}</p>
+        }
+      </form>
     </mat-card-content>
   </mat-card>
 }

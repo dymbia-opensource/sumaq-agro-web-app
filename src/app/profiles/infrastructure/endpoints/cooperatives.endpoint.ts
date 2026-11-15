@@ -28,15 +28,26 @@ export class CooperativesApiEndpoint extends BaseApiEndpoint<
     region: string,
   ): Observable<unknown> {
     return this.http.post(this.endpointUrl, {
-      directorUserId,
-      legalName,
+      managerUserId: directorUserId,
+      businessName: legalName,
       ruc,
       region,
-      institutionalEmail: '',
-      legalRepresentative: '',
-      headquartersAddress: '',
-      switchboardPhone: '',
     });
+  }
+
+  override update(cooperative: Cooperative, id: number | string): Observable<Cooperative> {
+    const {
+      id: _id,
+      managerUserId: _manager,
+      ...body
+    } = this.assembler.toResourceFromEntity(cooperative);
+    return this.http
+      .put<CooperativeResource>(this.endpointUrl + '/' + id, body)
+      .pipe(map((resource) => this.assembler.toEntityFromResource(resource)));
+  }
+
+  inviteAgronomist(cooperativeId: number, email: string): Observable<unknown> {
+    return this.http.post(this.endpointUrl + '/' + cooperativeId + '/invitations', { email });
   }
 
   getByDirector(userId: number): Observable<Cooperative | null> {

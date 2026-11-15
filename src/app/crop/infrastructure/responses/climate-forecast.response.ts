@@ -3,7 +3,7 @@
 export interface ClimateForecastResource extends BaseResource {
   id: number;
   region: string;
-  temperature: number;
+  temperatureCelsius: number;
   rainChance: number;
   forecastDate: string;
   source: string;

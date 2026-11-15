@@ -1,5 +1,4 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { buildCostReportPdf } from '../presentation/components/campaign-summary-card/cost-report-pdf';
 import {
   computed,
   DestroyRef,
@@ -23,7 +22,6 @@ import {
   Subscription,
   switchMap,
   throwError,
-  toArray,
 } from 'rxjs';
 import { IamStore } from '../../iam/application/iam.store';
 import { SubscriptionsStore } from '../../subscriptions/application/subscriptions.store';
@@ -31,7 +29,6 @@ import { OfflineSync } from '../infrastructure/offline/offline-sync';
 import { PendingOperationType } from '../infrastructure/offline/pending-operation';
 import { CloseCropCampaignCommand } from '../domain/model/commands/close-crop-campaign.command';
 import { DelineatePlotBoundaryCommand } from '../domain/model/commands/delineate-plot-boundary.command';
-import { ExportCampaignCostReportCommand } from '../domain/model/commands/export-campaign-cost-report.command';
 import { RecordActualYieldCommand } from '../domain/model/commands/record-actual-yield.command';
 import { RecordDailyLaborExpenseCommand } from '../domain/model/commands/record-daily-labor-expense.command';
 import { RecordInputExpenseCommand } from '../domain/model/commands/record-input-expense.command';
@@ -59,7 +56,6 @@ import {
   PendingExpenseAssembler,
   PendingExpensePayload,
 } from '../infrastructure/assemblers/pending-expense-assembler';
-import { FileDownloader } from '../../shared/infrastructure/file-downloader';
 
 /** Any of the three expenses of the cost ledger (US-37 to US-39). */
 export type RecordExpenseCommand = ExpenseCommand;
@@ -77,7 +73,6 @@ export interface CropCampaignSetup {
   cropType: SelectCropTypeCommand;
   seedVariety: SpecifySeedVarietyCommand;
   sowingDate: RecordSowingDateCommand;
-  expectedYield?: SetExpectedYieldCommand;
 }
 
 /**
@@ -97,7 +92,6 @@ export class FarmingStore {
   private readonly session = inject(IamStore);
   private readonly offlineSync = inject(OfflineSync);
   private readonly pendingExpenses = new PendingExpenseAssembler();
-  private readonly fileDownloader = inject(FileDownloader);
   private readonly subscriptions = inject(SubscriptionsStore);
 
   private readonly plotsSignal = signal<FieldPlot[]>([]);
@@ -116,7 +110,6 @@ export class FarmingStore {
   private readonly plotMutationBusy = signal(false);
   private readonly registrationIncompleteSignal = signal(false);
   private readonly planPlotQuota = signal<{ ownerUserId: number; limit: number } | null>(null);
-  private ledgersLoad?: Subscription;
 
   /** Plots of the producer. */
   readonly plots: Signal<FieldPlot[]> = computed<FieldPlot[]>(() =>
@@ -242,11 +235,6 @@ export class FarmingStore {
       const userId = this.currentUserId();
       untracked(() => (userId === null ? this.clearState() : this.loadMyPlots(userId)));
     });
-    effect(() => {
-      if (this.offlineSync.isOnline() && this.pendingExpenseCount() > 0) {
-        untracked(() => this.syncPendingExpenses());
-      }
-    });
 
     // The plan belongs to Subscriptions; Farming only asks for the limit it answers.
     effect(() => {
@@ -310,7 +298,6 @@ export class FarmingStore {
     this.quotaLoaded.set(false);
     this.registrationIncompleteSignal.set(false);
     this.plotsLoad?.unsubscribe();
-    this.ledgersLoad?.unsubscribe();
     this.plotsLoadingSignal.set(true);
     this.startLoading();
     this.plotsLoad = this.farmingApi
@@ -430,38 +417,30 @@ export class FarmingStore {
     });
   }
 
-  /**
-   * Selects a plot and loads the cost ledgers of its campaigns.
-   * @param plotId - Plot to show.
-   */
   selectPlot = (plotId: number): void => {
-    if (!this.plots().some((plot) => plot.id === plotId)) return;
-    this.ledgersLoad?.unsubscribe();
-    this.selectedPlotIdSignal.set(plotId);
-    const campaigns = this.campaignsByPlotSignal().get(plotId) ?? [];
-    if (campaigns.length === 0) return;
-    this.startLoading();
-    this.ledgersLoad = forkJoin(
-      campaigns.map((campaign) =>
-        this.farmingApi.getLedgerByCampaign(campaign.id as number).pipe(retry(2)),
-      ),
-    ).subscribe({
-      next: (ledgers) => {
-        this.ledgersByCampaignSignal.update((current) => {
-          const next = new Map(current);
-          campaigns.forEach((campaign, index) => next.set(campaign.id as number, ledgers[index]));
-          return next;
-        });
-        this.loadingSignal.set(false);
+    if (this.findPlot(plotId)) this.selectedPlotIdSignal.set(plotId);
+  };
+
+  refreshPlot = (plotId: number): void => {
+    const ownerId = this.currentUserId();
+    if (ownerId === null || !this.findPlot(plotId)) return;
+    const revision = this.plotRevision;
+    this.farmingApi.getPlotById(plotId).subscribe({
+      next: (plot) => {
+        if (this.isPlotParticipant(ownerId, revision) && plot.ownerUserId === ownerId) {
+          this.replacePlot(plot);
+        }
       },
-      error: (error) => this.fail(error, 'farming.errors.load-plot'),
+      error: (error) => {
+        if (this.isPlotParticipant(ownerId, revision)) this.fail(error, 'farming.errors.load-plot');
+      },
     });
   };
 
   // ---------- FieldPlot aggregate ----------
 
   /**
-   * Registers a plot "without polygon" with its first campaign and its cost ledger (US-28, US-32 to US-36).
+   * Registers a plot and starts its first campaign with the returned plot ID.
    * @remarks Rechecks the owner-scoped quota before POST and serializes local mutations.
    * The backend must enforce the quota atomically across browsers and clients.
    * @param command - Owner, name, region and declared area of the plot.
@@ -537,18 +516,17 @@ export class FarmingStore {
           );
         }),
         switchMap((createdPlot) =>
-          this.createCampaignWithLedger(createdPlot.id as number, setup, []).pipe(
-            map((result) => ({ createdPlot, ...result })),
+          this.createCampaign(createdPlot.id as number, setup).pipe(
+            map((campaign) => ({ createdPlot, campaign })),
           ),
         ),
       )
       .subscribe({
-        next: ({ createdPlot, campaign, ledger }) => {
+        next: ({ createdPlot, campaign }) => {
           if (!this.isPlotParticipant(ownerUserId, revision)) return;
           this.campaignsByPlotSignal.update((campaigns) =>
             new Map(campaigns).set(createdPlot.id as number, [campaign]),
           );
-          this.setLedger(campaign.id as number, ledger);
           this.plotMutationBusy.set(false);
           this.loadingSignal.set(false);
           this.selectPlot(createdPlot.id as number);
@@ -582,20 +560,10 @@ export class FarmingStore {
     command: DelineatePlotBoundaryCommand,
     onDelineated?: (plot: FieldPlot) => void,
   ): void => {
-    const current = this.findPlot(command.plotId);
-    if (!current) return;
-    const plot = this.copyPlot(current);
-    try {
-      plot.boundary = [...command.coordinates];
-      plot.areaHectares = command.areaHectares;
-    } catch (error) {
-      this.fail(error, 'farming.errors.invalid-polygon');
-      return;
-    }
+    if (!this.findPlot(command.plotId) || this.loading()) return;
     this.startLoading();
     this.farmingApi
-      .updatePlot(plot)
-      .pipe(retry(2))
+      .savePolygon(command.plotId, command.coordinates)
       .subscribe({
         next: (updated) => {
           this.replacePlot(updated);
@@ -612,90 +580,34 @@ export class FarmingStore {
    * @param onRecorded - Called after the API confirms.
    */
   recordSoilBaseline = (command: RecordSoilBaselineCommand, onRecorded?: () => void): void => {
-    this.savePlot(
-      command.plotId,
-      (plot) => {
-        plot.soilBaseline = new SoilBaseline({
-          ph: command.ph,
-          texture: command.texture,
-          organicMatterPercentage: command.organicMatterPercentage,
-          recordedAt: command.recordedAt,
-        });
-      },
-      'farming.errors.save-soil',
-      onRecorded,
-    );
-  };
-
-  /**
-   * Deletes a plot by ID.
-   * @param id - The ID of the plot to delete.
-   */
-  deletePlot = (id: number): void => {
-    if (this.plotMutationBusy() || this.loading()) return;
-    const ownerUserId = this.currentUserId();
-    const plot = this.findPlot(id);
-    if (
-      ownerUserId === null ||
-      !this.plotQuotaReady() ||
-      !plot ||
-      plot.ownerUserId !== ownerUserId
-    ) {
-      this.errorSignal.set('farming.errors.plot-not-owned');
+    if (!this.findPlot(command.plotId) || this.loading()) return;
+    let soil: SoilBaseline;
+    try {
+      soil = new SoilBaseline({
+        ph: command.ph,
+        texture: command.texture,
+        organicMatterPercentage: command.organicMatterPercentage,
+        recordedAt: command.recordedAt,
+      });
+    } catch (error) {
+      this.fail(error, 'farming.errors.save-soil');
       return;
     }
-    const revision = this.plotRevision;
-    this.plotMutationBusy.set(true);
     this.startLoading();
-    this.plotMutation = this.farmingApi
-      .getPlotById(id)
-      .pipe(
-        switchMap((current) => {
-          if (
-            !this.isPlotParticipant(ownerUserId, revision) ||
-            current.id !== id ||
-            current.ownerUserId !== ownerUserId
-          )
-            return throwError(() => new Error('farming.errors.plot-not-owned'));
-          return this.deletePlotWithCampaigns(id);
-        }),
-      )
-      .subscribe({
-        next: () => {
-          if (!this.isPlotParticipant(ownerUserId, revision)) return;
-          this.plotsSignal.update((plots) => plots.filter((plot) => plot.id !== id));
-          this.campaignsByPlotSignal.update((campaigns) => {
-            const next = new Map(campaigns);
-            next.delete(id);
-            return next;
-          });
-          this.plotMutationBusy.set(false);
-          this.loadingSignal.set(false);
-          if (this.selectedPlotId() === id) {
-            this.selectedPlotIdSignal.set(null);
-            const first = this.plots()[0];
-            if (first) this.selectPlot(first.id as number);
-          }
-        },
-        error: (error) => {
-          if (!this.isPlotParticipant(ownerUserId, revision)) return;
-          this.plotMutationBusy.set(false);
-          // Failed or ambiguous deletion never frees a local slot without confirmation.
-          this.fail(
-            error,
-            error instanceof Error && error.message === 'farming.errors.plot-not-owned'
-              ? error.message
-              : 'farming.errors.delete-plot',
-          );
-        },
-      });
+    this.farmingApi.saveSoilBaseline(command.plotId, soil).subscribe({
+      next: (plot) => {
+        this.replacePlot(plot);
+        this.loadingSignal.set(false);
+        onRecorded?.();
+      },
+      error: (error) => this.fail(error, 'farming.errors.save-soil'),
+    });
   };
 
   // ---------- CropCampaign aggregate ----------
 
   /**
-   * Starts a new campaign on a plot whose previous campaign is closed, and
-   * opens its cost ledger (policy P8).
+   * Starts a new campaign on a plot whose previous campaign is closed.
    * @param setup - Commands of the new campaign.
    * @param onStarted - Called with the new campaign.
    */
@@ -704,18 +616,13 @@ export class FarmingStore {
     onStarted?: (campaign: CropCampaign) => void,
   ): void => {
     const plotId = setup.start.plotId;
-    if (!this.findPlot(plotId)) return;
+    if (!this.findPlot(plotId) || this.loading()) return;
     this.startLoading();
-    this.createCampaignWithLedger(
-      plotId,
-      setup,
-      this.campaignsByPlotSignal().get(plotId) ?? [],
-    ).subscribe({
-      next: ({ campaign, ledger }) => {
+    this.createCampaign(plotId, setup).subscribe({
+      next: (campaign) => {
         this.campaignsByPlotSignal.update((campaigns) =>
           new Map(campaigns).set(plotId, [...(campaigns.get(plotId) ?? []), campaign]),
         );
-        this.setLedger(campaign.id as number, ledger);
         this.loadingSignal.set(false);
         onStarted?.(campaign);
       },
@@ -723,52 +630,48 @@ export class FarmingStore {
     });
   };
 
-  /**
-   * Closes a campaign and freezes its cost ledger. When the producer knows
-   * the harvest, it also records the actual yield.
-   * @param command - Campaign to close.
-   * @param actualYield - Harvested yield, if known.
-   * @param onClosed - Called after the API confirms.
-   */
-  closeCampaign = (
-    command: CloseCropCampaignCommand,
-    actualYield?: RecordActualYieldCommand,
-    onClosed?: () => void,
+  updateCampaign = (
+    campaignId: number,
+    fields: Pick<CropCampaign, 'cropType' | 'seedVariety' | 'customSeedVariety' | 'sowingDate'>,
+    onUpdated?: () => void,
   ): void => {
-    const current = this.findCampaign(command.campaignId);
-    if (!current) return;
-    const campaign = this.copyCampaign(current);
-    const currentLedger = this.ledgersByCampaignSignal().get(command.campaignId) ?? null;
-    const ledger = currentLedger ? this.copyLedger(currentLedger) : null;
+    const current = this.findCampaign(campaignId);
+    if (!current?.isActive() || this.loading()) return;
+    let edited: CropCampaign;
     try {
-      campaign.status = CampaignStatus.FINISHED;
-      if (ledger && actualYield) ledger.actualYield = actualYield.actualYield;
-      if (ledger) ledger.frozen = true;
+      edited = new CropCampaign({
+        id: campaignId,
+        plotId: current.plotId,
+        season: current.season,
+        status: current.status,
+        ...fields,
+      });
     } catch (error) {
-      this.fail(error, 'farming.errors.close-campaign');
+      this.fail(error, 'farming.errors.update-campaign');
       return;
     }
     this.startLoading();
-    this.farmingApi
-      .updateCampaign(campaign)
-      .pipe(
-        retry(2),
-        switchMap((savedCampaign) => {
-          const saveLedger: Observable<CampaignLedger | null> = ledger
-            ? this.farmingApi.updateLedger(ledger).pipe(retry(2))
-            : of(null);
-          return saveLedger.pipe(map((savedLedger) => ({ savedCampaign, savedLedger })));
-        }),
-      )
-      .subscribe({
-        next: ({ savedCampaign, savedLedger }) => {
-          this.replaceCampaign(savedCampaign);
-          if (savedLedger) this.setLedger(savedCampaign.id as number, savedLedger);
-          this.loadingSignal.set(false);
-          onClosed?.();
-        },
-        error: (error) => this.fail(error, 'farming.errors.close-campaign'),
-      });
+    this.farmingApi.updateCampaign(edited).subscribe({
+      next: (campaign) => {
+        this.replaceCampaign(campaign);
+        this.loadingSignal.set(false);
+        onUpdated?.();
+      },
+      error: (error) => this.fail(error, 'farming.errors.update-campaign'),
+    });
+  };
+
+  closeCampaign = (command: CloseCropCampaignCommand): void => {
+    const current = this.findCampaign(command.campaignId);
+    if (!current?.isActive() || this.loading()) return;
+    this.startLoading();
+    this.farmingApi.closeCampaign(command.campaignId).subscribe({
+      next: (campaign) => {
+        this.replaceCampaign(campaign);
+        this.loadingSignal.set(false);
+      },
+      error: (error) => this.fail(error, 'farming.errors.close-campaign'),
+    });
   };
 
   // ---------- CampaignLedger aggregate ----------
@@ -822,31 +725,8 @@ export class FarmingStore {
     );
   };
 
-  /**
-   * Builds the cost report of a campaign and downloads it.
-   * @param command - Campaign of the report.
-   */
-  exportCostReport = (command: ExportCampaignCostReportCommand): void => {
-    const campaign = this.findCampaign(command.campaignId);
-    if (!campaign) {
-      this.errorSignal.set('farming.errors.export-report');
-      return;
-    }
-    this.farmingApi.downloadCostReport(command.campaignId).subscribe({
-      next: (content) =>
-        this.fileDownloader.save({ fileName: `cost-report-${campaign.season}.pdf`, content }),
-      error: (error) => {
-        const ledger = this.ledgersByCampaignSignal().get(command.campaignId);
-        if (!(error instanceof HttpErrorResponse) || error.status !== 404 || !ledger) {
-          this.fail(error, 'farming.errors.export-report');
-          return;
-        }
-
-        const plot = this.findPlot(campaign.plotId);
-        const content = buildCostReportPdf(ledger, campaign.season, plot?.name ?? '', plot?.areaHectares ?? 0);
-        this.fileDownloader.save({ fileName: 'cost-report-' + campaign.season + '.pdf', content });
-      },
-    });
+  exportCostReport = (_command: { campaignId: number }): void => {
+    this.errorSignal.set('farming.finances.pending');
   };
 
   /**
@@ -904,48 +784,9 @@ export class FarmingStore {
 
   // ---------- Helpers ----------
 
-  /**
-   * Deletes a plot with its campaigns and cost ledgers, one request at a time.
-   *
-   * @remarks
-   * The RESTful API deletes them in cascade; the fake API does not, so the
-   * store does it to avoid orphan campaigns. json-server rewrites its file on
-   * every change, so the requests go one after the other.
-   */
-  private deletePlotWithCampaigns(plotId: number): Observable<void> {
-    return this.farmingApi.getCampaignsByPlot(plotId).pipe(
-      switchMap((campaigns) => from(campaigns)),
-      concatMap((campaign) =>
-        this.farmingApi.getLedgerByCampaign(campaign.id as number).pipe(
-          switchMap((ledger) =>
-            ledger ? this.farmingApi.deleteLedger(ledger.id as number) : of(undefined),
-          ),
-          switchMap(() => this.farmingApi.deleteCampaign(campaign.id as number)),
-        ),
-      ),
-      toArray(),
-      switchMap(() => this.farmingApi.deletePlot(plotId)),
-    );
-  }
-
-  /**
-   * Starts a campaign, applies its setup commands and opens its ledger (policy P8).
-   *
-   * @remarks
-   * With the RESTful API the backend opens the ledger when it receives
-   * `CropCampaignStarted`; with the fake API the store creates it.
-   */
-  private createCampaignWithLedger(
-    plotId: number,
-    setup: CropCampaignSetup,
-    plotCampaigns: CropCampaign[],
-  ): Observable<{
-    campaign: CropCampaign;
-    ledger: CampaignLedger;
-  }> {
-    let campaign: CropCampaign;
+  private createCampaign(plotId: number, setup: CropCampaignSetup): Observable<CropCampaign> {
     try {
-      campaign = new CropCampaign({
+      const campaign = new CropCampaign({
         id: 0,
         plotId,
         season: setup.start.season.trim(),
@@ -954,62 +795,10 @@ export class FarmingStore {
         customSeedVariety: setup.seedVariety.custom,
         sowingDate: setup.sowingDate.sowingDate,
       });
+      return this.farmingApi.createCampaign(campaign);
     } catch (error) {
       return throwError(() => error);
     }
-    return this.farmingApi.createCampaign(campaign).pipe(
-      switchMap((created) => {
-        // Policy P8: Whenever CropCampaignStarted Then OpenCampaignLedger.
-        const ledger = new CampaignLedger({
-          id: 0,
-          campaignId: created.id as number,
-          yieldUnit: this.yieldUnitOf(created.cropType),
-        });
-        try {
-          if (setup.expectedYield) {
-            ledger.expectedYield = setup.expectedYield.expectedYield;
-          }
-        } catch (error) {
-          return throwError(() => error);
-        }
-        return this.farmingApi
-          .createLedger(ledger)
-          .pipe(map((createdLedger) => ({ campaign: created, ledger: createdLedger })));
-      }),
-    );
-  }
-
-  /**
-   * Applies a change to a copy of a plot and saves it; the shown plot only
-   * changes when the API confirms.
-   */
-  private savePlot(
-    plotId: number,
-    change: (plot: FieldPlot) => void,
-    errorKey: string,
-    onSaved?: () => void,
-  ): void {
-    const current = this.findPlot(plotId);
-    if (!current) return;
-    const plot = this.copyPlot(current);
-    try {
-      change(plot);
-    } catch (error) {
-      this.fail(error, errorKey);
-      return;
-    }
-    this.startLoading();
-    this.farmingApi
-      .updatePlot(plot)
-      .pipe(retry(2))
-      .subscribe({
-        next: (saved) => {
-          this.replacePlot(saved);
-          this.loadingSignal.set(false);
-          onSaved?.();
-        },
-        error: (error) => this.fail(error, errorKey),
-      });
   }
 
   /**
@@ -1119,7 +908,6 @@ export class FarmingStore {
     this.registrationIncompleteSignal.set(false);
     this.plotsLoadingSignal.set(false);
     this.plotsLoad?.unsubscribe();
-    this.ledgersLoad?.unsubscribe();
     this.loadingSignal.set(false);
     this.plotsSignal.set([]);
     this.campaignsByPlotSignal.set(new Map());
@@ -1153,8 +941,11 @@ export class FarmingStore {
    * @param fallbackKey - i18n key of the failed operation.
    */
   private fail(error: unknown, fallbackKey: string): void {
-    console.error(error);
-    this.errorSignal.set(fallbackKey);
+    const detail =
+      error instanceof HttpErrorResponse && [400, 403, 409, 422].includes(error.status)
+        ? error.error?.details || error.error?.detail
+        : null;
+    this.errorSignal.set(typeof detail === 'string' && detail.trim() ? detail : fallbackKey);
     this.loadingSignal.set(false);
   }
 
@@ -1208,34 +999,6 @@ export class FarmingStore {
         clientSyncId: command.clientSyncId,
       }),
     ];
-  }
-
-  /** Copies of the entities, changed before the API confirms. */
-  private copyPlot(plot: FieldPlot): FieldPlot {
-    return new FieldPlot({
-      id: plot.id as number,
-      ownerUserId: plot.ownerUserId,
-      name: plot.name,
-      region: plot.region,
-      status: plot.status,
-      boundary: [...plot.boundary],
-      areaHectares: plot.areaHectares,
-      agroMonitoringPolygonId: plot.agroMonitoringPolygonId,
-      soilBaseline: plot.soilBaseline,
-    });
-  }
-
-  private copyCampaign(campaign: CropCampaign): CropCampaign {
-    return new CropCampaign({
-      id: campaign.id as number,
-      plotId: campaign.plotId,
-      season: campaign.season,
-      cropType: campaign.cropType,
-      seedVariety: campaign.seedVariety,
-      customSeedVariety: campaign.customSeedVariety,
-      sowingDate: campaign.sowingDate,
-      status: campaign.status,
-    });
   }
 
   private copyLedger(ledger: CampaignLedger): CampaignLedger {

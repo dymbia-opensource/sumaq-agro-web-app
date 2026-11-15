@@ -1,390 +1,418 @@
-@if (store.loading()) {
-  <mat-progress-bar mode="indeterminate" [attr.aria-label]="'certification.loading' | translate" />
-}
+<app-page-header
+  [breadcrumbs]="breadcrumbs"
+  [title]="'certification.page-title' | translate"
+/>
 
-@if (store.notice(); as notice) {
-  <p role="status">{{ notice | translate }}</p>
+@let state = store.state(); @if (state.loading) {
+<p role="status">{{ 'certification.loading' | translate }}</p>
+} @else if (state.error) {
+<p role="alert">{{ 'certification.load-save-error' | translate }}</p>
+<button mat-stroked-button type="button" (click)="store.reload()">
+  {{ 'certification.workspace.reload' | translate }}
+</button>
+} @else { @if (store.user()?.experience === 'COOPERATIVE_DIRECTOR' &&
+!store.canManage()) {
+<p>{{ 'certification.scope.missing-cooperative' | translate }}</p>
 }
-@if (!isFarmer() && !store.canIssue() && store.error(); as error) {
-  <div role="alert">
-    {{ error | translate }}
-    <button type="button" (click)="store.load()">{{ 'common.retry' | translate }}</button>
-  </div>
-}
-
-@if (isFarmer()) {
-  <app-farmer-certificates />
-} @else if (store.canIssue()) {
-  <app-page-header
-    [breadcrumbs]="breadcrumbs"
-    [title]="'certification.title' | translate"
-    [subtitle]="'certification.subtitle' | translate"
-    [compact]="true"
+<div class="toolbar">
+  @if (store.canManage()) {
+  <button
+    mat-flat-button
+    type="button"
+    [disabled]="busy()"
+    (click)="startRegistration()"
   >
-    <div class="header-actions">
-      <span class="campaign"
-        >{{ 'certification.campaign' | translate }} 2026-I <mat-icon>expand_more</mat-icon></span
+    {{ 'certification.workspace.register' | translate }}
+  </button>
+  } @if (store.entries().length) {
+  <form class="lookup" (ngSubmit)="lookup()">
+    <label>
+      {{ 'certification.workspace.number' | translate }}
+      <input name="search" [(ngModel)]="search" required />
+    </label>
+    <button
+      mat-stroked-button
+      type="submit"
+      [disabled]="busy() || !search.trim()"
+    >
+      {{ 'certification.workspace.lookup' | translate }}
+    </button>
+  </form>
+  }
+</div>
+
+@if (error()) {
+<p role="alert">{{ error() | translate }}</p>
+} @if (notice()) {
+<p role="status">{{ notice() | translate }}</p>
+}
+
+<div class="workspace">
+  <section class="card">
+    <h2>{{ 'certification.workspace.batches' | translate }}</h2>
+    @for (entry of store.entries(); track entry.batch.id) {
+    <button
+      class="batch"
+      type="button"
+      [attr.aria-pressed]="selectedId() === entry.batch.id"
+      [disabled]="busy()"
+      (click)="selectBatch(entry.batch.id)"
+    >
+      <strong>{{ entry.batch.batchCode }}</strong>
+      <span
+        >{{ 'certification.workspace.status.' + entry.batch.status | translate
+        }}</span
       >
+      @if (entry.certificate; as certificate) {
+      <span
+        >{{ certificate.certificateNumber }} · {{
+        'certification.workspace.status.' + certificate.status | translate
+        }}</span
+      >
+      }
+    </button>
+    } @empty {
+    <p>{{ 'certification.workspace.empty' | translate }}</p>
+    }
+  </section>
+
+  @if (registering() && store.canManage()) {
+  <section class="card">
+    <h2>{{ 'certification.workspace.register' | translate }}</h2>
+    <form #registration="ngForm" (ngSubmit)="register()">
+      <label
+        >{{ 'certification.workspace.batchCode' | translate }}
+        <input name="batchCode" [(ngModel)]="form.batchCode" required />
+      </label>
+      <label
+        >{{ 'certification.workspace.member' | translate }}
+        <select
+          name="memberId"
+          [ngModel]="form.memberId"
+          (ngModelChange)="selectMember($event)"
+          required
+        >
+          <option [ngValue]="null">
+            {{ 'certification.workspace.choose' | translate }}
+          </option>
+          @for (member of state.members; track member.id) { @if (member.userId
+          !== null) {
+          <option [ngValue]="+member.id">{{ member.fullName }}</option>
+          } }
+        </select>
+      </label>
+      @if (plots().error) {
+      <p role="alert">
+        {{ 'certification.workspace.plots-error' | translate }}
+      </p>
+      <button
+        mat-stroked-button
+        type="button"
+        (click)="selectMember(form.memberId)"
+      >
+        {{ 'certification.workspace.reload' | translate }}
+      </button>
+      } @else if (plots().loading) {
+      <p role="status">
+        {{ 'certification.workspace.plots-loading' | translate }}
+      </p>
+      } @else if (form.memberId !== null && !plots().items.length) {
+      <p>{{ 'certification.workspace.plots-empty' | translate }}</p>
+      }
+      <label
+        >{{ 'certification.workspace.plot' | translate }}
+        <select name="plotId" [(ngModel)]="form.plotId" required>
+          <option [ngValue]="null">
+            {{ 'certification.workspace.choose' | translate }}
+          </option>
+          @for (plot of plots().items; track plot.id) {
+          <option [ngValue]="plot.id">{{ plot.name }}</option>
+          }
+        </select>
+      </label>
+      <label
+        >{{ 'certification.workspace.crop' | translate }}
+        <select name="cropType" [(ngModel)]="form.cropType" required>
+          @for (crop of crops; track crop) {
+          <option [ngValue]="crop">
+            {{ 'certification.workspace.cropType.' + crop | translate }}
+          </option>
+          }
+        </select>
+      </label>
+      <label
+        >{{ 'certification.workspace.harvestedOn' | translate }}
+        <input
+          type="date"
+          name="harvestedOn"
+          [(ngModel)]="form.harvestedOn"
+          required
+        />
+      </label>
       <button
         mat-flat-button
-        class="primary-action"
-        [disabled]="store.loading() || members().length === 0"
-        (click)="openNew()"
+        type="submit"
+        [disabled]="busy() || registration.invalid"
       >
-        <mat-icon>add</mat-icon>
-        {{ 'certification.evaluate-new' | translate }}
+        {{ 'certification.workspace.save' | translate }}
       </button>
-    </div>
-  </app-page-header>
-
-  @if (store.error(); as error) {
-    <div class="error-banner" role="alert">
-      {{ 'certification.load-save-error' | translate }} {{ error | translate }}
-      <button type="button" (click)="store.load()">{{ 'common.retry' | translate }}</button>
-    </div>
-  }
-
-  <h2 class="section-label">{{ 'certification.kpi.title' | translate }}</h2>
-  <section class="kpi-grid" [attr.aria-label]="'certification.kpi.summary' | translate">
-    <article class="kpi-card">
-      <span>{{ 'certification.kpi.total' | translate }}</span
-      ><strong>{{
-        'certification.kpi.issued-count' | translate: { count: store.activeCertificates().length }
-      }}</strong
-      ><small>{{ 'certification.kpi.public-verification' | translate }}</small>
-    </article>
-    <article class="kpi-card">
-      <span>{{ 'certification.kpi.certified-batches' | translate }}</span
-      ><strong>{{
-        'certification.kpi.certification-rate' | translate: { rate: certificationRate }
-      }}</strong
-      ><small>{{
-        'certification.kpi.first-potato-average' | translate: { rate: potatoFirstRate }
-      }}</small>
-    </article>
-    <article class="kpi-card">
-      <span>{{ 'certification.kpi.specialty-coffee' | translate }}</span
-      ><strong>{{
-        'certification.kpi.qualified-count' | translate: { count: specialtyCoffeeCount }
-      }}</strong
-      ><small>{{ 'certification.kpi.sca-threshold' | translate }}</small>
-    </article>
+    </form>
   </section>
+  } @else if (selected(); as entry) { @let batch = entry.batch;
+  <section class="card">
+    <h2>{{ batch.batchCode }}</h2>
+    <p>
+      {{ 'certification.workspace.cropType.' + batch.cropType | translate }} ·
+      {{ batch.harvestedOn }}
+    </p>
+    <dl>
+      @if (batch.netWeightKg !== null) {
+      <dt>{{ 'certification.workspace.netWeightKg' | translate }}</dt>
+      <dd>{{ batch.netWeightKg | number }} kg</dd>
+      } @if (batch.sampleIdentifier) {
+      <dt>{{ 'certification.workspace.sample' | translate }}</dt>
+      <dd>
+        {{ batch.sampleIdentifier }} · {{ batch.sampleWeightKg | number }} kg
+      </dd>
+      } @if (batch.qualityCategory) {
+      <dt>{{ 'certification.workspace.quality' | translate }}</dt>
+      <dd>{{ batch.qualityCategory }} · {{ batch.qualityScore | number }}</dd>
+      } @if (entry.certificate; as certificate) {
+      <dt>{{ 'certification.workspace.number' | translate }}</dt>
+      <dd>
+        {{ certificate.certificateNumber }} · {{ certificate.issuedAt | date:
+        'mediumDate' }}
+      </dd>
+      <dt>{{ 'certification.workspace.certificate-status' | translate }}</dt>
+      <dd>
+        {{ 'certification.workspace.status.' + certificate.status | translate }}
+      </dd>
+      }
+    </dl>
 
-  <section class="filters" [attr.aria-label]="'certification.filters.summary' | translate">
-    <h2>{{ 'certification.filters.title' | translate }}</h2>
-    <div class="filter-row">
-      <label class="search">
-        <mat-icon>search</mat-icon>
+    @if (entry.certificate; as certificate) {
+    <div class="actions">
+      <a
+        mat-stroked-button
+        routerLink="/verify"
+        [queryParams]="{ number: certificate.certificateNumber, hash: certificate.certificateHash }"
+        target="_blank"
+        rel="noopener"
+      >
+        {{ 'certification.trace.public-verification' | translate }}
+      </a>
+      @if (certificate.status === 'ACTIVE') {
+      <button
+        mat-stroked-button
+        type="button"
+        [disabled]="busy()"
+        (click)="download(certificate.certificateNumber)"
+      >
+        {{ 'certification.farmer.download-pdf' | translate }}
+      </button>
+      @if (store.canManage()) {
+      <button
+        mat-stroked-button
+        type="button"
+        [disabled]="busy()"
+        (click)="revoke(certificate.id)"
+      >
+        {{ (confirmRevocation ? 'certification.workspace.confirm-revoke' :
+        'certification.workspace.revoke') | translate }}
+      </button>
+      @if (confirmRevocation) {
+      <button
+        mat-button
+        type="button"
+        [disabled]="busy()"
+        (click)="confirmRevocation = false"
+      >
+        {{ 'certification.workspace.cancel' | translate }}
+      </button>
+      } } }
+    </div>
+    } @else if (store.canManage()) { @if (batch.netWeightKg === null) {
+    <h3>{{ 'certification.workspace.weigh' | translate }}</h3>
+    <form #weighing="ngForm" (ngSubmit)="weigh(batch.id)">
+      <label
+        >{{ 'certification.workspace.grossWeightKg' | translate }}
         <input
-          type="search"
-          [placeholder]="'certification.filters.search' | translate"
-          [ngModel]="search()"
-          (ngModelChange)="search.set($event); page.set(1)"
-      /></label>
+          type="number"
+          step="any"
+          min="0.001"
+          name="grossWeightKg"
+          [(ngModel)]="weight.grossWeightKg"
+          required
+        />
+      </label>
       <label
-        >{{ 'certification.filters.crop' | translate }}
-        <select [ngModel]="cropFilter()" (ngModelChange)="cropFilter.set($event); page.set(1)">
-          <option value="ALL">
-            {{ 'certification.filters.all-masculine' | translate }}
-          </option>
-          <option value="ANDEAN_POTATO">
-            {{ 'certification.filters.potato' | translate }}
-          </option>
-          <option value="SPECIALTY_COFFEE">
-            {{ 'certification.filters.coffee' | translate }}
-          </option>
-        </select></label
+        >{{ 'certification.workspace.tareKg' | translate }}
+        <input
+          type="number"
+          step="any"
+          min="0"
+          name="tareKg"
+          [(ngModel)]="weight.tareKg"
+          required
+        />
+      </label>
+      <button
+        mat-flat-button
+        type="submit"
+        [disabled]="busy() || weighing.invalid"
       >
-      <label
-        >{{ 'certification.filters.quality' | translate }}
-        <select
-          [ngModel]="qualityFilter()"
-          (ngModelChange)="qualityFilter.set($event); page.set(1)"
-        >
-          <option value="ALL">
-            {{ 'certification.filters.all-feminine' | translate }}
-          </option>
-          <option value="PREMIUM_GOLD">
-            {{ 'certification.quality-category.PREMIUM_GOLD' | translate }}
-          </option>
-          <option value="STANDARD">
-            {{ 'certification.quality-category.STANDARD' | translate }}
-          </option>
-          <option value="SPECIALTY_COFFEE">
-            {{ 'certification.quality-category.SPECIALTY_COFFEE' | translate }}
-          </option>
-          <option value="COMMERCIAL_COFFEE">
-            {{ 'certification.quality-category.COMMERCIAL_COFFEE' | translate }}
-          </option>
-        </select></label
-      >
-    </div>
-  </section>
-
-  <section class="table-shell" [attr.aria-label]="'certification.table.summary' | translate">
-    <div class="table-title">{{ 'certification.table.title' | translate }}</div>
-    <div class="table-scroll">
-      <table>
-        <thead>
-          <tr>
-            <th>{{ 'certification.table.batch-code' | translate }}</th>
-            <th>{{ 'certification.table.producer' | translate }}</th>
-            <th>{{ 'certification.table.crop-variety' | translate }}</th>
-            <th>{{ 'certification.table.volume' | translate }}</th>
-            <th>{{ 'certification.table.quality' | translate }}</th>
-            <th>{{ 'certification.table.issued' | translate }}</th>
-            <th>{{ 'certification.table.document' | translate }}</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (row of visibleRows(); track row.certificate.id) {
-            <tr>
-              <td>{{ row.batch.data.code }}</td>
-              <td>{{ row.batch.data.memberName }}</td>
-              <td>
-                {{ row.batch.data.variety }}<small>{{ row.batch.data.plotName }}</small>
-              </td>
-              <td>{{ row.batch.netKg | number: '1.0-2' }} kg</td>
-              <td>
-                @if (row.batch.data.qualityCategory === 'SPECIALTY_COFFEE') {
-                  {{
-                    'certification.table.sca-points'
-                      | translate: { score: row.batch.data.coffeeCupping?.totalScore }
-                  }}
-                } @else {
-                  {{
-                    'certification.table.first-rate'
-                      | translate: { rate: row.batch.data.potatoGrading?.firstPercentage }
-                  }}
-                }
-              </td>
-              <td>{{ row.certificate.data.issuedAt | date: 'dd/MM/yyyy' }}</td>
-              <td>
-                <button
-                  type="button"
-                  class="table-button"
-                  (click)="showCertificate(row.certificate)"
-                >
-                  {{ 'certification.table.view-certificate' | translate }}
-                </button>
-              </td>
-            </tr>
-          } @empty {
-            <tr>
-              <td colspan="7" class="empty">
-                {{ 'certification.table.empty' | translate }}
-              </td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    </div>
-  </section>
-  <div class="pagination">
-    <span>{{
-      'certification.table.showing'
-        | translate
-          : {
-              shown: visibleRows().length,
-              total: rows().length,
-            }
-    }}</span>
-    <div>
-      <button type="button" (click)="selectPage(page() - 1)" [disabled]="page() === 1">‹</button>
-      <span>{{ page() }} / {{ pageCount() }}</span>
-      <button type="button" (click)="selectPage(page() + 1)" [disabled]="page() === pageCount()">
-        ›
+        {{ 'certification.workspace.save' | translate }}
       </button>
-    </div>
-  </div>
-
-  @if (dialog() !== 'closed') {
-    <div class="modal-backdrop" (click)="close()">
-      <section
-        class="modal"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="modal-title"
-        (click)="$event.stopPropagation()"
+    </form>
+    } @else if (!batch.sampleIdentifier) {
+    <h3>{{ 'certification.workspace.sample' | translate }}</h3>
+    <form #sampling="ngForm" (ngSubmit)="extractSample(batch.id)">
+      <label
+        >{{ 'certification.workspace.sampleIdentifier' | translate }}
+        <input
+          name="sampleIdentifier"
+          [(ngModel)]="sample.sampleIdentifier"
+          required
+        />
+      </label>
+      <label
+        >{{ 'certification.workspace.sampleWeightKg' | translate }}
+        <input
+          type="number"
+          step="any"
+          [min]="batch.cropType === 'SPECIALTY_COFFEE' ? 1 : 0.001"
+          [max]="batch.netWeightKg"
+          name="sampleWeightKg"
+          [(ngModel)]="sample.sampleWeightKg"
+          required
+        />
+      </label>
+      <button
+        mat-flat-button
+        type="submit"
+        [disabled]="busy() || sampling.invalid"
       >
-        <header class="modal-header">
-          <div>
-            <h2 id="modal-title">{{ 'certification.modal.title' | translate }}</h2>
-            <p>
-              {{ 'certification.modal.active-campaign' | translate }}: 2026-I <span>|</span>
-              {{ 'certification.modal.intake-record' | translate }}
-            </p>
-          </div>
-          <button
-            type="button"
-            class="close"
-            [attr.aria-label]="'certification.modal.close' | translate"
-            (click)="close()"
-          >
-            ×
-          </button>
-        </header>
-        <div class="modal-content">
-          @if (dialog() === 'form') {
-            <app-harvest-batch-registration
-              [form]="form"
-              [members]="members()"
-              [plots]="plotsForMember"
-              (memberChanged)="changeMember()"
-            />
-            <button type="button" class="example-button" (click)="loadExample()">
-              {{ 'certification.modal.load-example' | translate }}
-            </button>
-            <app-harvest-grading-sheet [form]="form" [cropType]="selectedCrop" />
-            @if (formError()) {
-              <p class="form-error" role="alert">
-                {{ formError() | translate: formErrorParams() }}
-              </p>
-            }
-          } @else if (selectedBatch(); as batch) {
-            <p class="form-section-title">
-              {{
-                (dialog() === 'issued'
-                  ? 'certification.modal.certificate-issued'
-                  : 'certification.modal.certificate-preview'
-                ) | translate
-              }}
-            </p>
-            <div class="certificate" id="print-certificate">
-              <div class="certificate-title">
-                SUMAQAGRO CERTIFICATE ENGINE <span>|</span>
-                {{ 'certification.certificate.technical-document' | translate }}
-              </div>
-              <div class="certificate-body">
-                <div class="certificate-facts">
-                  <div>
-                    <strong>{{ 'certification.certificate.producer' | translate }} :</strong>
-                    {{ batch.data.memberName }} <br /><strong
-                      >{{ 'certification.certificate.plot' | translate }} :</strong
-                    >
-                    {{ batch.data.plotName }} · {{ batch.data.plotRegion }} <br /><strong
-                      >{{ 'certification.certificate.gps' | translate }} :</strong
-                    >
-                    {{ batch.data.coordinates }}
-                  </div>
-                  <div>
-                    <strong>{{ 'certification.certificate.product' | translate }} :</strong>
-                    {{ batch.data.variety }} ·
-                    <strong>{{ 'certification.certificate.volume' | translate }} :</strong>
-                    {{ batch.netKg | number: '1.0-2' }}
-                    {{ 'certification.certificate.net-kg' | translate }} <br /><strong
-                      >{{ 'certification.certificate.quality' | translate }} :</strong
-                    >
-                    {{ 'certification.quality-category.' + batch.data.qualityCategory | translate }}
-                    <br />
-                    @if (batch.data.potatoGrading; as grade) {
-                      {{ 'certification.certificate.first' | translate }}:
-                      {{ grade.firstPercentage }} % ·
-                      {{ 'certification.certificate.second' | translate }}:
-                      {{ grade.secondPercentage }} % ·
-                      {{ 'certification.certificate.loss' | translate }}:
-                      {{ grade.thirdPercentage }} %
-                    } @else {
-                      {{ 'certification.certificate.sca-score' | translate }}:
-                      {{ batch.data.coffeeCupping?.totalScore }}
-                    }
-                  </div>
-                  @if (selectedCertificate(); as certificate) {
-                    <div>
-                      @if (certificate.data.verificationToken.startsWith('demo-')) {
-                        <strong>{{ 'certification.certificate.demo-record' | translate }}</strong
-                        ><br />
-                      } @else {
-                        <strong>{{ 'certification.certificate.hash' | translate }} :</strong>
-                        {{ certificate.data.sha256Hash.slice(0, 18) }}…<br />
-                      }
-                      <strong>{{ 'certification.certificate.issued-by' | translate }} :</strong>
-                      {{ certificate.data.issuedByName }} <br /><strong
-                        >{{ 'certification.certificate.date' | translate }} :</strong
-                      >
-                      {{ certificate.data.issuedAt | date: 'dd/MM/yyyy HH:mm' }}
-                    </div>
-                  } @else if (draftHash(); as hash) {
-                    <div>
-                      <strong
-                        >{{ 'certification.certificate.preliminary-hash' | translate }} :</strong
-                      >
-                      {{ hash.slice(0, 18) }} …<br /><strong
-                        >{{ 'certification.certificate.expected-issuer' | translate }}:</strong
-                      >
-                      {{ store.issuer()?.displayName }}<br /><strong
-                        >{{ 'certification.certificate.preview-date' | translate }} :</strong
-                      >
-                      {{ draftIssuedAt() | date: 'dd/MM/yyyy HH:mm' }}
-                    </div>
-                  }
-                </div>
-                <div class="qr-panel">
-                  @if (previewUrl()) {
-                    <img
-                      [src]="qrImageUrl()"
-                      width="120"
-                      height="120"
-                      [alt]="'certification.certificate.qr-alt' | translate"
-                    />
-                    @if (selectedCertificate()) {
-                      <a [href]="previewUrl()" target="_blank" rel="noopener">{{
-                        'certification.certificate.verify' | translate
-                      }}</a>
-                    } @else {
-                      <span>{{ 'certification.certificate.link-pending' | translate }}</span>
-                    }
-                  } @else {
-                    <mat-icon>qr_code_2</mat-icon>
-                    <span>{{ 'certification.certificate.qr-pending' | translate }}</span>
-                  }
-                </div>
-              </div>
-            </div>
-            @if (dialog() === 'preview') {
-              <label class="notify"
-                ><input
-                  type="checkbox"
-                  [ngModel]="notifyMember()"
-                  (ngModelChange)="notifyMember.set($event)"
-                  disabled
-                />
-                {{ 'certification.modal.sms-pending' | translate }}</label
-              >
-            }
-          }
-        </div>
-        <footer class="modal-footer">
-          @if (dialog() === 'form') {
-            <button type="button" class="secondary" (click)="close()">
-              {{ 'common.cancel' | translate }}
-            </button>
-            <button type="button" class="primary" (click)="preview()">
-              {{ 'certification.modal.review' | translate }}
-            </button>
-          } @else if (dialog() === 'preview') {
-            <button type="button" class="secondary" (click)="dialog.set('form')">
-              ← {{ 'certification.modal.modify' | translate }}
-            </button>
-            <button
-              type="button"
-              class="primary"
-              [disabled]="busy() || store.loading()"
-              (click)="issue()"
-            >
-              {{ 'certification.modal.issue' | translate }}
-            </button>
-          } @else {
-            <button type="button" class="secondary" (click)="close()">
-              {{ 'certification.modal.close' | translate }}
-            </button>
-            <button type="button" class="primary" (click)="print()">
-              {{ 'certification.modal.print' | translate }}
-            </button>
-          }
-        </footer>
-      </section>
-    </div>
+        {{ 'certification.workspace.save' | translate }}
+      </button>
+    </form>
+    } @else if (batch.status === 'PENDING') {
+    <h3>
+      {{ (batch.cropType === 'ANDEAN_POTATO' ? 'certification.workspace.grade' :
+      'certification.workspace.cup') | translate }}
+    </h3>
+    <form #grading="ngForm" (ngSubmit)="grade(batch.id, batch.cropType)">
+      @if (batch.cropType === 'ANDEAN_POTATO') {
+      <label
+        >{{ 'certification.workspace.firstPercentage' | translate }}
+        <input
+          type="number"
+          step="any"
+          min="0"
+          max="100"
+          name="firstPercentage"
+          [(ngModel)]="potato.firstPercentage"
+          required
+        />
+      </label>
+      <label
+        >{{ 'certification.workspace.secondPercentage' | translate }}
+        <input
+          type="number"
+          step="any"
+          min="0"
+          max="100"
+          name="secondPercentage"
+          [(ngModel)]="potato.secondPercentage"
+          required
+        />
+      </label>
+      <label
+        >{{ 'certification.workspace.thirdPercentage' | translate }}
+        <input
+          type="number"
+          step="any"
+          min="0"
+          max="100"
+          name="thirdPercentage"
+          [(ngModel)]="potato.thirdPercentage"
+          required
+        />
+      </label>
+      <label
+        >{{ 'certification.workspace.pestDamagePercentage' | translate }}
+        <input
+          type="number"
+          step="any"
+          min="0"
+          max="100"
+          name="pestDamagePercentage"
+          [(ngModel)]="potato.pestDamagePercentage"
+          required
+        />
+      </label>
+      <p>{{ 'certification.workspace.grade-instruction' | translate }}</p>
+      } @else { @for (field of coffeeFields; track field) {
+      <label
+        >{{ 'certification.workspace.' + field | translate }}
+        <input
+          type="number"
+          step="any"
+          min="0"
+          max="100"
+          [name]="field"
+          [(ngModel)]="coffee[field]"
+          required
+        />
+      </label>
+      }
+      <label class="check">
+        <input
+          type="checkbox"
+          name="fermentDefect"
+          [(ngModel)]="coffee.fermentDefect"
+        />
+        {{ 'certification.workspace.fermentDefect' | translate }}
+      </label>
+      }
+      <button
+        mat-flat-button
+        type="submit"
+        [disabled]="busy() || grading.invalid"
+      >
+        {{ 'certification.workspace.save' | translate }}
+      </button>
+    </form>
+    } @else if (batch.status === 'GRADED' && batch.qualityCategory) {
+    <h3>{{ 'certification.workspace.issue' | translate }}</h3>
+    <form #issuing="ngForm" (ngSubmit)="issue(batch.id)">
+      <label
+        >{{ 'certification.workspace.number' | translate }}
+        <input
+          name="certificateNumber"
+          [(ngModel)]="certificateNumber"
+          required
+        />
+      </label>
+      <button
+        mat-flat-button
+        type="submit"
+        [disabled]="busy() || issuing.invalid"
+      >
+        {{ 'certification.workspace.issue' | translate }}
+      </button>
+    </form>
+    } @else {
+    <p>{{ 'certification.workspace.refresh-batch' | translate }}</p>
+    <button
+      mat-stroked-button
+      type="button"
+      [disabled]="busy()"
+      (click)="store.reload()"
+    >
+      {{ 'certification.workspace.reload' | translate }}
+    </button>
+    } }
+  </section>
   }
+</div>
 }

@@ -1,6 +1,7 @@
 import { UpdateFarmerAccountCommand } from '../domain/model/commands/update-farmer-account.command';
-import { computed, DestroyRef, effect, inject, Injectable, signal, untracked } from '@angular/core';
+import { computed, DestroyRef, effect, inject, Injectable, Injector, signal, untracked } from '@angular/core';
 import {
+  catchError,
   finalize,
   forkJoin,
   map,
@@ -10,14 +11,11 @@ import {
   switchMap,
   throwError,
 } from 'rxjs';
+import { FarmingStore } from '../../farming/application/farming.store';
 import { IamStore, SessionParticipant } from '../../iam/application/iam.store';
-import { UpdateFarmerContactCommand } from '../domain/model/commands/update-farmer-contact.command';
 import { UpdateCooperativeCommand } from '../domain/model/commands/update-cooperative.command';
-import { InviteTechnicalAdvisorCommand } from '../domain/model/commands/invite-technical-advisor.command';
-import { ReassignTechnicalAdvisorCommand } from '../domain/model/commands/reassign-technical-advisor.command';
 import { CooperativeMember } from '../domain/model/entities/cooperative-member.entity';
 import { Cooperative } from '../domain/model/entities/cooperative.entity';
-import { CooperativeDashboard } from '../domain/model/entities/cooperative-dashboard.entity';
 import { FarmerProfile } from '../domain/model/entities/farmer-profile.entity';
 import { TechnicalAdvisor } from '../domain/model/entities/technical-advisor.entity';
 import { AdvisorSummary } from '../domain/model/entities/advisor-summary';
@@ -28,13 +26,13 @@ import { ProfilesApi } from '../infrastructure/profiles-api';
 /** Coordinates the institutional Profile read models for a cooperative director. */
 @Injectable({ providedIn: 'root' })
 export class ProfilesStore {
+  private readonly injector = inject(Injector);
   private readonly profilesApi = inject(ProfilesApi);
   private readonly session = inject(IamStore);
   private readonly profileSignal = signal<FarmerProfile | null>(null);
   private readonly cooperativeSignal = signal<Cooperative | null>(null);
   private readonly membersSignal = signal<CooperativeMember[]>([]);
   private readonly technicalAdvisorsSignal = signal<TechnicalAdvisor[]>([]);
-  private readonly dashboardSignal = signal<CooperativeDashboard | null>(null);
   private readonly loadingSignal = signal(false);
   private readonly savingSignal = signal(false);
   private readonly errorSignal = signal<string | null>(null);
@@ -45,7 +43,6 @@ export class ProfilesStore {
   readonly cooperative = this.cooperativeSignal.asReadonly();
   readonly members = this.membersSignal.asReadonly();
   readonly technicalAdvisors = this.technicalAdvisorsSignal.asReadonly();
-  readonly dashboard = this.dashboardSignal.asReadonly();
   readonly loading = this.loadingSignal.asReadonly();
   readonly saving = this.savingSignal.asReadonly();
   readonly error = this.errorSignal.asReadonly();
@@ -81,18 +78,8 @@ export class ProfilesStore {
       });
   }
 
-  /** Validates and persists the farmer's contact data. */
-  saveContact(command: UpdateFarmerContactCommand): void {
-    this.persistFarmerProfile(command);
-  }
-
+  /** Saves the farmer's editable profile fields. */
   saveAccount(command: UpdateFarmerAccountCommand): void {
-    this.persistFarmerProfile(command);
-  }
-
-  private persistFarmerProfile(
-    command: UpdateFarmerContactCommand | UpdateFarmerAccountCommand,
-  ): void {
     this.contactSavedSignal.set(false);
     const current = this.profileSignal();
     if (!current || this.saving()) return;
@@ -106,10 +93,8 @@ export class ProfilesStore {
     });
 
     try {
-      profile.updateContact(command.phoneNumber, command.email);
-      if (command instanceof UpdateFarmerAccountCommand) {
-        profile.updateName(command.firstName, command.lastName);
-      }
+      profile.updateName(command.firstName, command.lastName);
+      profile.updatePhoneNumber(command.phoneNumber);
     } catch (error) {
       this.errorSignal.set(error instanceof Error ? error.message : 'Invalid contact data.');
       return;
@@ -129,83 +114,72 @@ export class ProfilesStore {
       });
   }
 
-  /** Loads the role-specific read model for the active cooperative director. */
-  loadCooperativeDashboard(directorUserId: number): void {
-    this.loadingSignal.set(true);
-    this.errorSignal.set(null);
-    this.dashboardSignal.set(null);
-    this.cooperativeSignal.set(null);
-    this.profilesApi
-      .getCooperativeByDirector(directorUserId)
-      .pipe(
-        switchMap((cooperative) => {
-          this.cooperativeSignal.set(cooperative);
-          return cooperative
-            ? this.profilesApi.getInstitutionalDashboard(directorUserId)
-            : of(null);
-        }),
-        finalize(() => this.loadingSignal.set(false)),
-      )
-      .subscribe({
-        next: (dashboard) => this.dashboardSignal.set(dashboard),
-        error: (error: Error) => this.errorSignal.set(error.message),
-      });
-  }
-
-  /** Loads the cooperative, member summary, and technical team for the active director. */
+  /** Loads the director's cooperative, members and assigned agronomists. */
   loadInstitutionalDashboard(directorUserId: number): void {
     this.loadingSignal.set(true);
     this.errorSignal.set(null);
-    this.profilesApi
-      .getCooperativeByDirector(directorUserId)
-      .pipe(
-        switchMap((cooperative) => {
-          this.cooperativeSignal.set(cooperative);
-          if (!cooperative) {
-            return of({ members: [], advisors: [] });
-          }
-          const coopId = cooperative.id as number;
-          return this.profilesApi
-            .getCooperativeMembers(coopId)
-            .pipe(
-              switchMap((members) =>
-                this.profilesApi
-                  .getTechnicalAdvisors(coopId)
-                  .pipe(switchMap((advisors) => of({ members, advisors }))),
-              ),
-            );
-        }),
-      )
-      .subscribe({
-        next: (result) => {
-          this.membersSignal.set(result.members);
-          this.technicalAdvisorsSignal.set(result.advisors);
-          this.loadingSignal.set(false);
-        },
-        error: (error: Error) => {
-          this.errorSignal.set(error.message);
-          this.loadingSignal.set(false);
-        },
-      });
+    this.cooperativeSignal.set(null);
+    this.membersSignal.set([]);
+    this.technicalAdvisorsSignal.set([]);
+    this.profilesApi.getCooperativeByDirector(directorUserId).pipe(
+      switchMap((cooperative) => {
+        this.cooperativeSignal.set(cooperative);
+        if (!cooperative) return of({ members: [], advisors: [] });
+        const id = Number(cooperative.id);
+        return forkJoin({
+          members: this.profilesApi.getCooperativeMembers(id),
+          advisors: this.profilesApi.getAssignmentsByCooperative(id).pipe(
+            switchMap((assignments) => this.assignedAdvisors(assignments, id)),
+          ),
+        });
+      }),
+      finalize(() => this.loadingSignal.set(false)),
+    ).subscribe({
+      next: ({ members, advisors }) => {
+        this.membersSignal.set(members);
+        this.technicalAdvisorsSignal.set(advisors);
+      },
+      error: (error: Error) => this.errorSignal.set(error.message),
+    });
   }
 
-  /** Loads technical advisors specifically for a cooperative. */
-  loadTechnicalAdvisors(cooperativeId: number): void {
-    this.loadingSignal.set(true);
-    this.errorSignal.set(null);
-    this.profilesApi
-      .getTechnicalAdvisors(cooperativeId)
-      .pipe(finalize(() => this.loadingSignal.set(false)))
-      .subscribe({
-        next: (advisors) => this.technicalAdvisorsSignal.set(advisors),
-        error: (error: Error) => this.errorSignal.set(error.message),
-      });
+  private assignedAdvisors(assignments: PlotAdvisorAssignment[], cooperativeId = 0): Observable<TechnicalAdvisor[]> {
+    const active = assignments.filter((assignment) => assignment.status === 'ACTIVE');
+    const ids = [...new Set(active.map((assignment) => assignment.advisorUserId))];
+    if (!ids.length) return of([]);
+    return forkJoin(ids.map((userId) =>
+      this.advisorByUser(userId).pipe(
+        map((advisor) => new TechnicalAdvisor({
+          id: userId,
+          userId,
+          cooperativeId,
+          name: advisor?.name || '#' + userId,
+          cipCode: '',
+          phone: '',
+          assignedPlotsCount: active.filter((assignment) => assignment.advisorUserId === userId).length,
+        })),
+      ),
+    ));
+  }
+
+  inviteAgronomist(email: string): Observable<unknown> {
+    const cooperative = this.cooperative();
+    if (!cooperative || cooperative.directorUserId !== this.session.activeUser()?.id) {
+      return throwError(() => new Error('profiles.advisory.errors.denied'));
+    }
+    return this.profilesApi.inviteAgronomist(Number(cooperative.id), email);
   }
 
   /** Validates and persists the director's institutional configuration. */
   saveCooperative(command: UpdateCooperativeCommand): void {
-    const cooperative = this.cooperativeSignal();
-    if (!cooperative) return;
+    const current = this.cooperativeSignal();
+    if (!current || this.saving()) return;
+    const cooperative = new Cooperative({
+      id: Number(current.id), directorUserId: current.directorUserId,
+      legalName: current.legalName, ruc: current.ruc, region: current.region,
+      institutionalEmail: current.institutionalEmail, legalRepresentative: current.legalRepresentative,
+      headquartersAddress: current.headquartersAddress, switchboardPhone: current.switchboardPhone,
+    });
 
     try {
       cooperative.updateInstitutionalData(command);
@@ -225,79 +199,6 @@ export class ProfilesStore {
       });
   }
 
-  /** Invites a new technical advisor to the cooperative team. */
-  inviteTechnicalAdvisor(command: InviteTechnicalAdvisorCommand): void {
-    const newAdvisor = new TechnicalAdvisor({
-      cooperativeId: command.cooperativeId,
-      name: command.name,
-      cipCode: command.cipCode,
-      phone: command.phone,
-      assignedPlotsCount: command.assignedPlotsCount,
-    });
-
-    this.savingSignal.set(true);
-    this.errorSignal.set(null);
-    this.profilesApi
-      .createTechnicalAdvisor(newAdvisor)
-      .pipe(finalize(() => this.savingSignal.set(false)))
-      .subscribe({
-        next: (createdAdvisor) => {
-          this.technicalAdvisorsSignal.update((current) => [...current, createdAdvisor]);
-        },
-        error: (error: Error) => this.errorSignal.set(error.message),
-      });
-  }
-
-  /** Reassigns or edits details for an existing technical advisor. */
-  reassignTechnicalAdvisor(command: ReassignTechnicalAdvisorCommand): void {
-    const advisors = this.technicalAdvisorsSignal();
-    const advisor = advisors.find((item) => item.id === command.id);
-    if (!advisor) return;
-
-    try {
-      advisor.updateDetails(
-        command.name,
-        command.cipCode,
-        command.phone,
-        command.assignedPlotsCount,
-      );
-    } catch (error) {
-      this.errorSignal.set(error instanceof Error ? error.message : 'Datos inválidos.');
-      return;
-    }
-
-    this.savingSignal.set(true);
-    this.errorSignal.set(null);
-    this.profilesApi
-      .updateTechnicalAdvisor(advisor)
-      .pipe(finalize(() => this.savingSignal.set(false)))
-      .subscribe({
-        next: (updatedAdvisor) => {
-          this.technicalAdvisorsSignal.update((current) =>
-            current.map((item) => (item.id === updatedAdvisor.id ? updatedAdvisor : item)),
-          );
-        },
-        error: (error: Error) => this.errorSignal.set(error.message),
-      });
-  }
-
-  /** Removes a technical advisor from the cooperative team. */
-  removeTechnicalAdvisor(id: number): void {
-    this.savingSignal.set(true);
-    this.errorSignal.set(null);
-    this.profilesApi
-      .deleteTechnicalAdvisor(id)
-      .pipe(finalize(() => this.savingSignal.set(false)))
-      .subscribe({
-        next: () => {
-          this.technicalAdvisorsSignal.update((current) =>
-            current.filter((item) => item.id !== id),
-          );
-        },
-        error: (error: Error) => this.errorSignal.set(error.message),
-      });
-  }
-
   // ---------- Published reads for the other bounded contexts ----------
 
   /**
@@ -305,13 +206,10 @@ export class ProfilesStore {
    * @param userId - Account of the professional.
    */
   advisorByUser(userId: number): Observable<AdvisorSummary | null> {
-    return this.profilesApi
-      .getAdvisorByUser(userId)
-      .pipe(
-        map((advisor): AdvisorSummary | null =>
-          advisor ? { userId: advisor.userId, name: advisor.name } : null,
-        ),
-      );
+    return this.profilesApi.getFarmerProfile(userId).pipe(
+      map((profile) => ({ userId, name: profile.fullName || '#' + userId })),
+      catchError(() => of(null)),
+    );
   }
 
   /**
@@ -355,20 +253,20 @@ export class ProfilesStore {
   ): Observable<{ plotIds: number[]; advisors: AdvisorSummary[] }> {
     return forkJoin({
       members: this.profilesApi.getCooperativeMembers(cooperativeId),
-      advisors: this.profilesApi.getTechnicalAdvisors(cooperativeId),
+      assignments: this.profilesApi.getAssignmentsByCooperative(cooperativeId),
     }).pipe(
-      map(({ members, advisors }) => ({
-        plotIds: [
-          ...new Set(
-            members
-              .filter((member) => member.active)
-              .flatMap((member) => member.plots.map((plot) => plot.id)),
-          ),
-        ],
-        advisors: advisors.map((advisor): AdvisorSummary => ({
-          userId: advisor.userId,
-          name: advisor.name,
-        })),
+      switchMap(({ members, assignments }) => {
+        const userIds = [...new Set(members.flatMap((member) =>
+          member.active && member.userId !== null ? [member.userId] : [],
+        ))];
+        return forkJoin({
+          plots: userIds.length ? forkJoin(userIds.map(this.injector.get(FarmingStore).plotSummariesByOwner)) : of([]),
+          advisors: this.assignedAdvisors(assignments, cooperativeId),
+        });
+      }),
+      map(({ plots, advisors }) => ({
+        plotIds: [...new Set(plots.flat().map((plot) => plot.id))],
+        advisors: advisors.map((advisor) => ({ userId: advisor.userId, name: advisor.name })),
       })),
     );
   }
@@ -408,100 +306,28 @@ export class ProfilesStore {
     () => this.session.activeUser()?.experience === 'COOPERATIVE_DIRECTOR',
   );
 
-  /**
-   * Links a plot of a member to a technical advisor of the cooperative.
-   *
-   * @remarks
-   * Only a director assigns, and only to an advisor of the team already loaded
-   * by {@link loadTechnicalAdvisors}. The previous responsible advisor is kept
-   * in the history, so a reassignment never loses the earlier period.
-   *
-   * @param plotId - Plot of the member.
-   * @param producerUserId - Account of the member who owns the plot.
-   * @param advisorUserId - Account of the advisor who takes responsibility.
-   */
   assignPlotAdvisor(
+    cooperativeId: number,
     plotId: number,
     producerUserId: number,
     advisorUserId: number,
   ): Observable<PlotResponsibility> {
-    if (!this.directorScoped() || !Number.isSafeInteger(producerUserId) || producerUserId <= 0)
+    const director = this.session.activeUser();
+    if (!this.directorScoped() ||
+      ![cooperativeId, plotId, producerUserId, advisorUserId].every((id) => Number.isSafeInteger(id) && id > 0)) {
       return throwError(() => new Error('profiles.advisory.errors.denied'));
-    if (!this.technicalAdvisors().some((advisor) => advisor.userId === advisorUserId))
-      return throwError(() => new Error('profiles.advisory.errors.denied'));
-
+    }
     return this.profilesApi.getAssignmentByPlot(plotId).pipe(
       switchMap((previous) => {
-        if (previous && previous.producerUserId !== producerUserId)
+        if (!this.directorScoped() || this.session.activeUser()?.id !== director?.id ||
+          (previous && (previous.producerUserId !== producerUserId || previous.cooperativeId !== cooperativeId))) {
           return throwError(() => new Error('profiles.advisory.errors.denied'));
-        const assignedAt = new Date().toISOString();
-        // Only an advisor replaced while still in charge leaves a period open,
-        // so only that case has something for the history to close; a release
-        // already closed its own.
-        const replaced =
-          previous !== null &&
-          previous.status === 'ACTIVE' &&
-          previous.advisorUserId !== advisorUserId;
-        // Supervision that was released and comes back starts again, even when
-        // the same agronomist returns.
-        const continues = previous !== null && previous.status === 'ACTIVE' && !replaced;
-        const record: PlotAdvisorAssignment = {
-          id: previous?.id ?? plotId,
-          plotId,
-          producerUserId,
-          advisorUserId,
-          status: 'ACTIVE',
-          assignedAt: continues && previous ? previous.assignedAt : assignedAt,
-          history: replaced
-            ? [
-                ...previous.history,
-                {
-                  advisorUserId: previous.advisorUserId,
-                  assignedAt: previous.assignedAt,
-                  endedAt: assignedAt,
-                },
-              ]
-            : (previous?.history ?? []),
-        };
-
-        return this.profilesApi.saveAssignment(record, previous !== null);
+        }
+        if (!previous) return this.profilesApi.assign(cooperativeId, plotId, advisorUserId);
+        if (previous.status === 'ACTIVE' && previous.advisorUserId === advisorUserId) return of(previous);
+        return this.profilesApi.reassign(previous.id, advisorUserId);
       }),
       map(ProfilesStore.toResponsibility),
-    );
-  }
-
-  /**
-   * Removes the supervision of a plot, which stops appearing in the advisor panel.
-   *
-   * @param plotId - Plot that stops being supervised.
-   */
-  releasePlotAdvisor(plotId: number): Observable<null> {
-    if (!this.directorScoped())
-      return throwError(() => new Error('profiles.advisory.errors.denied'));
-
-    return this.profilesApi.getAssignmentByPlot(plotId).pipe(
-      switchMap((previous) => {
-        if (!previous || previous.status !== 'ACTIVE') return of(null);
-        const endedAt = new Date().toISOString();
-
-        return this.profilesApi
-          .saveAssignment(
-            {
-              ...previous,
-              status: 'INACTIVE',
-              history: [
-                ...previous.history,
-                {
-                  advisorUserId: previous.advisorUserId,
-                  assignedAt: previous.assignedAt,
-                  endedAt,
-                },
-              ],
-            },
-            true,
-          )
-          .pipe(map(() => null));
-      }),
     );
   }
 
@@ -511,9 +337,7 @@ export class ProfilesStore {
   private readonly advisorCatalogue = signal<TechnicalAdvisor[]>([]);
   private readonly advisoryAssignments = signal<PlotAdvisorAssignment[]>([]);
   private readonly advisoryLoadingSignal = signal(false);
-  private readonly advisorySavingSignal = signal(false);
   private readonly advisoryErrorSignal = signal<string | null>(null);
-  private readonly advisoryReady = signal(false);
   private readonly advisoryMemberOfCooperative = signal(false);
   private advisoryRequests = new Subscription();
   private advisoryRevision = 0;
@@ -537,7 +361,6 @@ export class ProfilesStore {
   );
 
   readonly advisoryLoading = computed(() => this.advisoryScoped() && this.advisoryLoadingSignal());
-  readonly advisorySaving = computed(() => this.advisoryScoped() && this.advisorySavingSignal());
   readonly advisoryError = computed(() =>
     this.advisoryScoped() ? this.advisoryErrorSignal() : null,
   );
@@ -553,24 +376,22 @@ export class ProfilesStore {
     this.advisoryAssignments.set([]);
     this.advisoryErrorSignal.set(null);
     this.advisoryLoadingSignal.set(false);
-    this.advisorySavingSignal.set(false);
-    this.advisoryReady.set(false);
     this.advisoryMemberOfCooperative.set(false);
     if (user?.experience !== 'FARMER') return;
     this.advisoryLoadingSignal.set(true);
     this.advisoryRequests.add(
       forkJoin({
-        advisors: this.profilesApi.getAvailableAdvisors(),
         assignments: this.profilesApi.getAssignmentsByProducer(user.id),
         memberships: this.profilesApi.getMembershipsByUser(user.id),
-      }).subscribe({
+      }).pipe(switchMap(({ assignments, memberships }) =>
+        this.assignedAdvisors(assignments).pipe(map((advisors) => ({ advisors, assignments, memberships }))),
+      )).subscribe({
         next: ({ advisors, assignments, memberships }) => {
           if (!this.isCurrentAdvisory(revision)) return;
           this.advisorCatalogue.set(advisors);
           this.advisoryAssignments.set(assignments);
           this.advisoryMemberOfCooperative.set(memberships.some((member) => member.active));
           this.advisoryLoadingSignal.set(false);
-          this.advisoryReady.set(true);
         },
         error: () => {
           if (this.isCurrentAdvisory(revision)) {
@@ -599,108 +420,10 @@ export class ProfilesStore {
     );
   }
 
-  /**
-   * Indicates whether the producer belongs to a cooperative, where the director
-   * is the one who assigns supervision (US-20).
-   */
+  /** Indicates whether the producer belongs to an active cooperative. */
   readonly advisorAssignedByDirector = computed(
     () => this.advisoryScoped() && this.advisoryMemberOfCooperative(),
   );
-
-  /**
-   * Indicates whether the producer can change the professional of a plot.
-   *
-   * @remarks
-   * Only an independent producer chooses: inside a cooperative the decision
-   * belongs to the director, so the producer only sees who takes care of it.
-   *
-   * @param owned - The caller confirms the plot belongs to the active producer.
-   */
-  canAssign(owned: boolean): boolean {
-    return (
-      owned &&
-      this.advisoryScoped() &&
-      !this.advisoryMemberOfCooperative() &&
-      this.advisoryReady() &&
-      !this.advisoryLoading() &&
-      !this.advisorySaving()
-    );
-  }
-
-  /**
-   * Changes responsibility after the view explicitly confirms the professional.
-   * @param plotId - Plot of the active producer.
-   * @param advisorUserId - Account of a selectable professional.
-   * @param owned - The caller confirms the plot belongs to the active producer.
-   * @param onSaved - Called only after the API confirms, in the same session.
-   */
-  assign(plotId: number, advisorUserId: number, owned: boolean, onSaved: () => void): void {
-    if (this.advisorySaving()) return;
-    if (!this.canAssign(owned) || !this.advisors().some((item) => item.userId === advisorUserId)) {
-      this.advisoryErrorSignal.set('profiles.advisory.errors.denied');
-      return;
-    }
-    const user = this.session.activeUser()!;
-    const revision = this.advisoryRevision;
-    this.advisorySavingSignal.set(true);
-    this.advisoryErrorSignal.set(null);
-    this.advisoryRequests.add(
-      this.profilesApi
-        .getAssignmentByPlot(plotId)
-        .pipe(
-          switchMap((previous) => {
-            if (
-              !this.isCurrentAdvisory(revision) ||
-              (previous && previous.producerUserId !== user.id)
-            )
-              throw new Error('profiles.advisory.errors.denied');
-            const assignedAt = new Date().toISOString();
-            const history = previous?.history ?? [];
-            const record: PlotAdvisorAssignment = {
-              id: previous?.id ?? plotId,
-              plotId,
-              producerUserId: user.id,
-              status: 'ACTIVE',
-              advisorUserId,
-              assignedAt:
-                previous?.advisorUserId === advisorUserId ? previous.assignedAt : assignedAt,
-              history:
-                previous && previous.advisorUserId !== advisorUserId
-                  ? [
-                      ...history,
-                      {
-                        advisorUserId: previous.advisorUserId,
-                        assignedAt: previous.assignedAt,
-                        endedAt: assignedAt,
-                      },
-                    ]
-                  : history,
-            };
-            return this.profilesApi.saveAssignment(record, previous !== null);
-          }),
-        )
-        .subscribe({
-          next: (record) => {
-            if (!this.isCurrentAdvisory(revision)) return;
-            this.advisoryAssignments.update((items) => [
-              ...items.filter((item) => item.plotId !== plotId),
-              record,
-            ]);
-            this.advisorySavingSignal.set(false);
-            onSaved();
-          },
-          error: (error) => {
-            if (!this.isCurrentAdvisory(revision)) return;
-            this.advisorySavingSignal.set(false);
-            this.advisoryErrorSignal.set(
-              error instanceof Error && error.message.startsWith('profiles.advisory.errors.')
-                ? error.message
-                : 'profiles.advisory.errors.save',
-            );
-          },
-        }),
-    );
-  }
 
   private isCurrentAdvisory(revision: number): boolean {
     return revision === this.advisoryRevision && this.advisoryScoped();

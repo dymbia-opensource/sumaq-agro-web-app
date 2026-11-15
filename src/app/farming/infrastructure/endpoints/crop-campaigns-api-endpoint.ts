@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { catchError, map, Observable } from 'rxjs';
+import { catchError, map, Observable, switchMap } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { BaseApiEndpoint } from '../../../shared/infrastructure/base-api-endpoint';
 import { CropCampaign } from '../../domain/model/entities/crop-campaign.entity';
@@ -36,12 +36,29 @@ export class CropCampaignsApiEndpoint extends BaseApiEndpoint<
     );
   }
 
-  /**
-   * Downloads the cost report of a campaign (`/crop-campaigns/{id}/cost-report`).
-   * @param campaignId - Campaign of the report.
-   */
-  getCostReport(campaignId: number): Observable<Blob> {
+  override create(campaign: CropCampaign): Observable<CropCampaign> {
+    const { id, status, ...body } = this.assembler.toResourceFromEntity(campaign);
     return this.http
-      .get(`${this.endpointUrl}/${campaignId}/cost-report`, { responseType: 'blob' });
+      .post<CropCampaignResource>(this.endpointUrl, body)
+      .pipe(map(this.assembler.toEntityFromResource));
+  }
+
+  override update(campaign: CropCampaign, id: number | string): Observable<CropCampaign> {
+    const { cropType, seedVariety, customSeedVariety, sowingDate } =
+      this.assembler.toResourceFromEntity(campaign);
+    return this.http
+      .patch<CropCampaignResource>(this.endpointUrl + '/' + id, {
+        cropType,
+        seedVariety,
+        customSeedVariety,
+        ...(sowingDate ? { sowingDate } : {}),
+      })
+      .pipe(map(this.assembler.toEntityFromResource));
+  }
+
+  close(id: number): Observable<CropCampaign> {
+    return this.http
+      .post(this.endpointUrl + '/' + id + '/closures', null)
+      .pipe(switchMap(() => this.getById(id)));
   }
 }

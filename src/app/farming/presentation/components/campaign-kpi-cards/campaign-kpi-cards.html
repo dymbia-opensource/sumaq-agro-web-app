@@ -11,7 +11,7 @@
       <p class="kpi-note" role="alert">{{ 'crop.errors.load-observations' | translate }}</p>
     } @else if (observation(); as observation) {
       <p class="kpi-value">
-        {{ observation.ndviMean | number: '1.2-2' }} <span class="kpi-unit">NDVI</span>
+        {{ observation.ndviMean === null ? ('crop.no-data' | translate) : (observation.ndviMean | number: '1.2-2') }} <span class="kpi-unit">NDVI</span>
       </p>
       <p class="kpi-note">
         {{ 'crop.capture-date' | translate }}: {{ observation.date | date: 'mediumDate' }}

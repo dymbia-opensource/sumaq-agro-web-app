@@ -2,17 +2,17 @@
  * Development environment.
  *
  * @remarks
- * Points to the json-server fake API (`server/db.json`) running on port 3000.
+ * Points to the local Spring Boot API.
  */
 export const environment = {
   production: false,
-  platformProviderApiBaseUrl: 'http://localhost:3000/api/v1',
+  platformProviderApiBaseUrl: 'http://localhost:8080/api/v1',
 
   // IAM
-  platformProviderSignUpEndpointPath: '/authentication/sign-up',
-  platformProviderSignInEndpointPath: '/authentication/sign-in',
+  platformProviderSignUpEndpointPath: '/users',
+  platformProviderSignInEndpointPath: '/tokens',
   platformProviderPasswordRecoveryEndpointPath: '/authentication/password-recovery',
-  useMockAuthentication: true,
+  useMockAuthentication: false,
 
   // Profiles
   platformProviderProfilesEndpointPath: '/profiles',
@@ -24,10 +24,9 @@ export const environment = {
   platformProviderTechnicalAdvisorsEndpointPath: '/technical-advisors',
 
   // Subscriptions and Payments
-  useMockSubscriptionPayments: true,
+  demoCheckoutEnabled: true,
   platformProviderPlansEndpointPath: '/plans',
   platformProviderSubscriptionsEndpointPath: '/subscriptions',
-  platformProviderPaymentsEndpointPath: '/payments',
 
   // Field Management
   platformProviderFieldPlotsEndpointPath: '/field-plots',

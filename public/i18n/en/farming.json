@@ -61,6 +61,7 @@
       "map-title": "Map Delineation"
     },
     "plots": {
+      "delete-pending": "Delete plot (pending)",
       "manage": "Manage Plots",
       "title": "My Registered Plots",
       "subtitle": "Manage your plots with the Seed plan ({{ used }} of {{ quota }} slots used).",
@@ -151,6 +152,7 @@
       "manage-plots": "Go to Manage Plots"
     },
     "errors": {
+      "update-campaign": "The campaign could not be saved.",
       "load-plots": "We could not load your plots. Check your connection and try again.",
       "load-plot": "We could not load the campaign of the plot.",
       "register-plot": "We could not register the plot. Try again.",
@@ -172,6 +174,7 @@
       "registration-partial": "The plot was registered and occupies a slot, but its initial campaign could not be completed. Review it in Manage Plots before registering again."
     },
     "finances": {
+      "pending": "Ledgers, expenses and cost reports will be available once finances are integrated.",
       "subtitle": "{{ plot }} | Season {{ season }}",
       "register-expense": "Register expense",
       "no-ledger": "Select a plot with an active campaign to see its expenses.",
@@ -228,6 +231,7 @@
       "HARVEST": "Harvest"
     },
     "campaigns": {
+      "edit": "Edit campaign",
       "title": "My Campaigns",
       "subtitle": "{{ plot }} · {{ count }} campaign(s)",
       "new": "Start New Campaign",
@@ -239,7 +243,7 @@
       "expense-count": "{{ count }} expense(s) recorded",
       "close": "Close campaign",
       "close-title": "Close the season {{ season }}?",
-      "close-warning": "The campaign becomes read only and its cost ledger stops accepting expenses.",
+      "close-warning": "The campaign will become read-only.",
       "actual-yield-hint": "Optional: what you harvested. You can also record it later.",
       "one-in-progress": "This plot already has a campaign in progress. Close it before starting a new one.",
       "empty": "This plot has no campaigns yet."

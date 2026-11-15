@@ -1,58 +1,40 @@
-﻿import { HttpClient, HttpParams } from '@angular/common/http';
-import { catchError, map, Observable } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { map } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { BaseApiEndpoint } from '../../../shared/infrastructure/base-api-endpoint';
-import { TechnicalPrescription } from '../../domain/model/entities/technical-prescription.entity';
+import { IssueTechnicalPrescriptionCommand } from '../../domain/model/commands/issue-technical-prescription.command';
 import { TechnicalPrescriptionAssembler } from '../assemblers/technical-prescription.assembler';
-import {
-  TechnicalPrescriptionResource,
-  TechnicalPrescriptionsResponse,
-} from '../responses/technical-prescription.response';
+import { TechnicalPrescriptionResource } from '../responses/technical-prescription.response';
 
-/**
- * HTTP endpoint for managing agronomist prescriptions (`/technical-prescriptions`).
- */
-export class TechnicalPrescriptionsApiEndpoint extends BaseApiEndpoint<
-  TechnicalPrescription,
-  TechnicalPrescriptionResource,
-  TechnicalPrescriptionsResponse,
-  TechnicalPrescriptionAssembler
-> {
-  /**
-   * Initializes the endpoint with the configured environment URL.
-   * @param http - Angular's HttpClient.
-   */
-  constructor(http: HttpClient) {
-    super(
-      http,
-      `${environment.platformProviderApiBaseUrl}${environment.platformProviderTechnicalPrescriptionsEndpointPath}`,
-      new TechnicalPrescriptionAssembler(),
-    );
-  }
+export class TechnicalPrescriptionsApiEndpoint {
+  private readonly url =
+    environment.platformProviderApiBaseUrl +
+    environment.platformProviderTechnicalPrescriptionsEndpointPath;
+  private readonly assembler = new TechnicalPrescriptionAssembler();
+  constructor(private readonly http: HttpClient) {}
 
-  /**
-   * Fetches the technical prescriptions issued for a specific pest report.
-   * @param reportId - The unique identifier of the pest report.
-   * @returns An observable of the domain entities.
-   */
-  getByReportId(reportId: number): Observable<TechnicalPrescription[]> {
-    const params = new HttpParams().set('reportId', reportId);
+  getByPlot(plotId: number) {
     return this.http
-      .get<TechnicalPrescriptionsResponse | TechnicalPrescriptionResource[]>(this.endpointUrl, {
-        params,
-      })
-      .pipe(
-        map((response) => this.toEntities(response)),
-        catchError(this.handleError('Failed to fetch prescriptions')),
-      );
+      .get<TechnicalPrescriptionResource[]>(this.url, { params: { plotId } })
+      .pipe(map((items) => items.map(this.assembler.toEntityFromResource)));
   }
 
-  /** Lets the API assign the ID of a new record. */
-  override create(entity: TechnicalPrescription): Observable<TechnicalPrescription> {
-    const { id: _id, ...resource } = this.assembler.toResourceFromEntity(entity);
-    return this.http.post<TechnicalPrescriptionResource>(this.endpointUrl, resource).pipe(
-      map((created) => this.assembler.toEntityFromResource(created)),
-      catchError(this.handleError('Failed to create technical-prescription')),
-    );
+  issue(command: IssueTechnicalPrescriptionCommand) {
+    const { reportId, agronomistId, product, dosage, instructions, applicationDate } = command;
+    return this.http
+      .post<TechnicalPrescriptionResource>(this.url, {
+        pestReportId: reportId,
+        agronomistId,
+        product,
+        dosage,
+        instructions,
+        applicationDate,
+      })
+      .pipe(map(this.assembler.toEntityFromResource));
+  }
+
+  apply(id: number) {
+    return this.http
+      .patch<TechnicalPrescriptionResource>(this.url + '/' + id + '/application', null)
+      .pipe(map(this.assembler.toEntityFromResource));
   }
 }

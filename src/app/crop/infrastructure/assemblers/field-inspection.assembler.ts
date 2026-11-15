@@ -1,38 +1,16 @@
-import { BaseAssembler } from '../../../shared/infrastructure/base-assembler';
 import { FieldInspection } from '../../domain/model/entities/field-inspection.entity';
-import {
-  FieldInspectionResource,
-  FieldInspectionsResponse,
-} from '../responses/field-inspection.response';
+import { FieldInspectionResource } from '../responses/field-inspection.response';
 
-export class FieldInspectionAssembler implements BaseAssembler<
-  FieldInspection,
-  FieldInspectionResource,
-  FieldInspectionsResponse
-> {
-  toEntityFromResource(resource: FieldInspectionResource): FieldInspection {
-    return new FieldInspection({
+export class FieldInspectionAssembler {
+  toEntityFromResource = (resource: FieldInspectionResource): FieldInspection =>
+    new FieldInspection({
       id: resource.id,
-      reportId: resource.reportId,
+      reportId: resource.pestReportId,
+      plotId: resource.plotId,
       scheduledAt: resource.scheduledAt,
-      notes: resource.notes,
+      notes: resource.findings ?? '',
       status: resource.status,
       completedAt: resource.completedAt,
-      inspectorUserId: resource.inspectorUserId,
+      inspectorUserId: resource.agronomistId,
     });
-  }
-  toResourceFromEntity(entity: FieldInspection): FieldInspectionResource {
-    return {
-      id: entity.id as number,
-      reportId: entity.reportId,
-      scheduledAt: entity.scheduledAt,
-      notes: entity.notes,
-      status: entity.status,
-      completedAt: entity.completedAt,
-      inspectorUserId: entity.inspectorUserId,
-    };
-  }
-  toEntitiesFromResponse(response: FieldInspectionsResponse): FieldInspection[] {
-    return response.inspections.map((r) => this.toEntityFromResource(r));
-  }
 }

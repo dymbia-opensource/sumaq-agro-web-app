@@ -3,78 +3,30 @@
     ><mat-card-title>{{ 'profiles.advisory.title' | translate }}</mat-card-title></mat-card-header
   >
   <mat-card-content>
-    @if (store.advisoryLoading() || store.advisorySaving()) {
+    @if (store.advisoryLoading()) {
       <mat-progress-bar mode="indeterminate" [attr.aria-label]="'common.loading' | translate" />
     }
     @if (store.advisoryError(); as error) {
       <p role="alert">{{ error | translate }}</p>
-      <button mat-button (click)="store.reloadAdvisory()" [disabled]="store.advisorySaving()">
+      <button mat-button (click)="store.reloadAdvisory()">
         {{ 'common.retry' | translate }}
       </button>
     }
     @if (!store.advisoryLoading()) {
       @if (advisor(); as advisor) {
         <p>
-          <strong>{{ advisor.name }}</strong> · CIP {{ advisor.cipCode }}
+          <strong>{{ advisor.name }}</strong>
         </p>
-        <p>{{ advisor.phone }}</p>
       } @else if (assignment()) {
-        <p>{{ 'profiles.advisory.unavailable' | translate }}</p>
+        <p>{{ 'profiles.cooperative.supervision.in-charge' | translate }} #{{ assignment()?.advisorUserId }}</p>
       } @else {
         <p>{{ 'profiles.advisory.unassigned' | translate }}</p>
       }
       @if (store.advisorAssignedByDirector()) {
         <p>{{ 'profiles.advisory.by-director' | translate }}</p>
       } @else {
-        <p>{{ 'profiles.advisory.demo-notice' | translate }}</p>
+        <p>{{ 'profiles.cooperative.integration.independent-pending' | translate }}</p>
       }
-      @if (store.advisorAssignedByDirector()) {
-        <!-- The director of the cooperative decides; nothing to choose here. -->
-      } @else if (store.advisors().length) {
-        <mat-form-field appearance="outline"
-          ><mat-label>{{ 'profiles.advisory.select' | translate }}</mat-label>
-          <mat-select
-            [ngModel]="selected()"
-            (ngModelChange)="selected.set($event); confirming.set(false); saved.set(false)"
-            [disabled]="!store.canAssign(owned())"
-          >
-            @for (advisor of store.advisors(); track advisor.userId) {
-              <mat-option [value]="advisor.userId"
-                >{{ advisor.name }} · CIP {{ advisor.cipCode }}</mat-option
-              >
-            }
-          </mat-select>
-        </mat-form-field>
-        @if (confirming()) {
-          <p role="status">{{ 'profiles.advisory.confirm' | translate }}</p>
-          <div class="actions">
-            <button mat-flat-button (click)="save()" [disabled]="!store.canAssign(owned())">
-              {{ 'profiles.advisory.confirm-button' | translate }}</button
-            ><button mat-button (click)="confirming.set(false)" [disabled]="store.advisorySaving()">
-              {{ 'crop.cancel' | translate }}
-            </button>
-          </div>
-        } @else {
-          <div class="actions">
-            <button
-              mat-stroked-button
-              (click)="confirming.set(true); saved.set(false)"
-              [disabled]="
-                !store.canAssign(owned()) ||
-                selected() === null ||
-                selected() === assignment()?.advisorUserId
-              "
-            >
-              {{ 'profiles.advisory.assign' | translate }}
-            </button>
-          </div>
-        }
-      } @else if (!store.advisoryError()) {
-        <p>{{ 'profiles.advisory.no-advisors' | translate }}</p>
-      }
-    }
-    @if (saved()) {
-      <p role="status">{{ 'profiles.advisory.saved' | translate }}</p>
     }
   </mat-card-content>
 </mat-card>

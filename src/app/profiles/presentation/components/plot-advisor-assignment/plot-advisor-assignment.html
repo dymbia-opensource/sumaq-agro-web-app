@@ -2,56 +2,21 @@
   @if (loading() || saving()) {
     <mat-progress-bar mode="indeterminate" [attr.aria-label]="'common.loading' | translate" />
   }
-
-  @if (responsible(); as name) {
-    <p class="current">
-      {{ 'profiles.cooperative.supervision.in-charge' | translate }} <strong>{{ name }}</strong>
-    </p>
-  } @else {
-    <p class="current unassigned">
-      {{ 'profiles.cooperative.supervision.none' | translate }}
-    </p>
+  @if (responsibility(); as current) {
+    <p>{{ 'profiles.cooperative.supervision.in-charge' | translate }} <strong>#{{ current.advisorUserId }}</strong></p>
+  } @else if (!loading() && !error()) {
+    <p>{{ 'profiles.cooperative.supervision.none' | translate }}</p>
   }
-
-  @if (advisors().length) {
-    <div class="controls">
-      <mat-form-field appearance="outline">
-        <mat-label>{{ 'profiles.advisory.select' | translate }}</mat-label>
-        <mat-select
-          [ngModel]="selected()"
-          (ngModelChange)="selected.set($event)"
-          [disabled]="loading() || saving()"
-        >
-          @for (advisor of advisors(); track advisor.id) {
-            <mat-option [value]="advisor.userId">{{ advisor.name }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
-
-      <button
-        mat-flat-button
-        type="button"
-        [disabled]="selected() === null || loading() || saving()"
-        (click)="assign()"
-      >
-        {{ 'profiles.cooperative.supervision.assign' | translate }}
-      </button>
-
-      @if (responsibility()) {
-        <button
-          mat-stroked-button
-          type="button"
-          [disabled]="loading() || saving()"
-          (click)="release()"
-        >
-          {{ 'profiles.cooperative.supervision.release' | translate }}
-        </button>
-      }
-    </div>
-  } @else {
-    <p class="hint">{{ 'profiles.cooperative.supervision.no-team' | translate }}</p>
-  }
-
+  <div class="controls">
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'profiles.cooperative.integration.advisor-id' | translate }}</mat-label>
+      <input matInput type="number" min="1" step="1" [ngModel]="selected()"
+        (ngModelChange)="selected.set($event)" [disabled]="loading() || saving()" />
+    </mat-form-field>
+    <button mat-flat-button type="button" [disabled]="!validId() || loading() || saving() || selected() === responsibility()?.advisorUserId" (click)="assign()">
+      {{ 'profiles.cooperative.supervision.assign' | translate }}
+    </button>
+  </div>
   @if (error(); as reason) {
     <p role="alert" class="hint">{{ reason | translate }}</p>
   }

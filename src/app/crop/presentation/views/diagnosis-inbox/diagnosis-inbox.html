@@ -149,19 +149,11 @@
                     >{{ 'crop.schedule-inspection' | translate }}</a
                   >
                 }
-                @if (store.canPrescribe() && report.status === 'INSPECTED') {
+                @if (store.canPrescribe() && store.treatableReports().includes(report)) {
                   <a
                     mat-stroked-button
                     [routerLink]="['/pest-reports', report.id, 'prescriptions', 'new']"
                     >{{ 'crop.btn-prescribe' | translate }}</a
-                  >
-                }
-                @if (store.canAssess(+report.id)) {
-                  <a
-                    mat-stroked-button
-                    [routerLink]="['/pest-reports', report.id]"
-                    fragment="assessment"
-                    >{{ 'crop.advisor.evaluate' | translate }}</a
                   >
                 }
               </mat-card-actions>

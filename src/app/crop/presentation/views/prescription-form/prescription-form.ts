@@ -118,8 +118,9 @@ export class PrescriptionForm {
       new IssueTechnicalPrescriptionCommand({
         reportId: value.reportId,
         agronomistId: value.agronomistId,
-        recommendedProducts: value.agrochemical.trim(),
-        dosageInstructions: value.dosage.trim() + '\n' + value.instructions.trim(),
+        product: value.agrochemical.trim(),
+        dosage: value.dosage.trim(),
+        instructions: value.instructions.trim(),
         applicationDate: value.applicationDate,
       }),
       () => {

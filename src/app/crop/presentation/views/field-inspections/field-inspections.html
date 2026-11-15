@@ -13,6 +13,9 @@
   >
 }
 
+@if (store.inspectionReportError(); as error) {
+  <p role="alert">{{ error | translate }}</p>
+}
 @if (saved()) {
   <p role="status">{{ savedMessage() | translate }}</p>
 }
@@ -35,10 +38,6 @@
           <mat-label>{{ 'crop.scheduled-at' | translate }}</mat-label>
           <input matInput type="datetime-local" formControlName="scheduledAt" />
           <mat-error>{{ 'crop.required-field' | translate }}</mat-error>
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>{{ 'crop.inspection-notes' | translate }}</mat-label>
-          <textarea matInput formControlName="notes" rows="3"></textarea>
         </mat-form-field>
         <button
           mat-flat-button
@@ -70,6 +69,7 @@
         </mat-card-header>
         <mat-card-content>
           <p>{{ 'crop.inspection-statuses.' + inspection.status | translate }}</p>
+          <p>{{ store.advisorName(inspection.inspectorUserId!) }}</p>
           <p>{{ inspection.notes }}</p>
           @if (inspection.completedAt) {
             <p>
@@ -88,12 +88,7 @@
               ></textarea>
             </mat-form-field>
             <button mat-flat-button [disabled]="store.saving()" (click)="complete(+inspection.id)">
-              {{
-                (inspection.status === 'COMPLETED'
-                  ? 'crop.sync-report'
-                  : 'crop.complete-inspection'
-                ) | translate
-              }}
+              {{ 'crop.complete-inspection' | translate }}
             </button>
           }
         </mat-card-content>
