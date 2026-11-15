@@ -1,14 +1,11 @@
-import { BaseResource } from '../../../shared/infrastructure/base-response';
+import { PlanCode } from '../../domain/model/entities/plan-code';
 
-/** Plan of the catalog as the API sends it. */
-export interface PlanResource extends BaseResource {
-  id: number;
-  code: string;
-  name: string;
+export interface PlanResource {
+  code: PlanCode;
   monthlyPrice: number;
   annualPrice: number;
-  /** ISO 4217 currency code, for example `PEN`. */
   currency: string;
-  plotQuota: number;
-  features: string[];
+  registeredPlotLimit: number;
+  producerLimit: number;
+  supervisedPlotLimit: number;
 }

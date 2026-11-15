@@ -94,11 +94,8 @@ export class BillingHistory {
     this.confirmingCancellation.set(false);
   }
 
-  /** Downloads the receipt for a payment identifier. */
-  onDownloadReceipt(id: number | string | null): void {
-    const paymentId = this.numericId(id);
-    if (paymentId === null) return;
-    this.store.downloadReceipt(paymentId);
+  onDownloadReceipt(reference: string): void {
+    this.store.downloadReceipt(reference);
   }
 
   private numericId(id: number | string | null | undefined): number | null {

@@ -1,15 +1,14 @@
-import { BaseResource } from '../../../shared/infrastructure/base-response';
+import { BillingCycle } from '../../domain/model/entities/billing-cycle';
+import { PaymentStatus } from '../../domain/model/entities/payment-status';
+import { PlanCode } from '../../domain/model/entities/plan-code';
 
-/** Payment of a subscription as the API sends it. */
-export interface PaymentResource extends BaseResource {
-  id: number;
-  subscriptionId: number;
+export interface PaymentResource {
+  reference: string;
+  subscriptionId: number | null;
+  planCode: PlanCode;
+  billingCycle: BillingCycle;
   amount: number;
   currency: string;
-  /** Token returned by the gateway. Never the card number. */
-  transactionToken: string;
-  /** `PENDING`, `COMPLETED` or `REJECTED`. */
-  status: string;
-  /** Date and time in ISO 8601 format. */
-  paidAt: string;
+  status: PaymentStatus;
+  attemptedAt: string;
 }

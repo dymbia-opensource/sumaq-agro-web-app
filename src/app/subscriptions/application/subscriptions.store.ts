@@ -1,12 +1,10 @@
 import { computed, DestroyRef, inject, Injectable, Signal, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { forkJoin, map, Observable, of, switchMap } from 'rxjs';
-import { Money } from '../../shared/domain/model/money';
+import { forkJoin } from 'rxjs';
+import { IamStore } from '../../iam/application/iam.store';
 import { FileDownloader } from '../../shared/infrastructure/file-downloader';
-import { ApplyCouponCommand } from '../domain/model/commands/apply-coupon.command';
 import { CancelSubscriptionCommand } from '../domain/model/commands/cancel-subscription.command';
 import { SelectSubscriptionPlanCommand } from '../domain/model/commands/select-subscription-plan.command';
-import { SubmitPaymentCommand } from '../domain/model/commands/submit-payment.command';
 import { BillingCycle } from '../domain/model/entities/billing-cycle';
 import { Payment } from '../domain/model/entities/payment.entity';
 import { PaymentStatus } from '../domain/model/entities/payment-status';
@@ -21,24 +19,20 @@ import {
 /** Result of the last payment attempt, shown in the last step of the checkout. */
 export type PaymentResult = PaymentStatus.COMPLETED | PaymentStatus.REJECTED;
 
-/** Promotional code accepted for the current checkout. */
-export interface AppliedCoupon {
-  code: string;
-  discountPercent: number;
-}
-
 /**
  * Holds the Subscriptions and Payments state and coordinates its behavior.
  *
  * @remarks
- * The views send commands and read signals. Every change is applied to a copy
- * of the subscription; the shown state is only updated when the API confirms.
+ * Updates subscription and payment state from the API.
  */
 @Injectable({ providedIn: 'root' })
 export class SubscriptionsStore {
   private readonly destroyRef = inject(DestroyRef);
   private readonly subscriptionsApi = inject(SubscriptionsApi);
   private readonly fileDownloader = inject(FileDownloader);
+  private readonly iam = inject(IamStore);
+  private subscriptionRequest = 0;
+  private loadedUserId: number | null = null;
 
   // Store state
   private readonly plansSignal = signal<Plan[]>([]);
@@ -46,7 +40,6 @@ export class SubscriptionsStore {
   private readonly paymentsSignal = signal<Payment[]>([]);
   private readonly billingCycleSignal = signal<BillingCycle>(BillingCycle.MONTHLY);
   private readonly selectedPlanSignal = signal<Plan | null>(null);
-  private readonly couponSignal = signal<AppliedCoupon | null>(null);
   private readonly paymentResultSignal = signal<PaymentResult | null>(null);
   private readonly loadedSignal = signal(false);
 
@@ -65,8 +58,6 @@ export class SubscriptionsStore {
   readonly billingCycle: Signal<BillingCycle> = this.billingCycleSignal.asReadonly();
   /** Plan chosen to pay, or `null`. */
   readonly selectedPlan: Signal<Plan | null> = this.selectedPlanSignal.asReadonly();
-  /** Coupon applied to the current checkout, or `null`. */
-  readonly coupon: Signal<AppliedCoupon | null> = this.couponSignal.asReadonly();
   /** Result of the last payment attempt, or `null`. */
   readonly paymentResult: Signal<PaymentResult | null> = this.paymentResultSignal.asReadonly();
   /** `true` while data is being loaded. */
@@ -75,7 +66,6 @@ export class SubscriptionsStore {
   readonly processing = this.processingSignal.asReadonly();
   /** i18n key of the last error, or `null`. */
   readonly error = this.errorSignal.asReadonly();
-  /** Signed-in user who owns the subscription. */
   /** `true` when the user has a paid plan with access (active, or cancelled but not yet expired). */
   readonly hasActivePlan = computed(() => this.subscriptionSignal()?.hasAccess() ?? false);
   /** Plan the user can use now, or `null` when the user has not paid or the plan expired. */
@@ -91,15 +81,10 @@ export class SubscriptionsStore {
   /** `true` once the subscription was loaded, so a quota of 0 is not shown by mistake. */
   readonly plotQuotaReady: Signal<boolean> = this.loadedSignal.asReadonly();
 
-  /** Amount of the selected plan for the chosen cycle, with the coupon discount. */
-  readonly checkoutAmount = computed<Money | null>(() => {
-    const plan = this.selectedPlanSignal();
-    if (!plan) return null;
-    const price = plan.priceFor(this.billingCycleSignal());
-    const discount = this.couponSignal()?.discountPercent ?? 0;
-    const discounted = Math.round(price.amount * (1 - discount / 100) * 100) / 100;
-    return new Money(discounted, price.currency);
-  });
+  /** Amount quoted by the catalog for the selected billing cycle. */
+  readonly checkoutAmount = computed(
+    () => this.selectedPlanSignal()?.priceFor(this.billingCycleSignal()) ?? null,
+  );
 
   // Actions
 
@@ -124,30 +109,34 @@ export class SubscriptionsStore {
    * @param userId - Owner of the subscription.
    */
   loadMySubscription = (userId: number): void => {
+    if (this.iam.activeUser()?.id !== userId) return;
+    const request = ++this.subscriptionRequest;
+    if (this.loadedUserId !== userId) {
+      this.loadedSignal.set(false);
+      this.subscriptionSignal.set(null);
+      this.paymentsSignal.set([]);
+    }
     this.startLoading();
     forkJoin({
       plans: this.subscriptionsApi.getPlans(),
-      subscription: this.subscriptionsApi.getSubscriptionByUserId(userId),
+      subscription: this.subscriptionsApi.getMySubscription(),
+      payments: this.subscriptionsApi.getMyPayments(),
     })
-      .pipe(
-        switchMap(({ plans, subscription }) => {
-          const ready = subscription ? this.withPlan(subscription, plans) : null;
-          const payments$: Observable<Payment[]> = ready
-            ? this.subscriptionsApi.getPayments(ready.id as number)
-            : of([]);
-          return payments$.pipe(map((payments) => ({ plans, ready, payments })));
-        }),
-        takeUntilDestroyed(this.destroyRef),
-      )
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: ({ plans, ready, payments }) => {
+        next: ({ plans, subscription, payments }) => {
+          if (request !== this.subscriptionRequest || this.iam.activeUser()?.id !== userId) return;
           this.plansSignal.set(plans);
-          this.subscriptionSignal.set(ready);
-          this.paymentsSignal.set(this.newestFirst(payments));
+          this.subscriptionSignal.set(subscription ? this.withPlan(subscription, plans) : null);
+          this.paymentsSignal.set(payments);
+          this.loadedUserId = userId;
           this.loadedSignal.set(true);
           this.loadingSignal.set(false);
         },
-        error: (error) => this.fail(error, 'subscriptions.errors.load-subscription'),
+        error: (error) => {
+          if (request !== this.subscriptionRequest || this.iam.activeUser()?.id !== userId) return;
+          this.fail(error, 'subscriptions.errors.load-subscription');
+        },
       });
   };
 
@@ -167,7 +156,6 @@ export class SubscriptionsStore {
 
     this.errorSignal.set(null);
     this.paymentResultSignal.set(null);
-    this.couponSignal.set(null);
     this.billingCycleSignal.set(command.billingCycle);
     this.selectedPlanSignal.set(plan);
     return true;
@@ -179,127 +167,85 @@ export class SubscriptionsStore {
       cycle === BillingCycle.MONTHLY ? BillingCycle.ANNUAL : BillingCycle.MONTHLY,
     );
 
-  /**
-   * Applies a promotional code to the amount to pay.
-   * @param command - Code typed by the user.
-   */
-  applyCoupon = (command: ApplyCouponCommand): void => {
-    if (!this.selectedPlanSignal()) return;
-    this.errorSignal.set(null);
-    this.subscriptionsApi
-      .getCouponDiscount(command.couponCode)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (discountPercent) => {
-          if (discountPercent === null) {
-            this.couponSignal.set(null);
-            this.errorSignal.set('subscriptions.errors.invalid-coupon');
-            return;
-          }
-          this.couponSignal.set({ code: command.couponCode.trim().toUpperCase(), discountPercent });
-        },
-        error: (error) => this.fail(error, 'subscriptions.errors.invalid-coupon'),
-      });
-  };
-
-  /**
-   * Submits checkout and applies the result returned by the API.
-   * @param userId - Current user identifier supplied by the container view.
-   */
-  submitPayment = (command: SubmitPaymentCommand, userId: number): void => {
+  /** Submits a demo payment and refreshes the data recorded by Spring. */
+  submitPayment = (outcome: PaymentResult, userId: number): void => {
     const plan = this.selectedPlanSignal();
-    const current = this.subscriptionSignal();
-
-    if (!plan || !Number.isSafeInteger(userId) || userId <= 0 || this.processingSignal()) {
-      return;
-    }
-
-    if (current && current.userId !== userId) return;
-    if (command.subscriptionId !== (current?.id ?? null)) return;
+    if (!plan || this.iam.activeUser()?.id !== userId || this.processingSignal()) return;
 
     this.processingSignal.set(true);
+    this.paymentResultSignal.set(null);
     this.errorSignal.set(null);
 
     this.subscriptionsApi
-      .submitCheckout({
-        userId,
-        plan,
-        billingCycle: this.billingCycleSignal(),
-        currentSubscription: current,
-        command,
-      })
+      .submitCheckout(plan.code, this.billingCycleSignal(), outcome)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: ({ status, subscription, payment }) => {
-          if (subscription) {
-            subscription.plan = plan;
-            this.subscriptionSignal.set(subscription);
-            this.selectedPlanSignal.set(null);
-            this.couponSignal.set(null);
-          }
-          if (payment) this.paymentsSignal.update((payments) => [payment, ...payments]);
-          this.paymentResultSignal.set(status);
+        next: (payment) => {
           this.processingSignal.set(false);
+          if (this.iam.activeUser()?.id !== userId) return;
+          if (payment.status === PaymentStatus.COMPLETED) this.selectedPlanSignal.set(null);
+          if (
+            payment.status === PaymentStatus.COMPLETED ||
+            payment.status === PaymentStatus.REJECTED
+          ) {
+            this.paymentResultSignal.set(payment.status);
+          }
+          this.loadMySubscription(userId);
         },
         error: (error) => {
           this.processingSignal.set(false);
-          this.fail(error, 'subscriptions.errors.payment');
+          if (this.iam.activeUser()?.id === userId)
+            this.fail(error, 'subscriptions.errors.payment');
         },
       });
   };
 
-  /**
-   * Stops the renewal; the access stays until the end date.
-   * @param command - Subscription to cancel.
-   */
+  /** Stops renewal while retaining access through the end of the paid period. */
   cancelSubscription = (command: CancelSubscriptionCommand): void => {
     const subscription = this.subscriptionSignal();
-    if (!subscription || subscription.id !== command.subscriptionId || this.processingSignal()) {
+    const userId = this.iam.activeUser()?.id;
+    if (
+      !subscription?.autoRenew ||
+      subscription.id !== command.subscriptionId ||
+      userId === undefined ||
+      this.loadedUserId !== userId ||
+      this.processingSignal()
+    )
       return;
-    }
-    const cancelled = subscription.copy();
-    try {
-      cancelled.cancel();
-    } catch (error) {
-      this.fail(error, 'subscriptions.errors.cancel');
-      return;
-    }
+
     this.processingSignal.set(true);
     this.errorSignal.set(null);
     this.subscriptionsApi
-      .updateSubscription(cancelled)
+      .cancelMySubscription()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (saved) => {
-          saved.plan = subscription.plan;
-          this.subscriptionSignal.set(saved);
           this.processingSignal.set(false);
+          if (this.iam.activeUser()?.id !== userId) return;
+          ++this.subscriptionRequest;
+          this.loadingSignal.set(false);
+          this.subscriptionSignal.set(this.withPlan(saved, this.plansSignal()));
         },
         error: (error) => {
           this.processingSignal.set(false);
-          this.fail(error, 'subscriptions.errors.cancel');
+          if (this.iam.activeUser()?.id === userId) this.fail(error, 'subscriptions.errors.cancel');
         },
       });
   };
 
-  /**
-   * Downloads the receipt of a payment.
-   * @param paymentId - Payment of the receipt.
-   */
-  downloadReceipt = (paymentId: number): void => {
-    const payment = this.paymentsSignal().find((candidate) => candidate.id === paymentId);
-    if (!payment) {
+  downloadReceipt = (reference: string): void => {
+    if (this.iam.activeUser()?.id !== this.loadedUserId) return;
+    const payment = this.paymentsSignal().find((candidate) => candidate.reference === reference);
+    if (!payment || payment.status !== PaymentStatus.COMPLETED) {
       this.errorSignal.set('subscriptions.errors.receipt');
       return;
     }
-    const planName = this.subscriptionSignal()?.plan?.name ?? '';
-    this.fileDownloader.save(this.subscriptionsApi.buildReceipt(payment, planName));
+    this.fileDownloader.save(this.subscriptionsApi.buildReceipt(payment));
   };
 
-  /** Clears the checkout (selected plan, coupon and result) when the user leaves it. */
+  /** Clears the checkout (selected plan and result) when the user leaves it. */
   resetCheckout = (): void => {
     this.selectedPlanSignal.set(null);
-    this.couponSignal.set(null);
     this.paymentResultSignal.set(null);
     this.errorSignal.set(null);
   };
@@ -308,12 +254,8 @@ export class SubscriptionsStore {
 
   /** Completes the plan of a subscription from the catalog. */
   private withPlan(subscription: Subscription, plans: Plan[]): Subscription {
-    subscription.plan = plans.find((plan) => plan.id === subscription.planId) ?? null;
+    subscription.plan = plans.find((plan) => plan.code === subscription.planCode) ?? null;
     return subscription;
-  }
-
-  private newestFirst(payments: Payment[]): Payment[] {
-    return [...payments].sort((a, b) => b.paidAt.getTime() - a.paidAt.getTime());
   }
 
   private startLoading(): void {
