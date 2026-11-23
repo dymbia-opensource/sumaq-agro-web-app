@@ -4,6 +4,9 @@ import { forkJoin } from 'rxjs';
 import { IamStore } from '../../iam/application/iam.store';
 import { FileDownloader } from '../../shared/infrastructure/file-downloader';
 import { CancelSubscriptionCommand } from '../domain/model/commands/cancel-subscription.command';
+import { ConfirmPaymentCommand } from '../domain/model/commands/confirm-payment.command';
+import { StartPaymentCheckoutCommand } from '../domain/model/commands/start-payment-checkout.command';
+import { PaymentCheckout } from '../domain/model/entities/payment-checkout';
 import { SelectSubscriptionPlanCommand } from '../domain/model/commands/select-subscription-plan.command';
 import { BillingCycle } from '../domain/model/entities/billing-cycle';
 import { Payment } from '../domain/model/entities/payment.entity';
@@ -16,8 +19,11 @@ import {
   type SubscriptionSegment,
 } from '../domain/model/entities/subscription-segment';
 
-/** Result of the last payment attempt, shown in the last step of the checkout. */
-export type PaymentResult = PaymentStatus.COMPLETED | PaymentStatus.REJECTED;
+/**
+ * Result of the last payment attempt, shown in the last step of the checkout.
+ * Mercado Pago can also leave a payment PENDING (for example, cash payments).
+ */
+export type PaymentResult = PaymentStatus.COMPLETED | PaymentStatus.REJECTED | PaymentStatus.PENDING;
 
 /**
  * Holds the Subscriptions and Payments state and coordinates its behavior.
@@ -167,8 +173,80 @@ export class SubscriptionsStore {
       cycle === BillingCycle.MONTHLY ? BillingCycle.ANNUAL : BillingCycle.MONTHLY,
     );
 
-  /** Submits a demo payment and refreshes the data recorded by Spring. */
-  submitPayment = (outcome: PaymentResult, userId: number): void => {
+  /**
+   * Starts paying the selected plan with Mercado Pago Checkout Pro.
+   * @param onReady - Receives the checkout; the view opens its Mercado Pago page.
+   */
+  startPaymentCheckout = (onReady: (checkout: PaymentCheckout) => void): void => {
+    const plan = this.selectedPlanSignal();
+    const userId = this.iam.activeUser()?.id;
+    if (!plan || userId === undefined || this.processingSignal()) return;
+
+    this.processingSignal.set(true);
+    this.paymentResultSignal.set(null);
+    this.errorSignal.set(null);
+    this.subscriptionsApi
+      .startPaymentCheckout(
+        new StartPaymentCheckoutCommand({
+          planCode: plan.code,
+          billingCycle: this.billingCycleSignal(),
+        }),
+      )
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (checkout) => {
+          // Processing stays on: the browser is leaving for Mercado Pago.
+          if (this.iam.activeUser()?.id === userId) onReady(checkout);
+        },
+        error: (error) => {
+          this.processingSignal.set(false);
+          if (this.iam.activeUser()?.id === userId)
+            this.fail(error, 'subscriptions.errors.checkout-session');
+        },
+      });
+  };
+
+  /**
+   * Confirms the Mercado Pago payment the producer comes back with, and
+   * reloads the subscription, which is active when the payment was approved.
+   * @param paymentId - `payment_id` of the return address, or `null` when there is none.
+   */
+  confirmPayment = (paymentId: string | null): void => {
+    const userId = this.iam.activeUser()?.id;
+    if (userId === undefined || this.processingSignal()) return;
+
+    this.paymentResultSignal.set(null);
+    this.errorSignal.set(null);
+    let command: ConfirmPaymentCommand;
+    try {
+      command = new ConfirmPaymentCommand({ paymentId: paymentId ?? '' });
+    } catch (error) {
+      this.fail(error, 'subscriptions.errors.no-payment');
+      return;
+    }
+
+    this.processingSignal.set(true);
+    this.subscriptionsApi
+      .confirmPayment(command)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (payment) => {
+          this.processingSignal.set(false);
+          if (this.iam.activeUser()?.id !== userId) return;
+          if (payment.status === PaymentStatus.COMPLETED) this.selectedPlanSignal.set(null);
+          this.paymentResultSignal.set(payment.status);
+          this.loadMySubscription(userId);
+        },
+        error: (error) => {
+          this.processingSignal.set(false);
+          if (this.iam.activeUser()?.id === userId)
+            this.fail(error, 'subscriptions.errors.confirm-payment');
+        },
+      });
+  };
+
+  /** Submits a demo payment (`dev` profile only) and refreshes the data recorded by Spring. */
+  submitPayment = (outcome: PaymentStatus.COMPLETED | PaymentStatus.REJECTED, userId: number): void => {
     const plan = this.selectedPlanSignal();
     if (!plan || this.iam.activeUser()?.id !== userId || this.processingSignal()) return;
 
