@@ -83,22 +83,47 @@
 @if (activeTab() === 'technical-team' && cooperative()) {
   <mat-card class="settings-card">
     <mat-card-content>
-      <h2>{{ 'profiles.cooperative.integration.assigned-advisors' | translate }}</h2>
-      @for (advisor of technicalAdvisors(); track advisor.id) {
-        <p>{{ advisor.name }} · {{ advisor.assignedPlotsCount }}</p>
-      } @empty {
-        @if (!loading() && !error()) {
-          <p>{{ 'profiles.cooperative.supervision.none' | translate }}</p>
+      <h2>{{ 'profiles.cooperative.team.title' | translate }}</h2>
+      <p class="settings-card__description">{{ 'profiles.cooperative.team.subtitle' | translate }}</p>
+
+      <ul class="team">
+        @for (member of technicalTeam(); track member.invitation.id) {
+          <li class="team-member">
+            <mat-icon aria-hidden="true">{{ member.invitation.accepted ? 'person' : 'schedule_send' }}</mat-icon>
+            <div class="team-member__main">
+              <strong>{{ member.name ?? member.invitation.email }}</strong>
+              <span>
+                {{ member.invitation.email }}
+                @if (member.invitation.accepted) {
+                  · {{ 'profiles.cooperative.team.plots' | translate: { count: member.assignedPlotsCount } }}
+                }
+              </span>
+            </div>
+            <span class="team-status" [class.team-status--pending]="!member.invitation.accepted">
+              {{ 'profiles.cooperative.team.status.' + member.invitation.status | translate }}
+            </span>
+          </li>
+        } @empty {
+          @if (!loading() && !error()) {
+            <li class="team-empty">{{ 'profiles.cooperative.team.empty' | translate }}</li>
+          }
         }
-      }
-      <form (submit)="$event.preventDefault(); invite()">
-        <mat-form-field appearance="outline">
-          <mat-label>{{ 'profiles.cooperative.integration.invitation-email' | translate }}</mat-label>
-          <input matInput type="email" [formControl]="invitationEmail" />
-        </mat-form-field>
-        <button mat-flat-button type="submit" [disabled]="invitationEmail.invalid || invitationBusy()">
-          {{ 'profiles.cooperative.integration.invite' | translate }}
-        </button>
+      </ul>
+
+      <form class="team-invite" (submit)="$event.preventDefault(); invite()">
+        <h3>{{ 'profiles.cooperative.team.invite-title' | translate }}</h3>
+        <p class="settings-card__description">{{ 'profiles.cooperative.team.invite-hint' | translate }}</p>
+        <div class="team-invite__row">
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'profiles.cooperative.integration.invitation-email' | translate }}</mat-label>
+            <mat-icon matPrefix aria-hidden="true">alternate_email</mat-icon>
+            <input matInput type="email" [formControl]="invitationEmail" />
+          </mat-form-field>
+          <button mat-flat-button type="submit" [disabled]="invitationEmail.invalid || invitationBusy()">
+            <mat-icon>send</mat-icon>
+            {{ 'profiles.cooperative.integration.invite' | translate }}
+          </button>
+        </div>
         @if (invitationFeedback(); as feedback) {
           <p role="status">{{ feedback | translate }}</p>
         }
