@@ -1,10 +1,17 @@
+import { BaseResource, BaseResponse } from '../../../shared/infrastructure/base-response';
+
 /**
- * Provisional response returned after successful authentication.
+ * Resource returned by the sign-in endpoint: the authenticated user and its access token.
  */
-export interface SignInResponse {
-  readonly id: number | string;
-  readonly email: string;
-  readonly fullName?: string | null;
-  readonly roles: readonly string[];
-  readonly token: string;
+export interface SignInResource extends BaseResource {
+  id: number;
+  email: string;
+  roles: string[];
+  token: string;
+  fullName: string | null;
 }
+
+/**
+ * Response shape returned by the sign-in endpoint.
+ */
+export interface SignInResponse extends BaseResponse, SignInResource {}

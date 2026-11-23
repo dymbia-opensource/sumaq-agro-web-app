@@ -1,31 +1,49 @@
 import { HttpClient } from '@angular/common/http';
-import { delay, Observable, of } from 'rxjs';
+import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { RequestPasswordResetCommand } from '../../domain/model/commands/request-password-reset.command';
 import { ResetPasswordCommand } from '../../domain/model/commands/reset-password.command';
 import { PasswordRecoveryAssembler } from '../assemblers/password-recovery.assembler';
 
-/** Recovery HTTP operations; endpoint paths and empty success responses are provisional. */
+const passwordRecoveryApiEndpointUrl = `${environment.platformProviderApiBaseUrl}${environment.platformProviderPasswordRecoveryEndpointPath}`;
+
+/**
+ * Encapsulates IAM password recovery HTTP operations.
+ *
+ * @remarks
+ * HTTP errors reach the store untouched, so it can tell an expired link from
+ * a rejected request.
+ */
 export class PasswordRecoveryApiEndpoint {
-  readonly isPreview = !environment.production && environment.useMockAuthentication;
-  private readonly endpointUrl =
-    `${environment.platformProviderApiBaseUrl}` +
-    `${environment.platformProviderPasswordRecoveryEndpointPath}`;
+  /**
+   * Creates an instance of PasswordRecoveryApiEndpoint.
+   * @param http - The HttpClient for making HTTP requests.
+   * @param assembler - The assembler for converting commands into requests.
+   */
+  constructor(
+    private http: HttpClient,
+    private assembler: PasswordRecoveryAssembler,
+  ) {}
 
-  private readonly assembler = new PasswordRecoveryAssembler();
-
-  constructor(private readonly http: HttpClient) {}
-
-  requestReset(command: RequestPasswordResetCommand): Observable<void> {
-    if (this.isPreview) return of(undefined).pipe(delay(300));
-    return this.http.post<void>(this.endpointUrl, this.assembler.toForgotPasswordRequest(command));
-  }
-
-  reset(command: ResetPasswordCommand): Observable<void> {
-    if (this.isPreview) return of(undefined).pipe(delay(300));
-    return this.http.post<void>(
-      `${this.endpointUrl}/reset`,
-      this.assembler.toResetPasswordRequest(command),
+  /**
+   * Asks the platform to email a recovery link.
+   * @param command - Command with the email of the account.
+   * @returns Completion stream.
+   */
+  requestReset = (command: RequestPasswordResetCommand): Observable<void> =>
+    this.http.post<void>(
+      `${passwordRecoveryApiEndpointUrl}/request`,
+      this.assembler.toRecoveryRequestFromCommand(command),
     );
-  }
+
+  /**
+   * Sets a new password with the token of the recovery link.
+   * @param command - Command with the token and the new password.
+   * @returns Completion stream.
+   */
+  reset = (command: ResetPasswordCommand): Observable<void> =>
+    this.http.post<void>(
+      `${passwordRecoveryApiEndpointUrl}/reset`,
+      this.assembler.toResetRequestFromCommand(command),
+    );
 }

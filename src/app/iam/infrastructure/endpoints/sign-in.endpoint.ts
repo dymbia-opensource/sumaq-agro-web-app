@@ -2,27 +2,38 @@ import { HttpClient } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { SignInCommand } from '../../domain/model/commands/sign-in.command';
-import { AuthenticatedUser } from '../../domain/model/entities/authenticated-user.entity';
 import { SignInAssembler } from '../assemblers/sign-in.assembler';
-import { SignInResponse } from '../responses/sign-in.response';
+import { SignInResource, SignInResponse } from '../responses/sign-in.response';
+
+const signInApiEndpointUrl = `${environment.platformProviderApiBaseUrl}${environment.platformProviderSignInEndpointPath}`;
 
 /**
- * Encapsulates sign-in HTTP operations.
+ * Encapsulates IAM sign-in HTTP operations.
+ *
+ * @remarks
+ * HTTP errors reach the store untouched, so it can tell wrong credentials
+ * (401) from a server that cannot be reached (0).
  */
 export class SignInApiEndpoint {
-  private readonly endpointUrl =
-    `${environment.platformProviderApiBaseUrl}` +
-    `${environment.platformProviderSignInEndpointPath}`;
+  /**
+   * Creates an instance of SignInApiEndpoint.
+   * @param http - The HttpClient for making HTTP requests.
+   * @param assembler - The assembler for converting between commands, requests, and responses.
+   */
+  constructor(
+    private http: HttpClient,
+    private assembler: SignInAssembler,
+  ) {}
 
-  private readonly assembler = new SignInAssembler();
-
-  constructor(private readonly http: HttpClient) {}
-
-  signIn(command: SignInCommand): Observable<AuthenticatedUser> {
-    const request = this.assembler.toRequestFromCommand(command);
-
+  /**
+   * Authenticates a user with the remote IAM endpoint.
+   * @param signInCommand - Command containing email and password.
+   * @returns Stream with the authenticated user resource and access token.
+   */
+  signIn = (signInCommand: SignInCommand): Observable<SignInResource> => {
+    const signInRequest = this.assembler.toRequestFromCommand(signInCommand);
     return this.http
-      .post<SignInResponse>(this.endpointUrl, request)
-      .pipe(map((response) => this.assembler.toEntityFromResponse(response)));
-  }
+      .post<SignInResponse>(signInApiEndpointUrl, signInRequest)
+      .pipe(map((response) => this.assembler.toResourceFromResponse(response)));
+  };
 }

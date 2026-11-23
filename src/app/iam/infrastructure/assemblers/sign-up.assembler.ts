@@ -1,30 +1,35 @@
 import { SignUpCommand } from '../../domain/model/commands/sign-up.command';
-import { User } from '../../domain/model/entities/user.entity';
+import { SignUpResource, SignUpResponse } from '../responses/sign-up.response';
 import { SignUpRequest } from '../requests/sign-up.request';
-import { SignUpResponse } from '../responses/sign-up.response';
 import { UserRoleAssembler } from './user-role.assembler';
 
 /**
- * Maps sign-up commands and API responses.
+ * Maps IAM sign-up commands and endpoint payloads.
  */
 export class SignUpAssembler {
-  toRequestFromCommand(command: SignUpCommand): SignUpRequest {
-    return {
-      email: command.email,
-      password: command.password,
-      roles: [UserRoleAssembler.toResource(command.role)],
-      profile: {
-        firstName: command.firstName,
-        lastName: command.lastName,
-      },
-    };
-  }
+  /**
+   * Converts the endpoint response into a resource.
+   * @param response - Raw response returned by the sign-up endpoint.
+   * @returns Mapped sign-up resource.
+   */
+  toResourceFromResponse = (response: SignUpResponse): SignUpResource => ({
+    id: response.id,
+    email: response.email,
+    roles: response.roles,
+  });
 
-  toEntityFromResponse(response: SignUpResponse): User {
-    return new User({
-      id: response.id,
-      email: response.email,
-      roles: response.roles.map((role) => UserRoleAssembler.toDomain(role)),
-    });
-  }
+  /**
+   * Converts a sign-up command into the request payload expected by the API.
+   * @param command - Domain command with the account and profile values.
+   * @returns Mapped request payload.
+   */
+  toRequestFromCommand = (command: SignUpCommand): SignUpRequest => ({
+    email: command.email,
+    password: command.password,
+    roles: [UserRoleAssembler.toResourceFromRole(command.role)],
+    profile: {
+      firstName: command.firstName,
+      lastName: command.lastName,
+    },
+  });
 }

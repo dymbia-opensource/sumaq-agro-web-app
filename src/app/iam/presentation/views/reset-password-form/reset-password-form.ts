@@ -105,7 +105,7 @@ export class ResetPasswordForm {
   }
 
   protected submit(): void {
-    if (this.invalidLink() || this.store.isLoading() || this.store.passwordRecoveryCompleted())
+    if (this.invalidLink() || this.store.passwordRecoveryLoading() || this.store.passwordRecoveryCompleted())
       return;
     this.form.markAllAsTouched();
     if (this.form.invalid) return;

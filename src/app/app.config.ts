@@ -14,7 +14,6 @@ import { provideTranslateMultiHttpLoader } from '@ngx-translate/http-loader';
 import { routes } from './app.routes';
 import { iamInterceptor } from './iam/infrastructure/iam.interceptor';
 import { TranslatedTitleStrategy } from './shared/infrastructure/translated-title.strategy';
-import { mockAuthenticationInterceptor } from './iam/infrastructure/mock/mock-authentication.interceptor';
 
 /** Spanish (Peru) data for dates and numbers; English is built in. */
 registerLocaleData(localeEsPe, 'es');
@@ -47,7 +46,7 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes, withComponentInputBinding()),
     provideHttpClient(
       withFetch(),
-      withInterceptors([iamInterceptor, mockAuthenticationInterceptor]),
+      withInterceptors([iamInterceptor]),
     ),
     provideTranslateService({
       loader: provideTranslateMultiHttpLoader({

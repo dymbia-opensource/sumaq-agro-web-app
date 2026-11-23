@@ -147,10 +147,7 @@
     <section class="security-section">
       <h2>{{ 'profiles.settings.security-title' | translate }}</h2>
       <p>{{ 'profiles.settings.security-description' | translate }}</p>
-      @if (session.isPasswordRecoveryPreview) {
-        <p class="notice">{{ 'profiles.settings.preview' | translate }}</p>
-      }
-      <a mat-stroked-button routerLink="/forgot-password"
+      <a mat-stroked-button routerLink="/iam/forgot-password"
         ><mat-icon>lock_reset</mat-icon>{{ 'profiles.settings.change-password' | translate }}</a
       >
       <div class="preferences">

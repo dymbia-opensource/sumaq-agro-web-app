@@ -4,30 +4,22 @@ import { IamStore } from '../application/iam.store';
 import { UserRole } from '../domain/model/entities/user-role';
 
 /**
- * Checks session validity and the active role required by a route.
- * The backend must enforce authentication and authorization.
+ * Blocks protected routes when no authenticated IAM session exists.
+ *
+ * @remarks
+ * A route may also list the roles allowed to open it in `data.roles`; other
+ * roles are sent to their own start page. The platform still checks every
+ * request on its side.
  */
 export const iamGuard: CanActivateFn & CanActivateChildFn = (route, state) => {
   const store = inject(IamStore);
   const router = inject(Router);
-
   store.checkSessionExpiration();
-
   const user = store.activeUser();
-
-  if (!user) {
-    return router.createUrlTree(['/sign-in'], {
-      queryParams: {
-        returnUrl: state.url,
-      },
-    });
-  }
-
+  if (!user) return router.createUrlTree(['/iam/sign-in'], { queryParams: { returnUrl: state.url } });
   const allowedRoles = route.data['roles'] as readonly UserRole[] | undefined;
-
   if (allowedRoles && !allowedRoles.includes(user.experience)) {
     return router.parseUrl(user.initialRoute);
   }
-
   return true;
 };

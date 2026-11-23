@@ -6,7 +6,7 @@ import {
   ValidatorFn,
   Validators,
 } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
@@ -97,8 +97,20 @@ export class SignUpForm {
     { validators: matchingPasswordsValidator },
   );
 
+  /**
+   * Token of the agronomist invitation, present when the user opens the link
+   * of the invitation email (`/iam/sign-up?invitationToken=...`).
+   */
+  protected readonly invitationToken =
+    inject(ActivatedRoute).snapshot.queryParamMap.get('invitationToken')?.trim() ?? '';
+
   constructor() {
     this.store.clearFeedback();
+    // An invited user can only register as the agronomist the cooperative invited.
+    if (this.invitationToken) {
+      this.form.controls.role.setValue('AGRONOMIST');
+      this.form.controls.role.disable();
+    }
   }
 
   protected togglePassword(): void {
