@@ -9,9 +9,9 @@
 }
 
 .kpi-card {
-  --mat-card-elevated-container-color: var(--mat-sys-on-tertiary-fixed-variant);
-  --mat-card-title-text-color: var(--mat-sys-on-tertiary);
-  color: var(--mat-sys-on-tertiary);
+  --mat-card-elevated-container-color: var(--mat-sys-on-primary-fixed-variant);
+  --mat-card-title-text-color: var(--mat-sys-on-primary);
+  color: var(--mat-sys-on-primary);
   border-radius: 20px;
   display: flex;
   flex-direction: column;
@@ -49,7 +49,7 @@
 
 .kpi-unit {
   font: var(--mat-sys-body-medium);
-  color: var(--mat-sys-on-tertiary);
+  color: var(--mat-sys-on-primary);
 }
 
 .kpi-note {
