@@ -35,6 +35,8 @@ export class PlotAdvisorAssignment {
   protected readonly saving = signal(false);
   protected readonly error = signal<string | null>(null);
   protected readonly selected = signal<number | null>(null);
+  /** Name of the agronomist in charge, read from its profile. */
+  protected readonly advisorName = signal<string | null>(null);
 
   constructor() {
     effect((onCleanup) => {
@@ -44,7 +46,7 @@ export class PlotAdvisorAssignment {
       const request = this.store.responsibilityByPlot(id).subscribe({
         next: (current) => {
           const active = current?.status === 'ACTIVE' ? current : null;
-          this.responsibility.set(active);
+          this.showResponsibility(active);
           this.selected.set(active?.advisorUserId ?? null);
           this.loading.set(false);
         },
@@ -73,7 +75,7 @@ export class PlotAdvisorAssignment {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (saved) => {
-          this.responsibility.set(saved);
+          this.showResponsibility(saved);
           this.saving.set(false);
         },
         error: (reason: unknown) => {
@@ -87,5 +89,16 @@ export class PlotAdvisorAssignment {
           );
         },
       });
+  }
+
+  /** Shows the responsibility and looks up the name of its agronomist. */
+  private showResponsibility(responsibility: PlotResponsibility | null): void {
+    this.responsibility.set(responsibility);
+    this.advisorName.set(null);
+    if (!responsibility) return;
+    this.store
+      .advisorByUser(responsibility.advisorUserId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((advisor) => this.advisorName.set(advisor?.name ?? null));
   }
 }

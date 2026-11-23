@@ -118,7 +118,7 @@
       <div class="alerts-list">
         @for (forecast of store.forecasts(); track forecast.id) {
           <article class="alert-card">
-            <h3>{{ forecast.forecastDate | date: 'medium' : '-0500' }}</h3>
+            <h3>{{ forecast.forecastDate | date: 'fullDate' : '-0500' }}</h3>
             <p>{{ forecast.temperature | number: '1.0-1' }} °C</p>
             <p>{{ 'crop.rain-chance' | translate }}: {{ forecast.rainChance | number: '1.0-1' }}%</p>
             <p>{{ forecast.source }}</p>

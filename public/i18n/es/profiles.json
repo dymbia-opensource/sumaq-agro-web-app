@@ -4,9 +4,7 @@
       "integration": {
         "member-user-id": "ID del usuario productor (opcional)",
         "invalid-id": "Ingresa un ID entero positivo.",
-        "member-edit-pending": "Editar miembro (pendiente)",
         "account-link-pending": "Para asociar una cuenta, indica el ID del productor al dar de alta al miembro.",
-        "certification-pending": "La información de cosechas y certificados se integrará en la etapa de certificación.",
         "advisor-id": "ID de usuario del agrónomo",
         "assigned-advisors": "Agrónomos con parcelas asignadas",
         "invitation-email": "Correo del agrónomo",
