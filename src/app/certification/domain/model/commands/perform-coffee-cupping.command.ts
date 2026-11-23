@@ -1,6 +1,28 @@
-import { CoffeeCuppingResultData } from '../entities/coffee-cupping-result.entity';
+/** Grades a specialty coffee batch with a cupping session. */
+export class PerformCoffeeCuppingCommand {
+  readonly batchId: number;
+  readonly aroma: number;
+  readonly flavor: number;
+  readonly acidity: number;
+  readonly body: number;
+  readonly totalScore: number;
+  readonly fermentDefect: boolean;
 
-/** Asocia el resultado de catación sensorial con el lote de café evaluado. */
-export interface PerformCoffeeCuppingCommand extends CoffeeCuppingResultData {
-  harvestBatchId: number;
+  constructor(props: {
+    batchId: number;
+    aroma: number;
+    flavor: number;
+    acidity: number;
+    body: number;
+    totalScore: number;
+    fermentDefect: boolean;
+  }) {
+    this.batchId = props.batchId;
+    this.aroma = props.aroma;
+    this.flavor = props.flavor;
+    this.acidity = props.acidity;
+    this.body = props.body;
+    this.totalScore = props.totalScore;
+    this.fermentDefect = props.fermentDefect;
+  }
 }

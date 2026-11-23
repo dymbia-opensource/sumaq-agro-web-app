@@ -1,8 +1,8 @@
+/** Stage of a harvest batch: registered, graded or certified. */
 export const BatchStatus = {
-  PENDING_GRADING: 'PENDING_GRADING',
+  PENDING: 'PENDING',
   GRADED: 'GRADED',
   CERTIFIED: 'CERTIFIED',
 } as const;
-
-/** Los estados válidos se derivan de una única lista de valores. */
+/** The valid states come from a single list of values. */
 export type BatchStatus = (typeof BatchStatus)[keyof typeof BatchStatus];
