@@ -20,6 +20,13 @@ const checkoutPages: Routes = [
       import('./presentation/views/checkout/checkout').then((m) => m.Checkout),
     title: 'subscriptions.checkout.title',
   },
+  {
+    // Mercado Pago sends the producer back here with `?payment_id=...`.
+    path: 'payment-result',
+    loadComponent: () =>
+      import('./presentation/views/payment-result/payment-result').then((m) => m.PaymentResult),
+    title: 'subscriptions.result.title',
+  },
 ];
 
 /** Lazy-loaded routes for the Subscriptions and Payments context. */

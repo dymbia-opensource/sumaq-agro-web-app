@@ -103,8 +103,7 @@
       "apply-coupon": "Aplicar cupón",
       "total": "Total a pagar",
       "payment-title": "Pago",
-      "demo-notice": "Pago de demostración. No se realizará ningún cobro.",
-      "unavailable": "El pago de demostración no está habilitado.",
+      "demo-notice": "Solo en desarrollo: pago simulado, no se realiza ningún cobro.",
       "back": "Volver a los planes",
       "simulate-payment": "Simular pago aprobado",
       "payment-approved": "Pago de demostración aprobado. Tu plan se actualizó.",
@@ -113,7 +112,10 @@
       "go-to-dashboard": "Ir a mi panel",
       "simulate-rejection": "Simular pago rechazado",
       "no-plan": "Primero elige un plan para continuar.",
-      "choose-plan": "Ver planes"
+      "choose-plan": "Ver planes",
+      "mercado-pago-notice": "Pagarás en Mercado Pago y volverás aquí al terminar.",
+      "pay-mercado-pago": "Pagar con Mercado Pago",
+      "redirecting": "Abriendo Mercado Pago…"
     },
     "errors": {
       "load-plans": "No se pudieron cargar los planes.",
@@ -122,7 +124,18 @@
       "invalid-coupon": "El código promocional no es válido.",
       "payment": "No se pudo procesar el pago. Tu plan no cambió.",
       "cancel": "No se pudo cancelar la suscripción.",
-      "receipt": "No se encontró el comprobante."
+      "receipt": "No se encontró el comprobante.",
+      "checkout-session": "No pudimos abrir Mercado Pago. Inténtalo de nuevo en unos minutos.",
+      "confirm-payment": "No pudimos confirmar tu pago. Si se hizo el cobro, revisa tu suscripción en unos minutos.",
+      "no-payment": "No hay un pago para confirmar. Si cancelaste en Mercado Pago, vuelve a elegir tu plan."
+    },
+    "result": {
+      "title": "Resultado del pago",
+      "confirming": "Confirmando tu pago…",
+      "approved": "Pago aprobado. Tu plan está activo.",
+      "pending": "Tu pago está pendiente. Activaremos tu plan apenas Mercado Pago lo apruebe.",
+      "rejected": "Mercado Pago rechazó el pago. Tu plan no cambió.",
+      "try-again": "Intentar de nuevo"
     }
   }
 }

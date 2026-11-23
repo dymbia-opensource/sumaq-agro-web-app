@@ -103,8 +103,7 @@
       "apply-coupon": "Apply coupon",
       "total": "Total due",
       "payment-title": "Payment",
-      "demo-notice": "Demo payment. You will not be charged.",
-      "unavailable": "Demo payments are disabled.",
+      "demo-notice": "Development only: simulated payment, no charge is made.",
       "back": "Back to plans",
       "simulate-payment": "Simulate approved payment",
       "payment-approved": "Demo payment approved. Your plan has been updated.",
@@ -113,7 +112,10 @@
       "go-to-dashboard": "Go to my dashboard",
       "simulate-rejection": "Simulate rejected payment",
       "no-plan": "Choose a plan before continuing.",
-      "choose-plan": "Browse plans"
+      "choose-plan": "Browse plans",
+      "mercado-pago-notice": "You will pay on Mercado Pago and come back here when you finish.",
+      "pay-mercado-pago": "Pay with Mercado Pago",
+      "redirecting": "Opening Mercado Pago…"
     },
     "errors": {
       "load-plans": "The plans could not be loaded.",
@@ -122,7 +124,18 @@
       "invalid-coupon": "The promotional code is not valid.",
       "payment": "The payment could not be processed. Your plan was not changed.",
       "cancel": "The subscription could not be cancelled.",
-      "receipt": "The receipt could not be found."
+      "receipt": "The receipt could not be found.",
+      "checkout-session": "We could not open Mercado Pago. Try again in a few minutes.",
+      "confirm-payment": "We could not confirm your payment. If you were charged, check your subscription in a few minutes.",
+      "no-payment": "There is no payment to confirm. If you cancelled on Mercado Pago, choose your plan again."
+    },
+    "result": {
+      "title": "Payment result",
+      "confirming": "Confirming your payment…",
+      "approved": "Payment approved. Your plan is active.",
+      "pending": "Your payment is pending. We will activate your plan as soon as Mercado Pago approves it.",
+      "rejected": "Mercado Pago rejected the payment. Your plan did not change.",
+      "try-again": "Try again"
     }
   }
 }

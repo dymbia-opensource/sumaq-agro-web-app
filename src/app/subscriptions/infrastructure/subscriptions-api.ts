@@ -3,6 +3,8 @@ import { inject, Injectable } from '@angular/core';
 import { BaseApi } from '../../shared/infrastructure/base-api';
 import { ExportedFile } from '../../shared/infrastructure/file-downloader';
 import { buildTextPdf } from '../../shared/infrastructure/text-pdf';
+import { ConfirmPaymentCommand } from '../domain/model/commands/confirm-payment.command';
+import { StartPaymentCheckoutCommand } from '../domain/model/commands/start-payment-checkout.command';
 import { BillingCycle } from '../domain/model/entities/billing-cycle';
 import { Payment } from '../domain/model/entities/payment.entity';
 import { PaymentStatus } from '../domain/model/entities/payment-status';
@@ -23,6 +25,15 @@ export class SubscriptionsApi extends BaseApi {
   getMyPayments = () => this.paymentsEndpoint.getAll();
   cancelMySubscription = () => this.subscriptionsEndpoint.cancel();
 
+  /** Starts paying a plan with Mercado Pago; returns the page to open. */
+  startPaymentCheckout = (command: StartPaymentCheckoutCommand) =>
+    this.subscriptionsEndpoint.startCheckoutSession(command);
+
+  /** Confirms the payment Mercado Pago reports when the producer comes back. */
+  confirmPayment = (command: ConfirmPaymentCommand) =>
+    this.subscriptionsEndpoint.confirmPayment(command);
+
+  /** Simulated payment, only in the `dev` profile of the platform. */
   submitCheckout = (
     planCode: PlanCode,
     billingCycle: BillingCycle,
@@ -32,7 +43,7 @@ export class SubscriptionsApi extends BaseApi {
   buildReceipt = (payment: Payment): ExportedFile => ({
     fileName: `receipt-${payment.reference}.pdf`,
     content: buildTextPdf([
-      'SumaqAgro - Demo payment receipt',
+      'SumaqAgro - Payment receipt',
       `Transaction: ${payment.reference}`,
       `Plan: ${payment.planCode}`,
       `Date: ${payment.attemptedAt.toISOString().slice(0, 10)}`,

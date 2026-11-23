@@ -78,20 +78,37 @@
 
     <p class="notice">
       <mat-icon aria-hidden="true">info</mat-icon>
-      {{ (demoPaymentsEnabled ? 'subscriptions.checkout.demo-notice' :
-      'subscriptions.checkout.unavailable' ) | translate }}
+      {{ 'subscriptions.checkout.mercado-pago-notice' | translate }}
     </p>
 
-    @if (demoPaymentsEnabled) {
     <div class="actions">
       <button
         mat-flat-button
         class="cta"
         type="button"
         [disabled]="processing() || !amount()"
-        (click)="onPay(paymentStatuses.COMPLETED)"
+        (click)="onPayWithMercadoPago()"
       >
         <mat-icon>lock</mat-icon>
+        {{
+          (processing() ? 'subscriptions.checkout.redirecting' : 'subscriptions.checkout.pay-mercado-pago')
+            | translate
+        }}
+      </button>
+    </div>
+
+    @if (demoPaymentsEnabled) {
+    <p class="notice">
+      <mat-icon aria-hidden="true">science</mat-icon>
+      {{ 'subscriptions.checkout.demo-notice' | translate }}
+    </p>
+    <div class="actions">
+      <button
+        mat-stroked-button
+        type="button"
+        [disabled]="processing() || !amount()"
+        (click)="onPay(paymentStatuses.COMPLETED)"
+      >
         {{ 'subscriptions.checkout.simulate-payment' | translate }}
       </button>
       <button
