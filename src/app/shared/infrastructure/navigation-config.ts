@@ -1,4 +1,4 @@
-import { UserRole } from '../../iam/domain/model/entities/user-role';
+import { UserRole } from '../../iam/domain/model/user-role';
 
 /** One option displayed in a role-specific side navigation menu. */
 export interface NavigationOption {

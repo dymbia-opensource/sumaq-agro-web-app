@@ -1,59 +1,36 @@
-import { HttpErrorResponse, HttpInterceptorFn } from "@angular/common/http";
-import { inject } from "@angular/core";
-import { catchError, throwError } from "rxjs";
-import { environment } from "../../../environments/environment";
-import { IamStore } from "../application/iam.store";
-
-const apiBaseUrl = environment.platformProviderApiBaseUrl.replace(/\/+$/, "");
-
-const publicUrls = new Set([
-  apiBaseUrl + "/public/traceability",
-  `${apiBaseUrl}${environment.platformProviderSignInEndpointPath}`,
-  `${apiBaseUrl}${environment.platformProviderSignUpEndpointPath}`,
-  `${apiBaseUrl}${environment.platformProviderPasswordRecoveryEndpointPath}`,
-  `${apiBaseUrl}${environment.platformProviderPasswordRecoveryEndpointPath}/reset`,
-]);
+import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
+import { inject } from '@angular/core';
+import { Router } from '@angular/router';
+import { catchError, throwError } from 'rxjs';
+import { IamStore } from '../application/iam.store';
 
 /**
- * Adds platform bearer credentials and invalidates the originating session on HTTP 401.
+ * Adds IAM bearer credentials to outgoing HTTP requests when available.
+ *
+ * @remarks
+ * When the platform answers 401 to a request that carried the token, the
+ * token is no longer valid (it lasts 30 minutes), so the user is signed out.
  */
 export const iamInterceptor: HttpInterceptorFn = (request, next) => {
-  const requestUrl = request.url.split(/[?#]/, 1)[0];
-
-  const targetsPlatformApi =
-    requestUrl === apiBaseUrl || requestUrl.startsWith(`${apiBaseUrl}/`);
-
-  if (!targetsPlatformApi || publicUrls.has(requestUrl)) {
-    return next(request);
-  }
-
   const store = inject(IamStore);
-  store.checkSessionExpiration();
+  const router = inject(Router);
+  // Get the token of the current session.
   const token = store.currentToken();
-  const participant = store.currentUser();
-
-  if (!token || request.headers.has("Authorization")) {
-    return next(request);
-  }
-
-  return next(
-    request.clone({
-      setHeaders: {
-        Authorization: `Bearer ${token}`,
-      },
-    }),
-  ).pipe(
+  // If the token exists, add it to the request headers. Otherwise, send the request as is.
+  const handledRequest = token
+    ? request.clone({ headers: request.headers.set('Authorization', `Bearer ${token}`) })
+    : request;
+  // Return the handled request.
+  return next(handledRequest).pipe(
     catchError((error: unknown) => {
-      // A late response must not sign out a newer session, even if its token is identical.
       if (
+        token &&
         error instanceof HttpErrorResponse &&
         error.status === 401 &&
-        participant !== null &&
-        store.currentUser() === participant
+        store.currentToken() === token
       ) {
-        store.signOut();
+        store.signOut(router);
       }
-
       return throwError(() => error);
     }),
   );

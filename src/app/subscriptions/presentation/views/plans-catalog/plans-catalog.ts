@@ -8,7 +8,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { map } from 'rxjs';
 import { IamStore } from '../../../../iam/application/iam.store';
-import type { UserRole } from '../../../../iam/domain/model/entities/user-role';
+import type { UserRole } from '../../../../iam/domain/model/user-role';
 import { MessageCard } from '../../../../shared/presentation/components/message-card/message-card';
 import { SubscriptionsStore } from '../../../application/subscriptions.store';
 import { SelectSubscriptionPlanCommand } from '../../../domain/model/commands/select-subscription-plan.command';

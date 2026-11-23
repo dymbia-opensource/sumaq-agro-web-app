@@ -12,7 +12,6 @@ export const environment = {
   platformProviderSignUpEndpointPath: '/users',
   platformProviderSignInEndpointPath: '/tokens',
   platformProviderPasswordRecoveryEndpointPath: '/authentication/password-recovery',
-  useMockAuthentication: false,
 
   // Profiles
   platformProviderProfilesEndpointPath: '/profiles',

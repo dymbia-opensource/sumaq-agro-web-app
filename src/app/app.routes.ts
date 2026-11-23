@@ -1,10 +1,12 @@
 import { provideCharts, withDefaultRegisterables } from "ng2-charts";
 import { inject } from "@angular/core";
 import { RedirectFunction, Router, Routes } from "@angular/router";
-import { iamRoutes } from "./iam/iam.routes";
 import { iamGuard } from "./iam/infrastructure/iam.guard";
 import { roleGuard } from "./shared/infrastructure/role.guard";
 import { activeSubscriptionGuard } from "./subscriptions/infrastructure/active-subscription.guard";
+
+const iamRoutes = () =>
+  import("./iam/presentation/iam.routes").then((m) => m.iamRoutes);
 
 const layout = () =>
   import("./shared/presentation/components/layout/layout").then(
@@ -68,7 +70,7 @@ function redirectLegacyPath(destination: string): RedirectFunction {
  */
 export const routes: Routes = [
   // Pages without the shell
-  ...iamRoutes,
+  { path: "iam", loadChildren: iamRoutes },
   {
     path: "verify/:token",
     loadComponent: publicTraceability,
@@ -79,7 +81,7 @@ export const routes: Routes = [
     loadComponent: publicTraceability,
     title: "certification.trace.public-verification",
   },
-  { path: "", redirectTo: "/sign-in", pathMatch: "full" },
+  { path: "", redirectTo: "/iam/sign-in", pathMatch: "full" },
 
   // Subscriptions: each of its pages chooses its own layout
   {

@@ -5,7 +5,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
-import { RequestPasswordResetCommand } from '../../../domain/model/commands/request-password-reset.command';
+import { RequestPasswordResetCommand } from '../../../domain/model/request-password-reset.command';
 import { AuthLayout } from '../../components/auth-layout/auth-layout';
 import { IamStore } from '../../../application/iam.store';
 
@@ -42,7 +42,7 @@ export class ForgotPasswordForm {
   }
 
   protected submit(): void {
-    if (this.store.isLoading() || this.store.passwordRecoveryCompleted()) return;
+    if (this.store.passwordRecoveryLoading() || this.store.passwordRecoveryCompleted()) return;
     this.form.markAllAsTouched();
     if (this.form.invalid) return;
     this.store.requestPasswordReset(new RequestPasswordResetCommand(this.form.getRawValue()));

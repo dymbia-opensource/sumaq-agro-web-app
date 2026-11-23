@@ -1,18 +1,17 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { computed, DestroyRef, inject, Injectable, signal } from '@angular/core';
-import { finalize, Subscription, Observable } from 'rxjs';
-import { SignInCommand } from '../domain/model/commands/sign-in.command';
-import { SignUpCommand } from '../domain/model/commands/sign-up.command';
-import { AuthenticatedUser } from '../domain/model/entities/authenticated-user.entity';
+import { computed, inject, Injectable, signal } from '@angular/core';
+import { Router } from '@angular/router';
+import { RequestPasswordResetCommand } from '../domain/model/request-password-reset.command';
+import { ResetPasswordCommand } from '../domain/model/reset-password.command';
+import { SignInCommand } from '../domain/model/sign-in.command';
+import { SignUpCommand } from '../domain/model/sign-up.command';
+import { User } from '../domain/model/user.entity';
+import { UserRole } from '../domain/model/user-role';
 import { IamApi } from '../infrastructure/iam-api';
-import { getDevelopmentDemoAccounts } from '../infrastructure/mock/development-demo-accounts';
-import { SessionStorage } from '../infrastructure/session/session-storage';
-import { SessionExpiration } from '../infrastructure/session/session-expiration';
-import { RequestPasswordResetCommand } from '../domain/model/commands/request-password-reset.command';
-import { ResetPasswordCommand } from '../domain/model/commands/reset-password.command';
-import { UserRole } from '../domain/model/entities/user-role';
+import { SignInAssembler } from '../infrastructure/sign-in-assembler';
+import { SignInResource } from '../infrastructure/sign-in-response';
 
-/** Published identity projection; it excludes credentials and authentication operations. */
+/** Identity of the signed-in user that the other bounded contexts read. */
 export interface SessionParticipant {
   readonly id: number;
   readonly displayName: string;
@@ -20,14 +19,7 @@ export interface SessionParticipant {
   readonly initialRoute: string;
 }
 
-/** Published identity projection; it excludes credentials and authentication operations. */
-export interface SessionParticipant {
-  readonly id: number;
-  readonly displayName: string;
-  readonly experience: UserRole;
-  readonly initialRoute: string;
-}
-
+/** Reasons a sign-in or sign-up can fail; each one has its own translation. */
 export type IamError =
   | 'INVALID_CREDENTIALS'
   | 'REGISTRATION_CONFLICT'
@@ -35,10 +27,17 @@ export type IamError =
   | 'CONNECTION_ERROR'
   | 'UNEXPECTED_ERROR';
 
+/** Reasons a password recovery step can fail; each one has its own translation. */
 export type PasswordRecoveryError =
-  'INVALID_LINK' | 'RATE_LIMITED' | 'CONNECTION_ERROR' | 'REQUEST_REJECTED' | 'UNEXPECTED_ERROR';
+  | 'INVALID_LINK'
+  | 'RATE_LIMITED'
+  | 'CONNECTION_ERROR'
+  | 'REQUEST_REJECTED'
+  | 'UNEXPECTED_ERROR';
 
-type IamOperation = 'sign-in' | 'sign-up';
+/** Keys of the session kept in `localStorage`, so a reload does not sign the user out. */
+const TOKEN_KEY = 'token';
+const USER_KEY = 'user';
 
 const ROLE_PRIORITY: readonly UserRole[] = ['COOPERATIVE_DIRECTOR', 'AGRONOMIST', 'FARMER'];
 
@@ -47,246 +46,263 @@ const INITIAL_ROUTES: Record<UserRole, string> = {
   COOPERATIVE_DIRECTOR: '/cooperative/dashboard',
   AGRONOMIST: '/pest-reports',
 };
+
 /**
- * Holds IAM state and orchestrates authentication operations.
+ * Reads the expiration of a JWT (`exp` claim, in seconds).
+ * @param token - Access token returned by `POST /tokens`.
+ * @returns The expiration in milliseconds, or 0 when the token cannot be read.
+ */
+function tokenExpiration(token: string): number {
+  try {
+    const payload = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+    const claims = JSON.parse(atob(payload)) as { exp?: number };
+    return typeof claims.exp === 'number' ? claims.exp * 1000 : 0;
+  } catch {
+    return 0;
+  }
+}
+
+/**
+ * Holds IAM application state and orchestrates authentication flows.
  */
 @Injectable({ providedIn: 'root' })
 export class IamStore {
   private readonly iamApi = inject(IamApi);
-  private readonly sessionStorage = inject(SessionStorage);
-  private readonly sessionExpiration = inject(SessionExpiration);
-  private readonly expiresAtSignal = signal<number | null>(null);
-  private activeRequest?: Subscription;
+  private readonly assembler = new SignInAssembler();
 
-  private readonly currentUserSignal = signal<AuthenticatedUser | null>(null);
-  private readonly pendingOperationSignal = signal<IamOperation | null>(null);
+  private readonly currentUserSignal = signal<User | null>(null);
+  private readonly currentTokenSignal = signal<string | null>(null);
+  private readonly loadingSignal = signal<boolean>(false);
   private readonly errorSignal = signal<IamError | null>(null);
-  private readonly registrationCompletedSignal = signal(false);
+  private readonly registrationCompletedSignal = signal<boolean>(false);
+  private readonly recoveryLoadingSignal = signal<boolean>(false);
+  private readonly recoveryCompletedSignal = signal<boolean>(false);
+  private readonly recoveryErrorSignal = signal<PasswordRecoveryError | null>(null);
 
+  /** Readonly signal for the signed-in user. */
   readonly currentUser = this.currentUserSignal.asReadonly();
 
-  /** Demo producer accounts offered while the IAM API is simulated. */
-  readonly demoFarmerAccounts: readonly { readonly id: number; readonly email: string }[] =
-    getDevelopmentDemoAccounts()
-      .filter(({ role }) => role === 'FARMER')
-      .map(({ id, email }) => ({ id, email }));
+  /** Readonly signal for the current authentication token. */
+  readonly currentToken = this.currentTokenSignal.asReadonly();
+
+  /** Computed signal indicating if the user is signed in. */
+  readonly isSignedIn = computed(() => this.currentToken() !== null);
+
+  /** Signal indicating if a sign-in or sign-up is running. */
+  readonly isLoading = this.loadingSignal.asReadonly();
+
+  /** Reason of the last failed sign-in or sign-up. */
+  readonly error = this.errorSignal.asReadonly();
+
+  /** Signal indicating if the last sign-up succeeded. */
+  readonly registrationCompleted = this.registrationCompletedSignal.asReadonly();
+
+  /** Signal indicating if a password recovery step is running. */
+  readonly passwordRecoveryLoading = this.recoveryLoadingSignal.asReadonly();
+
+  /** Signal indicating if the last password recovery step succeeded. */
+  readonly passwordRecoveryCompleted = this.recoveryCompletedSignal.asReadonly();
+
+  /** Reason of the last failed password recovery step. */
+  readonly passwordRecoveryError = this.recoveryErrorSignal.asReadonly();
+
   /**
-   * Public identity projection consumed by other bounded contexts.
+   * Identity of the signed-in user for the other bounded contexts: its main
+   * role (`experience`) and the page it starts at.
    */
   readonly activeUser = computed<SessionParticipant | null>(() => {
     const user = this.currentUser();
-
-    if (!user) return null;
-
+    if (!user || !this.isSignedIn()) return null;
     const experience = ROLE_PRIORITY.find((role) => user.hasRole(role));
-
     if (!experience) return null;
-
-    const id =
-      typeof user.id === 'number' ? user.id : /^[0-9]+$/.test(user.id) ? Number(user.id) : NaN;
-
-    if (!Number.isSafeInteger(id) || id <= 0) return null;
-
     return {
-      id,
-      displayName: user.fullName,
+      id: user.id as number,
+      displayName: user.fullName || user.email,
       experience,
       initialRoute: INITIAL_ROUTES[experience],
     };
   });
 
+  /** Computed signal indicating if there is a signed-in user with a known role. */
   readonly hasActiveUser = computed(() => this.activeUser() !== null);
-  readonly pendingOperation = this.pendingOperationSignal.asReadonly();
-  readonly error = this.errorSignal.asReadonly();
-  readonly registrationCompleted = this.registrationCompletedSignal.asReadonly();
-  readonly sessionExpiresAt = this.expiresAtSignal.asReadonly();
 
-  readonly isSignedIn = computed(() => this.currentUser() !== null);
-  readonly currentToken = computed(() => this.currentUser()?.token ?? null);
-  readonly isLoading = computed(() => this.pendingOperation() !== null);
-
-  private recoveryRequest?: Subscription;
-
-  private readonly recoveryStateSignal = signal<'idle' | 'pending' | 'completed'>('idle');
-
-  private readonly recoveryErrorSignal = signal<PasswordRecoveryError | null>(null);
-
-  readonly isPasswordRecoveryPreview = this.iamApi.isPasswordRecoveryPreview;
-
-  readonly passwordRecoveryLoading = computed(() => this.recoveryStateSignal() === 'pending');
-
-  readonly passwordRecoveryCompleted = computed(() => this.recoveryStateSignal() === 'completed');
-
-  readonly passwordRecoveryError = this.recoveryErrorSignal.asReadonly();
-
+  /**
+   * Creates an instance of IamStore and restores the session saved before a reload.
+   */
   constructor() {
-    const restored = this.sessionStorage.restore();
+    this.restoreSession();
+  }
 
-    if (restored) {
-      this.currentUserSignal.set(restored.user);
-      this.expiresAtSignal.set(restored.expiresAt);
-
-      this.sessionExpiration.start(restored.expiresAt, () => this.signOut());
-    }
-
-    inject(DestroyRef).onDestroy(() => {
-      this.activeRequest?.unsubscribe();
-      this.recoveryRequest?.unsubscribe();
-      this.sessionExpiration.stop();
+  /**
+   * Executes sign-in and, on success, opens the page the user asked for or its start page.
+   * @param signInCommand - Credentials command.
+   * @param router - Router used for post-auth navigation.
+   * @param returnUrl - Private page the user tried to open before signing in.
+   */
+  signIn(signInCommand: SignInCommand, router: Router, returnUrl: string | null = null): void {
+    if (this.isLoading()) return;
+    this.clearSession();
+    this.errorSignal.set(null);
+    this.loadingSignal.set(true);
+    this.iamApi.signIn(signInCommand).subscribe({
+      next: (signInResource) => {
+        this.saveSession(signInResource);
+        this.loadingSignal.set(false);
+        const isSafeReturnUrl = !!returnUrl && returnUrl.startsWith('/') && !returnUrl.startsWith('//');
+        const destination = isSafeReturnUrl
+          ? returnUrl
+          : (this.activeUser()?.initialRoute ?? '/iam/sign-in');
+        router.navigateByUrl(destination, { replaceUrl: true }).then();
+      },
+      error: (error: unknown) => {
+        this.loadingSignal.set(false);
+        this.errorSignal.set(this.resolveError(error, 'sign-in'));
+      },
     });
   }
 
-  signIn(command: SignInCommand): void {
+  /**
+   * Executes sign-up; the view then invites the user to sign in.
+   * @param signUpCommand - Registration command.
+   */
+  signUp(signUpCommand: SignUpCommand): void {
     if (this.isLoading()) return;
-
-    this.signOut();
-    this.pendingOperationSignal.set('sign-in');
-
-    this.activeRequest = this.iamApi
-      .signIn(command)
-      .pipe(finalize(() => this.pendingOperationSignal.set(null)))
-      .subscribe({
-        next: (user) => {
-          const session = this.sessionStorage.save(user);
-          const expiresAt = session?.expiresAt ?? null;
-
-          this.expiresAtSignal.set(expiresAt);
-          this.currentUserSignal.set(user);
-
-          this.sessionExpiration.start(expiresAt, () => this.signOut());
-        },
-        error: (error: unknown) => {
-          this.errorSignal.set(this.resolveError(error, 'sign-in'));
-        },
-      });
-  }
-
-  signUp(command: SignUpCommand): void {
-    if (this.isLoading()) return;
-
     this.errorSignal.set(null);
     this.registrationCompletedSignal.set(false);
-    this.pendingOperationSignal.set('sign-up');
-
-    this.activeRequest = this.iamApi
-      .signUp(command)
-      .pipe(finalize(() => this.pendingOperationSignal.set(null)))
-      .subscribe({
-        next: () => {
-          this.registrationCompletedSignal.set(true);
-        },
-        error: (error: unknown) => {
-          this.errorSignal.set(this.resolveError(error, 'sign-up'));
-        },
-      });
+    this.loadingSignal.set(true);
+    this.iamApi.signUp(signUpCommand).subscribe({
+      next: () => {
+        this.loadingSignal.set(false);
+        this.registrationCompletedSignal.set(true);
+      },
+      error: (error: unknown) => {
+        this.loadingSignal.set(false);
+        this.errorSignal.set(this.resolveError(error, 'sign-up'));
+      },
+    });
   }
 
-  signOut(): void {
-    this.activeRequest?.unsubscribe();
-    this.activeRequest = undefined;
-    this.sessionExpiration.stop();
-    this.expiresAtSignal.set(null);
-    this.sessionStorage.clear();
-    this.pendingOperationSignal.set(null);
-    this.currentUserSignal.set(null);
-    this.errorSignal.set(null);
-    this.registrationCompletedSignal.set(false);
+  /**
+   * Clears the authentication state and redirects to sign-in.
+   * @param router - Router used for sign-out navigation.
+   */
+  signOut(router: Router): void {
+    this.clearSession();
+    router.navigate(['/iam/sign-in'], { replaceUrl: true }).then();
   }
 
+  /**
+   * Clears the session when its token has expired (JWTs of the platform last 30 minutes).
+   * Guards call it before checking {@link activeUser}.
+   */
   checkSessionExpiration(): void {
-    this.sessionExpiration.check();
+    const token = this.currentToken();
+    if (token && tokenExpiration(token) <= Date.now()) this.clearSession();
   }
 
+  /** Clears the result of the last sign-in or sign-up. */
   clearFeedback(): void {
     this.errorSignal.set(null);
     this.registrationCompletedSignal.set(false);
   }
 
-  private resolveError(error: unknown, operation: IamOperation): IamError {
-    if (!(error instanceof HttpErrorResponse)) {
-      return 'UNEXPECTED_ERROR';
-    }
+  /**
+   * Asks the platform to email a password recovery link.
+   * @param command - Command with the email of the account.
+   */
+  requestPasswordReset(command: RequestPasswordResetCommand): void {
+    if (this.passwordRecoveryLoading()) return;
+    this.recoveryErrorSignal.set(null);
+    this.recoveryLoadingSignal.set(true);
+    this.iamApi.requestPasswordReset(command).subscribe({
+      next: () => this.completePasswordRecovery(),
+      error: (error: unknown) => this.failPasswordRecovery(error, false),
+    });
+  }
 
+  /**
+   * Sets a new password with the token of the recovery link.
+   * @param command - Command with the token and the new password.
+   */
+  resetPassword(command: ResetPasswordCommand): void {
+    if (this.passwordRecoveryLoading()) return;
+    this.recoveryErrorSignal.set(null);
+    this.recoveryLoadingSignal.set(true);
+    this.iamApi.resetPassword(command).subscribe({
+      next: () => this.completePasswordRecovery(),
+      error: (error: unknown) => this.failPasswordRecovery(error, true),
+    });
+  }
+
+  /** Clears the result of the last password recovery step. */
+  clearPasswordRecovery(): void {
+    this.recoveryLoadingSignal.set(false);
+    this.recoveryCompletedSignal.set(false);
+    this.recoveryErrorSignal.set(null);
+  }
+
+  private completePasswordRecovery(): void {
+    this.recoveryLoadingSignal.set(false);
+    this.recoveryCompletedSignal.set(true);
+  }
+
+  private failPasswordRecovery(error: unknown, resetting: boolean): void {
+    this.recoveryLoadingSignal.set(false);
+    this.recoveryErrorSignal.set(this.resolvePasswordRecoveryError(error, resetting));
+  }
+
+  private saveSession(signInResource: SignInResource): void {
+    localStorage.setItem(TOKEN_KEY, signInResource.token);
+    localStorage.setItem(USER_KEY, JSON.stringify({ ...signInResource, token: undefined }));
+    this.currentTokenSignal.set(signInResource.token);
+    this.currentUserSignal.set(this.assembler.toEntityFromResource(signInResource));
+  }
+
+  private restoreSession(): void {
+    const token = localStorage.getItem(TOKEN_KEY);
+    const user = localStorage.getItem(USER_KEY);
+    if (!token || !user || tokenExpiration(token) <= Date.now()) {
+      this.clearSession();
+      return;
+    }
+    try {
+      const resource = { ...(JSON.parse(user) as SignInResource), token };
+      this.currentTokenSignal.set(token);
+      this.currentUserSignal.set(this.assembler.toEntityFromResource(resource));
+    } catch {
+      this.clearSession();
+    }
+  }
+
+  private clearSession(): void {
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(USER_KEY);
+    this.currentTokenSignal.set(null);
+    this.currentUserSignal.set(null);
+  }
+
+  private resolveError(error: unknown, operation: 'sign-in' | 'sign-up'): IamError {
+    if (!(error instanceof HttpErrorResponse)) return 'UNEXPECTED_ERROR';
     switch (error.status) {
       case 0:
         return 'CONNECTION_ERROR';
-
       case 401:
         return operation === 'sign-in' ? 'INVALID_CREDENTIALS' : 'ACCESS_DENIED';
-
       case 403:
         return 'ACCESS_DENIED';
-
       case 409:
         return operation === 'sign-up' ? 'REGISTRATION_CONFLICT' : 'UNEXPECTED_ERROR';
-
       default:
         return 'UNEXPECTED_ERROR';
     }
   }
 
-  requestPasswordReset(command: RequestPasswordResetCommand): void {
-    if (this.passwordRecoveryLoading() || this.passwordRecoveryCompleted()) {
-      return;
-    }
-
-    this.executePasswordRecovery(this.iamApi.requestPasswordReset(command), false);
-  }
-
-  resetPassword(command: ResetPasswordCommand): void {
-    if (this.passwordRecoveryLoading() || this.passwordRecoveryCompleted()) {
-      return;
-    }
-
-    this.executePasswordRecovery(this.iamApi.resetPassword(command), true);
-  }
-
-  clearPasswordRecovery(): void {
-    this.recoveryRequest?.unsubscribe();
-    this.recoveryRequest = undefined;
-
-    this.recoveryErrorSignal.set(null);
-    this.recoveryStateSignal.set('idle');
-  }
-
-  private executePasswordRecovery(operation: Observable<void>, resetting: boolean): void {
-    this.recoveryErrorSignal.set(null);
-    this.recoveryStateSignal.set('pending');
-
-    this.recoveryRequest = operation
-      .pipe(
-        finalize(() => {
-          if (this.recoveryStateSignal() === 'pending') {
-            this.recoveryStateSignal.set('idle');
-          }
-        }),
-      )
-      .subscribe({
-        next: () => {
-          this.recoveryStateSignal.set('completed');
-        },
-        error: (error: unknown) => {
-          this.recoveryErrorSignal.set(this.resolvePasswordRecoveryError(error, resetting));
-        },
-      });
-  }
-
   private resolvePasswordRecoveryError(error: unknown, resetting: boolean): PasswordRecoveryError {
-    if (!(error instanceof HttpErrorResponse)) {
-      return 'UNEXPECTED_ERROR';
-    }
-
+    if (!(error instanceof HttpErrorResponse)) return 'UNEXPECTED_ERROR';
     if (error.status === 0) return 'CONNECTION_ERROR';
     if (error.status === 429) return 'RATE_LIMITED';
-
-    if (resetting && [401, 404, 410].includes(error.status)) {
-      return 'INVALID_LINK';
-    }
-
-    if ([400, 422].includes(error.status)) {
-      return 'REQUEST_REJECTED';
-    }
-
+    if (resetting && [400, 401, 404, 410].includes(error.status)) return 'INVALID_LINK';
+    if ([400, 422].includes(error.status)) return 'REQUEST_REJECTED';
     return 'UNEXPECTED_ERROR';
   }
 }

@@ -15,7 +15,6 @@ import {
   navigationFor,
 } from '../../../infrastructure/navigation-config';
 import { IamStore } from '../../../../iam/application/iam.store';
-import { AuthNavigation } from '../../../../iam/infrastructure/auth-navigation';
 
 /**
  * Side menu of the shell: brand, options of the user's role, offline status,
@@ -56,7 +55,6 @@ export class LeftSidebar {
 
     return user ? activeNavigationLink(user.experience, this.url()) : null;
   });
-  private readonly authNavigation = inject(AuthNavigation);
 
   /** Navigation generated from the current participant's primary role. */
   readonly sections = computed(() => {
@@ -67,6 +65,6 @@ export class LeftSidebar {
 
   protected signOut(): void {
     this.layout.closeSidebarOnHandset();
-    this.authNavigation.signOut();
+    this.session.signOut(this.router);
   }
 }
