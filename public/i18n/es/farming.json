@@ -171,10 +171,10 @@
       "quota-unavailable": "No se pudo confirmar tu cupo. Actualiza los datos antes de registrar otra parcela.",
       "quota-check": "No se pudo comprobar el cupo con el servidor. No se registró una nueva parcela.",
       "registration-unconfirmed": "No se pudo confirmar el registro. Actualiza la lista antes de volver a intentarlo: la parcela podría haberse guardado.",
-      "registration-partial": "La parcela ya está registrada y ocupa un cupo, pero no se completó su campaña inicial. Revisa la parcela desde Administrar parcelas antes de volver a registrar."
+      "registration-partial": "La parcela ya está registrada y ocupa un cupo, pero no se completó su campaña inicial. Revisa la parcela desde Administrar parcelas antes de volver a registrar.",
+      "load-ledger": "No pudimos cargar la bitácora de costos de la campaña."
     },
     "finances": {
-      "pending": "La bitácora, los gastos y los informes de costos estarán disponibles cuando se integre el módulo de finanzas.",
       "subtitle": "{{ plot }} | Campaña {{ season }}",
       "register-expense": "Registrar gasto",
       "no-ledger": "Selecciona una parcela con una campaña activa para ver sus gastos.",

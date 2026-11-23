@@ -14,6 +14,7 @@ import {
 import { CampaignForm, CampaignFormData } from '../../components/campaign-form/campaign-form';
 import { FarmingStore } from '../../../application/farming.store';
 import { CloseCropCampaignCommand } from '../../../domain/model/commands/close-crop-campaign.command';
+import { ExportCampaignCostReportCommand } from '../../../domain/model/commands/export-campaign-cost-report.command';
 import {
   CampaignSummary,
   CampaignSummaryCard,
@@ -122,5 +123,11 @@ export class CampaignHistory {
           );
         }
       });
+  }
+
+  onExport(summary: CampaignSummary): void {
+    this.store.exportCostReport(
+      new ExportCampaignCostReportCommand({ campaignId: summary.campaignId }),
+    );
   }
 }

@@ -171,10 +171,10 @@
       "quota-unavailable": "Your capacity could not be confirmed. Refresh the data before registering another plot.",
       "quota-check": "Could not check capacity with the server. No new plot was registered.",
       "registration-unconfirmed": "Registration could not be confirmed. Refresh the list before retrying: the plot may have been saved.",
-      "registration-partial": "The plot was registered and occupies a slot, but its initial campaign could not be completed. Review it in Manage Plots before registering again."
+      "registration-partial": "The plot was registered and occupies a slot, but its initial campaign could not be completed. Review it in Manage Plots before registering again.",
+      "load-ledger": "We could not load the cost ledger of the campaign."
     },
     "finances": {
-      "pending": "Ledgers, expenses and cost reports will be available once finances are integrated.",
       "subtitle": "{{ plot }} | Season {{ season }}",
       "register-expense": "Register expense",
       "no-ledger": "Select a plot with an active campaign to see its expenses.",
