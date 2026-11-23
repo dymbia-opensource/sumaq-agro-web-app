@@ -37,6 +37,7 @@ export const farmerNavigationSections: NavigationSection[] = [
     title: 'section.agricultural-operation',
     options: [
       { link: '/monitoring', label: 'option.crop-health', icon: 'eco' },
+      { link: '/alerts', label: 'option.alerts', icon: 'notification_important' },
       { link: '/finances', label: 'option.expenses', icon: 'payments' },
       // The same inbox the other roles open; only the name on the menu changes.
       {
@@ -55,7 +56,6 @@ export const farmerNavigationSections: NavigationSection[] = [
   {
     title: 'section.system',
     options: [
-      { link: '/alerts', label: 'option.alerts', icon: 'notification_important' },
       { link: '/subscriptions', label: 'subscriptions.nav-title', icon: 'credit_card' },
       { link: '/settings', label: 'option.settings', icon: 'settings' },
     ],
@@ -73,17 +73,14 @@ export const cooperativeDirectorNavigationSections: NavigationSection[] = [
         icon: 'home',
       },
       { link: '/cooperative/members', label: 'option.member-directory', icon: 'group' },
-      {
-        link: '/monitoring',
-        label: 'option.cooperative-plot-health',
-        icon: 'eco',
-      },
+      // The pages every role shares keep the same name in every menu.
+      { link: '/monitoring', label: 'option.crop-health', icon: 'eco' },
       {
         link: '/certificates',
-        label: 'option.cooperative-certificates',
+        label: 'option.harvest-certificates',
         icon: 'workspace_premium',
       },
-      { link: '/alerts', label: 'option.cooperative-alerts', icon: 'notification_important' },
+      { link: '/alerts', label: 'option.alerts', icon: 'notification_important' },
       {
         link: '/pest-reports',
         label: 'option.diagnosis-inbox',
@@ -109,8 +106,9 @@ export const agronomistNavigationSections: NavigationSection[] = [
   {
     title: 'section.agricultural-operation',
     options: [
-      { link: '/assigned-plots', label: 'option.assigned-plots', icon: 'map' },
+      // The inbox is the start page of the agronomist, so it opens the menu.
       { link: '/pest-reports', label: 'option.diagnosis-inbox', icon: 'pest_control' },
+      { link: '/assigned-plots', label: 'option.assigned-plots', icon: 'map' },
       {
         link: '/inspections',
         label: 'option.field-inspections',
@@ -118,12 +116,16 @@ export const agronomistNavigationSections: NavigationSection[] = [
       },
       { link: '/prescriptions', label: 'option.prescriptions', icon: 'medication' },
       { link: '/monitoring', label: 'option.crop-health', icon: 'eco' },
-      { link: '/alerts', label: 'option.alerts', icon: 'warning' },
+      { link: '/alerts', label: 'option.alerts', icon: 'notification_important' },
     ],
   },
   {
     title: 'section.system',
-    options: [{ link: '/subscriptions', label: 'subscriptions.nav-title', icon: 'credit_card' }],
+    options: [
+      { link: '/subscriptions', label: 'subscriptions.nav-title', icon: 'credit_card' },
+      // The same account page as the producer, without the producer's manuals.
+      { link: '/settings', label: 'layout.profile', icon: 'person' },
+    ],
   },
 ];
 
@@ -220,16 +222,6 @@ export function activeNavigationLink(experience: UserRole, url: string): string 
 /** Returns the account page of a role, the one its user menu opens. */
 export function settingsRouteFor(experience: UserRole): string {
   return experience === 'COOPERATIVE_DIRECTOR' ? '/cooperative/settings' : '/settings';
-}
-
-/** Returns the first breadcrumb of a role: its own start page. */
-export function homeCrumbFor(experience: UserRole): { label: string; link: string } {
-  const home = homeRouteFor(experience);
-  const option = navigationFor(experience)
-    .flatMap((section) => section.options)
-    .find((item) => item.link === home);
-
-  return { label: option?.label ?? 'option.my-plot', link: home };
 }
 
 /**

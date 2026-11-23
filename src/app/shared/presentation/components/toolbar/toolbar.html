@@ -1,13 +1,13 @@
 <mat-toolbar class="topbar">
-  @if (layout.isHandset()) {
-    <button
-      mat-icon-button
-      (click)="layout.toggleSidebar()"
-      [attr.aria-label]="'layout.menu' | translate"
-    >
-      <mat-icon>menu</mat-icon>
-    </button>
-  }
+  <!-- Opens the menu on phones; hides or shows it on wide screens. -->
+  <button
+    mat-icon-button
+    (click)="layout.toggleSidebar()"
+    [attr.aria-label]="'layout.menu' | translate"
+    [attr.aria-expanded]="layout.sidebarOpened()"
+  >
+    <mat-icon>{{ layout.sidebarOpened() && !layout.isHandset() ? 'menu_open' : 'menu' }}</mat-icon>
+  </button>
 
   <label class="search">
     <mat-icon aria-hidden="true">search</mat-icon>
@@ -34,7 +34,11 @@
   <span class="spacer"></span>
 
   <mat-chip-set class="connection" [attr.aria-label]="'layout.connection' | translate">
-    <mat-chip [highlighted]="layout.isOnline()" [disableRipple]="true">
+    <mat-chip
+      [highlighted]="layout.isOnline()"
+      [disableRipple]="true"
+      [matTooltip]="(layout.isOnline() ? 'layout.offline-mode-off-hint' : 'layout.offline-mode-on-hint') | translate"
+    >
       <mat-icon matChipAvatar>{{ layout.isOnline() ? 'cloud_done' : 'cloud_off' }}</mat-icon>
       {{ (layout.isOnline() ? 'layout.connected' : 'layout.disconnected') | translate }}
     </mat-chip>
