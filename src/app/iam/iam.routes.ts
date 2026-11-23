@@ -1,11 +1,11 @@
 import { Routes } from '@angular/router';
 
-const signInForm = () => import('./views/sign-in-form/sign-in-form').then((m) => m.SignInForm);
-const signUpForm = () => import('./views/sign-up-form/sign-up-form').then((m) => m.SignUpForm);
+const signInForm = () => import('./presentation/views/sign-in-form/sign-in-form').then((m) => m.SignInForm);
+const signUpForm = () => import('./presentation/views/sign-up-form/sign-up-form').then((m) => m.SignUpForm);
 const forgotPasswordForm = () =>
-  import('./views/forgot-password-form/forgot-password-form').then((m) => m.ForgotPasswordForm);
+  import('./presentation/views/forgot-password-form/forgot-password-form').then((m) => m.ForgotPasswordForm);
 const resetPasswordForm = () =>
-  import('./views/reset-password-form/reset-password-form').then((m) => m.ResetPasswordForm);
+  import('./presentation/views/reset-password-form/reset-password-form').then((m) => m.ResetPasswordForm);
 
 /**
  * Route tree for IAM presentation views.

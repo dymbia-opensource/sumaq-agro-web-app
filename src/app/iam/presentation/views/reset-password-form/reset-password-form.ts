@@ -25,7 +25,7 @@ import { MatInputModule } from '@angular/material/input';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { map } from 'rxjs';
-import { ResetPasswordCommand } from '../../../domain/model/reset-password.command';
+import { ResetPasswordCommand } from '../../../domain/model/commands/reset-password.command';
 import { AuthLayout } from '../../components/auth-layout/auth-layout';
 import { IamStore } from '../../../application/iam.store';
 

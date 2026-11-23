@@ -1,7 +1,7 @@
-import { SignUpCommand } from '../domain/model/sign-up.command';
-import { SignUpResource, SignUpResponse } from './sign-up-response';
-import { SignUpRequest } from './sign-up.request';
-import { UserRoleAssembler } from './user-role-assembler';
+import { SignUpCommand } from '../../domain/model/commands/sign-up.command';
+import { SignUpResource, SignUpResponse } from '../responses/sign-up.response';
+import { SignUpRequest } from '../requests/sign-up.request';
+import { UserRoleAssembler } from './user-role.assembler';
 
 /**
  * Maps IAM sign-up commands and endpoint payloads.

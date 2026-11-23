@@ -1,4 +1,4 @@
-import { UserRole } from '../domain/model/user-role';
+import { UserRole } from '../../domain/model/entities/user-role';
 
 /**
  * Maps the roles of the domain to and from the `ROLE_*` names of the API.

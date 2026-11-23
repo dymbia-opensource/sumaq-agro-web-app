@@ -1,4 +1,4 @@
-import { BaseEntity } from '../../../shared/domain/model/base-entity';
+import { BaseEntity } from '../../../../shared/domain/model/base-entity';
 import { UserRole } from './user-role';
 
 /**

@@ -2,18 +2,18 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { BaseApi } from '../../shared/infrastructure/base-api';
-import { RequestPasswordResetCommand } from '../domain/model/request-password-reset.command';
-import { ResetPasswordCommand } from '../domain/model/reset-password.command';
-import { SignInCommand } from '../domain/model/sign-in.command';
-import { SignUpCommand } from '../domain/model/sign-up.command';
-import { PasswordRecoveryApiEndpoint } from './password-recovery-api-endpoint';
-import { PasswordRecoveryAssembler } from './password-recovery-assembler';
-import { SignInApiEndpoint } from './sign-in-api-endpoint';
-import { SignInAssembler } from './sign-in-assembler';
-import { SignInResource } from './sign-in-response';
-import { SignUpApiEndpoint } from './sign-up-api-endpoint';
-import { SignUpAssembler } from './sign-up-assembler';
-import { SignUpResource } from './sign-up-response';
+import { RequestPasswordResetCommand } from '../domain/model/commands/request-password-reset.command';
+import { ResetPasswordCommand } from '../domain/model/commands/reset-password.command';
+import { SignInCommand } from '../domain/model/commands/sign-in.command';
+import { SignUpCommand } from '../domain/model/commands/sign-up.command';
+import { PasswordRecoveryApiEndpoint } from './endpoints/password-recovery.endpoint';
+import { PasswordRecoveryAssembler } from './assemblers/password-recovery.assembler';
+import { SignInApiEndpoint } from './endpoints/sign-in.endpoint';
+import { SignInAssembler } from './assemblers/sign-in.assembler';
+import { SignInResource } from './responses/sign-in.response';
+import { SignUpApiEndpoint } from './endpoints/sign-up.endpoint';
+import { SignUpAssembler } from './assemblers/sign-up.assembler';
+import { SignUpResource } from './responses/sign-up.response';
 
 /**
  * Infrastructure facade that exposes IAM endpoint operations.

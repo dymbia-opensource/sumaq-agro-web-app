@@ -1,4 +1,4 @@
-import { BaseResource, BaseResponse } from '../../shared/infrastructure/base-response';
+import { BaseResource, BaseResponse } from '../../../shared/infrastructure/base-response';
 
 /**
  * Resource returned by the sign-up endpoint: the registered account.

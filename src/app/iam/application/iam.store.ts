@@ -1,15 +1,15 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { RequestPasswordResetCommand } from '../domain/model/request-password-reset.command';
-import { ResetPasswordCommand } from '../domain/model/reset-password.command';
-import { SignInCommand } from '../domain/model/sign-in.command';
-import { SignUpCommand } from '../domain/model/sign-up.command';
-import { User } from '../domain/model/user.entity';
-import { UserRole } from '../domain/model/user-role';
+import { RequestPasswordResetCommand } from '../domain/model/commands/request-password-reset.command';
+import { ResetPasswordCommand } from '../domain/model/commands/reset-password.command';
+import { SignInCommand } from '../domain/model/commands/sign-in.command';
+import { SignUpCommand } from '../domain/model/commands/sign-up.command';
+import { User } from '../domain/model/entities/user.entity';
+import { UserRole } from '../domain/model/entities/user-role';
 import { IamApi } from '../infrastructure/iam-api';
-import { SignInAssembler } from '../infrastructure/sign-in-assembler';
-import { SignInResource } from '../infrastructure/sign-in-response';
+import { SignInAssembler } from '../infrastructure/assemblers/sign-in.assembler';
+import { SignInResource } from '../infrastructure/responses/sign-in.response';
 
 /** Identity of the signed-in user that the other bounded contexts read. */
 export interface SessionParticipant {

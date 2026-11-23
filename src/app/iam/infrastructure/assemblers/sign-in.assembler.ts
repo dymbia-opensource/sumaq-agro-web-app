@@ -1,8 +1,8 @@
-import { SignInCommand } from '../domain/model/sign-in.command';
-import { User } from '../domain/model/user.entity';
-import { SignInResource, SignInResponse } from './sign-in-response';
-import { SignInRequest } from './sign-in.request';
-import { UserRoleAssembler } from './user-role-assembler';
+import { SignInCommand } from '../../domain/model/commands/sign-in.command';
+import { User } from '../../domain/model/entities/user.entity';
+import { SignInResource, SignInResponse } from '../responses/sign-in.response';
+import { SignInRequest } from '../requests/sign-in.request';
+import { UserRoleAssembler } from './user-role.assembler';
 
 /**
  * Maps IAM sign-in commands and endpoint payloads.

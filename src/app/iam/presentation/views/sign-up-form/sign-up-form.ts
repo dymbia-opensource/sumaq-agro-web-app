@@ -14,8 +14,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatRadioModule } from '@angular/material/radio';
 import { TranslatePipe } from '@ngx-translate/core';
 import { IamStore } from '../../../application/iam.store';
-import { SignUpCommand } from '../../../domain/model/sign-up.command';
-import { UserRole } from '../../../domain/model/user-role';
+import { SignUpCommand } from '../../../domain/model/commands/sign-up.command';
+import { UserRole } from '../../../domain/model/entities/user-role';
 import { AuthLayout } from '../../components/auth-layout/auth-layout';
 import { ErrorStateMatcher } from '@angular/material/core';
 

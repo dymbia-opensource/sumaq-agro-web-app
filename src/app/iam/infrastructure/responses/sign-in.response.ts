@@ -1,4 +1,4 @@
-import { BaseResource, BaseResponse } from '../../shared/infrastructure/base-response';
+import { BaseResource, BaseResponse } from '../../../shared/infrastructure/base-response';
 
 /**
  * Resource returned by the sign-in endpoint: the authenticated user and its access token.

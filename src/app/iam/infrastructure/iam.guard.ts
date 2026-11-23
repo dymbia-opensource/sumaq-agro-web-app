@@ -1,7 +1,7 @@
 import { inject } from '@angular/core';
 import { CanActivateChildFn, CanActivateFn, Router } from '@angular/router';
 import { IamStore } from '../application/iam.store';
-import { UserRole } from '../domain/model/user-role';
+import { UserRole } from '../domain/model/entities/user-role';
 
 /**
  * Blocks protected routes when no authenticated IAM session exists.

@@ -1,6 +1,6 @@
-import { RequestPasswordResetCommand } from '../domain/model/request-password-reset.command';
-import { ResetPasswordCommand } from '../domain/model/reset-password.command';
-import { PasswordRecoveryRequest, PasswordResetRequest } from './password-recovery.request';
+import { RequestPasswordResetCommand } from '../../domain/model/commands/request-password-reset.command';
+import { ResetPasswordCommand } from '../../domain/model/commands/reset-password.command';
+import { PasswordRecoveryRequest, PasswordResetRequest } from '../requests/password-recovery.request';
 
 /**
  * Maps password recovery commands into the payloads expected by the API.

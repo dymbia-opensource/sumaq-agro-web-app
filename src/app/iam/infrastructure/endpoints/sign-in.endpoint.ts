@@ -1,9 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
-import { environment } from '../../../environments/environment';
-import { SignInCommand } from '../domain/model/sign-in.command';
-import { SignInAssembler } from './sign-in-assembler';
-import { SignInResource, SignInResponse } from './sign-in-response';
+import { environment } from '../../../../environments/environment';
+import { SignInCommand } from '../../domain/model/commands/sign-in.command';
+import { SignInAssembler } from '../assemblers/sign-in.assembler';
+import { SignInResource, SignInResponse } from '../responses/sign-in.response';
 
 const signInApiEndpointUrl = `${environment.platformProviderApiBaseUrl}${environment.platformProviderSignInEndpointPath}`;
 

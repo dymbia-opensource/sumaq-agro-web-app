@@ -6,7 +6,7 @@ import { roleGuard } from "./shared/infrastructure/role.guard";
 import { activeSubscriptionGuard } from "./subscriptions/infrastructure/active-subscription.guard";
 
 const iamRoutes = () =>
-  import("./iam/presentation/iam.routes").then((m) => m.iamRoutes);
+  import("./iam/iam.routes").then((m) => m.iamRoutes);
 
 const layout = () =>
   import("./shared/presentation/components/layout/layout").then(

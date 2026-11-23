@@ -8,7 +8,7 @@ import { MatInputModule } from '@angular/material/input';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { IamStore } from '../../../application/iam.store';
-import { SignInCommand } from '../../../domain/model/sign-in.command';
+import { SignInCommand } from '../../../domain/model/commands/sign-in.command';
 import { AuthLayout } from '../../components/auth-layout/auth-layout';
 
 /**

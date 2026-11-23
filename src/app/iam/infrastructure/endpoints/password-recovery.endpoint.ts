@@ -1,9 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../../environments/environment';
-import { RequestPasswordResetCommand } from '../domain/model/request-password-reset.command';
-import { ResetPasswordCommand } from '../domain/model/reset-password.command';
-import { PasswordRecoveryAssembler } from './password-recovery-assembler';
+import { environment } from '../../../../environments/environment';
+import { RequestPasswordResetCommand } from '../../domain/model/commands/request-password-reset.command';
+import { ResetPasswordCommand } from '../../domain/model/commands/reset-password.command';
+import { PasswordRecoveryAssembler } from '../assemblers/password-recovery.assembler';
 
 const passwordRecoveryApiEndpointUrl = `${environment.platformProviderApiBaseUrl}${environment.platformProviderPasswordRecoveryEndpointPath}`;
 

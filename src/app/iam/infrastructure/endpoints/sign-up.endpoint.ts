@@ -1,9 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
-import { environment } from '../../../environments/environment';
-import { SignUpCommand } from '../domain/model/sign-up.command';
-import { SignUpAssembler } from './sign-up-assembler';
-import { SignUpResource, SignUpResponse } from './sign-up-response';
+import { environment } from '../../../../environments/environment';
+import { SignUpCommand } from '../../domain/model/commands/sign-up.command';
+import { SignUpAssembler } from '../assemblers/sign-up.assembler';
+import { SignUpResource, SignUpResponse } from '../responses/sign-up.response';
 
 const signUpApiEndpointUrl = `${environment.platformProviderApiBaseUrl}${environment.platformProviderSignUpEndpointPath}`;
 
