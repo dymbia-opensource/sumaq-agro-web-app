@@ -65,7 +65,8 @@ describe('Farmer contact persistence', () => {
     expect(store.contactSaved()).toBe(false);
     expect(store.profile()).toBe(original);
     expect(original.email).toBe('old@example.com');
-    expect(store.error()).toBe('Connection failed');
+    // The view shows a translated message, never the raw HTTP error.
+    expect(store.error()).toBe('profiles.errors.save');
     expect(store.saving()).toBe(false);
   });
 
@@ -164,14 +165,15 @@ it('uses the profile ID, sends editable fields only and exposes Spring validatio
 
   const onError = vi.fn();
   endpoint.update(profile).subscribe({ error: onError });
-  const put = http.expectOne(url + '/12');
-  expect(put.request.method).toBe('PUT');
-  expect(put.request.body).toEqual({
+  const patch = http.expectOne(url + '/12');
+  expect(patch.request.method).toBe('PATCH');
+  expect(patch.request.body).toEqual({
     firstName: 'Pedro',
     lastName: 'García',
     phoneNumber: '987654321',
+    dni: '',
   });
-  put.flush(
+  patch.flush(
     { details: 'Campo phoneNumber: valor inválido' },
     {
       status: 400,

@@ -13,6 +13,7 @@ export class FarmerProfile extends BaseEntity {
   private readonly _email: string;
   private _firstName: string;
   private _lastName: string;
+  private _dni: string;
 
   constructor(props: {
     id: number;
@@ -21,6 +22,7 @@ export class FarmerProfile extends BaseEntity {
     email: string;
     firstName?: string;
     lastName?: string;
+    dni?: string;
   }) {
     super({ id: props.id });
     this._userId = props.userId;
@@ -28,6 +30,24 @@ export class FarmerProfile extends BaseEntity {
     this._lastName = props.lastName?.trim() ?? '';
     this._phoneNumber = props.phoneNumber.trim();
     this._email = props.email;
+    this._dni = props.dni?.trim() ?? '';
+  }
+
+  /** DNI the producer added so the cooperative does not have to type it; empty when he did not. */
+  get dni(): string {
+    return this._dni;
+  }
+
+  /**
+   * Replaces the DNI; an empty value removes it.
+   * @param value - Eight digits, or empty.
+   */
+  updateDni(value: string): void {
+    const dni = value.trim();
+    if (dni && !/^\d{8}$/.test(dni)) {
+      throw new Error('profiles.errors.dni');
+    }
+    this._dni = dni;
   }
 
   get firstName(): string {

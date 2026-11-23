@@ -2,10 +2,6 @@
   "profiles": {
     "cooperative": {
       "integration": {
-        "member-user-id": "Farmer user ID (optional)",
-        "invalid-id": "Enter a positive whole-number ID.",
-        "account-link-pending": "To link an account, enter the farmer user ID when adding the member.",
-        "advisor-id": "Agronomist user ID",
         "assigned-advisors": "Agronomists with assigned plots",
         "invitation-email": "Agronomist email",
         "invite": "Create invitation",
@@ -64,7 +60,19 @@
         "error-name": "Enter the member's name",
         "error-dni": "The ID must have 8 digits",
         "error-phone": "Enter a valid phone number",
-        "dni-hint": "8 digits"
+        "dni-hint": "8 digits",
+        "lookup-hint": "If the producer already has a SumaqAgro account, type its email and look it up: the details are filled in for you.",
+        "account-email": "Email of the producer account",
+        "email-error": "Type a valid email.",
+        "look-up": "Look up",
+        "account-found": "Account found: check the details and add the community.",
+        "account-not-found-hint": "No producer uses this email. You can register the member by hand and link the account later.",
+        "already-member": "This producer is already a member of your cooperative.",
+        "lookup-error": "The account could not be looked up. Please try again.",
+        "account-not-found": "No producer uses this email.",
+        "already-linked": "This member is already linked to an account.",
+        "account-in-use": "That account already belongs to another member of the cooperative.",
+        "link-hint": "This member has no linked account. If he already uses SumaqAgro, type the email of his account to see his plots."
       },
       "settings": {
         "breadcrumb": "Settings",
@@ -150,7 +158,23 @@
         "none": "Without an assigned advisor.",
         "assign": "Assign",
         "release": "Remove assignment",
-        "no-team": "Invite agronomists with a linked account to assign supervision."
+        "no-team": "Invite agronomists in Settings → Technical team.",
+        "agronomist": "Agronomist of the technical team"
+      },
+      "team": {
+        "title": "Technical team",
+        "subtitle": "Agronomists who advise the plots of your members.",
+        "plots": "Plots in charge: {{count}}",
+        "status": {
+          "PENDING": "Invitation pending",
+          "ACCEPTED": "In the team",
+          "EXPIRED": "Invitation expired"
+        },
+        "empty": "You have not invited any agronomist yet.",
+        "invite-title": "Invite an agronomist",
+        "invite-hint": "They will get an email to create their account. If they already have one, they join the team at once.",
+        "joined": "The agronomist already had an account and joined the team.",
+        "already-invited": "You already invited this email."
       }
     },
     "settings": {
@@ -173,7 +197,7 @@
       "profile-title": "Your farmer account",
       "farmer-role": "Farmer",
       "manage-plots": "Manage my plots",
-      "contact-description": "You can update your name and phone number. Your sign-in email is read-only.",
+      "contact-description": "You can update your personal and contact details. Your sign-in email is read-only.",
       "saved": "Account details saved.",
       "preferences": "Preferences",
       "language": "Application language",
@@ -261,7 +285,9 @@
       "edit-account": "Edit account",
       "cancel": "Cancel",
       "account-title": "Your account",
-      "account-subtitle": "Manage your contact details and the access to your account."
+      "account-subtitle": "Manage your contact details and the access to your account.",
+      "dni": "DNI (optional)",
+      "dni-hint": "If you add it, your cooperative will not have to ask you for it."
     },
     "advisory": {
       "title": "Responsible plot advisor",
@@ -290,7 +316,8 @@
       "ruc": "The tax ID must have 11 digits.",
       "email": "The institutional email is not valid.",
       "name": "First and last names are required and must not exceed 100 characters.",
-      "phone": "The phone number must not exceed 15 characters."
+      "phone": "The phone number must not exceed 15 characters.",
+      "dni": "The DNI must have 8 digits."
     }
   }
 }

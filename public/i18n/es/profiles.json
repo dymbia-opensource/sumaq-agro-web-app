@@ -2,10 +2,6 @@
   "profiles": {
     "cooperative": {
       "integration": {
-        "member-user-id": "ID del usuario productor (opcional)",
-        "invalid-id": "Ingresa un ID entero positivo.",
-        "account-link-pending": "Para asociar una cuenta, indica el ID del productor al dar de alta al miembro.",
-        "advisor-id": "ID de usuario del agrónomo",
         "assigned-advisors": "Agrónomos con parcelas asignadas",
         "invitation-email": "Correo del agrónomo",
         "invite": "Crear invitación",
@@ -64,7 +60,19 @@
         "error-name": "Ingresa el nombre del socio",
         "error-dni": "El DNI debe tener 8 dígitos",
         "error-phone": "Ingresa un teléfono válido",
-        "dni-hint": "8 dígitos"
+        "dni-hint": "8 dígitos",
+        "lookup-hint": "Si el productor ya tiene cuenta en SumaqAgro, escribe su correo y búscalo: sus datos se llenarán solos.",
+        "account-email": "Correo de la cuenta del productor",
+        "email-error": "Escribe un correo válido.",
+        "look-up": "Buscar",
+        "account-found": "Cuenta encontrada: revisa sus datos y completa la comunidad.",
+        "account-not-found-hint": "Ningún productor usa este correo. Puedes registrar al socio a mano y vincular su cuenta después.",
+        "already-member": "Este productor ya es socio de tu cooperativa.",
+        "lookup-error": "No se pudo buscar la cuenta. Inténtalo de nuevo.",
+        "account-not-found": "Ningún productor usa este correo.",
+        "already-linked": "Este socio ya está vinculado a una cuenta.",
+        "account-in-use": "Esa cuenta ya pertenece a otro socio de la cooperativa.",
+        "link-hint": "Este socio no tiene cuenta vinculada. Si ya usa SumaqAgro, escribe el correo de su cuenta para ver sus parcelas."
       },
       "settings": {
         "breadcrumb": "Configuración",
@@ -150,7 +158,23 @@
         "none": "Sin asesor asignado.",
         "assign": "Asignar",
         "release": "Quitar asignación",
-        "no-team": "Invita agrónomos con cuenta vinculada para asignar la supervisión."
+        "no-team": "Invita agrónomos en Configuración → Equipo técnico.",
+        "agronomist": "Agrónomo del equipo técnico"
+      },
+      "team": {
+        "title": "Equipo técnico",
+        "subtitle": "Agrónomos que asesoran las parcelas de tus socios.",
+        "plots": "Parcelas a cargo: {{count}}",
+        "status": {
+          "PENDING": "Invitación pendiente",
+          "ACCEPTED": "En el equipo",
+          "EXPIRED": "Invitación vencida"
+        },
+        "empty": "Aún no invitaste a ningún agrónomo.",
+        "invite-title": "Invitar a un agrónomo",
+        "invite-hint": "Le llegará un correo para crear su cuenta. Si ya tiene cuenta, se une al equipo al instante.",
+        "joined": "El agrónomo ya tenía cuenta y se unió al equipo.",
+        "already-invited": "Ya invitaste a este correo."
       }
     },
     "settings": {
@@ -173,7 +197,7 @@
       "profile-title": "Tu cuenta de agricultor",
       "farmer-role": "Agricultor",
       "manage-plots": "Administrar mis parcelas",
-      "contact-description": "Puedes actualizar tu nombre y teléfono. El correo de inicio de sesión es de solo lectura.",
+      "contact-description": "Puedes actualizar tus datos personales y de contacto. Tu correo de acceso no se puede cambiar.",
       "saved": "Datos de tu cuenta guardados.",
       "preferences": "Preferencias",
       "language": "Idioma de la aplicación",
@@ -261,7 +285,9 @@
       "edit-account": "Editar cuenta",
       "cancel": "Cancelar",
       "account-title": "Tu cuenta",
-      "account-subtitle": "Administra tus datos de contacto y el acceso a tu cuenta."
+      "account-subtitle": "Administra tus datos de contacto y el acceso a tu cuenta.",
+      "dni": "DNI (opcional)",
+      "dni-hint": "Si lo agregas, tu cooperativa no tendrá que pedírtelo."
     },
     "advisory": {
       "title": "Asesor responsable de la parcela",
@@ -290,7 +316,8 @@
       "ruc": "El RUC debe tener 11 dígitos.",
       "email": "El correo institucional no es válido.",
       "name": "Los nombres y apellidos son obligatorios y no deben superar los 100 caracteres.",
-      "phone": "El teléfono no debe superar los 15 caracteres."
+      "phone": "El teléfono no debe superar los 15 caracteres.",
+      "dni": "El DNI debe tener 8 dígitos."
     }
   }
 }

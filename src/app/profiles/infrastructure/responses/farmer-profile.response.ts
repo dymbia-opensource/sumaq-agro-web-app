@@ -6,4 +6,6 @@ export interface FarmerProfileResource {
   lastName?: string;
   phoneNumber: string | null;
   email: string | null;
+  /** Only sent to the owner of the profile. */
+  dni?: string | null;
 }

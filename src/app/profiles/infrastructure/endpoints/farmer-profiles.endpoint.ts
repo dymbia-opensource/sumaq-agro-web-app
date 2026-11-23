@@ -28,12 +28,14 @@ export class FarmerProfilesApiEndpoint extends ErrorHandlingEnabledBaseType {
   }
 
   update(profile: FarmerProfile): Observable<FarmerProfile> {
-    const { firstName, lastName, phoneNumber } = profile;
+    const { firstName, lastName, phoneNumber, dni } = profile;
     return this.http
       .patch<FarmerProfileResource>(this.url + '/' + profile.id, {
         firstName,
         lastName,
         phoneNumber: phoneNumber || null,
+        // An empty DNI removes it on the platform.
+        dni,
       })
       .pipe(
         map((resource) => this.assembler.toEntityFromResource(resource)),

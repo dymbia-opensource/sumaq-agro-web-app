@@ -108,6 +108,11 @@ export class FarmerSettings {
       nonNullable: true,
       validators: [Validators.maxLength(15)],
     }),
+    // Optional: a producer who adds it does not have to dictate it to his cooperative.
+    dni: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.pattern(/^(\d{8})?$/)],
+    }),
   });
 
   constructor() {
@@ -134,6 +139,7 @@ export class FarmerSettings {
             firstName: profile.firstName,
             lastName: profile.lastName,
             phoneNumber: profile.phoneNumber,
+            dni: profile.dni,
           },
           { emitEvent: false },
         );
@@ -155,6 +161,7 @@ export class FarmerSettings {
         firstName: profile.firstName,
         lastName: profile.lastName,
         phoneNumber: profile.phoneNumber,
+        dni: profile.dni,
       });
     this.editing.set(false);
   }
