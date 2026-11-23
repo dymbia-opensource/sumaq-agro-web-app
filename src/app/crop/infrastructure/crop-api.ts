@@ -45,6 +45,7 @@ export class CropApi {
 
   getAlertsByRegion = (region: string) => this.alerts.getByRegion(region);
   getForecastsByRegion = (region: string) => this.forecasts.getByRegion(region);
+  importForecasts = (plotId: number) => this.forecasts.importForPlot(plotId);
   getBulletinsByRegion = (region: string) =>
     this.http.get<RegionalBulletin[]>(this.bulletinsUrl, { params: { region } });
   publishBulletin = (body: Omit<RegionalBulletin, 'id' | 'publishedAt'>) =>

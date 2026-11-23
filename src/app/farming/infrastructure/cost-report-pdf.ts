@@ -1,6 +1,6 @@
-import { buildPdfPage } from '../../../../shared/infrastructure/text-pdf';
-import { CampaignLedger, YieldUnit } from '../../../domain/model/entities/campaign-ledger.entity';
-import { ExpenseCategory } from '../../../domain/model/entities/expense-entry.entity';
+import { buildPdfPage } from '../../shared/infrastructure/text-pdf';
+import { CampaignLedger, YieldUnit } from '../domain/model/entities/campaign-ledger.entity';
+import { ExpenseCategory } from '../domain/model/entities/expense-entry.entity';
 
 export function buildCostReportPdf(ledger: CampaignLedger, season: string, plotName: string, area: number): Blob {
   const operations: string[] = [];
