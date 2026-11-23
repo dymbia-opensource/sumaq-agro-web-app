@@ -16,8 +16,9 @@ export class CertificationApi {
     /\/+$/,
     "",
   );
-  private readonly batches = this.base + "/harvest-batches";
-  private readonly certificates = this.base + "/quality-certificates";
+  private readonly batches = this.base + environment.platformProviderHarvestBatchesEndpointPath;
+  private readonly certificates =
+    this.base + environment.platformProviderQualityCertificatesEndpointPath;
 
   listBatches(cooperativeId: number) {
     return this.http.get<BatchEntry[]>(this.batches, {
@@ -111,7 +112,7 @@ export class CertificationApi {
 
   verify(number: string, hash: string) {
     return this.http.get<PublicTraceabilityResource>(
-      this.base + "/public/traceability",
+      this.base + environment.platformProviderPublicTraceabilityEndpointPath,
       {
         params: { number, hash },
       },
