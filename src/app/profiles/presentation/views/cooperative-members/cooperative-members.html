@@ -1,4 +1,5 @@
 <app-page-header
+  [breadcrumbs]="memberId() === null ? [] : dossierBreadcrumbs"
   [title]="
     (memberId() === null
       ? 'profiles.cooperative.members.title'

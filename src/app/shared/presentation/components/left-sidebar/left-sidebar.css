@@ -55,15 +55,6 @@
   color: var(--mat-sys-on-surface);
 }
 
-.offline-status {
-  font: var(--mat-sys-label-small);
-  color: var(--mat-sys-on-surface-variant);
-}
-
-.offline-status.offline-on {
-  color: var(--mat-sys-error);
-}
-
 .sidebar-footer {
   margin-top: auto;
   display: flex;
@@ -72,14 +63,9 @@
   padding: 12px 8px 0;
 }
 
-/* Same green as the dashboard cards, a bit darker. */
+/* Quiet: signing out is not a task of the day, it only closes the session. */
 .sign-out {
   width: 100%;
-  height: 40px;
-  --mat-button-filled-container-color: color-mix(
-    in srgb,
-    var(--mat-sys-on-primary-fixed-variant) 80%,
-    black
-  );
-  --mat-button-filled-label-text-color: var(--mat-sys-on-primary);
+  justify-content: flex-start;
+  --mat-button-text-label-text-color: var(--mat-sys-on-surface-variant);
 }

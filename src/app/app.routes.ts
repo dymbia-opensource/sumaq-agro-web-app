@@ -1,5 +1,7 @@
 import { provideCharts, withDefaultRegisterables } from "ng2-charts";
+import { inject } from "@angular/core";
 import { Routes } from "@angular/router";
+import { IamStore } from "./iam/application/iam.store";
 import { iamGuard } from "./iam/infrastructure/iam.guard";
 import { roleGuard } from "./shared/infrastructure/role.guard";
 import { activeSubscriptionGuard } from "./subscriptions/infrastructure/active-subscription.guard";
@@ -66,7 +68,13 @@ export const routes: Routes = [
     loadComponent: publicTraceability,
     title: "certification.trace.public-verification",
   },
-  { path: "", redirectTo: "/iam/sign-in", pathMatch: "full" },
+  // The root (and the logo of the side menu) opens the start page of the
+  // signed-in role, or the sign-in page for a visitor.
+  {
+    path: "",
+    pathMatch: "full",
+    redirectTo: () => inject(IamStore).activeUser()?.initialRoute ?? "/iam/sign-in",
+  },
 
   // Subscriptions: each of its pages chooses its own layout
   {

@@ -62,8 +62,8 @@
     },
     "plots": {
       "delete-pending": "Delete plot (pending)",
-      "manage": "Manage Plots",
-      "title": "My Registered Plots",
+      "manage": "Manage plots",
+      "title": "Manage plots",
       "subtitle": "Manage your plots with the Seed plan ({{ used }} of {{ quota }} slots used).",
       "plot-number": "Plot #{{ number }}",
       "crop": "Crop",
@@ -268,7 +268,25 @@
       "area": "Plot area: {{ area }} ha",
       "per-hectare": "per hectare",
       "yield-per-hectare": "Yield: {{ quantity }} {{ unit }} per hectare",
-      "no-area": "Delineate the plot or declare its area to calculate the cost per hectare."
+      "no-area": "Delineate the plot or declare its area to calculate the cost per hectare.",
+      "pdf": {
+        "title": "Cost report",
+        "campaign": "Campaign {{season}}",
+        "total": "Total invested",
+        "expenses-count": "{{count}} expenses recorded",
+        "breakdown": "Expense breakdown",
+        "category": "Category",
+        "amount": "Amount",
+        "inputs": "Inputs",
+        "labor": "Labor",
+        "freight": "Freight",
+        "indicators": "Campaign indicators",
+        "cost-per-hectare": "Cost per hectare",
+        "no-area": "No area recorded",
+        "breakeven": "Break-even price",
+        "no-yield": "No yield",
+        "expected-yield": "Expected yield"
+      }
     },
     "offline": {
       "no-connection": "You are offline. Your expenses are kept on this device.",

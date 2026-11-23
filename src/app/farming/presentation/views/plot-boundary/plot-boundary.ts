@@ -73,7 +73,6 @@ export class PlotBoundary {
 
   protected readonly breadcrumbs: Breadcrumb[] = [
     { label: 'farming.plots.manage', link: '/plots' },
-    { label: 'farming.steps.crop-data' },
     { label: 'farming.steps.map-title' },
   ];
 

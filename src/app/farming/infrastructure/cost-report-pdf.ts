@@ -1,8 +1,37 @@
+import { inject, Injectable } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
 import { buildPdfPage } from '../../shared/infrastructure/text-pdf';
-import { CampaignLedger, YieldUnit } from '../domain/model/entities/campaign-ledger.entity';
+import { CampaignLedger } from '../domain/model/entities/campaign-ledger.entity';
 import { ExpenseCategory } from '../domain/model/entities/expense-entry.entity';
 
-export function buildCostReportPdf(ledger: CampaignLedger, season: string, plotName: string, area: number): Blob {
+/**
+ * Builds the PDF cost report of a campaign (US-40) in the language chosen
+ * by the visitor.
+ */
+@Injectable({ providedIn: 'root' })
+export class CostReportPdf {
+  private readonly translate = inject(TranslateService);
+
+  /**
+   * Draws the one-page report.
+   * @param ledger - Ledger of the campaign.
+   * @param season - Season of the campaign.
+   * @param plotName - Name of the plot, if known.
+   * @param area - Area of the plot in hectares.
+   * @returns The PDF file.
+   */
+  build(ledger: CampaignLedger, season: string, plotName: string, area: number): Blob {
+    return buildCostReport(ledger, season, plotName, area, (key, params) => this.translate.instant(key, params));
+  }
+}
+
+function buildCostReport(
+  ledger: CampaignLedger,
+  season: string,
+  plotName: string,
+  area: number,
+  t: (key: string, params?: Record<string, unknown>) => string,
+): Blob {
   const operations: string[] = [];
   const fill = (color: string, x: number, y: number, width: number, height: number) => {
     operations.push([color, 'rg', x, y, width, height, 're f'].join(' '));
@@ -17,23 +46,24 @@ export function buildCostReportPdf(ledger: CampaignLedger, season: string, plotN
 
   fill('0.07 0.28 0.21', 0, 690, 595, 152);
   text('SUMAQAGRO', 48, 795, 12, true, '1 1 1');
-  text('Reporte de costos', 48, 756, 28, true, '1 1 1');
-  text('Campaña ' + season.slice(0, 55), 48, 724, 13, false, '1 1 1');
+  text(t('farming.reports.pdf.title'), 48, 756, 28, true, '1 1 1');
+  text(t('farming.reports.pdf.campaign', { season: season.slice(0, 55) }), 48, 724, 13, false, '1 1 1');
   if (plotName) text(plotName.slice(0, 65), 48, 663, 14, true);
 
   fill('0.89 0.95 0.90', 48, 563, 499, 74);
-  text('Total invertido', 64, 611, 12, true);
+  text(t('farming.reports.pdf.total'), 64, 611, 12, true);
   text(ledger.totalInvestment().format(), 64, 580, 24, true);
-  text(ledger.entries.length + ' gastos registrados', 365, 588, 12);
+  text(t('farming.reports.pdf.expenses-count', { count: ledger.entries.length }), 365, 588, 12);
 
-  text('Desglose de gastos', 48, 522, 17, true);
+  text(t('farming.reports.pdf.breakdown'), 48, 522, 17, true);
   fill('0.94 0.96 0.94', 48, 470, 499, 32);
-  text('Categoría', 64, 481, 11, true);
-  text('Importe', 530 - 7 * 6.116, 481, 11, true);
+  text(t('farming.reports.pdf.category'), 64, 481, 11, true);
+  const amountLabel = t('farming.reports.pdf.amount');
+  text(amountLabel, 530 - amountLabel.length * 6.116, 481, 11, true);
   const rows = [
-    ['Insumos', ExpenseCategory.INPUTS],
-    ['Mano de obra', ExpenseCategory.LABOR],
-    ['Transporte', ExpenseCategory.FREIGHT],
+    [t('farming.reports.pdf.inputs'), ExpenseCategory.INPUTS],
+    [t('farming.reports.pdf.labor'), ExpenseCategory.LABOR],
+    [t('farming.reports.pdf.freight'), ExpenseCategory.FREIGHT],
   ] as const;
   rows.forEach(([label, category], index) => {
     const y = 444 - index * 38;
@@ -44,12 +74,12 @@ export function buildCostReportPdf(ledger: CampaignLedger, season: string, plotN
     fill('0.86 0.90 0.86', 48, y - 12, 499, 1);
   });
 
-  text('Indicadores de campaña', 48, 314, 17, true);
-  const unit = ledger.yieldUnit === YieldUnit.SACK ? 'sacos' : ledger.yieldUnit.toLowerCase();
+  text(t('farming.reports.pdf.indicators'), 48, 314, 17, true);
+  const unit = t('farming.yield-unit.' + ledger.yieldUnit);
   const indicators = [
-    ['Costo por hectárea', area > 0 ? ledger.costPerHectare(area).format() : 'Sin área registrada'],
-    ['Precio de equilibrio', ledger.referenceYield() > 0 ? ledger.breakevenPrice().format() : 'Sin rendimiento'],
-    ['Rendimiento esperado', ledger.expectedYield + ' ' + unit],
+    [t('farming.reports.pdf.cost-per-hectare'), area > 0 ? ledger.costPerHectare(area).format() : t('farming.reports.pdf.no-area')],
+    [t('farming.reports.pdf.breakeven'), ledger.referenceYield() > 0 ? ledger.breakevenPrice().format() : t('farming.reports.pdf.no-yield')],
+    [t('farming.reports.pdf.expected-yield'), ledger.expectedYield + ' ' + unit],
   ];
   indicators.forEach(([label, value], index) => {
     const x = 48 + index * 169;

@@ -26,7 +26,7 @@ import {
 import { IamStore } from '../../iam/application/iam.store';
 import { FileDownloader } from '../../shared/infrastructure/file-downloader';
 import { SubscriptionsStore } from '../../subscriptions/application/subscriptions.store';
-import { buildCostReportPdf } from '../infrastructure/cost-report-pdf';
+import { CostReportPdf } from '../infrastructure/cost-report-pdf';
 import { OfflineSync } from '../infrastructure/offline/offline-sync';
 import { PendingOperationType } from '../infrastructure/offline/pending-operation';
 import { CloseCropCampaignCommand } from '../domain/model/commands/close-crop-campaign.command';
@@ -97,6 +97,7 @@ export class FarmingStore {
   private readonly pendingExpenses = new PendingExpenseAssembler();
   private readonly subscriptions = inject(SubscriptionsStore);
   private readonly fileDownloader = inject(FileDownloader);
+  private readonly costReportPdf = inject(CostReportPdf);
 
   private readonly plotsSignal = signal<FieldPlot[]>([]);
   private readonly campaignsByPlotSignal = signal<Map<number, CropCampaign[]>>(new Map());
@@ -752,7 +753,7 @@ export class FarmingStore {
     const plot = this.findPlot(campaign.plotId);
     this.fileDownloader.save({
       fileName: `cost-report-${campaign.season}.pdf`,
-      content: buildCostReportPdf(ledger, campaign.season, plot?.name ?? '', plot?.areaHectares ?? 0),
+      content: this.costReportPdf.build(ledger, campaign.season, plot?.name ?? '', plot?.areaHectares ?? 0),
     });
   };
 

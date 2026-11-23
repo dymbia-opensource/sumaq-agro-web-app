@@ -5,6 +5,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { Router, RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -26,6 +27,7 @@ import { settingsRouteFor } from '../../../infrastructure/navigation-config';
     MatDividerModule,
     MatIconModule,
     MatMenuModule,
+    MatTooltipModule,
     MatToolbarModule,
     TranslatePipe,
   ],

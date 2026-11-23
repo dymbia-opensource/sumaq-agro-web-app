@@ -74,7 +74,7 @@ export class ProfilesStore {
       .pipe(finalize(() => this.loadingSignal.set(false)))
       .subscribe({
         next: (profile) => this.profileSignal.set(profile),
-        error: (error: Error) => this.errorSignal.set(error.message),
+        error: () => this.errorSignal.set('profiles.errors.load'),
       });
   }
 
@@ -96,7 +96,7 @@ export class ProfilesStore {
       profile.updateName(command.firstName, command.lastName);
       profile.updatePhoneNumber(command.phoneNumber);
     } catch (error) {
-      this.errorSignal.set(error instanceof Error ? error.message : 'Invalid contact data.');
+      this.errorSignal.set(error instanceof Error ? error.message : 'profiles.errors.invalid-data');
       return;
     }
 
@@ -110,7 +110,7 @@ export class ProfilesStore {
           this.profileSignal.set(updatedProfile);
           this.contactSavedSignal.set(true);
         },
-        error: (error: Error) => this.errorSignal.set(error.message),
+        error: () => this.errorSignal.set('profiles.errors.save'),
       });
   }
 
@@ -139,7 +139,7 @@ export class ProfilesStore {
         this.membersSignal.set(members);
         this.technicalAdvisorsSignal.set(advisors);
       },
-      error: (error: Error) => this.errorSignal.set(error.message),
+      error: () => this.errorSignal.set('profiles.errors.load'),
     });
   }
 
@@ -184,7 +184,7 @@ export class ProfilesStore {
     try {
       cooperative.updateInstitutionalData(command);
     } catch (error) {
-      this.errorSignal.set(error instanceof Error ? error.message : 'Invalid institutional data.');
+      this.errorSignal.set(error instanceof Error ? error.message : 'profiles.errors.invalid-data');
       return;
     }
 
@@ -195,7 +195,7 @@ export class ProfilesStore {
       .pipe(finalize(() => this.savingSignal.set(false)))
       .subscribe({
         next: (updatedCooperative) => this.cooperativeSignal.set(updatedCooperative),
-        error: (error: Error) => this.errorSignal.set(error.message),
+        error: () => this.errorSignal.set('profiles.errors.save'),
       });
   }
 

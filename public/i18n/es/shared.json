@@ -7,7 +7,7 @@
     "major": "Principal",
     "agricultural-operation": "Operación agrícola",
     "institutional-management": "Gestión institucional",
-    "system": "Sistema"
+    "system": "Cuenta"
   },
   "option": {
     "my-plot": "Mi parcela",
@@ -19,12 +19,9 @@
     "settings": "Configuración y ayuda",
     "cooperative-dashboard": "Dashboard",
     "member-directory": "Padrón",
-    "cooperative-plot-health": "Salud de Parcelas",
-    "cooperative-certificates": "Certificados",
-    "cooperative-alerts": "Alertas",
     "cooperative-settings": "Configuración",
     "diagnosis-inbox": "Reportes de plagas",
-    "field-inspections": "Inspecciones",
+    "field-inspections": "Inspecciones de campo",
     "prescriptions": "Recetas técnicas",
     "assigned-plots": "Parcelas asignadas"
   },
@@ -35,9 +32,6 @@
     "connection": "Estado de conexión",
     "connected": "Conectado",
     "disconnected": "Sin conexión",
-    "offline-mode": "Modo offline",
-    "offline-mode-on": "Activado",
-    "offline-mode-off": "Desactivado",
     "notifications": "Notificaciones",
     "profile": "Mi perfil",
     "sign-out": "Cerrar sesión",

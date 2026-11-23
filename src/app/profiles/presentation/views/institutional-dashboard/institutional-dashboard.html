@@ -2,13 +2,13 @@
   <mat-progress-bar mode="indeterminate" />
 }
 @if (error(); as error) {
-  <p role="alert">{{ error }}</p>
+  <p role="alert">{{ error | translate }}</p>
 }
 @if (cooperative(); as cooperative) {
   <header class="dashboard-header">
     <div>
       <h1>{{ cooperative.legalName }}</h1>
-      <p>{{ cooperative.region }} · RUC {{ cooperative.ruc }}</p>
+      <p>{{ cooperative.region }} · {{ 'profiles.cooperative.settings.ruc' | translate }} {{ cooperative.ruc }}</p>
     </div>
   </header>
   <section class="kpi-grid">
@@ -27,7 +27,7 @@
         @if (!loading() && !error()) {
           <strong>{{ advisors().length }}</strong>
         }
-        <a mat-button routerLink="/cooperative/settings">{{ 'profiles.settings.title' | translate }}</a>
+        <a mat-button routerLink="/cooperative/settings">{{ 'option.cooperative-settings' | translate }}</a>
       </mat-card-content>
     </mat-card>
   </section>

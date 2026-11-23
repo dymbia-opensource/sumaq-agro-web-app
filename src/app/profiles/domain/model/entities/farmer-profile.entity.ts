@@ -44,7 +44,7 @@ export class FarmerProfile extends BaseEntity {
     const first = firstName.trim();
     const last = lastName.trim();
     if (!first || !last || first.length > 100 || last.length > 100) {
-      throw new Error('First and last names are required and must not exceed 100 characters.');
+      throw new Error('profiles.errors.name');
     }
     this._firstName = first;
     this._lastName = last;
@@ -65,7 +65,7 @@ export class FarmerProfile extends BaseEntity {
   updatePhoneNumber(value: string): void {
     const phoneNumber = value.trim();
     if (phoneNumber.length > 15) {
-      throw new Error('The phone number must not exceed 15 characters.');
+      throw new Error('profiles.errors.phone');
     }
     this._phoneNumber = phoneNumber;
   }

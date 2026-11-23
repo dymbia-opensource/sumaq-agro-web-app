@@ -76,7 +76,16 @@
         "representative": "Legal representative or manager",
         "email": "Institutional contact email",
         "phone": "Switchboard phone",
-        "address": "Headquarters address"
+        "address": "Headquarters address",
+        "page-title": "Cooperative settings",
+        "page-subtitle": "Manage the cooperative details and its agronomy team.",
+        "sections": "Settings sections",
+        "tab-cooperative": "Cooperative details",
+        "tab-team": "Technical team",
+        "card-title": "Institutional record",
+        "card-subtitle": "Update the official details tied to the legal and operating registration.",
+        "save": "Save changes",
+        "saving": "Saving..."
       },
       "registration": {
         "existing": "Your account already has a registered cooperative.",
@@ -145,7 +154,7 @@
       }
     },
     "settings": {
-      "title": "Account Settings and Farmer Support",
+      "title": "Settings and help",
       "subtitle": "Manage your account and find guidance for using SumaqAgro.",
       "account-tab": "Account",
       "help-tab": "Help Manuals",
@@ -250,7 +259,9 @@
       "last-name": "Last name",
       "name-error": "Enter a valid name up to 100 characters.",
       "edit-account": "Edit account",
-      "cancel": "Cancel"
+      "cancel": "Cancel",
+      "account-title": "Your account",
+      "account-subtitle": "Manage your contact details and the access to your account."
     },
     "advisory": {
       "title": "Responsible plot advisor",
@@ -270,6 +281,16 @@
         "conflict": "Duplicate assignments were found for this plot. Request a data review."
       },
       "by-director": "The board of your cooperative assigns the advisor of each plot."
+    },
+    "errors": {
+      "load": "The data could not be loaded. Please try again.",
+      "save": "The changes could not be saved. Please try again.",
+      "invalid-data": "The data entered is not valid.",
+      "institutional-required": "All institutional details are required.",
+      "ruc": "The tax ID must have 11 digits.",
+      "email": "The institutional email is not valid.",
+      "name": "First and last names are required and must not exceed 100 characters.",
+      "phone": "The phone number must not exceed 15 characters."
     }
   }
 }

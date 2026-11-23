@@ -4,10 +4,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { TranslatePipe } from '@ngx-translate/core';
-import {
-  Breadcrumb,
-  PageHeader,
-} from '../../../../shared/presentation/components/page-header/page-header';
+import { MatIconModule } from '@angular/material/icon';
+import { PageHeader } from '../../../../shared/presentation/components/page-header/page-header';
 import { CropStore } from '../../../application/crop.store';
 
 /** Assigned plot directory, including plots without cases and producers outside cooperatives. */
@@ -18,20 +16,16 @@ import { CropStore } from '../../../application/crop.store';
     TranslatePipe,
     MatButtonModule,
     MatCardModule,
+    MatIconModule,
     MatProgressBarModule,
     PageHeader,
   ],
   templateUrl: './advisor-plots.html',
   styles: [
-    ':host { display: block; max-width: 1100px; margin: auto; } .plots { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr)); gap:16px; } mat-card-content { padding-top:16px; } nav { display:flex; flex-wrap:wrap; gap:12px; margin-bottom:20px; }',
+    ':host { display: block; max-width: 1100px; margin: auto; } .plots { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr)); gap:16px; } mat-card-content { padding-top:16px; } app-page-header { margin-bottom:20px; } mat-card-content { display:flex; flex-direction:column; gap:12px; } .producer { display:flex; align-items:center; gap:8px; margin:0; } .producer mat-icon { color: var(--mat-sys-on-surface-variant); } .badges { display:flex; flex-wrap:wrap; gap:8px; } .badge { padding:4px 12px; border-radius:999px; font: var(--mat-sys-label-large); background: var(--mat-sys-secondary-container); color: var(--mat-sys-on-secondary-container); } .badge--warn { background: var(--mat-sys-tertiary-container); color: var(--mat-sys-on-tertiary-container); }',
   ],
 })
 export class AdvisorPlots {
-  protected readonly breadcrumbs: Breadcrumb[] = [
-    { label: 'option.diagnosis-inbox', link: '/pest-reports' },
-    { label: 'option.assigned-plots' },
-  ];
-
   readonly store = inject(CropStore);
   constructor() {
     effect(() => {
