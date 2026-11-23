@@ -135,6 +135,8 @@ export class CropStore {
   readonly bulletinsError = computed(() => this.errors()['bulletins'] ?? null);
   readonly importingObservation = computed(() => !!this.busy()['satellite-import']);
   readonly importError = computed(() => this.errors()['satellite-import'] ?? null);
+  readonly importingForecast = computed(() => !!this.busy()['forecast-import']);
+  readonly forecastImportError = computed(() => this.errors()['forecast-import'] ?? null);
   readonly writeError = computed(() => this.errors()['write'] ?? null);
   readonly error = computed(() => Object.values(this.errors()).find((value) => value) ?? null);
   readonly pendingPestReportsCount = computed(
@@ -301,7 +303,7 @@ export class CropStore {
   private clearPlotData(): void {
     this.requests.get('observations')?.unsubscribe();
     this.requests.get('alerts')?.unsubscribe();
-    for (const key of ['forecasts', 'bulletins', 'satellite-import']) {
+    for (const key of ['forecasts', 'bulletins', 'satellite-import', 'forecast-import']) {
       this.requests.get(key)?.unsubscribe();
       this.setBusy(key, false);
       this.setError(key, null);
@@ -374,6 +376,45 @@ export class CropStore {
         ),
       () => this.loadObservations(plot.id),
       'crop.errors.import-observations',
+    );
+  }
+
+  /** Only the owner can import the forecast, and only for a plot with its monitoring polygon. */
+  canImportForecast(): boolean {
+    return this.canImportObservation();
+  }
+
+  /**
+   * Imports the 5-day forecast of the selected plot from AgroMonitoring. The
+   * platform also issues the frost or water stress alerts of the region, so
+   * the alerts are read again afterwards.
+   */
+  importForecasts(): void {
+    const plot = this.selectedPlot();
+    if (!plot || !this.canImportForecast() || this.importingForecast()) return;
+    this.read(
+      'forecast-import',
+      this.api.importForecasts(plot.id).pipe(
+        catchError((error: unknown) =>
+          throwError(() =>
+            error instanceof HttpErrorResponse && error.status === 404
+              ? new Error('crop.errors.no-forecast-available')
+              : error,
+          ),
+        ),
+      ),
+      (imported) => {
+        const others = this.forecastsSignal().filter(
+          (item) => !imported.some((forecast) => forecast.forecastDate === item.forecastDate),
+        );
+        this.forecastsSignal.set(
+          [...others, ...imported].sort(
+            (a, b) => Date.parse(a.forecastDate) - Date.parse(b.forecastDate),
+          ),
+        );
+        this.loadAlerts(plot.region);
+      },
+      'crop.errors.import-forecasts',
     );
   }
 

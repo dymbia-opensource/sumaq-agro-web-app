@@ -1,6 +1,9 @@
 {
   "crop": {
-    "prescription-status": {"ISSUED":"Emitida","APPLIED":"Aplicada"},
+    "prescription-status": {
+      "ISSUED": "Emitida",
+      "APPLIED": "Aplicada"
+    },
     "applied-at": "Aplicada el",
     "apply-prescription": "Registrar aplicación",
     "confirm-application": "Confirma que ya aplicaste la receta.",
@@ -98,7 +101,9 @@
       "assessment-evidence": "Se requiere aplicación y evolución de la misma receta. Para cerrar, todas las recetas deben tener este seguimiento.",
       "assessment-conflict": "La evaluación ya guardada difiere de este borrador o del seguimiento actual. Actualiza el caso antes de continuar.",
       "assessment-partial": "La evaluación se guardó, pero el cierre no se confirmó. Reintenta con el mismo borrador para sincronizar sin duplicarla.",
-      "save-assessment": "No se pudo guardar la evaluación. Conservamos tu borrador para reintentar."
+      "save-assessment": "No se pudo guardar la evaluación. Conservamos tu borrador para reintentar.",
+      "import-forecasts": "No pudimos importar el pronóstico de la parcela.",
+      "no-forecast-available": "AgroMonitoring aún no tiene pronóstico para esta parcela."
     },
     "no-inspections": "Sin inspecciones",
     "no-prescriptions": "Sin recetas",
@@ -233,6 +238,7 @@
       "awaiting-evidence": "Esperando confirmación de aplicación y evolución del agricultor para una misma receta.",
       "evaluation-saved": "Evaluación guardada. El estado del caso refleja la conclusión registrada."
     },
-    "plot-selector": "Selector de parcela"
+    "plot-selector": "Selector de parcela",
+    "import-forecast": "Importar pronóstico de 5 días"
   }
 }

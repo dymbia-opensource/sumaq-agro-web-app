@@ -1,6 +1,9 @@
 {
   "crop": {
-    "prescription-status": {"ISSUED":"Issued","APPLIED":"Applied"},
+    "prescription-status": {
+      "ISSUED": "Issued",
+      "APPLIED": "Applied"
+    },
     "applied-at": "Applied at",
     "apply-prescription": "Record application",
     "confirm-application": "Confirm that you have applied the prescription.",
@@ -98,7 +101,9 @@
       "assessment-evidence": "Application and evolution for the same prescription are required. All prescriptions need this follow-up before closure.",
       "assessment-conflict": "The saved evaluation differs from this draft or the current evidence. Refresh the case before continuing.",
       "assessment-partial": "The evaluation was saved but closure was not confirmed. Retry the same draft to synchronize without duplicating it.",
-      "save-assessment": "Could not save the evaluation. Your draft is preserved for retry."
+      "save-assessment": "Could not save the evaluation. Your draft is preserved for retry.",
+      "import-forecasts": "We could not import the forecast of the plot.",
+      "no-forecast-available": "AgroMonitoring has no forecast for this plot yet."
     },
     "no-inspections": "No inspections",
     "no-prescriptions": "No prescriptions",
@@ -233,6 +238,7 @@
       "awaiting-evidence": "Waiting for farmer application and evolution records for the same prescription.",
       "evaluation-saved": "Evaluation saved. The case status reflects the recorded conclusion."
     },
-    "plot-selector": "Plot selector"
+    "plot-selector": "Plot selector",
+    "import-forecast": "Import 5-day forecast"
   }
 }
