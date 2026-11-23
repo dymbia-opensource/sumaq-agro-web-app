@@ -713,3 +713,48 @@ mat-chip.status-chip.revoked {
     display: none;
   }
 }
+
+/* Look-up of the producer account by email */
+.lookup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  border-radius: 12px;
+  background: var(--mat-sys-surface-container);
+}
+.lookup-hint,
+.link-account p {
+  margin: 0;
+  color: var(--mat-sys-on-surface-variant);
+}
+.lookup-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 12px;
+}
+.lookup-row mat-form-field {
+  flex: 1 1 280px;
+}
+.lookup-row button {
+  margin-top: 8px;
+}
+.lookup-result {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font: var(--mat-sys-body-medium);
+}
+.lookup-result.found {
+  color: var(--mat-sys-primary);
+}
+.lookup-result.warn {
+  color: var(--mat-sys-error);
+}
+.link-account {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}

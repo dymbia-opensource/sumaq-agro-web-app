@@ -3,7 +3,9 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { catchError, map, Observable, shareReplay, tap, throwError } from 'rxjs';
 import { BaseApi } from '../../shared/infrastructure/base-api';
+import { AgronomistInvitation } from '../domain/model/entities/agronomist-invitation.entity';
 import { CooperativeMember } from '../domain/model/entities/cooperative-member.entity';
+import { MemberCandidate } from '../domain/model/entities/member-candidate';
 import { Cooperative } from '../domain/model/entities/cooperative.entity';
 import { FarmerProfile } from '../domain/model/entities/farmer-profile.entity';
 import { PlotAdvisorAssignment } from '../domain/model/entities/plot-advisor-assignment';
@@ -97,8 +99,24 @@ export class ProfilesApi extends BaseApi {
     return this.cooperativeMembersEndpoint.getByUser(userId);
   }
 
-  inviteAgronomist(cooperativeId: number, email: string): Observable<unknown> {
+  inviteAgronomist(cooperativeId: number, email: string): Observable<AgronomistInvitation> {
     return this.cooperativesEndpoint.inviteAgronomist(cooperativeId, email);
+  }
+
+  getInvitations(cooperativeId: number): Observable<AgronomistInvitation[]> {
+    return this.cooperativesEndpoint.getInvitations(cooperativeId);
+  }
+
+  findMemberCandidate(cooperativeId: number, email: string): Observable<MemberCandidate | null> {
+    return this.cooperativesEndpoint.findMemberCandidate(cooperativeId, email);
+  }
+
+  linkMemberAccount(
+    cooperativeId: number,
+    memberId: number,
+    email: string,
+  ): Observable<CooperativeMember> {
+    return this.cooperativeMembersEndpoint.linkAccount(cooperativeId, memberId, email);
   }
 
   getAssignmentsByCooperative(cooperativeId: number): Observable<PlotAdvisorAssignment[]> {
