@@ -34,7 +34,7 @@ export class TechnicalPrescriptionsApiEndpoint {
 
   apply(id: number) {
     return this.http
-      .patch<TechnicalPrescriptionResource>(this.url + '/' + id + '/application', null)
+      .post<TechnicalPrescriptionResource>(this.url + '/' + id + '/application', null)
       .pipe(map(this.assembler.toEntityFromResource));
   }
 }

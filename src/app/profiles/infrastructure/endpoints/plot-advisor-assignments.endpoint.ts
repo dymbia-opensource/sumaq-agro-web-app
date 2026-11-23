@@ -58,7 +58,7 @@ export class PlotAdvisorAssignmentsApiEndpoint {
 
   reassign(assignmentId: number, agronomistUserId: number): Observable<PlotAdvisorAssignment> {
     return this.http
-      .put<PlotAdvisorAssignmentResource>(this.url + '/' + assignmentId, {
+      .post<PlotAdvisorAssignmentResource>(this.url + '/' + assignmentId + '/reassignments', {
         agronomistUserId,
       })
       .pipe(map(PlotAdvisorAssignmentAssembler.toEntity));

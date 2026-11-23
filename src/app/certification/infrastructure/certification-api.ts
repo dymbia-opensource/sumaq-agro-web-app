@@ -103,9 +103,8 @@ export class CertificationApi {
     );
   }
 
-  document(certificateNumber: string) {
-    return this.http.get(this.certificates + "/document", {
-      params: { certificateNumber },
+  document(id: number) {
+    return this.http.get(this.certificates + "/" + id + "/document", {
       responseType: "blob",
     });
   }

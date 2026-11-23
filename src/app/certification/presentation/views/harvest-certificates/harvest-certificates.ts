@@ -263,8 +263,8 @@ export class HarvestCertificates {
     });
   }
 
-  protected download(number: string): void {
-    this.run(this.api.document(number), (pdf) => {
+  protected download(id: number, number: string): void {
+    this.run(this.api.document(id), (pdf) => {
       const url = URL.createObjectURL(pdf);
       const anchor = document.createElement("a");
       anchor.href = url;

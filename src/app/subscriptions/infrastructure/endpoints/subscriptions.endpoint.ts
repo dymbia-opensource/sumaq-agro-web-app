@@ -31,7 +31,7 @@ export class SubscriptionsApiEndpoint {
 
   cancel() {
     return this.http
-      .post<SubscriptionResource>(this.url + '/cancel', null)
+      .post<SubscriptionResource>(this.url + '/cancellation', null)
       .pipe(map(this.assembler.toEntityFromResource));
   }
 

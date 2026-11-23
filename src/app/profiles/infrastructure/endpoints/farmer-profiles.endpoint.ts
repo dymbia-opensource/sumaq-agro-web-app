@@ -30,7 +30,7 @@ export class FarmerProfilesApiEndpoint extends ErrorHandlingEnabledBaseType {
   update(profile: FarmerProfile): Observable<FarmerProfile> {
     const { firstName, lastName, phoneNumber } = profile;
     return this.http
-      .put<FarmerProfileResource>(this.url + '/' + profile.id, {
+      .patch<FarmerProfileResource>(this.url + '/' + profile.id, {
         firstName,
         lastName,
         phoneNumber: phoneNumber || null,
