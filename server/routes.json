@@ -1,4 +1,0 @@
-{
-  "/api/v1/field-plots/:fieldPlotId/crop-campaigns": "/crop-campaigns?fieldPlotId=:fieldPlotId",
-  "/api/v1/*": "/$1"
-}
