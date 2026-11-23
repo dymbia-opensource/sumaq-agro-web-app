@@ -5,6 +5,58 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+## [2.1.0] - 2026-11-23
+
+Adapts the Web Application to the SumaqAgro Platform v1.1.0 and polishes the user experience of the three customer segments.
+
+### Added
+- **Subscriptions**: payment with Mercado Pago Checkout Pro and a payment result page that confirms the subscription.
+- **Farming**: expenses and actual yield recorded through the campaign ledger endpoints of the platform; finance pages and campaign figures available again.
+- **Crop**: import of the climate forecast from the platform.
+- **Certification**: loading indicator and translated quality categories.
+- **Theme**: SumaqAgro palette generated with Angular Material from the brand colors (field green and harvest gold).
+
+### Changed
+- **IAM**: follows the learning-center layout while keeping the DDD subfolders; the interceptor only adds the bearer token and sign-in/sign-out no longer depend on the router.
+- **Certification**: rebuilt with DDD: entities, commands, endpoints, requests, responses, assemblers and a `CertificationStore`.
+- **Farming**: the cost report PDF is built in the infrastructure layer and translated to the selected language.
+- **Navigation**: pages opened from the side menu no longer show a breadcrumb, page titles match the menu labels, every role shares the same names for the shared pages, and the logo opens the start page of the signed-in role.
+- **Agronomist**: the diagnosis inbox opens the menu, assigned plots show status badges, and "My profile" shows the account of the agronomist instead of the farmer one.
+- **Layout**: the side menu can be collapsed on desktop, the sign-out button is quieter, and the connection chip explains the offline mode.
+- **Internationalization**: cooperative settings, domain errors of Profiles and the cost report are translated into English and Spanish.
+
+### Removed
+- Legacy routes, redirects, fake API files and the unused endpoints of the previous contract.
+- Unused advisor and delete confirmation dialogs of the cooperative settings.
+
+### Fixed
+- Translations not loading because of a circular dependency in the IAM interceptor.
+- Farmer profile updated with `PATCH`, as the platform expects.
+- Certificate documents retrieved and downloaded by id.
+
+## [2.0.0] - 2026-11-15
+
+The SumaqAgro Web Application now works with real data from the SumaqAgro Platform (Spring Boot) instead of the fake API.
+
+### Added
+- **IAM**: sign-in, sign-up with profile names and password confirmation, password recovery, session expiration, authentication guard and interceptor, language switching on the auth pages.
+- **Subscriptions**: plans catalog restricted by customer segment, checkout, billing history and cancellation; the workspace requires an active subscription and the plot quota comes from the plan.
+- **Profiles**: cooperative registration, member registry with filters and member dossiers, advisor assignment per plot, inline account editing, account settings and help manuals.
+- **Crop**: assigned plots view for the agronomist, farmer case view and advisory panel, regional bulletins.
+- **Farming**: campaigns, plot detail, soil analysis, cost report PDF and the offline expense queue.
+- **Certification**: certificate printing.
+- **Shared**: plot search with autocomplete in the toolbar and the active section marked in the side menu.
+
+### Changed
+- Data now comes from the platform REST API on Render.
+- Bounded contexts renamed: `field-management` → `farming`, `crop-health` → `crop`, `harvest-certification` → `certification`; routes no longer use those prefixes.
+- `Money` moved to the shared kernel and `LayoutService` renamed to `LayoutStore`.
+
+### Removed
+- Notifications button, demo coupons and payment components, and the free plan.
+
 ## [1.0.1] - 2026-10-09
 
 ### Added
@@ -63,5 +115,8 @@ First version of the SumaqAgro Web Application, deployed on Firebase Hosting wit
 - Cooperative dashboard and institutional settings loaded for the selected user.
 - Missing list responses of the Field Management infrastructure.
 
-[Unreleased]: https://github.com/dymbia-opensource/sumaqAgro-appweb/compare/v1.0.0...develop
-[1.0.0]: https://github.com/dymbia-opensource/sumaqAgro-appweb/releases/tag/v1.0.0
+[Unreleased]: https://github.com/dymbia-opensource/sumaq-agro-web-app/compare/v2.1.0...develop
+[2.1.0]: https://github.com/dymbia-opensource/sumaq-agro-web-app/compare/v2.0.0...v2.1.0
+[2.0.0]: https://github.com/dymbia-opensource/sumaq-agro-web-app/compare/v1.0.1...v2.0.0
+[1.0.1]: https://github.com/dymbia-opensource/sumaq-agro-web-app/compare/v1.0.0...v1.0.1
+[1.0.0]: https://github.com/dymbia-opensource/sumaq-agro-web-app/releases/tag/v1.0.0
