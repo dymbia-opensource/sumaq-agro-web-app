@@ -1,22 +1,18 @@
 import { DecimalPipe } from "@angular/common";
-import { HttpErrorResponse } from "@angular/common/http";
 import { Component, inject } from "@angular/core";
-import { toSignal } from "@angular/core/rxjs-interop";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ActivatedRoute } from "@angular/router";
 import { TranslatePipe } from "@ngx-translate/core";
-import { catchError, map, of, startWith, switchMap } from "rxjs";
-import { CertificationApi } from "../../../infrastructure/certification-api";
-import { PublicTraceabilityResource } from "../../../infrastructure/responses/certification-workspace.response";
+import { CertificationStore } from "../../../application/certification.store";
 
-interface Verification {
-  loading?: boolean;
-  error?: string;
-  result?: PublicTraceabilityResource;
-}
-
+/**
+ * Public page of the QR code of a certificate (`/verify?number=...&hash=...`):
+ * it tells whether the certificate is authentic and still valid.
+ */
 @Component({
   selector: "app-public-traceability",
   imports: [DecimalPipe, TranslatePipe],
+  providers: [CertificationStore],
   template: `
     <article class="trace-card">
       <p class="eyebrow">
@@ -28,7 +24,7 @@ interface Verification {
       } @else if (state.error) {
         <h1>{{ "certification.trace.verification-failed" | translate }}</h1>
         <p>{{ state.error | translate }}</p>
-      } @else if (state.result; as result) {
+      } @else if (state.record; as result) {
         @if (result.status === "REVOKED") {
           <h1>{{ "certification.trace.revoked" | translate }}</h1>
           <p>{{ "certification.trace.not-valid" | translate }}</p>
@@ -136,35 +132,15 @@ interface Verification {
   ],
 })
 export class PublicTraceability {
-  private readonly route = inject(ActivatedRoute);
-  private readonly api = inject(CertificationApi);
+  private readonly store = inject(CertificationStore);
 
-  protected readonly verification = toSignal<Verification, Verification>(
-    this.route.queryParamMap.pipe(
-      switchMap((params) => {
-        const number = params.get("number")?.trim();
-        const hash = params.get("hash")?.trim();
-        if (!number || !hash)
-          return of<Verification>({
-            error: "certification.workspace.missing-link",
-          });
-        if (!/^[a-f0-9]{64}$/i.test(hash)) {
-          return of<Verification>({ error: 'certification.workspace.invalid-hash' });
-        }
-        return this.api.verify(number, hash).pipe(
-          map((result): Verification => ({ result })),
-          catchError((error: unknown) =>
-            of<Verification>({
-              error:
-                error instanceof HttpErrorResponse && error.status === 404
-                  ? "certification.workspace.not-found"
-                  : "certification.workspace.verification-unavailable",
-            }),
-          ),
-          startWith<Verification, [Verification]>({ loading: true }),
-        );
-      }),
-    ),
-    { initialValue: { loading: true } },
-  );
+  protected readonly verification = this.store.verification;
+
+  constructor() {
+    inject(ActivatedRoute)
+      .queryParamMap.pipe(takeUntilDestroyed())
+      .subscribe((params) =>
+        this.store.verifyCertificate(params.get("number"), params.get("hash")),
+      );
+  }
 }
