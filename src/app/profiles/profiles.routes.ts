@@ -54,6 +54,6 @@ export const profilesRoutes: Routes = [
   {
     path: 'cooperative/settings',
     loadComponent: cooperativeSettings,
-    title: 'profiles.cooperative.settings.title',
+    title: 'profiles.cooperative.settings.page-title',
   },
 ];
