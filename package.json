@@ -4,7 +4,6 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "api": "json-server --watch server/db.json --routes server/routes.json --port 3000",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
@@ -35,7 +34,6 @@
     "@angular/compiler-cli": "^22.2.0",
     "@types/leaflet": "^1.9.22",
     "jsdom": "^30.0.0",
-    "json-server": "^0.17.4",
     "prettier": "^3.8.1",
     "typescript": "~6.0.2",
     "vitest": "^5.0.0"
