@@ -1,13 +1,12 @@
 <app-page-header
-  [breadcrumbs]="breadcrumbs"
   [title]="'crop.advisor.plots' | translate"
   [subtitle]="'crop.advisor.scope-notice' | translate"
-/>
-<nav>
-  <button mat-button (click)="reload()" [disabled]="store.loading() || store.saving()">
+>
+  <button mat-stroked-button (click)="reload()" [disabled]="store.loading() || store.saving()">
+    <mat-icon>refresh</mat-icon>
     {{ 'crop.advisor.refresh' | translate }}
   </button>
-</nav>
+</app-page-header>
 @if (store.clinicalLoading()) {
   <mat-progress-bar mode="indeterminate" [attr.aria-label]="'common.loading' | translate" />
 }
@@ -23,14 +22,19 @@
           ><mat-card-subtitle>{{ plot.region }}</mat-card-subtitle></mat-card-header
         >
         <mat-card-content>
-          <p>
+          <p class="producer">
+            <mat-icon aria-hidden="true">person</mat-icon>
             {{ 'crop.advisor.producer' | translate }}: {{ store.producerName(plot.ownerUserId) }}
           </p>
-          <p>{{ 'crop.advisor.responsible' | translate }}: {{ store.currentAdvisor()?.name }}</p>
-          <p>{{ 'crop.advisor.active' | translate }}</p>
-          @if (!store.clinicalLoading() && !store.clinicalError()) {
-            <p>{{ 'crop.advisor.pending' | translate }}: {{ pending(+plot.id) }}</p>
-          }
+          <div class="badges">
+            <span class="badge">{{ 'crop.advisor.active' | translate }}</span>
+            @if (!store.clinicalLoading() && !store.clinicalError()) {
+              @let open = pending(+plot.id);
+              <span class="badge" [class.badge--warn]="open > 0">
+                {{ 'crop.advisor.pending' | translate }}: {{ open }}
+              </span>
+            }
+          </div>
         </mat-card-content>
         <mat-card-actions>
           <a mat-stroked-button routerLink="/pest-reports" [queryParams]="{ plotId: plot.id }">{{
