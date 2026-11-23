@@ -55,6 +55,9 @@ export class CropStore {
   private readonly bulletinsSignal = signal<RegionalBulletin[]>([]);
   private readonly inspectionsSignal = signal<FieldInspection[]>([]);
   private readonly prescriptionsSignal = signal<TechnicalPrescription[]>([]);
+  /** Names of the producers and agronomists shown in the views, by user id. */
+  private readonly namesSignal = signal<ReadonlyMap<number, string>>(new Map());
+  private readonly requestedNames = new Set<number>();
 
   readonly activeUser = this.session.activeUser;
   readonly scopeReady = computed(() => this.ready() && this.scopeUser() === this.activeUser());
@@ -168,6 +171,29 @@ export class CropStore {
       this.farming.selectedPlotId();
       untracked(() => this.clearPlotData());
     });
+    // Read model of names: every person shown in a plot, report, visit or
+    // prescription is looked up once in Profiles.
+    effect(() => {
+      const ids = [
+        ...this.plots().map((plot) => plot.ownerUserId),
+        ...this.pestReports().map((report) => report.reporterId),
+        ...this.inspections().map((inspection) => inspection.inspectorUserId),
+        ...this.prescriptions().map((prescription) => prescription.agronomistId),
+      ];
+      untracked(() => this.loadNames(ids));
+    });
+  }
+
+  /** Looks up the names that are not known yet. */
+  private loadNames(ids: readonly (number | null | undefined)[]): void {
+    for (const id of new Set(ids)) {
+      if (typeof id !== 'number' || id <= 0 || this.requestedNames.has(id)) continue;
+      this.requestedNames.add(id);
+      this.profiles.advisorByUser(id).subscribe((summary) => {
+        if (summary?.name)
+          this.namesSignal.update((names) => new Map(names).set(id, summary.name));
+      });
+    }
   }
 
   private loadScope(user: SessionParticipant | null): void {
@@ -271,10 +297,11 @@ export class CropStore {
     );
   }
 
-  /** Uses the current account's display name; other producers remain identifiable by account ID. */
+  /** Name of a producer, from its profile; the account id while it loads. */
   producerName(userId: number): string {
     const user = this.session.activeUser();
-    return user?.id === userId ? user.displayName : `#${userId}`;
+    if (user?.id === userId) return user.displayName;
+    return this.namesSignal().get(userId) ?? `#${userId}`;
   }
 
   private cooperativeScope(cooperativeId: number, advisor: AdvisorSummary | null) {
@@ -720,6 +747,7 @@ export class CropStore {
     return (
       this.advisors().find((item) => item.userId === id)?.name ||
       (this.session.activeUser()?.id === id ? this.session.activeUser()?.displayName : undefined) ||
+      this.namesSignal().get(id) ||
       '#' + id
     );
   }

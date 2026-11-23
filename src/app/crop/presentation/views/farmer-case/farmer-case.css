@@ -237,16 +237,6 @@ mat-card.case-summary nav a[mat-stroked-button]:hover {
   font-size: 0.9rem;
 }
 
-.follow-up-note {
-  margin: 0 0 1rem;
-  padding: 0.85rem 1.1rem;
-  background: var(--info-bg);
-  border: 1px solid var(--info-border);
-  border-radius: 12px;
-  color: var(--info-text);
-  font-size: 0.88rem;
-  font-weight: 500;
-}
 
 /* =========================================================
    FORMULARIOS DE SEGUIMIENTO Y EVALUACIÓN AGRONÓMICA
