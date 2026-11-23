@@ -11,8 +11,8 @@ mat-card {
 
 /* Same dark green as the dashboard KPI cards. */
 .total-card {
-  --mat-card-elevated-container-color: var(--mat-sys-on-tertiary-fixed-variant);
-  color: var(--mat-sys-on-tertiary);
+  --mat-card-elevated-container-color: var(--mat-sys-on-primary-fixed-variant);
+  color: var(--mat-sys-on-primary);
 }
 
 mat-icon {

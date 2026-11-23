@@ -148,7 +148,6 @@
     "inspection-saved": "The inspection was scheduled successfully.",
     "report-status": "Status",
     "view-photo": "View photo",
-    "workflow-demo": "Records are saved to the test API. Available actions depend on the selected demo role.",
     "report-statuses": {
       "PENDING": "Pending",
       "INSPECTED": "Inspected",
@@ -182,7 +181,6 @@
       "COMPLETED": "Completed"
     },
     "case": {
-      "pending-extra": "Case assessment and tracking the evolution of treatment are pending.",
       "subtitle": "Review the original report, inspections, prescriptions, and crop progress.",
       "back": "Back to reports",
       "open": "View case and follow-up",

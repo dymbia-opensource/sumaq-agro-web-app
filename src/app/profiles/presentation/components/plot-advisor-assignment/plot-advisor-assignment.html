@@ -3,7 +3,7 @@
     <mat-progress-bar mode="indeterminate" [attr.aria-label]="'common.loading' | translate" />
   }
   @if (responsibility(); as current) {
-    <p>{{ 'profiles.cooperative.supervision.in-charge' | translate }} <strong>#{{ current.advisorUserId }}</strong></p>
+    <p>{{ 'profiles.cooperative.supervision.in-charge' | translate }} <strong>{{ advisorName() ?? '#' + current.advisorUserId }}</strong></p>
   } @else if (!loading() && !error()) {
     <p>{{ 'profiles.cooperative.supervision.none' | translate }}</p>
   }

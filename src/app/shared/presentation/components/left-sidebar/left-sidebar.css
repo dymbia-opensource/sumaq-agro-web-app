@@ -72,14 +72,14 @@
   padding: 12px 8px 0;
 }
 
-/* Same teal as the dashboard cards, a bit darker. */
+/* Same green as the dashboard cards, a bit darker. */
 .sign-out {
   width: 100%;
   height: 40px;
   --mat-button-filled-container-color: color-mix(
     in srgb,
-    var(--mat-sys-on-tertiary-fixed-variant) 80%,
+    var(--mat-sys-on-primary-fixed-variant) 80%,
     black
   );
-  --mat-button-filled-label-text-color: var(--mat-sys-on-tertiary);
+  --mat-button-filled-label-text-color: var(--mat-sys-on-primary);
 }

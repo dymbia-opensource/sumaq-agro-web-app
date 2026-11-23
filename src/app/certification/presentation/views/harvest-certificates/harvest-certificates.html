@@ -3,6 +3,10 @@
   [title]="'certification.page-title' | translate"
 />
 
+@if (busy() || store.state().loading) {
+<mat-progress-bar mode="indeterminate" [attr.aria-label]="'common.loading' | translate" />
+}
+
 @let state = store.state(); @if (state.loading) {
 <p role="status">{{ 'certification.loading' | translate }}</p>
 } @else if (state.error) {
@@ -176,7 +180,7 @@
       </dd>
       } @if (batch.qualityCategory) {
       <dt>{{ 'certification.workspace.quality' | translate }}</dt>
-      <dd>{{ batch.qualityCategory }} · {{ batch.qualityScore | number }}</dd>
+      <dd>{{ 'certification.quality-category.' + batch.qualityCategory | translate }} · {{ batch.qualityScore | number }}</dd>
       } @if (entry.certificate; as certificate) {
       <dt>{{ 'certification.workspace.number' | translate }}</dt>
       <dd>

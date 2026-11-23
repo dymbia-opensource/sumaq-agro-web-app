@@ -148,7 +148,6 @@
     "inspection-saved": "La inspección se programó correctamente.",
     "report-status": "Estado",
     "view-photo": "Ver foto",
-    "workflow-demo": "Los datos se guardan en la API de prueba. Las acciones disponibles dependen del rol demo seleccionado.",
     "report-statuses": {
       "PENDING": "Pendiente",
       "INSPECTED": "Inspeccionado",
@@ -182,7 +181,6 @@
       "COMPLETED": "Completada"
     },
     "case": {
-      "pending-extra": "La evaluación del caso y el seguimiento de la evolución están pendientes.",
       "subtitle": "Revisa el reporte original, las inspecciones, las recetas y la evolución del cultivo.",
       "back": "Volver a reportes",
       "open": "Ver caso y seguimiento",

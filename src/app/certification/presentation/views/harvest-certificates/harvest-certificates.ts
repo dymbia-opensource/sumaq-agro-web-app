@@ -3,6 +3,7 @@ import { Component, computed, effect, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { catchError, map, of, startWith, Subject, switchMap } from 'rxjs';
@@ -22,7 +23,7 @@ import { QualityCertificate } from '../../../domain/model/entities/quality-certi
  */
 @Component({
   selector: 'app-harvest-certificates',
-  imports: [FormsModule, DatePipe, DecimalPipe, RouterLink, TranslatePipe, MatButtonModule, PageHeader],
+  imports: [FormsModule, DatePipe, DecimalPipe, RouterLink, TranslatePipe, MatButtonModule, MatProgressBarModule, PageHeader],
   providers: [CertificationStore],
   templateUrl: './harvest-certificates.html',
   styleUrl: './harvest-certificates.css',
