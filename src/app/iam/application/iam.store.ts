@@ -1,6 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { computed, inject, Injectable, signal } from '@angular/core';
-import { Router } from '@angular/router';
 import { RequestPasswordResetCommand } from '../domain/model/commands/request-password-reset.command';
 import { ResetPasswordCommand } from '../domain/model/commands/reset-password.command';
 import { SignInCommand } from '../domain/model/commands/sign-in.command';
@@ -134,12 +133,17 @@ export class IamStore {
   }
 
   /**
-   * Executes sign-in and, on success, opens the page the user asked for or its start page.
+   * Executes sign-in and tells the view which page to open next: the private
+   * page the user asked for, or the start page of their role.
    * @param signInCommand - Credentials command.
-   * @param router - Router used for post-auth navigation.
+   * @param onSignedIn - Receives the page to open.
    * @param returnUrl - Private page the user tried to open before signing in.
    */
-  signIn(signInCommand: SignInCommand, router: Router, returnUrl: string | null = null): void {
+  signIn(
+    signInCommand: SignInCommand,
+    onSignedIn: (destination: string) => void,
+    returnUrl: string | null = null,
+  ): void {
     if (this.isLoading()) return;
     this.clearSession();
     this.errorSignal.set(null);
@@ -152,7 +156,7 @@ export class IamStore {
         const destination = isSafeReturnUrl
           ? returnUrl
           : (this.activeUser()?.initialRoute ?? '/iam/sign-in');
-        router.navigateByUrl(destination, { replaceUrl: true }).then();
+        onSignedIn(destination);
       },
       error: (error: unknown) => {
         this.loadingSignal.set(false);
@@ -183,12 +187,11 @@ export class IamStore {
   }
 
   /**
-   * Clears the authentication state and redirects to sign-in.
-   * @param router - Router used for sign-out navigation.
+   * Clears the authentication state. The shells (`Layout`, `SubscriptionsShell`)
+   * watch the session and open the sign-in page.
    */
-  signOut(router: Router): void {
+  signOut(): void {
     this.clearSession();
-    router.navigate(['/iam/sign-in'], { replaceUrl: true }).then();
   }
 
   /**
