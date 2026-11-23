@@ -1,34 +1,26 @@
-import { BaseAssembler } from '../../../shared/infrastructure/base-assembler';
-import { HarvestBatch } from '../../domain/model/entities/harvest-batch.entity';
+import { CertificateStatus } from '../../domain/model/entities/certificate-status';
+import { HarvestCropType } from '../../domain/model/entities/crop-type';
 import { PublicTraceabilityRecord } from '../../domain/model/entities/public-traceability-record.entity';
-import { QualityCertificate } from '../../domain/model/entities/quality-certificate.entity';
-import {
-  PublicTraceabilityResource,
-  PublicTraceabilityResponse,
-} from '../responses/public-traceability.response';
+import { QualityCategory } from '../../domain/model/entities/quality-category';
+import { PublicTraceabilityResource } from '../responses/public-traceability.response';
 
-/** Reconstruye el modelo público a partir del certificado y el lote recibidos. */
-export class PublicTraceabilityAssembler implements BaseAssembler<
-  PublicTraceabilityRecord,
-  PublicTraceabilityResource,
-  PublicTraceabilityResponse
-> {
-  toEntityFromResource(resource: PublicTraceabilityResource): PublicTraceabilityRecord {
-    return new PublicTraceabilityRecord(
-      new QualityCertificate(resource.certificate),
-      new HarvestBatch(resource.batch),
-    );
-  }
-
-  toResourceFromEntity(entity: PublicTraceabilityRecord): PublicTraceabilityResource {
-    return {
-      id: entity.id as number,
-      certificate: { ...entity.certificate.data },
-      batch: { ...entity.batch.data },
-    };
-  }
-
-  toEntitiesFromResponse(response: PublicTraceabilityResponse): PublicTraceabilityRecord[] {
-    return response.records.map((resource) => this.toEntityFromResource(resource));
-  }
+/** Maps the public verification of a certificate. */
+export class PublicTraceabilityAssembler {
+  /**
+   * Converts the verification returned by the API into the domain record.
+   * @param resource - Public verification.
+   */
+  toEntityFromResource = (resource: PublicTraceabilityResource): PublicTraceabilityRecord =>
+    new PublicTraceabilityRecord({
+      certificateNumber: resource.certificateNumber,
+      status: resource.status as CertificateStatus,
+      authentic: resource.authentic,
+      batchCode: resource.batchCode,
+      cropType: resource.cropType as HarvestCropType | null,
+      qualityCategory: resource.qualityCategory as QualityCategory | null,
+      qualityScore: resource.qualityScore,
+      plotName: resource.plotName,
+      region: resource.region,
+      seedVariety: resource.seedVariety,
+    });
 }

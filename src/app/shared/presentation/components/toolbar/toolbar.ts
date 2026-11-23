@@ -70,6 +70,6 @@ export class Toolbar {
   });
   protected signOut(): void {
     this.layout.closeSidebarOnHandset();
-    this.session.signOut(this.router);
+    this.session.signOut();
   }
 }

@@ -1,4 +1,12 @@
-import { QualityCertificateProps } from '../../domain/model/entities/quality-certificate.entity';
-
-/** Forma en que la API entrega un certificado de calidad. */
-export interface QualityCertificateResource extends QualityCertificateProps {}
+/** Quality certificate as the platform returns it (`/quality-certificates`). */
+export interface QualityCertificateResource {
+  id: number;
+  certificateNumber: string;
+  harvestBatchId: number;
+  qualityCategory: string;
+  certificateHash: string;
+  issuedByUserId: number;
+  issuedAt: string;
+  /** `ACTIVE` or `REVOKED`. */
+  status: string;
+}

@@ -66,7 +66,7 @@ export class SignInForm {
     if (this.form.invalid) return;
     this.store.signIn(
       new SignInCommand(this.form.getRawValue()),
-      this.router,
+      (destination) => void this.router.navigateByUrl(destination, { replaceUrl: true }),
       this.route.snapshot.queryParamMap.get('returnUrl'),
     );
   }

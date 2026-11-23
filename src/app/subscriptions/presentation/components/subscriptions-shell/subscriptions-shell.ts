@@ -43,6 +43,6 @@ export class SubscriptionsShell {
   }
 
   protected signOut(): void {
-    this.session.signOut(this.router);
+    this.session.signOut();
   }
 }
