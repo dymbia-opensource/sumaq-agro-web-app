@@ -9,7 +9,7 @@
 | | URL |
 |---|---|
 | Deployed application | https://sumaqagro-appweb.web.app |
-| Deployed fake API | https://sumaqagro-fake-api.onrender.com/api/v1 |
+| RESTful API (SumaqAgro Platform) | https://sumaq-agro-platform.onrender.com/api/v1 |
 
 ## Requirements
 
@@ -24,59 +24,39 @@ Libraries do not need to be installed individually: they are listed in `package.
 ## Running locally
 
 ```bash
-git clone https://github.com/dymbia-opensource/sumaqAgro-appweb.git
-cd sumaqAgro-appweb
+git clone https://github.com/dymbia-opensource/sumaq-agro-web-app.git
+cd sumaq-agro-web-app
 npm install
 ```
 
-Until the RESTful API is ready, data comes from a **fake API** using json-server (`server/db.json`). Open **two terminals**:
+The data comes from the **SumaqAgro Platform** RESTful API ([sumaq-agro-platform](https://github.com/dymbia-opensource/sumaq-agro-platform), v1.1.0). Start it first on `http://localhost:8080` (see its README: MySQL, `JWT_SECRET`, and the other environment variables), then start the application:
 
 ```bash
-# Terminal 1: fake API at http://localhost:3000/api/v1
-npm run api
-```
-
-```bash
-# Terminal 2: application at http://localhost:4200
+# Application at http://localhost:4200
 npm start
 ```
 
-Open `http://localhost:4200` to sign in or register an account. During development,
-IAM simulates authentication and restores the session within each tab for 30 minutes;
-mock accounts remain in memory, and password recovery is a preview.
-Integration with the real backend is still pending.
+`src/environments/environment.development.ts` points to `http://localhost:8080/api/v1`. The platform allows requests from `http://localhost:4200` (`FRONTEND_ORIGIN`).
+
+Open `http://localhost:4200`, register an account in `/iam/sign-up`, and sign in. A new account has no plan yet, so it opens the plan catalog first:
+
+* With Mercado Pago test credentials in the platform (`MERCADOPAGO_ACCESS_TOKEN`), pay with a Mercado Pago test buyer account. Mercado Pago sends you back to `/subscriptions/payment-result`, which confirms the payment.
+* In the `dev` profile of the platform, the checkout also offers a **simulated payment**, which activates the plan without Mercado Pago.
+
+The emails of the platform link to the application: password recovery opens `/iam/reset-password?token=...`, and an agronomist invitation opens `/iam/sign-up?invitationToken=...`.
 
 The layer and test organization is documented in [Frontend architecture](docs/frontend-architecture.md).
-
-### Test accounts with existing data
-
-With `npm run api` and `npm start` running, open **Try sample data** on the
-sign-in page. Selecting an account fills in the form; then click **Sign in**.
-
-| Role | Email | Linked ID in the fake API |
-|---|---|---|
-| Farmer | `farmer@sumaqagro.test` | 1: Guillermo's profile and plots |
-| Cooperative director | `cooperative@sumaqagro.test` | 3: Cooperativa Agraria Valle del Mantaro |
-| Agronomist | `agronomist@sumaqagro.test` | 4: existing advisor and assignments |
-
-Shared demo password: `SumaqAgroDemo2026!`.
-
-These accounts are reinitialized after reloading and only work with
-mock authentication during development. New accounts retain their own
-identifiers and start without associated data; they do not inherit anyone
-else's information. `server/db.json` is not modified, and passwords are not stored in the browser.
 
 | Command | Description |
 |---|---|
 | `npm start` | Runs the application in development mode (`ng serve`) |
-| `npm run api` | Runs the fake API on port 3000 |
 | `npm run build` | Builds for production in `dist/sumaqAgro-appweb/browser` |
 | `npm test` | Runs unit tests with Vitest |
 | `npm run check:architecture` | Checks layer boundaries, imports, and file organization |
 
 ## Deployment
 
-The application is deployed on **Firebase Hosting**, and the fake API is deployed on **Render**. The API URL used by the deployed version is configured in `src/environments/environment.ts`.
+The application is deployed on **Firebase Hosting** and uses the SumaqAgro Platform deployed on **Render**. The API URL used by the deployed version is configured in `src/environments/environment.ts`; the platform must allow the deployed origin in `FRONTEND_ORIGIN`.
 
 ### Web application (Firebase Hosting)
 
@@ -96,69 +76,52 @@ firebase deploy --only hosting
 
 `firebase.json` publishes `dist/sumaqAgro-appweb/browser` and redirects every route to `index.html`, allowing Angular to open the correct view when the page is reloaded. `.firebaserc` specifies the project (`sumaqagro-appweb`).
 
-### Fake API (Render)
-
-Render automatically redeploys the fake API after every push to `develop`. To create it in another account, select **New → Web Service**, use this repository, and configure:
-
-| Field | Value |
-|---|---|
-| Branch | `develop` |
-| Runtime | Node |
-| Build Command | `npm install --include=dev` |
-| Start Command | `npx json-server server/db.json --routes server/routes.json --host 0.0.0.0 --port $PORT` |
-| Instance Type | Free |
-
-Then update `platformProviderApiBaseUrl` in `src/environments/environment.ts` with the new URL. On the free plan, the service spins down after 15 minutes of inactivity (the first request takes a few seconds), and changes made through the application are lost when it restarts.
-
 ## Structure
 
-Each folder in `src/app` is a *bounded context* (a component in the C4 diagram in section 4.6 of the report) with four layers: `domain`, `application`, `infrastructure`, and `presentation`. File names match those in the class diagrams in section 4.7.
+Each folder in `src/app` is a *bounded context* with four layers: `domain`, `application`, `infrastructure`, and `presentation`.
 
 ```
-sumaqAgro-appweb/
-├── docs/
-│   ├── diagram-web-aplication/            # Web Application class diagrams (PlantUML)
-│   └── diagram-restful-api/               # RESTful API class diagrams (PlantUML)
+sumaq-agro-web-app/
+├── docs/                                  # Frontend architecture and PlantUML diagrams
 ├── public/                                # Copied unchanged into the build
 │   ├── i18n/
 │   │   ├── es/                            # shared.json + one file per bounded context
 │   │   └── en/                            # The same files in English
 │   └── images/
-├── server/
-│   ├── db.json                            # Fake API data (json-server)
-│   └── routes.json                        # Rewrites /api/v1/* → /*
 ├── src/
 │   ├── app/
 │   │   ├── shared/                        # Resources used by all contexts
-│   │   │   ├── domain/model/              # BaseEntity
+│   │   │   ├── domain/model/              # BaseEntity, Money
 │   │   │   ├── infrastructure/            # BaseApi, BaseApiEndpoint, BaseAssembler, API dates, file downloads
 │   │   │   └── presentation/
 │   │   │       ├── components/            # layout (+ layout.store), left-sidebar, toolbar, language-switcher, page-header, message-card
 │   │   │       └── views/                 # page-not-found
 │   │   │
-│   │   ├── farming/                       # Plots, GPS polygons, campaigns, and costs
+│   │   ├── iam/                           # Sign-in, sign-up, password recovery, guard, and interceptor
+│   │   ├── farming/                       # Plots, GPS polygons, campaigns, and cost ledgers
 │   │   │   ├── domain/model/
 │   │   │   │   ├── entities/              # Entities (*.entity.ts) and enums
 │   │   │   │   └── commands/              # Commands (*.command.ts)
 │   │   │   ├── application/               # Store with signals (*.store.ts)
 │   │   │   ├── infrastructure/            # Facade (*-api.ts)
-│   │   │   │   ├── endpoints/             # HTTP calls for each resource (*.endpoint.ts)
-│   │   │   │   ├── assemblers/            # Resource ↔ entity (*.assembler.ts)
+│   │   │   │   ├── endpoints/             # HTTP calls for each resource
+│   │   │   │   ├── assemblers/            # Resource ↔ entity, command → request
+│   │   │   │   ├── requests/              # Bodies sent to the API (*.request.ts)
 │   │   │   │   ├── responses/             # API contracts (*.response.ts)
-│   │   │   │   └── offline/               # Expenses saved offline (TS-05)
+│   │   │   │   └── offline/               # Expenses saved offline
 │   │   │   ├── presentation/views/        # One folder per view (.ts, .html, .css)
 │   │   │   └── farming.routes.ts          # Context routes (lazy loading)
 │   │   │
-│   │   ├── crop/                          # NDVI/NDWI, alerts, pests, and prescriptions
-│   │   ├── profiles/                      # Profiles, cooperatives, and members
+│   │   ├── crop/                          # NDVI/NDWI, climate, alerts, pests, and prescriptions
+│   │   ├── profiles/                      # Profiles, cooperatives, members, and agronomists
 │   │   ├── certification/                 # Batches, grading, certificates, and QR verification
-│   │   ├── subscriptions/                 # Plans, checkout, and billing history
+│   │   ├── subscriptions/                 # Plans, Mercado Pago checkout, and billing history
 │   │   │                                  # (all of them use the same layers as farming)
 │   │   ├── app.config.ts                  # Providers: router, HttpClient, translations (ngx-translate)
 │   │   ├── app.routes.ts                  # Root routes: private pages within the layout
 │   │   └── app.ts
 │   ├── environments/
-│   │   ├── environment.development.ts     # Local API (json-server)
+│   │   ├── environment.development.ts     # Local API (http://localhost:8080/api/v1)
 │   │   └── environment.ts                 # Deployed API (Render)
 │   ├── material-theme.scss                # Angular Material theme
 │   └── styles.css
@@ -174,16 +137,8 @@ A new *bounded context* creates its folder with the same layers, adds its `*.rou
 
 * **GitFlow:** `main` (production), `develop` (integration), and one `feature/<name>` branch per feature. Features are merged into `develop` using `git merge --no-ff`.
 * **Conventional Commits:** `feat(<context>): ...`, `fix(...)`, `refactor(...)`, `chore: ...`, `docs: ...`.
-* **Conflicts:** in `server/db.json` and `src/app/app.routes.ts`, preserve the lines from both branches. Each context edits only its own translation file.
+* **Conflicts:** in `src/app/app.routes.ts`, preserve the lines from both branches. Each context edits only its own translation file.
 
-## Crop Health: demo workflow
+## Security
 
-- Farmer: views their plots and observations, submits reports, and views their visits and prescriptions.
-- Director: views plots belonging to active members of their cooperative and schedules visits.
-- Agronomist (Juan A. Morales, user 4): views their cooperative's plots, completes visits, issues prescriptions, and marks reports as resolved. Their identity comes from the session, not from a manual selector.
-
-Plot selection is shared with Field Management. The viewer draws the registered polygon over a map or a hybrid satellite background and displays the stored indices; it does not download multispectral images. The available download is a PNG summary sheet with the logo and recorded values.
-
-A visit is scheduled for a future date and can be completed from that date onward, with at least 10 characters describing the findings. Upon completion, the report changes from PENDING to INSPECTED, allowing a prescription to be issued. After recording a prescription, the agronomist can mark the report as RESOLVED. If the report update fails after saving a visit, the screen allows that status to be synchronized without creating another visit.
-
-Role and plot access controls belong to the demo frontend. json-server does not authenticate users or protect its endpoints; real authorization must be implemented in the backend. State is cleared and previous queries are canceled when the user changes.
+The guards and role checks of the application only decide which pages to show. Every request carries the JWT of the session (`Authorization: Bearer`), and the platform authenticates and authorizes it. The token lasts 30 minutes; after that the user signs in again.
