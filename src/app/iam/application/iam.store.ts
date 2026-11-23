@@ -105,6 +105,14 @@ export class IamStore {
   /** Reason of the last failed password recovery step. */
   readonly passwordRecoveryError = this.recoveryErrorSignal.asReadonly();
 
+  private readonly signedOutOnPurposeSignal = signal<boolean>(false);
+
+  /**
+   * `true` when the user closed the session; `false` when it expired. Only an
+   * expired session sends the user back to the page they were on.
+   */
+  readonly signedOutOnPurpose = this.signedOutOnPurposeSignal.asReadonly();
+
   /**
    * Identity of the signed-in user for the other bounded contexts: its main
    * role (`experience`) and the page it starts at.
@@ -191,6 +199,7 @@ export class IamStore {
    * watch the session and open the sign-in page.
    */
   signOut(): void {
+    this.signedOutOnPurposeSignal.set(true);
     this.clearSession();
   }
 
@@ -200,7 +209,10 @@ export class IamStore {
    */
   checkSessionExpiration(): void {
     const token = this.currentToken();
-    if (token && tokenExpiration(token) <= Date.now()) this.clearSession();
+    if (token && tokenExpiration(token) <= Date.now()) {
+      this.signedOutOnPurposeSignal.set(false);
+      this.clearSession();
+    }
   }
 
   /** Clears the result of the last sign-in or sign-up. */

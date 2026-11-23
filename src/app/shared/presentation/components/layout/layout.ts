@@ -32,7 +32,8 @@ export class Layout {
         if (this.router.currentNavigation()) return;
 
         void this.router.navigate(['/iam/sign-in'], {
-          queryParams: { returnUrl: this.router.url },
+          // After a deliberate sign-out the next person starts at their own page.
+          queryParams: this.iamStore.signedOutOnPurpose() ? {} : { returnUrl: this.router.url },
           replaceUrl: true,
         });
       });

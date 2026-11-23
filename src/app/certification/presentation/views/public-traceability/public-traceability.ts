@@ -56,7 +56,7 @@ import { CertificationStore } from "../../../application/certification.store";
             }
             <dt>{{ "certification.trace.quality" | translate }}</dt>
             <dd>
-              {{ result.qualityCategory }} · {{ result.qualityScore | number }}
+              {{ 'certification.quality-category.' + result.qualityCategory | translate }} · {{ result.qualityScore | number }}
             </dd>
           </dl>
         }
