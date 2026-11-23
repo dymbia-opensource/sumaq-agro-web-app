@@ -4,7 +4,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { filter, map } from 'rxjs';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -15,7 +14,6 @@ import {
   navigationFor,
 } from '../../../infrastructure/navigation-config';
 import { IamStore } from '../../../../iam/application/iam.store';
-import { AuthNavigation } from '../../../../iam/infrastructure/auth-navigation';
 
 /**
  * Side menu of the shell: brand, options of the user's role, offline status,
@@ -29,7 +27,6 @@ import { AuthNavigation } from '../../../../iam/infrastructure/auth-navigation';
     MatDividerModule,
     MatIconModule,
     MatListModule,
-    MatTooltipModule,
     TranslatePipe,
     LanguageSwitcher,
   ],
@@ -56,7 +53,6 @@ export class LeftSidebar {
 
     return user ? activeNavigationLink(user.experience, this.url()) : null;
   });
-  private readonly authNavigation = inject(AuthNavigation);
 
   /** Navigation generated from the current participant's primary role. */
   readonly sections = computed(() => {
@@ -67,6 +63,6 @@ export class LeftSidebar {
 
   protected signOut(): void {
     this.layout.closeSidebarOnHandset();
-    this.authNavigation.signOut();
+    this.session.signOut();
   }
 }

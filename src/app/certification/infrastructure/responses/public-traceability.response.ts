@@ -1,15 +1,14 @@
-import { BaseResponse, BaseResource } from '../../../shared/infrastructure/base-response';
-import { HarvestBatchResource } from './harvest-batch.response';
-import { QualityCertificateResource } from './quality-certificate.response';
-
-/** Datos unidos que necesita la vista pública de trazabilidad. */
-export interface PublicTraceabilityResource extends BaseResource {
-  id: number;
-  certificate: QualityCertificateResource;
-  batch: HarvestBatchResource;
-}
-
-/** Formato de colección para registros de trazabilidad pública. */
-export interface PublicTraceabilityResponse extends BaseResponse {
-  records: PublicTraceabilityResource[];
+/** Public verification of a certificate (`GET /public/traceability?number=&hash=`). */
+export interface PublicTraceabilityResource {
+  certificateNumber: string;
+  /** `ACTIVE` or `REVOKED`. */
+  status: string;
+  authentic: boolean;
+  batchCode: string | null;
+  cropType: string | null;
+  qualityCategory: string | null;
+  qualityScore: number | null;
+  plotName: string | null;
+  region: string | null;
+  seedVariety: string | null;
 }

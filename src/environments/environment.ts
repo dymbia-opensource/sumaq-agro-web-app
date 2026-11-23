@@ -7,16 +7,12 @@ export const environment = {
   platformProviderSignUpEndpointPath: '/users',
   platformProviderSignInEndpointPath: '/tokens',
   platformProviderPasswordRecoveryEndpointPath: '/authentication/password-recovery',
-  useMockAuthentication: false,
 
   // Profiles
   platformProviderProfilesEndpointPath: '/profiles',
   platformProviderCooperativesEndpointPath: '/cooperatives',
   platformProviderCooperativeMembersEndpointPath: '/cooperative-members',
   platformProviderAgronomistAssignmentsEndpointPath: '/agronomist-assignments',
-  // The roster of professionals of a cooperative, which the platform does not
-  // serve yet; the supervision of each plot is the resource above.
-  platformProviderTechnicalAdvisorsEndpointPath: '/technical-advisors',
 
   // Subscriptions and Payments
   demoCheckoutEnabled: false,
@@ -29,9 +25,6 @@ export const environment = {
   platformProviderCampaignLedgersEndpointPath: '/campaign-ledgers',
 
   // Crop Health
-  // Clinical follow-up of a case; neither is served by the platform yet.
-  platformProviderCaseAssessmentsEndpointPath: '/case-assessments',
-  platformProviderTreatmentFollowUpsEndpointPath: '/treatment-follow-ups',
   platformProviderSatelliteObservationsEndpointPath: '/satellite-observations',
   platformProviderClimateForecastsEndpointPath: '/climate-forecasts',
   platformProviderAgroclimaticAlertsEndpointPath: '/agroclimatic-alerts',
@@ -43,5 +36,5 @@ export const environment = {
   // Harvest Certification
   platformProviderHarvestBatchesEndpointPath: '/harvest-batches',
   platformProviderQualityCertificatesEndpointPath: '/quality-certificates',
-  platformProviderPublicTraceabilityEndpointPath: '/public-traceability',
+  platformProviderPublicTraceabilityEndpointPath: '/public/traceability',
 };

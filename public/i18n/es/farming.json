@@ -62,8 +62,8 @@
     },
     "plots": {
       "delete-pending": "Eliminar parcela (pendiente)",
-      "manage": "Administrar Parcelas",
-      "title": "Mis Parcelas Registradas",
+      "manage": "Administrar parcelas",
+      "title": "Administrar parcelas",
       "subtitle": "Gestiona tus parcelas con el Plan Semilla ({{ used }} de {{ quota }} cupos utilizados).",
       "plot-number": "Parcela #{{ number }}",
       "crop": "Cultivo",
@@ -171,10 +171,10 @@
       "quota-unavailable": "No se pudo confirmar tu cupo. Actualiza los datos antes de registrar otra parcela.",
       "quota-check": "No se pudo comprobar el cupo con el servidor. No se registró una nueva parcela.",
       "registration-unconfirmed": "No se pudo confirmar el registro. Actualiza la lista antes de volver a intentarlo: la parcela podría haberse guardado.",
-      "registration-partial": "La parcela ya está registrada y ocupa un cupo, pero no se completó su campaña inicial. Revisa la parcela desde Administrar parcelas antes de volver a registrar."
+      "registration-partial": "La parcela ya está registrada y ocupa un cupo, pero no se completó su campaña inicial. Revisa la parcela desde Administrar parcelas antes de volver a registrar.",
+      "load-ledger": "No pudimos cargar la bitácora de costos de la campaña."
     },
     "finances": {
-      "pending": "La bitácora, los gastos y los informes de costos estarán disponibles cuando se integre el módulo de finanzas.",
       "subtitle": "{{ plot }} | Campaña {{ season }}",
       "register-expense": "Registrar gasto",
       "no-ledger": "Selecciona una parcela con una campaña activa para ver sus gastos.",
@@ -268,7 +268,25 @@
       "area": "Área de la parcela: {{ area }} ha",
       "per-hectare": "por hectárea",
       "yield-per-hectare": "Rendimiento: {{ quantity }} {{ unit }} por hectárea",
-      "no-area": "Delimita la parcela o declara su área para calcular el costo por hectárea."
+      "no-area": "Delimita la parcela o declara su área para calcular el costo por hectárea.",
+      "pdf": {
+        "title": "Reporte de costos",
+        "campaign": "Campaña {{season}}",
+        "total": "Total invertido",
+        "expenses-count": "{{count}} gastos registrados",
+        "breakdown": "Desglose de gastos",
+        "category": "Categoría",
+        "amount": "Importe",
+        "inputs": "Insumos",
+        "labor": "Mano de obra",
+        "freight": "Transporte",
+        "indicators": "Indicadores de campaña",
+        "cost-per-hectare": "Costo por hectárea",
+        "no-area": "Sin área registrada",
+        "breakeven": "Precio de equilibrio",
+        "no-yield": "Sin rendimiento",
+        "expected-yield": "Rendimiento esperado"
+      }
     },
     "offline": {
       "no-connection": "Estás sin conexión. Tus gastos se guardan en este dispositivo.",

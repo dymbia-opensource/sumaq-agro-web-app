@@ -257,3 +257,16 @@ mat-radio-button:focus-within {
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+.invitation-notice {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #e8f3ec;
+  color: #23603a;
+  font-size: 13px;
+  line-height: 1.5;
+}

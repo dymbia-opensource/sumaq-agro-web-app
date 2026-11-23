@@ -30,7 +30,7 @@ export class FieldInspectionsApiEndpoint {
 
   complete(id: number, findings: string) {
     return this.http
-      .patch<FieldInspectionResource>(this.url + '/' + id + '/completion', { findings })
+      .post<FieldInspectionResource>(this.url + '/' + id + '/completion', { findings })
       .pipe(map(this.assembler.toEntityFromResource));
   }
 }

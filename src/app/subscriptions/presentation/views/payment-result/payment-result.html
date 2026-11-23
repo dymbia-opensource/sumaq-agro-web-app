@@ -1,0 +1,44 @@
+<section class="result" role="status" [attr.aria-busy]="processing()">
+  @if (processing()) {
+    <mat-progress-bar mode="indeterminate" [attr.aria-label]="'common.loading' | translate" />
+    <h1>{{ 'subscriptions.result.confirming' | translate }}</h1>
+  } @else if (error(); as error) {
+    <span class="result-icon warning" aria-hidden="true"><mat-icon>error_outline</mat-icon></span>
+    <h1>{{ 'subscriptions.result.title' | translate }}</h1>
+    <p>{{ error | translate }}</p>
+    <div class="actions">
+      <a mat-flat-button class="cta" routerLink="/subscriptions/plans">
+        {{ 'subscriptions.checkout.choose-plan' | translate }}
+      </a>
+    </div>
+  } @else if (result() === paymentStatuses.COMPLETED) {
+    <span class="result-icon success" aria-hidden="true"><mat-icon>check</mat-icon></span>
+    <h1>{{ 'subscriptions.result.approved' | translate }}</h1>
+    <div class="actions">
+      @if (dashboardRoute(); as route) {
+        <a mat-flat-button class="cta" [routerLink]="route">
+          {{ 'subscriptions.checkout.go-to-dashboard' | translate }}
+        </a>
+      }
+      <a mat-button routerLink="/subscriptions">
+        {{ 'subscriptions.checkout.view-billing' | translate }}
+      </a>
+    </div>
+  } @else if (result() === paymentStatuses.PENDING) {
+    <span class="result-icon pending" aria-hidden="true"><mat-icon>schedule</mat-icon></span>
+    <h1>{{ 'subscriptions.result.pending' | translate }}</h1>
+    <div class="actions">
+      <a mat-flat-button class="cta" routerLink="/subscriptions">
+        {{ 'subscriptions.checkout.view-billing' | translate }}
+      </a>
+    </div>
+  } @else if (result() === paymentStatuses.REJECTED) {
+    <span class="result-icon warning" aria-hidden="true"><mat-icon>close</mat-icon></span>
+    <h1>{{ 'subscriptions.result.rejected' | translate }}</h1>
+    <div class="actions">
+      <a mat-flat-button class="cta" routerLink="/subscriptions/plans">
+        {{ 'subscriptions.result.try-again' | translate }}
+      </a>
+    </div>
+  }
+</section>

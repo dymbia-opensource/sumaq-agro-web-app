@@ -24,10 +24,13 @@ import {
   throwError,
 } from 'rxjs';
 import { IamStore } from '../../iam/application/iam.store';
+import { FileDownloader } from '../../shared/infrastructure/file-downloader';
 import { SubscriptionsStore } from '../../subscriptions/application/subscriptions.store';
+import { CostReportPdf } from '../infrastructure/cost-report-pdf';
 import { OfflineSync } from '../infrastructure/offline/offline-sync';
 import { PendingOperationType } from '../infrastructure/offline/pending-operation';
 import { CloseCropCampaignCommand } from '../domain/model/commands/close-crop-campaign.command';
+import { ExportCampaignCostReportCommand } from '../domain/model/commands/export-campaign-cost-report.command';
 import { DelineatePlotBoundaryCommand } from '../domain/model/commands/delineate-plot-boundary.command';
 import { RecordActualYieldCommand } from '../domain/model/commands/record-actual-yield.command';
 import { RecordDailyLaborExpenseCommand } from '../domain/model/commands/record-daily-labor-expense.command';
@@ -80,11 +83,11 @@ export interface CropCampaignSetup {
  *
  * @remarks
  * It keeps the producer's plots with their campaigns and cost ledgers, and the
- * selected plot. The views send commands and read signals. Every change is
- * applied to a copy of the aggregate; the shown state and the domain events
- * are only updated when the API confirms. It also applies the policies of the
- * context: P3 (link the polygon to AgroMonitoring), P8 (open the cost ledger
- * when a campaign starts) and keeps the expenses recorded offline.
+ * selected plot. The views send commands and read signals; the shown state is
+ * only updated with what the API answers. The platform applies the policies of
+ * the context (P8 opens the cost ledger when a campaign starts and freezes it
+ * when the campaign closes), so the store reloads the ledger after those
+ * commands. It also keeps the expenses recorded offline until they are sent.
  */
 @Injectable({ providedIn: 'root' })
 export class FarmingStore {
@@ -93,6 +96,8 @@ export class FarmingStore {
   private readonly offlineSync = inject(OfflineSync);
   private readonly pendingExpenses = new PendingExpenseAssembler();
   private readonly subscriptions = inject(SubscriptionsStore);
+  private readonly fileDownloader = inject(FileDownloader);
+  private readonly costReportPdf = inject(CostReportPdf);
 
   private readonly plotsSignal = signal<FieldPlot[]>([]);
   private readonly campaignsByPlotSignal = signal<Map<number, CropCampaign[]>>(new Map());
@@ -322,6 +327,8 @@ export class FarmingStore {
           this.campaignsByPlotSignal.set(
             new Map(plots.map((plot, index) => [plot.id as number, campaigns[index]])),
           );
+          this.ledgersByCampaignSignal.set(new Map());
+          campaigns.flat().forEach((campaign) => this.loadLedgerOf(campaign.id as number));
           this.loadingSignal.set(false);
           const keep = plots.some((plot) => plot.id === this.selectedPlotId());
           const first = plots[0];
@@ -623,6 +630,8 @@ export class FarmingStore {
         this.campaignsByPlotSignal.update((campaigns) =>
           new Map(campaigns).set(plotId, [...(campaigns.get(plotId) ?? []), campaign]),
         );
+        // P8: the platform opened the cost ledger of the new campaign.
+        this.loadLedgerOf(campaign.id as number);
         this.loadingSignal.set(false);
         onStarted?.(campaign);
       },
@@ -668,6 +677,8 @@ export class FarmingStore {
     this.farmingApi.closeCampaign(command.campaignId).subscribe({
       next: (campaign) => {
         this.replaceCampaign(campaign);
+        // The platform froze the cost ledger of the closed campaign.
+        this.loadLedgerOf(campaign.id as number);
         this.loadingSignal.set(false);
       },
       error: (error) => this.fail(error, 'farming.errors.close-campaign'),
@@ -681,32 +692,37 @@ export class FarmingStore {
    *
    * @remarks
    * Without connection the expense is kept on the device and shown at once;
-   * it is synchronized when the connection comes back.
+   * it is sent when the connection comes back. The platform records an
+   * expense only once per `clientSyncId`, so sending it again is safe.
    */
   recordExpense = (command: RecordExpenseCommand, onRecorded?: () => void): void => {
     if (!this.offlineSync.isOnline()) {
       this.recordOffline(command, onRecorded);
       return;
     }
-    this.saveLedger(
-      command.ledgerId,
-      (ledger) => this.applyExpense(ledger, command),
-      'farming.errors.record-expense',
-      onRecorded,
-      () => this.recordOffline(command, onRecorded),
-    );
+    this.startLoading();
+    this.sendExpense(command).subscribe({
+      next: (ledger) => {
+        this.setLedger(ledger.campaignId, ledger);
+        this.loadingSignal.set(false);
+        onRecorded?.();
+      },
+      error: (error) => {
+        if (!this.offlineSync.isOnline()) {
+          this.loadingSignal.set(false);
+          this.recordOffline(command, onRecorded);
+          return;
+        }
+        this.fail(error, 'farming.errors.record-expense');
+      },
+    });
   };
 
   /** Changes the expected yield, which updates the breakeven price (US-40). */
   setExpectedYield = (command: SetExpectedYieldCommand): void => {
-    this.saveLedger(
-      command.ledgerId,
-      (ledger) => {
-        ledger.expectedYield = command.expectedYield;
-        ledger.yieldUnit = command.unit;
-      },
-      'farming.errors.save-yield',
-    );
+    const ledger = this.findLedger(command.ledgerId);
+    if (!ledger) return;
+    this.estimateYield(ledger, command.expectedYield, ledger.actualYield, 'farming.errors.save-yield');
   };
 
   /**
@@ -715,59 +731,61 @@ export class FarmingStore {
    * @param onRecorded - Called after the API confirms.
    */
   recordActualYield = (command: RecordActualYieldCommand, onRecorded?: () => void): void => {
-    this.saveLedger(
-      command.ledgerId,
-      (ledger) => {
-        ledger.actualYield = command.actualYield;
-      },
+    const ledger = this.findLedger(command.ledgerId);
+    if (!ledger) return;
+    this.estimateYield(
+      ledger,
+      ledger.expectedYield,
+      command.actualYield,
       'farming.errors.save-actual-yield',
       onRecorded,
     );
   };
 
-  exportCostReport = (_command: { campaignId: number }): void => {
-    this.errorSignal.set('farming.finances.pending');
+  /**
+   * Downloads the cost report of a campaign as a PDF (US-40).
+   * @param command - Campaign of the report.
+   */
+  exportCostReport = (command: ExportCampaignCostReportCommand): void => {
+    const campaign = this.findCampaign(command.campaignId);
+    const ledger = this.ledgersByCampaignSignal().get(command.campaignId);
+    if (!campaign || !ledger) return;
+    const plot = this.findPlot(campaign.plotId);
+    this.fileDownloader.save({
+      fileName: `cost-report-${campaign.season}.pdf`,
+      content: this.costReportPdf.build(ledger, campaign.season, plot?.name ?? '', plot?.areaHectares ?? 0),
+    });
   };
 
   /**
-   * Sends the expenses recorded offline to the API, ledger by ledger.
-   * The ledger ignores the expenses that were already saved.
+   * Sends the expenses recorded offline to the API, one after the other.
+   * The platform ignores the expenses that were already recorded.
    */
   syncPendingExpenses = (): void => {
     if (this.syncingSignal() || !this.offlineSync.isOnline()) return;
-    const pending = this.offlineSync.pendingOf<PendingExpensePayload>(
-      PendingOperationType.FIELD_EXPENSE,
-    );
-    const ledgerIds = [...new Set(pending.map((operation) => operation.payload.ledgerId))];
-    if (ledgerIds.length === 0) return;
+    const commands = this.offlineSync
+      .pendingOf<PendingExpensePayload>(PendingOperationType.FIELD_EXPENSE)
+      .map(this.pendingExpenses.toCommand);
+    if (commands.length === 0) return;
     this.syncingSignal.set(true);
-    from(ledgerIds)
+    from(commands)
       .pipe(
-        concatMap((ledgerId) => {
-          const commands = pending
-            .filter((operation) => operation.payload.ledgerId === ledgerId)
-            .map(this.pendingExpenses.toCommand);
-          return this.farmingApi.getLedgerById(ledgerId).pipe(
-            switchMap((saved) => {
-              const ledger = this.copyLedger(saved);
-              commands.forEach((command) => this.applyExpense(ledger, command));
-              return this.farmingApi
-                .updateLedger(ledger)
-                .pipe(map((updated) => ({ updated, commands })));
-            }),
-            // A ledger that fails (for example, it was deleted) does not stop the others.
+        concatMap((command) =>
+          this.sendExpense(command).pipe(
+            map((ledger) => ({ ledger, command })),
+            // An expense that fails (for example, its campaign was closed) does not stop the others.
             catchError((error) => {
               console.error(error);
               return of(null);
             }),
-          );
-        }),
+          ),
+        ),
       )
       .subscribe({
         next: (result) => {
           if (!result) return;
-          this.offlineSync.remove(result.commands.map((command) => command.clientSyncId));
-          this.setLedger(result.updated.campaignId, result.updated);
+          this.offlineSync.remove([result.command.clientSyncId]);
+          this.setLedger(result.ledger.campaignId, result.ledger);
         },
         complete: () => this.syncingSignal.set(false),
       });
@@ -802,44 +820,54 @@ export class FarmingStore {
   }
 
   /**
-   * Applies a change to a copy of a ledger and saves it; the shown ledger
-   * only changes when the API confirms.
-   * @param onOffline - Called instead of failing when the connection was lost.
+   * Loads the cost ledger of a campaign into the state.
+   * @param campaignId - Campaign of the ledger.
    */
-  private saveLedger(
-    ledgerId: number,
-    change: (ledger: CampaignLedger) => void,
+  private loadLedgerOf(campaignId: number): void {
+    this.farmingApi.getLedgerByCampaign(campaignId).subscribe({
+      next: (ledger) => this.setLedger(campaignId, ledger),
+      error: (error) => this.fail(error, 'farming.errors.load-ledger'),
+    });
+  }
+
+  /**
+   * Sends one expense command to the endpoint of its category.
+   * @param command - Input, labor or freight expense.
+   * @returns Stream with the recalculated ledger.
+   */
+  private sendExpense(command: RecordExpenseCommand): Observable<CampaignLedger> {
+    if (command instanceof RecordInputExpenseCommand)
+      return this.farmingApi.recordInputExpense(command);
+    if (command instanceof RecordDailyLaborExpenseCommand)
+      return this.farmingApi.recordDailyLaborExpense(command);
+    return this.farmingApi.recordFieldFreightExpense(command);
+  }
+
+  /**
+   * Saves both yields of a ledger; the platform replaces them together (US-40).
+   * @param ledger - Ledger of the campaign.
+   * @param expectedYield - Yield the producer expects.
+   * @param actualYield - Yield harvested, or `null` before the harvest.
+   * @param errorKey - i18n key shown when it fails.
+   * @param onSaved - Called after the API confirms.
+   */
+  private estimateYield(
+    ledger: CampaignLedger,
+    expectedYield: number,
+    actualYield: number | null,
     errorKey: string,
     onSaved?: () => void,
-    onOffline?: () => void,
   ): void {
-    const current = this.findLedger(ledgerId);
-    if (!current) return;
-    const ledger = this.copyLedger(current);
-    try {
-      change(ledger);
-    } catch (error) {
-      this.fail(error, errorKey);
-      return;
-    }
     this.startLoading();
     this.farmingApi
-      .updateLedger(ledger)
-      .pipe(retry(2))
+      .estimateCampaignYield(ledger.id as number, expectedYield, actualYield)
       .subscribe({
         next: (saved) => {
           this.setLedger(saved.campaignId, saved);
           this.loadingSignal.set(false);
           onSaved?.();
         },
-        error: (error) => {
-          if (onOffline && !this.offlineSync.isOnline()) {
-            this.loadingSignal.set(false);
-            onOffline();
-            return;
-          }
-          this.fail(error, errorKey);
-        },
+        error: (error) => this.fail(error, errorKey),
       });
   }
 

@@ -62,8 +62,8 @@
     },
     "plots": {
       "delete-pending": "Delete plot (pending)",
-      "manage": "Manage Plots",
-      "title": "My Registered Plots",
+      "manage": "Manage plots",
+      "title": "Manage plots",
       "subtitle": "Manage your plots with the Seed plan ({{ used }} of {{ quota }} slots used).",
       "plot-number": "Plot #{{ number }}",
       "crop": "Crop",
@@ -171,10 +171,10 @@
       "quota-unavailable": "Your capacity could not be confirmed. Refresh the data before registering another plot.",
       "quota-check": "Could not check capacity with the server. No new plot was registered.",
       "registration-unconfirmed": "Registration could not be confirmed. Refresh the list before retrying: the plot may have been saved.",
-      "registration-partial": "The plot was registered and occupies a slot, but its initial campaign could not be completed. Review it in Manage Plots before registering again."
+      "registration-partial": "The plot was registered and occupies a slot, but its initial campaign could not be completed. Review it in Manage Plots before registering again.",
+      "load-ledger": "We could not load the cost ledger of the campaign."
     },
     "finances": {
-      "pending": "Ledgers, expenses and cost reports will be available once finances are integrated.",
       "subtitle": "{{ plot }} | Season {{ season }}",
       "register-expense": "Register expense",
       "no-ledger": "Select a plot with an active campaign to see its expenses.",
@@ -268,7 +268,25 @@
       "area": "Plot area: {{ area }} ha",
       "per-hectare": "per hectare",
       "yield-per-hectare": "Yield: {{ quantity }} {{ unit }} per hectare",
-      "no-area": "Delineate the plot or declare its area to calculate the cost per hectare."
+      "no-area": "Delineate the plot or declare its area to calculate the cost per hectare.",
+      "pdf": {
+        "title": "Cost report",
+        "campaign": "Campaign {{season}}",
+        "total": "Total invested",
+        "expenses-count": "{{count}} expenses recorded",
+        "breakdown": "Expense breakdown",
+        "category": "Category",
+        "amount": "Amount",
+        "inputs": "Inputs",
+        "labor": "Labor",
+        "freight": "Freight",
+        "indicators": "Campaign indicators",
+        "cost-per-hectare": "Cost per hectare",
+        "no-area": "No area recorded",
+        "breakeven": "Break-even price",
+        "no-yield": "No yield",
+        "expected-yield": "Expected yield"
+      }
     },
     "offline": {
       "no-connection": "You are offline. Your expenses are kept on this device.",

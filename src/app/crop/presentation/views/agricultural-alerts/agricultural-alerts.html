@@ -92,8 +92,24 @@
 
 @if (store.selectedPlot()) {
   <section class="alerts-section">
-    <h2>{{ 'crop.forecast-title' | translate }}</h2>
-    @if (store.forecastsLoading()) {
+    <div class="section-header">
+      <h2>{{ 'crop.forecast-title' | translate }}</h2>
+      @if (store.canImportForecast()) {
+        <button
+          mat-stroked-button
+          type="button"
+          [disabled]="store.importingForecast() || store.forecastsLoading()"
+          (click)="store.importForecasts()"
+        >
+          <mat-icon aria-hidden="true">cloud_download</mat-icon>
+          {{ (store.importingForecast() ? 'common.loading' : 'crop.import-forecast') | translate }}
+        </button>
+      }
+    </div>
+    @if (store.forecastImportError(); as error) {
+      <p class="feedback error" role="alert">{{ error | translate }}</p>
+    }
+    @if (store.forecastsLoading() || store.importingForecast()) {
       <mat-progress-bar mode="indeterminate" />
     } @else if (store.forecastsError(); as error) {
       <p role="alert">{{ error | translate }}</p>
@@ -102,7 +118,7 @@
       <div class="alerts-list">
         @for (forecast of store.forecasts(); track forecast.id) {
           <article class="alert-card">
-            <h3>{{ forecast.forecastDate | date: 'medium' : '-0500' }}</h3>
+            <h3>{{ forecast.forecastDate | date: 'fullDate' : '-0500' }}</h3>
             <p>{{ forecast.temperature | number: '1.0-1' }} °C</p>
             <p>{{ 'crop.rain-chance' | translate }}: {{ forecast.rainChance | number: '1.0-1' }}%</p>
             <p>{{ forecast.source }}</p>

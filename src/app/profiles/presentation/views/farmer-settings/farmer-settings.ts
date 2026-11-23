@@ -15,7 +15,7 @@ import { IamStore } from '../../../../iam/application/iam.store';
 import { ProfilesStore } from '../../../application/profiles.store';
 import { UpdateFarmerAccountCommand } from '../../../domain/model/commands/update-farmer-account.command';
 
-/** Account settings view for the independent farmer (segment 1). */
+/** Account settings of the farmer (with its help manuals) and of the agronomist. */
 @Component({
   selector: 'app-farmer-settings',
   imports: [
@@ -41,6 +41,9 @@ export class FarmerSettings {
   readonly session = inject(IamStore);
   readonly translate = inject(TranslateService);
   readonly tab = signal<'account' | 'help'>('account');
+  /** Role of the visitor: the agronomist also keeps its contact data here. */
+  readonly experience = computed(() => this.session.activeUser()?.experience ?? 'FARMER');
+  readonly isFarmer = computed(() => this.experience() === 'FARMER');
   readonly search = signal('');
   readonly editing = signal(false);
   readonly guideIds = [

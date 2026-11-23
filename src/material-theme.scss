@@ -2,15 +2,20 @@
 // `mat.theme()` defines the `--mat-sys-*` CSS variables used by every
 // Material component and by the custom styles of the app.
 // Learn more at https://material.angular.dev/guide/theming
+//
+// The palettes come from `_theme-colors.scss`, generated with
+// `ng generate @angular/material:theme-color` from the brand colors:
+// primary #286643 (field green) and tertiary #9A7B2F (harvest gold).
 @use '@angular/material' as mat;
+@use './theme-colors' as sumaq;
 
 html {
   height: 100%;
   @include mat.theme(
     (
       color: (
-        primary: mat.$green-palette,
-        tertiary: mat.$cyan-palette,
+        primary: sumaq.$primary-palette,
+        tertiary: sumaq.$tertiary-palette,
       ),
       typography: Poppins,
       density: 0,

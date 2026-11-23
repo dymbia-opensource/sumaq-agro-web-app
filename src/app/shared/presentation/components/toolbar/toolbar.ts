@@ -5,13 +5,13 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { Router, RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { LayoutStore } from '../layout/layout.store';
 import { CropStore } from '../../../../crop/application/crop.store';
 import { IamStore } from '../../../../iam/application/iam.store';
-import { AuthNavigation } from '../../../../iam/infrastructure/auth-navigation';
 import { settingsRouteFor } from '../../../infrastructure/navigation-config';
 
 /**
@@ -27,6 +27,7 @@ import { settingsRouteFor } from '../../../infrastructure/navigation-config';
     MatDividerModule,
     MatIconModule,
     MatMenuModule,
+    MatTooltipModule,
     MatToolbarModule,
     TranslatePipe,
   ],
@@ -36,7 +37,6 @@ import { settingsRouteFor } from '../../../infrastructure/navigation-config';
 export class Toolbar {
   protected readonly layout = inject(LayoutStore);
   private readonly session = inject(IamStore);
-  private readonly authNavigation = inject(AuthNavigation);
 
   private readonly crop = inject(CropStore);
   private readonly router = inject(Router);
@@ -72,6 +72,6 @@ export class Toolbar {
   });
   protected signOut(): void {
     this.layout.closeSidebarOnHandset();
-    this.authNavigation.signOut();
+    this.session.signOut();
   }
 }

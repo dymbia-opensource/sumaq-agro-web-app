@@ -18,7 +18,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { catchError, finalize, map, of, startWith, switchMap } from 'rxjs';
 import { IamStore } from '../../../../iam/application/iam.store';
-import { PageHeader } from '../../../../shared/presentation/components/page-header/page-header';
+import { Breadcrumb, PageHeader } from '../../../../shared/presentation/components/page-header/page-header';
 import { PlotAdvisorAssignment } from '../../components/plot-advisor-assignment/plot-advisor-assignment';
 import { ProfilesApi } from '../../../infrastructure/profiles-api';
 
@@ -45,6 +45,12 @@ import { ProfilesApi } from '../../../infrastructure/profiles-api';
   styleUrl: './cooperative-members.css',
 })
 export class CooperativeMembers {
+  /** Breadcrumb of the record of one member, a subpage of the member directory. */
+  protected readonly dossierBreadcrumbs: Breadcrumb[] = [
+    { label: 'option.member-directory', link: '/cooperative/members' },
+    { label: 'profiles.cooperative.members.dossier' },
+  ];
+
   private readonly api = inject(ProfilesApi);
   private readonly session = inject(IamStore);
   private readonly refresh = signal(0);

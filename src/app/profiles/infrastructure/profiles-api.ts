@@ -1,7 +1,7 @@
 import { CooperativeMemberDetails } from './responses/cooperative-member.response';
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { map, Observable } from 'rxjs';
+import { catchError, map, Observable, shareReplay, tap, throwError } from 'rxjs';
 import { BaseApi } from '../../shared/infrastructure/base-api';
 import { CooperativeMember } from '../domain/model/entities/cooperative-member.entity';
 import { Cooperative } from '../domain/model/entities/cooperative.entity';
@@ -19,6 +19,8 @@ export class ProfilesApi extends BaseApi {
   private readonly cooperativesEndpoint: CooperativesApiEndpoint;
   private readonly cooperativeMembersEndpoint: CooperativeMembersApiEndpoint;
   private readonly plotAdvisorAssignmentsEndpoint: PlotAdvisorAssignmentsApiEndpoint;
+  /** Cooperative of each director, shared by every view and store that asks for it. */
+  private readonly cooperativeByDirector = new Map<number, Observable<Cooperative | null>>();
 
   constructor() {
     super();
@@ -37,8 +39,25 @@ export class ProfilesApi extends BaseApi {
     return this.farmerProfilesEndpoint.update(profile);
   }
 
+  /**
+   * Finds the cooperative of a director. The answer is shared, so the pages
+   * and stores that need it at the same time make a single request; it is
+   * forgotten when the cooperative is registered or edited, or when it fails.
+   * @param userId - Account of the director.
+   */
   getCooperativeByDirector(userId: number): Observable<Cooperative | null> {
-    return this.cooperativesEndpoint.getByDirector(userId);
+    let request = this.cooperativeByDirector.get(userId);
+    if (!request) {
+      request = this.cooperativesEndpoint.getByDirector(userId).pipe(
+        catchError((error: unknown) => {
+          this.cooperativeByDirector.delete(userId);
+          return throwError(() => error);
+        }),
+        shareReplay({ bufferSize: 1, refCount: false }),
+      );
+      this.cooperativeByDirector.set(userId, request);
+    }
+    return request;
   }
 
   registerCooperative(
@@ -47,11 +66,15 @@ export class ProfilesApi extends BaseApi {
     ruc: string,
     region: string,
   ): Observable<unknown> {
-    return this.cooperativesEndpoint.register(directorUserId, legalName, ruc, region);
+    return this.cooperativesEndpoint
+      .register(directorUserId, legalName, ruc, region)
+      .pipe(tap(() => this.cooperativeByDirector.delete(directorUserId)));
   }
 
   updateCooperative(cooperative: Cooperative): Observable<Cooperative> {
-    return this.cooperativesEndpoint.update(cooperative, cooperative.id);
+    return this.cooperativesEndpoint
+      .update(cooperative, cooperative.id)
+      .pipe(tap(() => this.cooperativeByDirector.delete(cooperative.directorUserId)));
   }
 
   addCooperativeMember(

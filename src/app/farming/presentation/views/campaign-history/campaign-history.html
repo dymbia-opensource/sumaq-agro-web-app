@@ -41,6 +41,7 @@
         [saving]="loading()"
         (closeCampaign)="onClose($event)"
         (editCampaign)="onEdit($event)"
+        (exportReport)="onExport($event)"
       />
     } @empty {
       <app-message-card icon="agriculture" [message]="'farming.campaigns.empty' | translate">

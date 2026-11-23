@@ -1,10 +1,14 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
-import { Observable, tap, throwError } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { BaseApi } from '../../shared/infrastructure/base-api';
+import { RecordDailyLaborExpenseCommand } from '../domain/model/commands/record-daily-labor-expense.command';
+import { RecordFieldFreightExpenseCommand } from '../domain/model/commands/record-field-freight-expense.command';
+import { RecordInputExpenseCommand } from '../domain/model/commands/record-input-expense.command';
 import { CampaignLedger } from '../domain/model/entities/campaign-ledger.entity';
 import { CropCampaign } from '../domain/model/entities/crop-campaign.entity';
 import { FieldPlot, GeoCoordinate, SoilBaseline } from '../domain/model/entities/field-plot.entity';
+import { CampaignLedgersApiEndpoint } from './endpoints/campaign-ledgers-api-endpoint';
 import { CropCampaignsApiEndpoint } from './endpoints/crop-campaigns-api-endpoint';
 import { FieldPlotsApiEndpoint } from './endpoints/field-plots-api-endpoint';
 
@@ -19,6 +23,7 @@ export class FarmingApi extends BaseApi {
   private readonly http = inject(HttpClient);
   private readonly plotsEndpoint = new FieldPlotsApiEndpoint(this.http);
   private readonly campaignsEndpoint = new CropCampaignsApiEndpoint(this.http);
+  private readonly ledgersEndpoint = new CampaignLedgersApiEndpoint(this.http);
 
   /**
    * Retrieves the plots of one producer.
@@ -88,9 +93,50 @@ export class FarmingApi extends BaseApi {
 
   closeCampaign = (id: number): Observable<CropCampaign> => this.campaignsEndpoint.close(id);
 
-  getLedgerById = (_id: number): Observable<CampaignLedger> =>
-    throwError(() => new Error('farming.finances.pending'));
+  /**
+   * Retrieves the cost ledger of a campaign; the platform opens it when the campaign starts.
+   * @param campaignId - Campaign of the ledger.
+   * @returns Stream with the ledger, or `null` if the campaign has none.
+   */
+  getLedgerByCampaign = (campaignId: number): Observable<CampaignLedger | null> =>
+    this.ledgersEndpoint.getByCampaign(campaignId);
 
-  updateLedger = (_ledger: CampaignLedger): Observable<CampaignLedger> =>
-    throwError(() => new Error('farming.finances.pending'));
+  /**
+   * Records an input expense (US-37).
+   * @param command - Input bought.
+   * @returns Stream with the recalculated ledger.
+   */
+  recordInputExpense = (command: RecordInputExpenseCommand): Observable<CampaignLedger> =>
+    this.ledgersEndpoint.recordInputExpense(command);
+
+  /**
+   * Records a daily labor expense (US-38).
+   * @param command - Wages of a field activity.
+   * @returns Stream with the recalculated ledger.
+   */
+  recordDailyLaborExpense = (command: RecordDailyLaborExpenseCommand): Observable<CampaignLedger> =>
+    this.ledgersEndpoint.recordDailyLaborExpense(command);
+
+  /**
+   * Records a field freight expense (US-39).
+   * @param command - Cost of one freight.
+   * @returns Stream with the recalculated ledger.
+   */
+  recordFieldFreightExpense = (
+    command: RecordFieldFreightExpenseCommand,
+  ): Observable<CampaignLedger> => this.ledgersEndpoint.recordFieldFreightExpense(command);
+
+  /**
+   * Records the expected and actual yield of a campaign (US-40).
+   * @param ledgerId - Ledger of the campaign.
+   * @param expectedYield - Yield the producer expects.
+   * @param actualYield - Yield harvested, or `null` before the harvest.
+   * @returns Stream with the recalculated ledger.
+   */
+  estimateCampaignYield = (
+    ledgerId: number,
+    expectedYield: number,
+    actualYield: number | null,
+  ): Observable<CampaignLedger> =>
+    this.ledgersEndpoint.estimateYield(ledgerId, { expectedYield, actualYield });
 }

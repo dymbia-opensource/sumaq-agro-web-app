@@ -31,8 +31,9 @@ export class Layout {
       untracked(() => {
         if (this.router.currentNavigation()) return;
 
-        void this.router.navigate(['/sign-in'], {
-          queryParams: { returnUrl: this.router.url },
+        void this.router.navigate(['/iam/sign-in'], {
+          // After a deliberate sign-out the next person starts at their own page.
+          queryParams: this.iamStore.signedOutOnPurpose() ? {} : { returnUrl: this.router.url },
           replaceUrl: true,
         });
       });

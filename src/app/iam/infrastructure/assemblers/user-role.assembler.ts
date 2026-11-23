@@ -1,26 +1,20 @@
 import { UserRole } from '../../domain/model/entities/user-role';
 
 /**
- * Maps domain roles to and from the provisional API contract.
+ * Maps the roles of the domain to and from the `ROLE_*` names of the API.
  */
 export class UserRoleAssembler {
-  static toResource(role: UserRole): string {
-    return `ROLE_${role}`;
-  }
+  /**
+   * Converts an API role into a domain role.
+   * @param role - Role name returned by the API (for example `ROLE_FARMER`).
+   * @returns The domain role.
+   */
+  static toRoleFromResource = (role: string): UserRole => role.replace(/^ROLE_/, '') as UserRole;
 
-  static toDomain(role: string): UserRole {
-    switch (role) {
-      case 'ROLE_FARMER':
-        return 'FARMER';
-
-      case 'ROLE_COOPERATIVE_DIRECTOR':
-        return 'COOPERATIVE_DIRECTOR';
-
-      case 'ROLE_AGRONOMIST':
-        return 'AGRONOMIST';
-
-      default:
-        throw new Error(`Unsupported IAM role: ${role}`);
-    }
-  }
+  /**
+   * Converts a domain role into the role name expected by the API.
+   * @param role - Domain role.
+   * @returns The API role name.
+   */
+  static toResourceFromRole = (role: UserRole): string => `ROLE_${role}`;
 }

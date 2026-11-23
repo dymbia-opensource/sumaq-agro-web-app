@@ -46,17 +46,4 @@ export class TechnicalAdvisor extends BaseEntity {
   get assignedPlotsCount(): number {
     return this._assignedPlotsCount;
   }
-
-  updateDetails(name: string, cipCode: string, phone: string, assignedPlotsCount: number): void {
-    if (!name || name.trim().length === 0) {
-      throw new Error('El nombre del asesor es obligatorio.');
-    }
-    if (!cipCode || cipCode.trim().length === 0) {
-      throw new Error('La colegiatura CIP es obligatoria.');
-    }
-    this._name = name.trim();
-    this._cipCode = cipCode.trim();
-    this._phone = phone ? phone.trim() : '';
-    this._assignedPlotsCount = Math.max(0, assignedPlotsCount);
-  }
 }

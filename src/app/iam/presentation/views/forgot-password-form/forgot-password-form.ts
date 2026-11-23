@@ -42,7 +42,7 @@ export class ForgotPasswordForm {
   }
 
   protected submit(): void {
-    if (this.store.isLoading() || this.store.passwordRecoveryCompleted()) return;
+    if (this.store.passwordRecoveryLoading() || this.store.passwordRecoveryCompleted()) return;
     this.form.markAllAsTouched();
     if (this.form.invalid) return;
     this.store.requestPasswordReset(new RequestPasswordResetCommand(this.form.getRawValue()));

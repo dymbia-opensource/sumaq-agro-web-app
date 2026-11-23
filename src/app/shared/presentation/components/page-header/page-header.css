@@ -16,7 +16,7 @@
 }
 
 .breadcrumb a {
-  color: inherit;
+  color: var(--mat-sys-primary);
   text-decoration: none;
 }
 
@@ -28,10 +28,6 @@
   font-size: 18px;
   width: 18px;
   height: 18px;
-}
-
-.breadcrumb .current {
-  color: var(--mat-sys-primary);
 }
 
 h1 {

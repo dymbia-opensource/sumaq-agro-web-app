@@ -4,9 +4,7 @@
       "integration": {
         "member-user-id": "ID del usuario productor (opcional)",
         "invalid-id": "Ingresa un ID entero positivo.",
-        "member-edit-pending": "Editar miembro (pendiente)",
         "account-link-pending": "Para asociar una cuenta, indica el ID del productor al dar de alta al miembro.",
-        "certification-pending": "La información de cosechas y certificados se integrará en la etapa de certificación.",
         "advisor-id": "ID de usuario del agrónomo",
         "assigned-advisors": "Agrónomos con parcelas asignadas",
         "invitation-email": "Correo del agrónomo",
@@ -78,7 +76,16 @@
         "representative": "Representante legal o gerente",
         "email": "Correo institucional de contacto",
         "phone": "Teléfono de mesa de partes",
-        "address": "Dirección de sede central"
+        "address": "Dirección de sede central",
+        "page-title": "Configuración de la cooperativa",
+        "page-subtitle": "Administra los datos de la cooperativa y su equipo agronómico.",
+        "sections": "Secciones de configuración",
+        "tab-cooperative": "Datos de la cooperativa",
+        "tab-team": "Equipo técnico",
+        "card-title": "Ficha institucional",
+        "card-subtitle": "Actualiza los datos oficiales vinculados al registro legal y operativo.",
+        "save": "Guardar cambios",
+        "saving": "Guardando..."
       },
       "registration": {
         "existing": "Tu cuenta ya tiene una cooperativa registrada.",
@@ -147,7 +154,7 @@
       }
     },
     "settings": {
-      "title": "Ajustes de Cuenta y Asistencia al Agricultor",
+      "title": "Configuración y ayuda",
       "subtitle": "Administra tu cuenta y encuentra orientación para usar SumaqAgro.",
       "account-tab": "Cuenta",
       "help-tab": "Manuales de Ayuda",
@@ -168,7 +175,6 @@
       "manage-plots": "Administrar mis parcelas",
       "contact-description": "Puedes actualizar tu nombre y teléfono. El correo de inicio de sesión es de solo lectura.",
       "saved": "Datos de tu cuenta guardados.",
-      "preview": "La recuperación funciona actualmente como vista previa: no envía correos ni cambia contraseñas.",
       "preferences": "Preferencias",
       "language": "Idioma de la aplicación",
       "language-description": "El idioma se aplica durante esta visita. Puedes cambiarlo también desde el menú lateral.",
@@ -253,7 +259,9 @@
       "last-name": "Apellidos",
       "name-error": "Ingresa un nombre válido de hasta 100 caracteres.",
       "edit-account": "Editar cuenta",
-      "cancel": "Cancelar"
+      "cancel": "Cancelar",
+      "account-title": "Tu cuenta",
+      "account-subtitle": "Administra tus datos de contacto y el acceso a tu cuenta."
     },
     "advisory": {
       "title": "Asesor responsable de la parcela",
@@ -273,6 +281,16 @@
         "conflict": "Hay asignaciones duplicadas para esta parcela. Solicita revisar los datos."
       },
       "by-director": "La directiva de tu cooperativa asigna el asesor de cada parcela."
+    },
+    "errors": {
+      "load": "No se pudieron cargar los datos. Inténtalo de nuevo.",
+      "save": "No se pudieron guardar los cambios. Inténtalo de nuevo.",
+      "invalid-data": "Los datos ingresados no son válidos.",
+      "institutional-required": "Todos los datos institucionales son obligatorios.",
+      "ruc": "El RUC debe tener 11 dígitos.",
+      "email": "El correo institucional no es válido.",
+      "name": "Los nombres y apellidos son obligatorios y no deben superar los 100 caracteres.",
+      "phone": "El teléfono no debe superar los 15 caracteres."
     }
   }
 }

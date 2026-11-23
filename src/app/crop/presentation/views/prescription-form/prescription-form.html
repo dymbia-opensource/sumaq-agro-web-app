@@ -2,7 +2,6 @@
 @if (store.writeError(); as error) {
   <p role="alert">{{ error | translate }}</p>
 }
-<p>{{ 'crop.workflow-demo' | translate }}</p>
 @if (store.clinicalLoading() || store.saving()) {
   <mat-progress-bar mode="indeterminate" [attr.aria-label]="'common.loading' | translate" />
 }

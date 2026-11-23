@@ -1,4 +1,5 @@
 <app-page-header
+  [breadcrumbs]="breadcrumbs"
   [title]="'profiles.cooperative.registration.title' | translate"
   [subtitle]="'profiles.cooperative.registration.subtitle' | translate"
 />
@@ -11,7 +12,7 @@
   </mat-form-field>
 
   <mat-form-field appearance="outline">
-    <mat-label>RUC</mat-label>
+    <mat-label>{{ 'profiles.cooperative.registration.ruc' | translate }}</mat-label>
     <input matInput formControlName="ruc" inputmode="numeric" maxlength="11" required />
     <mat-error>{{ 'profiles.cooperative.registration.ruc-error' | translate }}</mat-error>
   </mat-form-field>

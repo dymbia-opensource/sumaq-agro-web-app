@@ -55,6 +55,9 @@ export class CropStore {
   private readonly bulletinsSignal = signal<RegionalBulletin[]>([]);
   private readonly inspectionsSignal = signal<FieldInspection[]>([]);
   private readonly prescriptionsSignal = signal<TechnicalPrescription[]>([]);
+  /** Names of the producers and agronomists shown in the views, by user id. */
+  private readonly namesSignal = signal<ReadonlyMap<number, string>>(new Map());
+  private readonly requestedNames = new Set<number>();
 
   readonly activeUser = this.session.activeUser;
   readonly scopeReady = computed(() => this.ready() && this.scopeUser() === this.activeUser());
@@ -135,6 +138,8 @@ export class CropStore {
   readonly bulletinsError = computed(() => this.errors()['bulletins'] ?? null);
   readonly importingObservation = computed(() => !!this.busy()['satellite-import']);
   readonly importError = computed(() => this.errors()['satellite-import'] ?? null);
+  readonly importingForecast = computed(() => !!this.busy()['forecast-import']);
+  readonly forecastImportError = computed(() => this.errors()['forecast-import'] ?? null);
   readonly writeError = computed(() => this.errors()['write'] ?? null);
   readonly error = computed(() => Object.values(this.errors()).find((value) => value) ?? null);
   readonly pendingPestReportsCount = computed(
@@ -166,6 +171,29 @@ export class CropStore {
       this.farming.selectedPlotId();
       untracked(() => this.clearPlotData());
     });
+    // Read model of names: every person shown in a plot, report, visit or
+    // prescription is looked up once in Profiles.
+    effect(() => {
+      const ids = [
+        ...this.plots().map((plot) => plot.ownerUserId),
+        ...this.pestReports().map((report) => report.reporterId),
+        ...this.inspections().map((inspection) => inspection.inspectorUserId),
+        ...this.prescriptions().map((prescription) => prescription.agronomistId),
+      ];
+      untracked(() => this.loadNames(ids));
+    });
+  }
+
+  /** Looks up the names that are not known yet. */
+  private loadNames(ids: readonly (number | null | undefined)[]): void {
+    for (const id of new Set(ids)) {
+      if (typeof id !== 'number' || id <= 0 || this.requestedNames.has(id)) continue;
+      this.requestedNames.add(id);
+      this.profiles.advisorByUser(id).subscribe((summary) => {
+        if (summary?.name)
+          this.namesSignal.update((names) => new Map(names).set(id, summary.name));
+      });
+    }
   }
 
   private loadScope(user: SessionParticipant | null): void {
@@ -269,10 +297,11 @@ export class CropStore {
     );
   }
 
-  /** Uses the current account's display name; other producers remain identifiable by account ID. */
+  /** Name of a producer, from its profile; the account id while it loads. */
   producerName(userId: number): string {
     const user = this.session.activeUser();
-    return user?.id === userId ? user.displayName : `#${userId}`;
+    if (user?.id === userId) return user.displayName;
+    return this.namesSignal().get(userId) ?? `#${userId}`;
   }
 
   private cooperativeScope(cooperativeId: number, advisor: AdvisorSummary | null) {
@@ -301,7 +330,7 @@ export class CropStore {
   private clearPlotData(): void {
     this.requests.get('observations')?.unsubscribe();
     this.requests.get('alerts')?.unsubscribe();
-    for (const key of ['forecasts', 'bulletins', 'satellite-import']) {
+    for (const key of ['forecasts', 'bulletins', 'satellite-import', 'forecast-import']) {
       this.requests.get(key)?.unsubscribe();
       this.setBusy(key, false);
       this.setError(key, null);
@@ -374,6 +403,45 @@ export class CropStore {
         ),
       () => this.loadObservations(plot.id),
       'crop.errors.import-observations',
+    );
+  }
+
+  /** Only the owner can import the forecast, and only for a plot with its monitoring polygon. */
+  canImportForecast(): boolean {
+    return this.canImportObservation();
+  }
+
+  /**
+   * Imports the 5-day forecast of the selected plot from AgroMonitoring. The
+   * platform also issues the frost or water stress alerts of the region, so
+   * the alerts are read again afterwards.
+   */
+  importForecasts(): void {
+    const plot = this.selectedPlot();
+    if (!plot || !this.canImportForecast() || this.importingForecast()) return;
+    this.read(
+      'forecast-import',
+      this.api.importForecasts(plot.id).pipe(
+        catchError((error: unknown) =>
+          throwError(() =>
+            error instanceof HttpErrorResponse && error.status === 404
+              ? new Error('crop.errors.no-forecast-available')
+              : error,
+          ),
+        ),
+      ),
+      (imported) => {
+        const others = this.forecastsSignal().filter(
+          (item) => !imported.some((forecast) => forecast.forecastDate === item.forecastDate),
+        );
+        this.forecastsSignal.set(
+          [...others, ...imported].sort(
+            (a, b) => Date.parse(a.forecastDate) - Date.parse(b.forecastDate),
+          ),
+        );
+        this.loadAlerts(plot.region);
+      },
+      'crop.errors.import-forecasts',
     );
   }
 
@@ -679,6 +747,7 @@ export class CropStore {
     return (
       this.advisors().find((item) => item.userId === id)?.name ||
       (this.session.activeUser()?.id === id ? this.session.activeUser()?.displayName : undefined) ||
+      this.namesSignal().get(id) ||
       '#' + id
     );
   }

@@ -2,27 +2,38 @@ import { HttpClient } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { SignUpCommand } from '../../domain/model/commands/sign-up.command';
-import { User } from '../../domain/model/entities/user.entity';
 import { SignUpAssembler } from '../assemblers/sign-up.assembler';
-import { SignUpResponse } from '../responses/sign-up.response';
+import { SignUpResource, SignUpResponse } from '../responses/sign-up.response';
+
+const signUpApiEndpointUrl = `${environment.platformProviderApiBaseUrl}${environment.platformProviderSignUpEndpointPath}`;
 
 /**
- * Encapsulates sign-up HTTP operations.
+ * Encapsulates IAM sign-up HTTP operations.
+ *
+ * @remarks
+ * HTTP errors reach the store untouched, so it can tell an email already in
+ * use (409) from other failures.
  */
 export class SignUpApiEndpoint {
-  private readonly endpointUrl =
-    `${environment.platformProviderApiBaseUrl}` +
-    `${environment.platformProviderSignUpEndpointPath}`;
+  /**
+   * Creates an instance of SignUpApiEndpoint.
+   * @param http - The HttpClient for making HTTP requests.
+   * @param assembler - The assembler for converting between commands, requests, and responses.
+   */
+  constructor(
+    private http: HttpClient,
+    private assembler: SignUpAssembler,
+  ) {}
 
-  private readonly assembler = new SignUpAssembler();
-
-  constructor(private readonly http: HttpClient) {}
-
-  signUp(command: SignUpCommand): Observable<User> {
-    const request = this.assembler.toRequestFromCommand(command);
-
+  /**
+   * Registers a new user in the remote IAM endpoint.
+   * @param signUpCommand - Command containing the sign-up values.
+   * @returns Stream with the created user resource.
+   */
+  signUp = (signUpCommand: SignUpCommand): Observable<SignUpResource> => {
+    const signUpRequest = this.assembler.toRequestFromCommand(signUpCommand);
     return this.http
-      .post<SignUpResponse>(this.endpointUrl, request)
-      .pipe(map((response) => this.assembler.toEntityFromResponse(response)));
-  }
+      .post<SignUpResponse>(signUpApiEndpointUrl, signUpRequest)
+      .pipe(map((response) => this.assembler.toResourceFromResponse(response)));
+  };
 }

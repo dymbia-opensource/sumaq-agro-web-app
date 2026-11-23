@@ -4,7 +4,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { Router, RouterOutlet } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { IamStore } from '../../../../iam/application/iam.store';
-import { AuthNavigation } from '../../../../iam/infrastructure/auth-navigation';
 import { LanguageSwitcher } from '../../../../shared/presentation/components/language-switcher/language-switcher';
 
 /**
@@ -24,7 +23,6 @@ import { LanguageSwitcher } from '../../../../shared/presentation/components/lan
 export class SubscriptionsShell {
   private readonly session = inject(IamStore);
   private readonly router = inject(Router);
-  private readonly authNavigation = inject(AuthNavigation);
 
   protected readonly userName = computed(() => this.session.activeUser()?.displayName ?? '');
 
@@ -36,8 +34,9 @@ export class SubscriptionsShell {
       untracked(() => {
         if (this.router.currentNavigation()) return;
 
-        void this.router.navigate(['/sign-in'], {
-          queryParams: { returnUrl: this.router.url },
+        void this.router.navigate(['/iam/sign-in'], {
+          // After a deliberate sign-out the next person starts at their own page.
+          queryParams: this.session.signedOutOnPurpose() ? {} : { returnUrl: this.router.url },
           replaceUrl: true,
         });
       });
@@ -45,6 +44,6 @@ export class SubscriptionsShell {
   }
 
   protected signOut(): void {
-    this.authNavigation.signOut();
+    this.session.signOut();
   }
 }

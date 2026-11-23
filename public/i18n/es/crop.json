@@ -1,6 +1,9 @@
 {
   "crop": {
-    "prescription-status": {"ISSUED":"Emitida","APPLIED":"Aplicada"},
+    "prescription-status": {
+      "ISSUED": "Emitida",
+      "APPLIED": "Aplicada"
+    },
     "applied-at": "Aplicada el",
     "apply-prescription": "Registrar aplicación",
     "confirm-application": "Confirma que ya aplicaste la receta.",
@@ -48,12 +51,12 @@
     "form-photo": "Foto (opcional)",
     "form-severity": "Severidad",
     "form-title": "Reporte de Plaga",
-    "history-title": "Historial de Recetas",
+    "history-title": "Recetas técnicas",
     "inbox-subtitle": "Revisa los reportes de plagas y da seguimiento a las inspecciones y recetas.",
-    "inbox-title": "Bandeja de Plagas",
-    "consult-title": "Consulta a tu asesor",
+    "inbox-title": "Reportes de plagas",
+    "consult-title": "Consultar al asesor",
     "consult-subtitle": "Reporta problemas de tu cultivo, revisa quién asesora tu parcela y sigue el estado de tus casos.",
-    "inspections-title": "Inspecciones de Campo",
+    "inspections-title": "Inspecciones de campo",
     "no-alerts": "No hay alertas registradas para esta región.",
     "no-observations": "No hay observaciones satelitales disponibles para esta parcela.",
     "errors": {
@@ -98,7 +101,9 @@
       "assessment-evidence": "Se requiere aplicación y evolución de la misma receta. Para cerrar, todas las recetas deben tener este seguimiento.",
       "assessment-conflict": "La evaluación ya guardada difiere de este borrador o del seguimiento actual. Actualiza el caso antes de continuar.",
       "assessment-partial": "La evaluación se guardó, pero el cierre no se confirmó. Reintenta con el mismo borrador para sincronizar sin duplicarla.",
-      "save-assessment": "No se pudo guardar la evaluación. Conservamos tu borrador para reintentar."
+      "save-assessment": "No se pudo guardar la evaluación. Conservamos tu borrador para reintentar.",
+      "import-forecasts": "No pudimos importar el pronóstico de la parcela.",
+      "no-forecast-available": "AgroMonitoring aún no tiene pronóstico para esta parcela."
     },
     "no-inspections": "Sin inspecciones",
     "no-prescriptions": "Sin recetas",
@@ -143,7 +148,6 @@
     "inspection-saved": "La inspección se programó correctamente.",
     "report-status": "Estado",
     "view-photo": "Ver foto",
-    "workflow-demo": "Los datos se guardan en la API de prueba. Las acciones disponibles dependen del rol demo seleccionado.",
     "report-statuses": {
       "PENDING": "Pendiente",
       "INSPECTED": "Inspeccionado",
@@ -177,7 +181,6 @@
       "COMPLETED": "Completada"
     },
     "case": {
-      "pending-extra": "La evaluación del caso y el seguimiento de la evolución están pendientes.",
       "subtitle": "Revisa el reporte original, las inspecciones, las recetas y la evolución del cultivo.",
       "back": "Volver a reportes",
       "open": "Ver caso y seguimiento",
@@ -207,7 +210,6 @@
       "scope-notice": "Solo se muestran parcelas con una asignación activa a tu cuenta, pertenezcan o no a una cooperativa.",
       "refresh": "Actualizar acceso y datos",
       "producer": "Productor",
-      "responsible": "Agrónomo responsable",
       "active": "Asignación activa",
       "pending": "Casos pendientes de atención",
       "view-work": "Ver casos",
@@ -233,6 +235,7 @@
       "awaiting-evidence": "Esperando confirmación de aplicación y evolución del agricultor para una misma receta.",
       "evaluation-saved": "Evaluación guardada. El estado del caso refleja la conclusión registrada."
     },
-    "plot-selector": "Selector de parcela"
+    "plot-selector": "Selector de parcela",
+    "import-forecast": "Importar pronóstico de 5 días"
   }
 }

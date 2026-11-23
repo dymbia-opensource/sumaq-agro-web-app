@@ -29,8 +29,7 @@
         ></mat-card-header
       ><mat-card-content
         ><p>
-          {{ 'crop.advisor.producer' | translate }}: {{ store.producerName(report.reporterId) }} ·
-          #{{ report.reporterId }}
+          {{ 'crop.advisor.producer' | translate }}: {{ store.producerName(report.reporterId) }}
         </p>
         <p class="notes">{{ report.description }}</p>
         @if (report.photo) {
@@ -110,7 +109,6 @@
     } @empty {
       <p class="empty-state">{{ 'crop.case.no-prescriptions' | translate }}</p>
     }
-    <p class="follow-up-note">{{ 'crop.case.pending-extra' | translate }}</p>
   } @else {
     <p role="status">{{ 'crop.case.not-found' | translate }}</p>
   }

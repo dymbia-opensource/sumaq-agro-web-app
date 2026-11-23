@@ -1,6 +1,9 @@
 {
   "crop": {
-    "prescription-status": {"ISSUED":"Issued","APPLIED":"Applied"},
+    "prescription-status": {
+      "ISSUED": "Issued",
+      "APPLIED": "Applied"
+    },
     "applied-at": "Applied at",
     "apply-prescription": "Record application",
     "confirm-application": "Confirm that you have applied the prescription.",
@@ -48,12 +51,12 @@
     "form-photo": "Photo (optional)",
     "form-severity": "Severity",
     "form-title": "Pest Report",
-    "history-title": "Prescription History",
+    "history-title": "Technical prescriptions",
     "inbox-subtitle": "Review pest reports and follow up on inspections and prescriptions.",
-    "inbox-title": "Diagnosis Inbox",
-    "consult-title": "Consult your advisor",
+    "inbox-title": "Pest reports",
+    "consult-title": "Consult the advisor",
     "consult-subtitle": "Report crop issues, check your plot’s advisor, and track your cases.",
-    "inspections-title": "Field Inspections",
+    "inspections-title": "Field inspections",
     "no-alerts": "No alerts are recorded for this region.",
     "no-observations": "No satellite observations are available for this plot.",
     "errors": {
@@ -98,7 +101,9 @@
       "assessment-evidence": "Application and evolution for the same prescription are required. All prescriptions need this follow-up before closure.",
       "assessment-conflict": "The saved evaluation differs from this draft or the current evidence. Refresh the case before continuing.",
       "assessment-partial": "The evaluation was saved but closure was not confirmed. Retry the same draft to synchronize without duplicating it.",
-      "save-assessment": "Could not save the evaluation. Your draft is preserved for retry."
+      "save-assessment": "Could not save the evaluation. Your draft is preserved for retry.",
+      "import-forecasts": "We could not import the forecast of the plot.",
+      "no-forecast-available": "AgroMonitoring has no forecast for this plot yet."
     },
     "no-inspections": "No inspections",
     "no-prescriptions": "No prescriptions",
@@ -143,7 +148,6 @@
     "inspection-saved": "The inspection was scheduled successfully.",
     "report-status": "Status",
     "view-photo": "View photo",
-    "workflow-demo": "Records are saved to the test API. Available actions depend on the selected demo role.",
     "report-statuses": {
       "PENDING": "Pending",
       "INSPECTED": "Inspected",
@@ -177,7 +181,6 @@
       "COMPLETED": "Completed"
     },
     "case": {
-      "pending-extra": "Case assessment and tracking the evolution of treatment are pending.",
       "subtitle": "Review the original report, inspections, prescriptions, and crop progress.",
       "back": "Back to reports",
       "open": "View case and follow-up",
@@ -207,7 +210,6 @@
       "scope-notice": "Only plots actively assigned to your account are displayed, whether or not they belong to a cooperative.",
       "refresh": "Refresh access and data",
       "producer": "Producer",
-      "responsible": "Responsible agronomist",
       "active": "Active assignment",
       "pending": "Cases awaiting attention",
       "view-work": "View cases",
@@ -233,6 +235,7 @@
       "awaiting-evidence": "Waiting for farmer application and evolution records for the same prescription.",
       "evaluation-saved": "Evaluation saved. The case status reflects the recorded conclusion."
     },
-    "plot-selector": "Plot selector"
+    "plot-selector": "Plot selector",
+    "import-forecast": "Import 5-day forecast"
   }
 }

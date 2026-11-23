@@ -3,6 +3,10 @@
   [title]="'certification.page-title' | translate"
 />
 
+@if (busy() || store.state().loading) {
+<mat-progress-bar mode="indeterminate" [attr.aria-label]="'common.loading' | translate" />
+}
+
 @let state = store.state(); @if (state.loading) {
 <p role="status">{{ 'certification.loading' | translate }}</p>
 } @else if (state.error) {
@@ -50,13 +54,13 @@
 <div class="workspace">
   <section class="card">
     <h2>{{ 'certification.workspace.batches' | translate }}</h2>
-    @for (entry of store.entries(); track entry.batch.id) {
+    @for (entry of store.entries(); track entry.batch.batchId) {
     <button
       class="batch"
       type="button"
-      [attr.aria-pressed]="selectedId() === entry.batch.id"
+      [attr.aria-pressed]="selectedId() === entry.batch.batchId"
       [disabled]="busy()"
-      (click)="selectBatch(entry.batch.id)"
+      (click)="selectBatch(entry.batch.batchId)"
     >
       <strong>{{ entry.batch.batchCode }}</strong>
       <span
@@ -176,7 +180,7 @@
       </dd>
       } @if (batch.qualityCategory) {
       <dt>{{ 'certification.workspace.quality' | translate }}</dt>
-      <dd>{{ batch.qualityCategory }} · {{ batch.qualityScore | number }}</dd>
+      <dd>{{ 'certification.quality-category.' + batch.qualityCategory | translate }} · {{ batch.qualityScore | number }}</dd>
       } @if (entry.certificate; as certificate) {
       <dt>{{ 'certification.workspace.number' | translate }}</dt>
       <dd>
@@ -206,7 +210,7 @@
         mat-stroked-button
         type="button"
         [disabled]="busy()"
-        (click)="download(certificate.certificateNumber)"
+        (click)="download(certificate)"
       >
         {{ 'certification.farmer.download-pdf' | translate }}
       </button>
@@ -215,7 +219,7 @@
         mat-stroked-button
         type="button"
         [disabled]="busy()"
-        (click)="revoke(certificate.id)"
+        (click)="revoke(certificate.certificateId)"
       >
         {{ (confirmRevocation ? 'certification.workspace.confirm-revoke' :
         'certification.workspace.revoke') | translate }}
@@ -233,7 +237,7 @@
     </div>
     } @else if (store.canManage()) { @if (batch.netWeightKg === null) {
     <h3>{{ 'certification.workspace.weigh' | translate }}</h3>
-    <form #weighing="ngForm" (ngSubmit)="weigh(batch.id)">
+    <form #weighing="ngForm" (ngSubmit)="weigh(batch.batchId)">
       <label
         >{{ 'certification.workspace.grossWeightKg' | translate }}
         <input
@@ -266,7 +270,7 @@
     </form>
     } @else if (!batch.sampleIdentifier) {
     <h3>{{ 'certification.workspace.sample' | translate }}</h3>
-    <form #sampling="ngForm" (ngSubmit)="extractSample(batch.id)">
+    <form #sampling="ngForm" (ngSubmit)="extractSample(batch.batchId)">
       <label
         >{{ 'certification.workspace.sampleIdentifier' | translate }}
         <input
@@ -300,7 +304,7 @@
       {{ (batch.cropType === 'ANDEAN_POTATO' ? 'certification.workspace.grade' :
       'certification.workspace.cup') | translate }}
     </h3>
-    <form #grading="ngForm" (ngSubmit)="grade(batch.id, batch.cropType)">
+    <form #grading="ngForm" (ngSubmit)="grade(batch)">
       @if (batch.cropType === 'ANDEAN_POTATO') {
       <label
         >{{ 'certification.workspace.firstPercentage' | translate }}
@@ -384,7 +388,7 @@
     </form>
     } @else if (batch.status === 'GRADED' && batch.qualityCategory) {
     <h3>{{ 'certification.workspace.issue' | translate }}</h3>
-    <form #issuing="ngForm" (ngSubmit)="issue(batch.id)">
+    <form #issuing="ngForm" (ngSubmit)="issue(batch.batchId)">
       <label
         >{{ 'certification.workspace.number' | translate }}
         <input

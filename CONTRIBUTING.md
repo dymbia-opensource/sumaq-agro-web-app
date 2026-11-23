@@ -13,7 +13,7 @@ Thank you for contributing to the SumaqAgro Web Application, built by the **Dymb
 4. [Semantic Versioning (SemVer)](#semantic-versioning-semver)
 5. [TypeScript Guidelines](#typescript-guidelines)
 6. [Angular & Angular Material Standards](#angular--angular-material-standards)
-7. [Fake API & Environments](#fake-api--environments)
+7. [RESTful API & Environments](#restful-api--environments)
 8. [Quality Assurance & Development Workflow](#quality-assurance--development-workflow)
 9. [Pull Request (PR) Process](#pull-request-pr-process)
 
@@ -128,16 +128,16 @@ Commit messages follow the [Conventional Commits v1.0.0](https://www.conventiona
 | `test`     | Adding or updating unit tests                                |
 | `build`    | Build configuration or dependency changes                    |
 | `ci`       | Continuous integration configuration                         |
-| `chore`    | Maintenance tasks (fake API data, deployment configuration)  |
+| `chore`    | Maintenance tasks (dependencies, deployment configuration)   |
 
 ### Allowed Scopes
-The scope is the bounded context or the area changed: `shared`, `farming`, `crop`, `profiles`, `certification`, `iam`, `subscriptions`, `i18n`, `server`, `deps`, `config`.
+The scope is the bounded context or the area changed: `shared`, `farming`, `crop`, `profiles`, `certification`, `iam`, `subscriptions`, `i18n`, `api`, `deps`, `config`.
 
 ### Examples
 - `feat(farming): add campaign finances and field expense views with their routes`
 - `fix(crop): correct map initialization`
 - `refactor(shared): split the layout into shell, sidebar and toolbar`
-- `chore(server): add crop health collections to the fake api`
+- `fix(crop): complete field inspections with POST`
 - `docs: add changelog and contributing guidelines`
 
 ---
@@ -146,7 +146,7 @@ The scope is the bounded context or the area changed: `shared`, `farming`, `crop
 
 Versions follow [SemVer 2.0.0](https://semver.org/): `MAJOR.MINOR.PATCH`. Every release is described in [`CHANGELOG.md`](CHANGELOG.md).
 
-- **MAJOR (`X.0.0`)**: Incompatible changes, for example replacing the fake API with the RESTful API contract or restructuring the routes.
+- **MAJOR (`X.0.0`)**: Incompatible changes, for example following a new major version of the RESTful API or restructuring the routes.
 - **MINOR (`0.X.0`)**: New backwards-compatible features, such as new views or a new bounded context.
 - **PATCH (`0.0.X`)**: Backwards-compatible bug fixes.
 
@@ -173,7 +173,7 @@ Versions follow [SemVer 2.0.0](https://semver.org/): `MAJOR.MINOR.PATCH`. Every 
 - **Dependency Injection**: Use `inject(Service)` instead of constructor injection.
 - **Reactivity via Signals**: Use `signal()`, `computed()` and `effect()` in stores and components, and `toSignal()` to bring RxJS streams into the view.
 - **Component APIs**: Use `input()`, `input.required()` and `output()`. Route data and parameters reach the views as inputs through `withComponentInputBinding()`.
-- **Routing**: Each bounded context exports its routes from `<context>.routes.ts`, loaded lazily from `app.routes.ts` inside the layout shell. Role checks use guards (for example, `cropHealthGuard`); when IAM is implemented, the shell route will use `iamGuard`.
+- **Routing**: Each bounded context exports its routes from `<context>.routes.ts`, loaded lazily from `app.routes.ts` inside the layout shell. The shell route uses `iamGuard` (session and `data.roles`), `roleGuard` and `activeSubscriptionGuard`; IAM pages live under `/iam`.
 - **Reactive Forms**: Use typed reactive forms (`FormBuilder`, `FormControl<T>`). Forms live in `presentation/components` and emit their data; the view creates the command and calls the store.
 - **Views stay small**: Views arrange components; repeated markup goes to a component (for example, `PageHeader` and `MessageCard` in `shared/presentation/components`).
 
@@ -193,13 +193,13 @@ Versions follow [SemVer 2.0.0](https://semver.org/): `MAJOR.MINOR.PATCH`. Every 
 
 ---
 
-## Fake API & Environments
+## RESTful API & Environments
 
-Until the RESTful API exists, the data comes from a fake API with **json-server**:
-- `server/db.json` holds the collections and `server/routes.json` maps `/api/v1/*` to them.
-- `src/environments/environment.development.ts` points to `http://localhost:3000/api/v1`; `src/environments/environment.ts` points to the fake API published on Render.
-- Do not commit test data you created while trying the application (for example, a plot registered by hand). Restore it with `git restore server/db.json` unless it is intended demo data.
-- When the RESTful API is ready, only the `environment` URLs and the `infrastructure` layer change; views, stores and entities stay the same.
+The data comes from the **SumaqAgro Platform** RESTful API (`sumaq-agro-platform`):
+- `src/environments/environment.development.ts` points to `http://localhost:8080/api/v1`; `src/environments/environment.ts` points to the platform deployed on Render. Every resource path lives in the environment files.
+- Every request carries the JWT of the session (`iamInterceptor`). Errors follow RFC 9457 problem details; show their `detail` when it explains what the user must fix.
+- Only call endpoints the platform serves. When a view needs data that no endpoint returns, compose it in the store from real endpoints (a read model) or ask the platform team for a query; never invent data in the frontend.
+- A change in the API contract only touches the `infrastructure` layer (endpoints, requests, responses, assemblers); views, stores and entities stay the same.
 
 ---
 
@@ -214,10 +214,9 @@ Until the RESTful API exists, the data comes from a fake API with **json-server*
 # Install dependencies
 npm install
 
-# Terminal 1: fake API on http://localhost:3000/api/v1
-npm run api
+# Start the SumaqAgro Platform on http://localhost:8080 first (see its README)
 
-# Terminal 2: application on http://localhost:4200
+# Application on http://localhost:4200
 npm start
 
 # Run unit tests (Vitest)
@@ -229,7 +228,7 @@ npm run build
 
 ### Deployment
 - **Web application**: Firebase Hosting (`npm run build` and then `firebase deploy --only hosting`).
-- **Fake API**: Render, redeployed automatically from the repository.
+- **RESTful API**: the SumaqAgro Platform on Render, deployed from its own repository.
 
 ---
 
@@ -241,6 +240,6 @@ Before merging into `develop`, verify that:
 3. [ ] Every new UI text has English and Spanish translations.
 4. [ ] Unit tests pass (`npm test`).
 5. [ ] The production build succeeds without errors (`npm run build`).
-6. [ ] `server/db.json` only contains intended demo data.
+6. [ ] Every endpoint called exists in the SumaqAgro Platform.
 7. [ ] Class diagrams and `CHANGELOG.md` are updated when the architecture or the features change.
 8. [ ] The branch targets `develop` (or `main` for hotfixes).

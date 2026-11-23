@@ -1,3 +1,4 @@
+import { DOCUMENT } from '@angular/common';
 import { Component, computed, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -10,7 +11,11 @@ import { MessageCard } from '../../../../shared/presentation/components/message-
 import { SubscriptionsStore } from '../../../application/subscriptions.store';
 import { PaymentStatus } from '../../../domain/model/entities/payment-status';
 
-/** Checkout summary and demo payment flow for a selected plan. */
+/**
+ * Checkout summary of the selected plan. The producer pays on Mercado Pago
+ * Checkout Pro; the simulated payment of the `dev` profile stays as a
+ * secondary option while developing.
+ */
 @Component({
   selector: 'app-checkout',
   imports: [
@@ -26,6 +31,7 @@ import { PaymentStatus } from '../../../domain/model/entities/payment-status';
 })
 export class Checkout {
   private readonly router = inject(Router);
+  private readonly document = inject(DOCUMENT);
   private readonly store = inject(SubscriptionsStore);
   private readonly iamStore = inject(IamStore);
 
@@ -42,6 +48,14 @@ export class Checkout {
 
   protected readonly paymentStatuses = PaymentStatus;
   protected readonly demoPaymentsEnabled = environment.demoCheckoutEnabled;
+
+  /** Opens the Mercado Pago page where the producer pays the selected plan. */
+  onPayWithMercadoPago(): void {
+    if (!this.selectedPlan() || !this.amount() || this.processing()) return;
+    this.store.startPaymentCheckout((checkout) =>
+      this.document.location.assign(checkout.checkoutUrl),
+    );
+  }
 
   /** Submits a demo payment using the current session identity. */
   onPay(status: PaymentStatus.COMPLETED | PaymentStatus.REJECTED): void {

@@ -3,10 +3,12 @@
 }
 
 <header class="settings-header">
-  <h1>{{ 'profiles.settings.title' | translate }}</h1>
-  <p>{{ 'profiles.settings.subtitle' | translate }}</p>
+  <h1>{{ (isFarmer() ? 'profiles.settings.title' : 'layout.profile') | translate }}</h1>
+  <p>{{ (isFarmer() ? 'profiles.settings.subtitle' : 'profiles.settings.account-subtitle') | translate }}</p>
 </header>
 
+<!-- The help manuals walk through the producer's pages only. -->
+@if (isFarmer()) {
 <nav class="settings-tabs" [attr.aria-label]="'profiles.settings.title' | translate">
   <button
     mat-stroked-button
@@ -25,26 +27,29 @@
     <mat-icon>help_outline</mat-icon>{{ 'profiles.settings.help-tab' | translate }}
   </button>
 </nav>
+}
 @if (tab() === 'account') {
   <mat-card class="profile-summary"
     ><mat-card-content>
       <mat-icon>account_circle</mat-icon>
       <div>
-        <h2>{{ 'profiles.settings.profile-title' | translate }}</h2>
+        <h2>{{ (isFarmer() ? 'profiles.settings.profile-title' : 'profiles.settings.account-title') | translate }}</h2>
         @if (profile()?.fullName || session.activeUser()?.displayName; as name) {
           <p class="profile-name">{{ name }}</p>
         }
         <p>{{ session.currentUser()?.email }}</p>
-        <span>{{ 'profiles.settings.farmer-role' | translate }}</span>
+        <span>{{ 'iam.roles.' + experience() | translate }}</span>
       </div>
-      <a mat-stroked-button routerLink="/plots">{{
-        'profiles.settings.manage-plots' | translate
-      }}</a>
+      @if (isFarmer()) {
+        <a mat-stroked-button routerLink="/plots">{{
+          'profiles.settings.manage-plots' | translate
+        }}</a>
+      }
     </mat-card-content></mat-card
   >
   @if (error(); as error) {
     <mat-card class="message-card" role="alert"
-      ><mat-card-content>{{ error }}</mat-card-content></mat-card
+      ><mat-card-content>{{ error | translate }}</mat-card-content></mat-card
     >
   }
 
@@ -147,10 +152,7 @@
     <section class="security-section">
       <h2>{{ 'profiles.settings.security-title' | translate }}</h2>
       <p>{{ 'profiles.settings.security-description' | translate }}</p>
-      @if (session.isPasswordRecoveryPreview) {
-        <p class="notice">{{ 'profiles.settings.preview' | translate }}</p>
-      }
-      <a mat-stroked-button routerLink="/forgot-password"
+      <a mat-stroked-button routerLink="/iam/forgot-password"
         ><mat-icon>lock_reset</mat-icon>{{ 'profiles.settings.change-password' | translate }}</a
       >
       <div class="preferences">

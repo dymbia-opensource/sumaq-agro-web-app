@@ -17,10 +17,16 @@
       <p>{{ 'iam.signUp.successMessage' | translate }}</p>
     </div>
 
-    <a mat-flat-button class="submit-button" routerLink="/sign-in">
+    <a mat-flat-button class="submit-button" routerLink="/iam/sign-in">
       {{ 'iam.signIn.submit' | translate }}
     </a>
   } @else {
+    @if (invitationToken) {
+      <p class="invitation-notice" role="status">
+        <mat-icon aria-hidden="true">mail</mat-icon>
+        {{ 'iam.signUp.invitationNotice' | translate }}
+      </p>
+    }
     <form [formGroup]="form" (ngSubmit)="submit()" [attr.aria-busy]="store.isLoading()" novalidate>
       <fieldset class="role-fieldset">
         <legend id="role-label">{{ 'iam.signUp.roleLabel' | translate }}</legend>
@@ -211,7 +217,7 @@
 
     <p class="auth-link">
       {{ 'iam.signUp.hasAccount' | translate }}
-      <a routerLink="/sign-in">
+      <a routerLink="/iam/sign-in">
         {{ 'iam.signIn.submit' | translate }}
       </a>
     </p>

@@ -23,23 +23,6 @@
           <span matListItemTitle>{{ option.label | translate }}</span>
         </a>
       }
-      @if (last) {
-        <mat-list-item
-          [matTooltip]="
-            (layout.isOnline() ? 'layout.offline-mode-off-hint' : 'layout.offline-mode-on-hint')
-              | translate
-          "
-          matTooltipPosition="right"
-        >
-          <mat-icon matListItemIcon>{{ layout.isOnline() ? 'wifi' : 'wifi_off' }}</mat-icon>
-          <span matListItemTitle>{{ 'layout.offline-mode' | translate }}</span>
-          <span matListItemMeta class="offline-status" [class.offline-on]="!layout.isOnline()">
-            {{
-              (layout.isOnline() ? 'layout.offline-mode-off' : 'layout.offline-mode-on') | translate
-            }}
-          </span>
-        </mat-list-item>
-      }
     </mat-nav-list>
     @if (!last) {
       <mat-divider />
@@ -48,7 +31,7 @@
 
   <div class="sidebar-footer">
     <app-language-switcher />
-    <button mat-flat-button class="sign-out" (click)="signOut()">
+    <button mat-button class="sign-out" (click)="signOut()">
       <mat-icon>logout</mat-icon>
       {{ 'layout.sign-out' | translate }}
     </button>

@@ -1,121 +1,44 @@
-import { HttpClient } from "@angular/common/http";
-import { inject, Injectable } from "@angular/core";
-import { environment } from "../../../environments/environment";
-import {
-  BatchEntry,
-  HarvestBatchResource,
-  PublicTraceabilityResource,
-  QualityCertificateResource,
-  RegisterBatchRequest,
-} from "./responses/certification-workspace.response";
+import { HttpClient } from '@angular/common/http';
+import { inject, Injectable } from '@angular/core';
+import { BaseApi } from '../../shared/infrastructure/base-api';
+import { ExtractRepresentativeSampleCommand } from '../domain/model/commands/extract-representative-sample.command';
+import { GradePotatoCalibersCommand } from '../domain/model/commands/grade-potato-calibers.command';
+import { IssueQualityCertificateCommand } from '../domain/model/commands/issue-quality-certificate.command';
+import { PerformCoffeeCuppingCommand } from '../domain/model/commands/perform-coffee-cupping.command';
+import { RegisterHarvestBatchCommand } from '../domain/model/commands/register-harvest-batch.command';
+import { RevokeQualityCertificateCommand } from '../domain/model/commands/revoke-quality-certificate.command';
+import { VerifyCertificateCommand } from '../domain/model/commands/verify-certificate.command';
+import { WeighDeliveredBatchCommand } from '../domain/model/commands/weigh-delivered-batch.command';
+import { HarvestBatchesApiEndpoint } from './endpoints/harvest-batches.endpoint';
+import { PublicTraceabilityApiEndpoint } from './endpoints/public-traceability.endpoint';
+import { QualityCertificatesApiEndpoint } from './endpoints/quality-certificates.endpoint';
 
-@Injectable({ providedIn: "root" })
-export class CertificationApi {
+/**
+ * Infrastructure facade of Harvest Certification: batches, certificates and
+ * their public verification.
+ */
+@Injectable({ providedIn: 'root' })
+export class CertificationApi extends BaseApi {
   private readonly http = inject(HttpClient);
-  private readonly base = environment.platformProviderApiBaseUrl.replace(
-    /\/+$/,
-    "",
-  );
-  private readonly batches = this.base + "/harvest-batches";
-  private readonly certificates = this.base + "/quality-certificates";
+  private readonly batches = new HarvestBatchesApiEndpoint(this.http);
+  private readonly certificates = new QualityCertificatesApiEndpoint(this.http);
+  private readonly traceability = new PublicTraceabilityApiEndpoint(this.http);
 
-  listBatches(cooperativeId: number) {
-    return this.http.get<BatchEntry[]>(this.batches, {
-      params: { cooperativeId },
-    });
-  }
+  getBatchesByCooperative = (cooperativeId: number) => this.batches.getByCooperative(cooperativeId);
+  getBatch = (batchId: number) => this.batches.getById(batchId);
+  registerBatch = (command: RegisterHarvestBatchCommand) => this.batches.register(command);
+  weighBatch = (command: WeighDeliveredBatchCommand) => this.batches.weigh(command);
+  extractSample = (command: ExtractRepresentativeSampleCommand) =>
+    this.batches.extractSample(command);
+  gradePotato = (command: GradePotatoCalibersCommand) => this.batches.gradePotato(command);
+  cupCoffee = (command: PerformCoffeeCuppingCommand) => this.batches.cupCoffee(command);
 
-  register(body: RegisterBatchRequest) {
-    return this.http.post<HarvestBatchResource>(this.batches, body);
-  }
+  issueCertificate = (command: IssueQualityCertificateCommand) => this.certificates.issue(command);
+  getCertificateByNumber = (certificateNumber: string) =>
+    this.certificates.getByNumber(certificateNumber);
+  revokeCertificate = (command: RevokeQualityCertificateCommand) =>
+    this.certificates.revoke(command);
+  getCertificateDocument = (certificateId: number) => this.certificates.document(certificateId);
 
-  batch(id: number) {
-    return this.http.get<HarvestBatchResource>(this.batches + "/" + id);
-  }
-
-  weigh(id: number, body: { grossWeightKg: number; tareKg: number }) {
-    return this.http.post<HarvestBatchResource>(
-      this.batches + "/" + id + "/weight",
-      body,
-    );
-  }
-
-  sample(
-    id: number,
-    body: { sampleIdentifier: string; sampleWeightKg: number },
-  ) {
-    return this.http.post<HarvestBatchResource>(
-      this.batches + "/" + id + "/sample",
-      body,
-    );
-  }
-
-  gradePotato(
-    id: number,
-    body: {
-      firstPercentage: number;
-      secondPercentage: number;
-      thirdPercentage: number;
-      pestDamagePercentage: number;
-    },
-  ) {
-    return this.http.post<HarvestBatchResource>(
-      this.batches + "/" + id + "/potato-calibers",
-      body,
-    );
-  }
-
-  cupCoffee(
-    id: number,
-    body: {
-      aroma: number;
-      flavor: number;
-      acidity: number;
-      body: number;
-      totalScore: number;
-      fermentDefect: boolean;
-    },
-  ) {
-    return this.http.post<HarvestBatchResource>(
-      this.batches + "/" + id + "/coffee-cupping",
-      body,
-    );
-  }
-
-  issue(body: {
-    certificateNumber: string;
-    harvestBatchId: number;
-    issuedByUserId: number;
-  }) {
-    return this.http.post<QualityCertificateResource>(this.certificates, body);
-  }
-
-  certificate(certificateNumber: string) {
-    return this.http.get<QualityCertificateResource>(this.certificates, {
-      params: { certificateNumber },
-    });
-  }
-
-  revoke(id: number) {
-    return this.http.post<QualityCertificateResource>(
-      this.certificates + "/" + id + "/revocation",
-      null,
-    );
-  }
-
-  document(certificateNumber: string) {
-    return this.http.get(this.certificates + "/document", {
-      params: { certificateNumber },
-      responseType: "blob",
-    });
-  }
-
-  verify(number: string, hash: string) {
-    return this.http.get<PublicTraceabilityResource>(
-      this.base + "/public/traceability",
-      {
-        params: { number, hash },
-      },
-    );
-  }
+  verifyCertificate = (command: VerifyCertificateCommand) => this.traceability.verify(command);
 }

@@ -79,13 +79,13 @@ export class Cooperative extends BaseEntity {
     ) as typeof data;
 
     if (Object.values(values).some((value) => !value)) {
-      throw new Error('All institutional data is required.');
+      throw new Error('profiles.errors.institutional-required');
     }
     if (!/^\d{11}$/.test(values.ruc)) {
-      throw new Error('The RUC must have eleven digits.');
+      throw new Error('profiles.errors.ruc');
     }
     if (!/^\S+@\S+\.\S+$/.test(values.institutionalEmail)) {
-      throw new Error('The institutional email is invalid.');
+      throw new Error('profiles.errors.email');
     }
 
     this._legalName = values.legalName;
