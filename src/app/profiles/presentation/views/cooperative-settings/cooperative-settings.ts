@@ -3,7 +3,9 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { HttpErrorResponse } from '@angular/common/http';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { TranslatePipe } from '@ngx-translate/core';
 import { IamStore } from '../../../../iam/application/iam.store';
@@ -21,7 +23,8 @@ export type SettingsTab = 'cooperative' | 'technical-team';
     MatCardModule,
     TranslatePipe,
     MatFormFieldModule,
-      MatInputModule,
+    MatIconModule,
+    MatInputModule,
     MatProgressBarModule,
   ],
   templateUrl: './cooperative-settings.html',
@@ -33,7 +36,7 @@ export class CooperativeSettings {
 
   readonly activeTab = signal<SettingsTab>('cooperative');
   readonly cooperative = this.store.cooperative;
-  readonly technicalAdvisors = this.store.technicalAdvisors;
+  readonly technicalTeam = this.store.technicalTeam;
   readonly loading = this.store.loading;
   readonly saving = this.store.saving;
   readonly error = this.store.error;
@@ -114,13 +117,22 @@ export class CooperativeSettings {
     this.invitationBusy.set(true);
     this.invitationFeedback.set('');
     this.store.inviteAgronomist(this.invitationEmail.value.trim()).subscribe({
-      next: () => {
+      next: (invitation) => {
         this.invitationEmail.reset();
-        this.invitationFeedback.set('profiles.cooperative.integration.invitation-created');
+        // An agronomist who already had an account joins the team at once.
+        this.invitationFeedback.set(
+          invitation.accepted
+            ? 'profiles.cooperative.team.joined'
+            : 'profiles.cooperative.integration.invitation-created',
+        );
         this.invitationBusy.set(false);
       },
-      error: () => {
-        this.invitationFeedback.set('profiles.cooperative.integration.invitation-error');
+      error: (reason: unknown) => {
+        this.invitationFeedback.set(
+          reason instanceof HttpErrorResponse && reason.status === 400
+            ? 'profiles.cooperative.team.already-invited'
+            : 'profiles.cooperative.integration.invitation-error',
+        );
         this.invitationBusy.set(false);
       },
     });

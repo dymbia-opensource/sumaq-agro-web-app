@@ -14,7 +14,10 @@ import {
 import { FarmingStore } from '../../farming/application/farming.store';
 import { IamStore, SessionParticipant } from '../../iam/application/iam.store';
 import { UpdateCooperativeCommand } from '../domain/model/commands/update-cooperative.command';
+import { AgronomistInvitation } from '../domain/model/entities/agronomist-invitation.entity';
 import { CooperativeMember } from '../domain/model/entities/cooperative-member.entity';
+import { CooperativeMemberDetails } from '../infrastructure/responses/cooperative-member.response';
+import { MemberCandidate } from '../domain/model/entities/member-candidate';
 import { Cooperative } from '../domain/model/entities/cooperative.entity';
 import { FarmerProfile } from '../domain/model/entities/farmer-profile.entity';
 import { TechnicalAdvisor } from '../domain/model/entities/technical-advisor.entity';
@@ -22,6 +25,15 @@ import { AdvisorSummary } from '../domain/model/entities/advisor-summary';
 import { PlotAdvisorAssignment } from '../domain/model/entities/plot-advisor-assignment';
 import { PlotResponsibility } from '../domain/model/entities/plot-responsibility';
 import { ProfilesApi } from '../infrastructure/profiles-api';
+
+/** One agronomist of the technical team, or an invitation still waiting for him. */
+export interface TechnicalTeamMember {
+  readonly invitation: AgronomistInvitation;
+  /** Name from the profile of the agronomist; null while the invitation is pending. */
+  readonly name: string | null;
+  /** Plots of the members he is in charge of. */
+  readonly assignedPlotsCount: number;
+}
 
 /** Coordinates the institutional Profile read models for a cooperative director. */
 @Injectable({ providedIn: 'root' })
@@ -33,6 +45,8 @@ export class ProfilesStore {
   private readonly cooperativeSignal = signal<Cooperative | null>(null);
   private readonly membersSignal = signal<CooperativeMember[]>([]);
   private readonly technicalAdvisorsSignal = signal<TechnicalAdvisor[]>([]);
+  private readonly invitationsSignal = signal<AgronomistInvitation[]>([]);
+  private readonly teamNamesSignal = signal<ReadonlyMap<number, string>>(new Map());
   private readonly loadingSignal = signal(false);
   private readonly savingSignal = signal(false);
   private readonly errorSignal = signal<string | null>(null);
@@ -43,6 +57,28 @@ export class ProfilesStore {
   readonly cooperative = this.cooperativeSignal.asReadonly();
   readonly members = this.membersSignal.asReadonly();
   readonly technicalAdvisors = this.technicalAdvisorsSignal.asReadonly();
+
+  /**
+   * Technical team of the director's cooperative: the accepted invitations first,
+   * then the pending ones.
+   */
+  readonly technicalTeam = computed<TechnicalTeamMember[]>(() => {
+    const names = this.teamNamesSignal();
+    const plots = new Map(
+      this.technicalAdvisors().map((advisor) => [advisor.userId, advisor.assignedPlotsCount]),
+    );
+    return [...this.invitationsSignal()]
+      .sort((first, second) => Number(second.accepted) - Number(first.accepted))
+      .map((invitation) => ({
+        invitation,
+        name:
+          invitation.agronomistUserId === null
+            ? null
+            : (names.get(invitation.agronomistUserId) ?? null),
+        assignedPlotsCount:
+          invitation.agronomistUserId === null ? 0 : (plots.get(invitation.agronomistUserId) ?? 0),
+      }));
+  });
   readonly loading = this.loadingSignal.asReadonly();
   readonly saving = this.savingSignal.asReadonly();
   readonly error = this.errorSignal.asReadonly();
@@ -90,11 +126,13 @@ export class ProfilesStore {
       lastName: current.lastName,
       phoneNumber: current.phoneNumber,
       email: current.email,
+      dni: current.dni,
     });
 
     try {
       profile.updateName(command.firstName, command.lastName);
       profile.updatePhoneNumber(command.phoneNumber);
+      if (this.session.activeUser()?.experience === 'FARMER') profile.updateDni(command.dni);
     } catch (error) {
       this.errorSignal.set(error instanceof Error ? error.message : 'profiles.errors.invalid-data');
       return;
@@ -121,23 +159,26 @@ export class ProfilesStore {
     this.cooperativeSignal.set(null);
     this.membersSignal.set([]);
     this.technicalAdvisorsSignal.set([]);
+    this.invitationsSignal.set([]);
     this.profilesApi.getCooperativeByDirector(directorUserId).pipe(
       switchMap((cooperative) => {
         this.cooperativeSignal.set(cooperative);
-        if (!cooperative) return of({ members: [], advisors: [] });
+        if (!cooperative) return of({ members: [], advisors: [], invitations: [] });
         const id = Number(cooperative.id);
         return forkJoin({
           members: this.profilesApi.getCooperativeMembers(id),
           advisors: this.profilesApi.getAssignmentsByCooperative(id).pipe(
             switchMap((assignments) => this.assignedAdvisors(assignments, id)),
           ),
+          invitations: this.profilesApi.getInvitations(id),
         });
       }),
       finalize(() => this.loadingSignal.set(false)),
     ).subscribe({
-      next: ({ members, advisors }) => {
+      next: ({ members, advisors, invitations }) => {
         this.membersSignal.set(members);
         this.technicalAdvisorsSignal.set(advisors);
+        this.showInvitations(invitations);
       },
       error: () => this.errorSignal.set('profiles.errors.load'),
     });
@@ -162,12 +203,95 @@ export class ProfilesStore {
     ));
   }
 
-  inviteAgronomist(email: string): Observable<unknown> {
+  /**
+   * Invites an agronomist to the technical team (US-19). An agronomist who already
+   * has an account joins at once.
+   * @param email - Email of the agronomist.
+   * @returns The invitation, already accepted when the agronomist had an account.
+   */
+  inviteAgronomist(email: string): Observable<AgronomistInvitation> {
     const cooperative = this.cooperative();
     if (!cooperative || cooperative.directorUserId !== this.session.activeUser()?.id) {
       return throwError(() => new Error('profiles.advisory.errors.denied'));
     }
-    return this.profilesApi.inviteAgronomist(Number(cooperative.id), email);
+    return this.profilesApi.inviteAgronomist(Number(cooperative.id), email).pipe(
+      map((invitation) => {
+        this.showInvitations([...this.invitationsSignal(), invitation]);
+        return invitation;
+      }),
+    );
+  }
+
+  /**
+   * Publishes the accepted agronomists of a cooperative, the ones the director can
+   * put in charge of a plot.
+   * @param cooperativeId - Cooperative of the director.
+   */
+  technicalTeamOf(cooperativeId: number): Observable<AdvisorSummary[]> {
+    return this.profilesApi.getInvitations(cooperativeId).pipe(
+      map((invitations) => invitations.filter((invitation) => invitation.accepted)),
+      switchMap((accepted) =>
+        accepted.length === 0
+          ? of([])
+          : forkJoin(
+              accepted.map((invitation) =>
+                this.advisorByUser(invitation.agronomistUserId as number).pipe(
+                  map((advisor) => ({
+                    userId: invitation.agronomistUserId as number,
+                    name: advisor?.name ?? invitation.email,
+                  })),
+                ),
+              ),
+            ),
+      ),
+    );
+  }
+
+  // ---------- Member list of the director (US-18) ----------
+
+  /**
+   * Finds the producer account that uses an email, with the data of its profile.
+   * @returns The producer, or null when no producer account uses the email.
+   */
+  findMemberCandidate(cooperativeId: number, email: string): Observable<MemberCandidate | null> {
+    if (!this.directorScoped()) return throwError(() => new Error('profiles.advisory.errors.denied'));
+    return this.profilesApi.findMemberCandidate(cooperativeId, email.trim());
+  }
+
+  /**
+   * Adds a member; with an email, he is linked to the producer account that uses it.
+   * @param details - Data of the member.
+   */
+  addMember(cooperativeId: number, details: CooperativeMemberDetails): Observable<CooperativeMember> {
+    if (!this.directorScoped()) return throwError(() => new Error('profiles.advisory.errors.denied'));
+    return this.profilesApi.addCooperativeMember(cooperativeId, details);
+  }
+
+  /**
+   * Links a member registered without an account to the producer account of an email.
+   * @param email - Email of the producer account.
+   */
+  linkMemberAccount(
+    cooperativeId: number,
+    memberId: number,
+    email: string,
+  ): Observable<CooperativeMember> {
+    if (!this.directorScoped()) return throwError(() => new Error('profiles.advisory.errors.denied'));
+    return this.profilesApi.linkMemberAccount(cooperativeId, memberId, email.trim());
+  }
+
+  /** Shows the invitations and looks up the names of the agronomists who accepted. */
+  private showInvitations(invitations: AgronomistInvitation[]): void {
+    this.invitationsSignal.set(invitations);
+    const known = this.teamNamesSignal();
+    for (const invitation of invitations) {
+      const userId = invitation.agronomistUserId;
+      if (userId === null || known.has(userId)) continue;
+      this.advisorByUser(userId).subscribe((advisor) => {
+        if (!advisor) return;
+        this.teamNamesSignal.update((names) => new Map(names).set(userId, advisor.name));
+      });
+    }
   }
 
   /** Validates and persists the director's institutional configuration. */

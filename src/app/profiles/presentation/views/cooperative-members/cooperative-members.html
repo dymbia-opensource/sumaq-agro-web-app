@@ -61,6 +61,62 @@
             {{ 'profiles.cooperative.members.new-title' | translate }}
           </h2>
 
+          <div class="lookup">
+            <p class="lookup-hint">{{ 'profiles.cooperative.members.lookup-hint' | translate }}</p>
+            <div class="lookup-row">
+              <mat-form-field appearance="outline">
+                <mat-label>{{ 'profiles.cooperative.members.account-email' | translate }}</mat-label>
+                <mat-icon matPrefix aria-hidden="true">alternate_email</mat-icon>
+                <input
+                  matInput
+                  type="email"
+                  formControlName="email"
+                  autocomplete="off"
+                  (keydown.enter)="$event.preventDefault(); lookUp()"
+                />
+                <mat-error>{{ 'profiles.cooperative.members.email-error' | translate }}</mat-error>
+              </mat-form-field>
+              <button
+                mat-stroked-button
+                type="button"
+                (click)="lookUp()"
+                [disabled]="!form.controls.email.value || form.controls.email.invalid || lookingUp()"
+              >
+                <mat-icon>search</mat-icon>
+                {{ 'profiles.cooperative.members.look-up' | translate }}
+              </button>
+            </div>
+            @if (lookingUp()) {
+              <mat-progress-bar mode="indeterminate" />
+            }
+            @switch (lookupResult()) {
+              @case ('found') {
+                <p class="lookup-result found" role="status">
+                  <mat-icon aria-hidden="true">check_circle</mat-icon>
+                  {{ 'profiles.cooperative.members.account-found' | translate }}
+                </p>
+              }
+              @case ('not-found') {
+                <p class="lookup-result" role="status">
+                  <mat-icon aria-hidden="true">info</mat-icon>
+                  {{ 'profiles.cooperative.members.account-not-found-hint' | translate }}
+                </p>
+              }
+              @case ('already-member') {
+                <p class="lookup-result warn" role="alert">
+                  <mat-icon aria-hidden="true">error_outline</mat-icon>
+                  {{ 'profiles.cooperative.members.already-member' | translate }}
+                </p>
+              }
+              @case ('error') {
+                <p class="lookup-result warn" role="alert">
+                  <mat-icon aria-hidden="true">error_outline</mat-icon>
+                  {{ 'profiles.cooperative.members.lookup-error' | translate }}
+                </p>
+              }
+            }
+          </div>
+
           <div class="fields">
             <mat-form-field appearance="outline">
               <mat-label>{{ 'profiles.settings.first-name' | translate }}</mat-label>
@@ -89,12 +145,6 @@
             </mat-form-field>
 
             <mat-form-field appearance="outline">
-              <mat-label>{{ 'profiles.cooperative.integration.member-user-id' | translate }}</mat-label>
-              <input matInput type="number" min="1" step="1" formControlName="userId" />
-              <mat-error>{{ 'profiles.cooperative.integration.invalid-id' | translate }}</mat-error>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline">
               <mat-label>{{ 'profiles.cooperative.members.community' | translate }}</mat-label>
               <mat-icon matPrefix aria-hidden="true">location_on</mat-icon>
               <input matInput formControlName="community" maxlength="100" />
@@ -112,7 +162,11 @@
             <button mat-stroked-button type="button" [disabled]="saving()" (click)="closeForm()">
               {{ 'crop.cancel' | translate }}
             </button>
-            <button mat-flat-button type="submit" [disabled]="saving()">
+            <button
+              mat-flat-button
+              type="submit"
+              [disabled]="saving() || lookingUp() || lookupResult() === 'already-member'"
+            >
               {{ 'profiles.cooperative.members.save' | translate }}
             </button>
           </div>
@@ -180,7 +234,30 @@
           <section>
             <h3>{{ 'profiles.cooperative.members.plots' | translate }}</h3>
             @if (!member.userId) {
-              <p>{{ 'profiles.cooperative.integration.account-link-pending' | translate }}</p>
+              <form class="link-account" (submit)="$event.preventDefault(); linkAccount(+member.id, member.cooperativeId)">
+                <p>{{ 'profiles.cooperative.members.link-hint' | translate }}</p>
+                <div class="lookup-row">
+                  <mat-form-field appearance="outline">
+                    <mat-label>{{ 'profiles.cooperative.members.account-email' | translate }}</mat-label>
+                    <mat-icon matPrefix aria-hidden="true">alternate_email</mat-icon>
+                    <input matInput type="email" [formControl]="linkEmail" autocomplete="off" />
+                    <mat-error>{{ 'profiles.cooperative.members.email-error' | translate }}</mat-error>
+                  </mat-form-field>
+                  <button mat-flat-button type="submit" [disabled]="linking()">
+                    <mat-icon>link</mat-icon>
+                    {{ 'profiles.cooperative.members.link-account' | translate }}
+                  </button>
+                </div>
+                @if (linking()) {
+                  <mat-progress-bar mode="indeterminate" />
+                }
+                @if (linkError()) {
+                  <p class="form-alert" role="alert">
+                    <mat-icon aria-hidden="true">error_outline</mat-icon>
+                    {{ linkError() | translate }}
+                  </p>
+                }
+              </form>
             } @else if (memberPlots(); as result) {
               @if (result.status === 'loading') {
                 <mat-progress-bar mode="indeterminate" />

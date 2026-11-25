@@ -41,6 +41,18 @@ export class CooperativeMembersApiEndpoint extends BaseApiEndpoint<
       .pipe(map((resource) => this.assembler.toEntityFromResource(resource)));
   }
 
+  /**
+   * Links a member registered without an account to the producer account of an email.
+   * @param email - Email of the producer account.
+   */
+  linkAccount(cooperativeId: number, memberId: number, email: string): Observable<CooperativeMember> {
+    return this.http
+      .put<CooperativeMemberResource>(this.membersUrl(cooperativeId) + '/' + memberId + '/account', {
+        email,
+      })
+      .pipe(map((resource) => this.assembler.toEntityFromResource(resource)));
+  }
+
   getByCooperative(cooperativeId: number): Observable<CooperativeMember[]> {
     return this.http.get<CooperativeMemberResource[]>(this.membersUrl(cooperativeId)).pipe(
       map((members) => members.map((member) => this.assembler.toEntityFromResource(member))),

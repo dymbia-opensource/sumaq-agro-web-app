@@ -21,7 +21,8 @@ export interface CooperativeMemberDetails {
   lastName: string;
   dni: string;
   community: string;
-  userId?: number;
+  /** Email of the producer account of the member, when he has one. */
+  email?: string;
 }
 
 /** API response used by the production service when it wraps members. */

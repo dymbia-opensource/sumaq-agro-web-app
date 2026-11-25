@@ -3,12 +3,13 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { TranslatePipe } from '@ngx-translate/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ProfilesStore } from '../../../application/profiles.store';
 import { PlotResponsibility } from '../../../domain/model/entities/plot-responsibility';
+import { AdvisorSummary } from '../../../domain/model/entities/advisor-summary';
 
 @Component({
   selector: 'app-plot-advisor-assignment',
@@ -16,7 +17,7 @@ import { PlotResponsibility } from '../../../domain/model/entities/plot-responsi
     FormsModule,
     MatButtonModule,
     MatFormFieldModule,
-    MatInputModule,
+    MatSelectModule,
     MatProgressBarModule,
     TranslatePipe,
   ],
@@ -37,8 +38,17 @@ export class PlotAdvisorAssignment {
   protected readonly selected = signal<number | null>(null);
   /** Name of the agronomist in charge, read from its profile. */
   protected readonly advisorName = signal<string | null>(null);
+  /** Agronomists of the technical team the director can put in charge. */
+  protected readonly team = signal<AdvisorSummary[]>([]);
 
   constructor() {
+    effect((onCleanup) => {
+      const request = this.store.technicalTeamOf(this.cooperativeId()).subscribe({
+        next: (team) => this.team.set(team),
+        error: () => this.team.set([]),
+      });
+      onCleanup(() => request.unsubscribe());
+    });
     effect((onCleanup) => {
       const id = this.plotId();
       this.loading.set(true);

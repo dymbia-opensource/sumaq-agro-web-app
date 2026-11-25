@@ -114,6 +114,22 @@
             <mat-error>{{ 'profiles.settings.phone-error' | translate }}</mat-error>
           }
         </mat-form-field>
+        @if (isFarmer()) {
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'profiles.settings.dni' | translate }}</mat-label>
+            <input
+              matInput
+              formControlName="dni"
+              inputmode="numeric"
+              maxlength="8"
+              [readonly]="!editing() || saving()"
+            />
+            <mat-hint>{{ 'profiles.settings.dni-hint' | translate }}</mat-hint>
+            @if (contactForm.controls.dni.invalid && contactForm.controls.dni.touched) {
+              <mat-error>{{ 'profiles.errors.dni' | translate }}</mat-error>
+            }
+          </mat-form-field>
+        }
         <mat-form-field appearance="outline">
           <mat-label>{{ 'profiles.settings.email' | translate }}</mat-label>
           <input

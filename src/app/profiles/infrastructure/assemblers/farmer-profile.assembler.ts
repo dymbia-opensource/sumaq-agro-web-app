@@ -7,6 +7,7 @@ export class FarmerProfileAssembler {
       ...resource,
       phoneNumber: resource.phoneNumber ?? '',
       email: resource.email ?? '',
+      dni: resource.dni ?? '',
     });
   }
 }

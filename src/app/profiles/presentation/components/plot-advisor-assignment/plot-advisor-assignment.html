@@ -9,9 +9,16 @@
   }
   <div class="controls">
     <mat-form-field appearance="outline">
-      <mat-label>{{ 'profiles.cooperative.integration.advisor-id' | translate }}</mat-label>
-      <input matInput type="number" min="1" step="1" [ngModel]="selected()"
-        (ngModelChange)="selected.set($event)" [disabled]="loading() || saving()" />
+      <mat-label>{{ 'profiles.cooperative.supervision.agronomist' | translate }}</mat-label>
+      <mat-select [ngModel]="selected()" (ngModelChange)="selected.set($event)"
+        [disabled]="loading() || saving() || team().length === 0">
+        @for (advisor of team(); track advisor.userId) {
+          <mat-option [value]="advisor.userId">{{ advisor.name }}</mat-option>
+        }
+      </mat-select>
+      @if (!loading() && team().length === 0) {
+        <mat-hint>{{ 'profiles.cooperative.supervision.no-team' | translate }}</mat-hint>
+      }
     </mat-form-field>
     <button mat-flat-button type="button" [disabled]="!validId() || loading() || saving() || selected() === responsibility()?.advisorUserId" (click)="assign()">
       {{ 'profiles.cooperative.supervision.assign' | translate }}

@@ -269,3 +269,64 @@
     align-items: stretch;
   }
 }
+
+/* Technical team */
+.team {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0 0 28px;
+  padding: 0;
+  list-style: none;
+}
+.team-member {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 12px;
+}
+.team-member > mat-icon {
+  color: var(--mat-sys-primary);
+}
+.team-member__main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+.team-member__main span {
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-body-small);
+}
+.team-status {
+  padding: 4px 12px;
+  border-radius: 999px;
+  font: var(--mat-sys-label-large);
+  background: var(--mat-sys-secondary-container);
+  color: var(--mat-sys-on-secondary-container);
+}
+.team-status--pending {
+  background: var(--mat-sys-tertiary-container);
+  color: var(--mat-sys-on-tertiary-container);
+}
+.team-empty {
+  color: var(--mat-sys-on-surface-variant);
+}
+.team-invite h3 {
+  margin: 0;
+  font: var(--mat-sys-title-medium);
+}
+.team-invite__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 12px;
+}
+.team-invite__row mat-form-field {
+  flex: 1 1 300px;
+}
+.team-invite__row button {
+  margin-top: 8px;
+}
