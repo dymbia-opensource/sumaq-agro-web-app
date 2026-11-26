@@ -1,0 +1,1360 @@
+@startuml
+' SumaqAgro Web Application - Field Management Bounded Context - Domain-Driven Design Class Diagram
+' Generated from the Angular source code in src/app/farming
+
+set separator none
+hide empty members
+
+package "app" {
+
+  ' ==========================================
+  ' FIELD MANAGEMENT BOUNDED CONTEXT
+  ' ==========================================
+  package "farming" {
+    package "domain.model" {
+      package "commands" {
+        class CloseCropCampaignCommand {
+          +campaignId: number
+        }
+
+        class DelineatePlotBoundaryCommand {
+          +plotId: number
+          +coordinates: GeoCoordinate[]
+          +areaHectares: number
+        }
+
+        class ExportCampaignCostReportCommand {
+          +campaignId: number
+        }
+
+        class RecordActualYieldCommand {
+          +ledgerId: number
+          +actualYield: number
+          +unit: YieldUnit
+        }
+
+        class RecordDailyLaborExpenseCommand {
+          +ledgerId: number
+          +activity: string
+          +workers: number
+          +days: number
+          +dailyWage: number
+          +expenseDate: Date
+          +clientSyncId: string
+        }
+
+        class RecordFieldFreightExpenseCommand {
+          +ledgerId: number
+          +route: string
+          +cost: number
+          +expenseDate: Date
+          +clientSyncId: string
+        }
+
+        class RecordInputExpenseCommand {
+          +ledgerId: number
+          +inputName: string
+          +quantity: number
+          +unitPrice: number
+          +expenseDate: Date
+          +clientSyncId: string
+        }
+
+        class RecordSoilBaselineCommand {
+          +plotId: number
+          +ph: number
+          +texture: SoilTexture
+          +organicMatterPercentage: number
+          +recordedAt: Date
+        }
+
+        class RecordSowingDateCommand {
+          +campaignId: number
+          +sowingDate: Date
+        }
+
+        class RegisterFieldPlotCommand {
+          +ownerUserId: number
+          +name: string
+          +region: string
+          +declaredAreaHectares: number
+        }
+
+        class SelectCropTypeCommand {
+          +campaignId: number
+          +cropType: CropType
+        }
+
+        class SetExpectedYieldCommand {
+          +ledgerId: number
+          +expectedYield: number
+          +unit: YieldUnit
+        }
+
+        class SpecifySeedVarietyCommand {
+          +campaignId: number
+          +varietyName: string
+          +custom: boolean
+        }
+
+        class StartCropCampaignCommand {
+          +plotId: number
+          +season: string
+        }
+      }
+
+      package "entities" {
+        enum YieldUnit {
+          SACK
+          QUINTAL
+        }
+
+        class CampaignLedger <<Entity>> {
+          -_campaignId: number
+          -_entries: ExpenseEntry[]
+          -_expectedYield: number
+          -_actualYield: number | null
+          -_yieldUnit: YieldUnit
+          -_frozen: boolean
+          -_currency: string
+          +campaignId: number
+          +entries: ExpenseEntry[]
+          +expectedYield: number
+          +actualYield: number | null
+          +yieldUnit: YieldUnit
+          +frozen: boolean
+          +currency: string
+          +expenseHistory(category?: ExpenseCategory | null): ExpenseEntry[]
+          +totalInvestment(): Money
+          +totalByCategory(category: ExpenseCategory): Money
+          +percentageByCategory(category: ExpenseCategory): number
+          +referenceYield(): number
+          +breakevenPrice(): Money
+          +breakevenPriceFor(yieldQuantity: number): Money
+          +suggestedPrice(marginPercentage): Money
+          +costPerHectare(areaHectares: number, category?: ExpenseCategory): Money
+          +yieldPerHectare(areaHectares: number): number
+        }
+
+        interface CampaignSummary {
+          +id: number
+          +plotId: number
+          +season: string
+          +cropType: CropType
+          +seedVariety: string
+        }
+
+        enum CropType {
+          ANDEAN_POTATO
+          SPECIALTY_COFFEE
+        }
+
+        enum CampaignStatus {
+          IN_PROGRESS
+          FINISHED
+        }
+
+        class CropCampaign <<Entity>> {
+          -_plotId: number
+          -_season: string
+          -_cropType: CropType
+          -_seedVariety: string
+          -_customSeedVariety: boolean
+          -_sowingDate: Date | null
+          -_status: CampaignStatus
+          +plotId: number
+          +season: string
+          +cropType: CropType
+          +seedVariety: string
+          +customSeedVariety: boolean
+          +sowingDate: Date | null
+          +status: CampaignStatus
+          +isActive(): boolean
+        }
+
+        enum ExpenseCategory {
+          INPUTS
+          LABOR
+          FREIGHT
+        }
+
+        class ExpenseEntry <<Entity>> {
+          -_ledgerId: number
+          -_category: ExpenseCategory
+          -_description: string
+          -_quantity: number
+          -_unitPrice: Money
+          -_expenseDate: Date
+          -_notes: string
+          -_clientSyncId: string
+          +ledgerId: number
+          +category: ExpenseCategory
+          +description: string
+          +quantity: number
+          +unitPrice: Money
+          +expenseDate: Date
+          +notes: string
+          +clientSyncId: string
+          +total(): Money
+        }
+
+        enum PlotStatus {
+          WITHOUT_POLYGON
+          ACTIVE_MONITORING
+        }
+
+        enum SoilTexture {
+          SANDY
+          LOAMY
+          CLAY
+          SILTY
+          SANDY_LOAM
+          CLAY_LOAM
+        }
+
+        class GeoCoordinate <<Entity>> {
+          -_latitude: number
+          -_longitude: number
+          +latitude: number
+          +longitude: number
+        }
+
+        class SoilBaseline <<Entity>> {
+          -_ph: number
+          -_texture: SoilTexture
+          -_organicMatterPercentage: number
+          -_recordedAt: Date
+          +ph: number
+          +texture: SoilTexture
+          +organicMatterPercentage: number
+          +recordedAt: Date
+        }
+
+        class FieldPlot <<Entity>> {
+          -_ownerUserId: number
+          -_name: string
+          -_region: string
+          -_status: PlotStatus
+          -_boundary: GeoCoordinate[]
+          -_areaHectares: number
+          -_agroMonitoringPolygonId: string | null
+          -_soilBaseline: SoilBaseline | null
+          +ownerUserId: number
+          +name: string
+          +region: string
+          +status: PlotStatus
+          +boundary: GeoCoordinate[]
+          +areaHectares: number
+          +agroMonitoringPolygonId: string | null
+          +soilBaseline: SoilBaseline | null
+          +hasPolygon(): boolean
+          +isMonitored(): boolean
+        }
+
+        interface PlotSummary {
+          +id: number
+          +ownerUserId: number
+          +name: string
+          +region: string
+          +areaHectares: number
+          +boundary: ( latitude: number; longitude: number )[]
+          +hasPolygon: boolean
+        }
+      }
+    }
+
+    package "infrastructure" {
+      class CostReportPdf {
+        -translate: TranslateService
+        +build(ledger: CampaignLedger, season: string, plotName: string, area: number): Blob
+      }
+
+      class FarmingApi {
+        -plotRevision: WritableSignal<number>
+        +plotChanges: Signal<number>
+        -http: HttpClient
+        -plotsEndpoint: FieldPlotsApiEndpoint
+        -campaignsEndpoint: CropCampaignsApiEndpoint
+        -ledgersEndpoint: CampaignLedgersApiEndpoint
+        +getPlotsByOwner(ownerUserId: number): Observable<FieldPlot[]>
+        +getPlotsByIds(ids: number[]): Observable<FieldPlot[]>
+        +getPlotById(id: number): Observable<FieldPlot>
+        +createPlot(plot: FieldPlot): Observable<FieldPlot>
+        +savePolygon(id: number, coordinates: GeoCoordinate[]): Observable<FieldPlot>
+        +saveSoilBaseline(id: number, soil: SoilBaseline): Observable<FieldPlot>
+        +getCampaignsByPlot(plotId: number): Observable<CropCampaign[]>
+        +createCampaign(campaign: CropCampaign): Observable<CropCampaign>
+        +updateCampaign(campaign: CropCampaign): Observable<CropCampaign>
+        +closeCampaign(id: number): Observable<CropCampaign>
+        +getLedgerByCampaign(campaignId: number): Observable<CampaignLedger | null>
+        +recordInputExpense(command: RecordInputExpenseCommand): Observable<CampaignLedger>
+        +recordDailyLaborExpense(command: RecordDailyLaborExpenseCommand): Observable<CampaignLedger>
+        +recordFieldFreightExpense(command: RecordFieldFreightExpenseCommand): Observable<CampaignLedger>
+        +estimateCampaignYield(ledgerId: number, expectedYield: number, actualYield: number | null): Observable<CampaignLedger>
+      }
+
+      package "assemblers" {
+        class CampaignLedgerAssembler <<Assembler>> {
+          +toEntitiesFromResponse(response: CampaignLedgersResponse): CampaignLedger[]
+          +toEntityFromResource(resource: CampaignLedgerResource): CampaignLedger
+          +toResourceFromEntity(entity: CampaignLedger): CampaignLedgerResource
+          +toInputExpenseRequestFromCommand(command: RecordInputExpenseCommand): RecordInputExpenseRequest
+          +toDailyLaborExpenseRequestFromCommand(command: RecordDailyLaborExpenseCommand): RecordDailyLaborExpenseRequest
+          +toFieldFreightExpenseRequestFromCommand(command: RecordFieldFreightExpenseCommand): RecordFieldFreightExpenseRequest
+        }
+
+        class CropCampaignAssembler <<Assembler>> {
+          +toEntitiesFromResponse(response: CropCampaignsResponse): CropCampaign[]
+          +toEntityFromResource(resource: CropCampaignResource): CropCampaign
+          +toResourceFromEntity(entity: CropCampaign): CropCampaignResource
+        }
+
+        class FieldPlotAssembler <<Assembler>> {
+          +toEntitiesFromResponse(response: FieldPlotsResponse): FieldPlot[]
+          +toEntityFromResource(resource: FieldPlotResource): FieldPlot
+          +toResourceFromEntity(entity: FieldPlot): FieldPlotResource
+        }
+
+        class PendingExpenseAssembler <<Assembler>> {
+          +toOperation(command: ExpenseCommand): PendingOperation<PendingExpensePayload>
+          +toCommand(operation: PendingOperation<PendingExpensePayload>): ExpenseCommand
+        }
+      }
+
+      package "endpoints" {
+        class CampaignLedgersApiEndpoint {
+          +getByCampaign(campaignId: number): Observable<CampaignLedger | null>
+          +recordInputExpense(command: RecordInputExpenseCommand): Observable<CampaignLedger>
+          +recordDailyLaborExpense(command: RecordDailyLaborExpenseCommand): Observable<CampaignLedger>
+          +recordFieldFreightExpense(command: RecordFieldFreightExpenseCommand): Observable<CampaignLedger>
+          +estimateYield(ledgerId: number, request: EstimateCampaignYieldRequest): Observable<CampaignLedger>
+        }
+
+        class CropCampaignsApiEndpoint {
+          +getByPlot(plotId: number): Observable<CropCampaign[]>
+          +create(campaign: CropCampaign): Observable<CropCampaign>
+          +update(campaign: CropCampaign, id: number | string): Observable<CropCampaign>
+          +close(id: number): Observable<CropCampaign>
+        }
+
+        class FieldPlotsApiEndpoint {
+          +getByOwner(ownerUserId: number): Observable<FieldPlot[]>
+          +getByIds(ids: number[]): Observable<FieldPlot[]>
+          +create(plot: FieldPlot): Observable<FieldPlot>
+          +savePolygon(id: number, points: GeoCoordinate[]): Observable<FieldPlot>
+          +saveSoilBaseline(id: number, soil: SoilBaseline): Observable<FieldPlot>
+        }
+      }
+
+      package "offline" {
+        class OfflineSync {
+          -onlineSignal: WritableSignal
+          -operationsSignal: WritableSignal<PendingOperation[]>
+          +isOnline: Signal
+          +pendingCount: Signal
+          +enqueue(operation: PendingOperation): void
+          +pendingOf(type: PendingOperationType): PendingOperation<TPayload>[]
+          +pendingCountOf(type: PendingOperationType): Signal<number>
+          +remove(uuids: string[]): void
+        }
+
+        enum PendingOperationType {
+          FIELD_EXPENSE
+        }
+
+        interface PendingOperation<TPayload> {
+          +uuid: string
+          +type: PendingOperationType
+          +payload: TPayload
+          +createdAt: string
+        }
+      }
+
+      package "requests" {
+        class EstimateCampaignYieldRequest <<Request>> {
+          +expectedYield: number
+          +actualYield: number | null
+        }
+
+        class RecordDailyLaborExpenseRequest <<Request>> {
+          +activity: string
+          +workers: number
+          +days: number
+          +dailyWage: number
+          +expenseDate: string
+          +clientSyncId: string
+        }
+
+        class RecordFieldFreightExpenseRequest <<Request>> {
+          +route: string
+          +cost: number
+          +expenseDate: string
+          +clientSyncId: string
+        }
+
+        class RecordInputExpenseRequest <<Request>> {
+          +inputName: string
+          +quantity: number
+          +unitPrice: number
+          +expenseDate: string
+          +clientSyncId: string
+        }
+      }
+
+      package "responses" {
+        class ExpenseEntryResource <<Resource>> {
+          +id: number
+          +category: string
+          +description: string
+          +quantity: number
+          +unitPrice: number
+          +total: number
+          +expenseDate: string
+          +notes: string | null
+          +clientSyncId: string | null
+        }
+
+        class CampaignLedgerResource <<Resource>> {
+          +id: number
+          +cropCampaignId: number
+          +yieldUnit: string
+          +expectedYield: number | null
+          +actualYield: number | null
+          +frozen: boolean
+          +currency: string
+          +totalInvestment: number
+          +breakevenPrice: number
+          +entries: ExpenseEntryResource[]
+        }
+
+        class CampaignLedgersResponse <<Response>> {
+          +ledgers: CampaignLedgerResource[]
+        }
+
+        class CropCampaignResource <<Resource>> {
+          +id: number
+          +fieldPlotId: number
+          +season: string
+          +cropType: string
+          +seedVariety: string
+          +customSeedVariety?: boolean
+          +sowingDate: string | null
+          +status: string
+        }
+
+        class CropCampaignsResponse <<Response>> {
+          +campaigns: CropCampaignResource[]
+        }
+
+        class SoilBaselineResource <<Resource>> {
+          +ph: number
+          +texture: string
+          +organicMatterPercentage: number
+          +recordedAt: string
+        }
+
+        class GeoCoordinateResource <<Resource>> {
+          +latitude: number
+          +longitude: number
+        }
+
+        class FieldPlotResource <<Resource>> {
+          +id: number
+          +ownerUserId: number
+          +name: string
+          +region: string
+          +status: string
+          +boundary: GeoCoordinateResource[]
+          +areaHectares: number
+          +agroMonitoringPolygonId: string
+          +soilBaseline?: SoilBaselineResource | null
+        }
+
+        class FieldPlotsResponse <<Response>> {
+          +plots: FieldPlotResource[]
+        }
+      }
+    }
+
+    package "application" {
+      interface CropCampaignSetup {
+        +start: StartCropCampaignCommand
+        +cropType: SelectCropTypeCommand
+        +seedVariety: SpecifySeedVarietyCommand
+        +sowingDate: RecordSowingDateCommand
+      }
+
+      class FarmingStore <<Store>> {
+        -farmingApi: FarmingApi
+        -session: IamStore
+        -offlineSync: OfflineSync
+        -pendingExpenses: PendingExpenseAssembler
+        -subscriptions: SubscriptionsStore
+        -fileDownloader: FileDownloader
+        -costReportPdf: CostReportPdf
+        -plotsSignal: WritableSignal<FieldPlot[]>
+        -campaignsByPlotSignal: WritableSignal<Map<number, CropCampaign[]>>
+        -ledgersByCampaignSignal: WritableSignal<Map<number, CampaignLedger | null>>
+        -plotsLoadingSignal: WritableSignal<boolean>
+        -loadingSignal: WritableSignal<boolean>
+        -errorSignal: WritableSignal<string | null>
+        -selectedPlotIdSignal: WritableSignal<number | null>
+        -syncingSignal: WritableSignal<boolean>
+        -plotsLoad?: Subscription
+        -plotMutation?: Subscription
+        -plotRevision: number
+        -quotaOwner: WritableSignal<number | null>
+        -quotaLoaded: WritableSignal<boolean>
+        -plotMutationBusy: WritableSignal<boolean>
+        -registrationIncompleteSignal: WritableSignal<boolean>
+        -planPlotQuota: WritableSignal<(...) | null>
+        +plots: Signal<FieldPlot[]>
+        +plotsLoading: Signal<boolean>
+        +loading: Signal<boolean>
+        +error: Signal<string | null>
+        +online
+        +pendingExpenseCount
+        +syncing: Signal<boolean>
+        +currentUserId: Signal
+        +plotCount: Signal
+        +plotQuota: Signal
+        +ownedPlotsReady: Signal
+        +plotQuotaReady: Signal
+        +remainingPlotSlots: Signal
+        +plotQuotaReached: Signal
+        +registrationIncomplete: Signal<boolean>
+        +canRegisterPlot: Signal
+        +selectedPlotId: Signal<number | null>
+        +selectedPlot: Signal
+        +campaigns: Signal
+        +activeCampaign: Signal
+        +hasCampaignInProgress: Signal
+        +ledger: Signal
+        +ledgersByCampaign: Signal<Map<number, CampaignLedger | null>>
+        +plotChanges
+        +setPlanPlotQuota(ownerUserId: number, limit: number | null): void
+        +reloadPlanPlotQuota(): void
+        +getPlotById(id: number): Signal<FieldPlot | undefined>
+        +getCurrentCampaignOf(plotId: number): Signal<CropCampaign | undefined>
+        +loadMyPlots(ownerUserId: number): void
+        +selectPlotId(plotId: number | null): void
+        +plotSummariesByOwner(ownerUserId: number): Observable<PlotSummary[]>
+        +plotSummariesByIds(ids: number[]): Observable<PlotSummary[]>
+        +activeCampaignByPlot(plotId: number): Observable<CampaignSummary | null>
+        +selectPlot(plotId: number): void
+        +refreshPlot(plotId: number): void
+        +registerPlot(command: RegisterFieldPlotCommand, setup: CropCampaignSetup, onRegistered?: (...) => void): void
+        +delineateBoundary(command: DelineatePlotBoundaryCommand, onDelineated?: (plot: FieldPlot) => void): void
+        +recordSoilBaseline(command: RecordSoilBaselineCommand, onRecorded?: () => void): void
+        +startCampaign(setup: CropCampaignSetup, onStarted?: (campaign: CropCampaign) => void): void
+        +updateCampaign(campaignId: number, fields: Pick<CropCampaign, '' | '' | '' | ''>, onUpdated?: () => void): void
+        +closeCampaign(command: CloseCropCampaignCommand): void
+        +recordExpense(command: RecordExpenseCommand, onRecorded?: () => void): void
+        +setExpectedYield(command: SetExpectedYieldCommand): void
+        +recordActualYield(command: RecordActualYieldCommand, onRecorded?: () => void): void
+        +exportCostReport(command: ExportCampaignCostReportCommand): void
+        +syncPendingExpenses(): void
+        +yieldUnitOf(cropType: CropType): YieldUnit
+        +seasonOf(date: Date): string
+      }
+    }
+
+    package "presentation" {
+      package "components" {
+        class ActualYieldCard <<Component>> {
+          +ledger: InputSignal<CampaignLedger>
+          +saving: InputSignal
+          +actualYieldChange: OutputEmitterRef<number>
+          #form: FormGroup
+          #actualYield
+          #onSave()
+        }
+
+        enum PolygonStatus {
+          OPEN
+          CLOSED
+          CROSSED
+        }
+
+        class BoundarySummaryPanel <<Component>> {
+          +plot: InputSignal<FieldPlot>
+          +campaign: InputSignal<CropCampaign>
+          +coordinates: InputSignal<GeoCoordinate[]>
+          +areaHectares: InputSignal<number>
+          +status: InputSignal<PolygonStatus>
+          +saving: InputSignal
+          +undo: OutputEmitterRef<void>
+          +clear: OutputEmitterRef<void>
+          +save: OutputEmitterRef<void>
+          #statusIcon: Signal
+        }
+
+        class BreakevenPanel <<Component>> {
+          +ledger: InputSignal<CampaignLedger>
+          +saving: InputSignal
+          +expectedYieldChange: OutputEmitterRef<number>
+          #form: FormGroup
+          #expectedYield
+          #onSave()
+        }
+
+        class BreakevenReportCard <<Component>> {
+          +ledger: InputSignal<CampaignLedger>
+          #margin: WritableSignal<number>
+          #salePrice: WritableSignal<number | null>
+          #report: Signal
+          #suggestedPrice: Signal
+          #profit: Signal
+        }
+
+        interface CampaignFormData {
+          +cropType: CropType
+          +seedVariety: string
+          +customVariety: boolean
+          +sowingDate: Date | null
+          +season: string
+        }
+
+        class CampaignForm <<Component>> {
+          #store: FarmingStore
+          -fb
+          #cropTypes
+          +initialCropType: InputSignal<CropType>
+          +campaign: InputSignal<CropCampaign>
+          +saving: InputSignal
+          +submitted: OutputEmitterRef<CampaignFormData>
+          +cancel: OutputEmitterRef<void>
+          #form
+          -cropType: Signal
+          -varietyText: Signal
+          -sowingDateText: Signal
+          #varieties: Signal
+          #season: Signal
+          +ngOnInit(): void
+          #onSubmit()
+        }
+
+        class CampaignKpiCards <<Component>> {
+          +campaign: InputSignal<CropCampaign>
+          +ledger: InputSignal<CampaignLedger | null>
+          +observation: InputSignal<SatelliteObservation>
+          +satelliteLoading: InputSignal
+          +satelliteError: InputSignal
+          #categoryShares: Signal
+        }
+
+        interface "CampaignSummary" as CampaignSummaryViewModel {
+          +campaignId: number
+          +plotId: number
+          +season: string
+          +cropType: CropType
+          +seedVariety: string
+          +sowingDate: Date | null
+          +status: CampaignStatus
+          +isActive: boolean
+          +ledgerId: number | null
+          +totalInvestment: Money
+          +breakevenPrice: Money
+          +expectedYield: number
+          +actualYield: number | null
+          +yieldUnit: YieldUnit
+          +expenseCount: number
+          +costPerHectare: Money
+          +yieldAchievement: number | null
+        }
+
+        class CampaignSummaryCard <<Component>> {
+          +summary: InputSignal<CampaignSummary>
+          +saving: InputSignal
+          +closeCampaign: OutputEmitterRef<CampaignSummary>
+          +editCampaign: OutputEmitterRef<CampaignSummary>
+          +exportReport: OutputEmitterRef<CampaignSummary>
+        }
+
+        interface CloseCampaignDialogData {
+          +season: string
+        }
+
+        class CloseCampaignDialog <<Component>> {
+          #data
+          -dialogRef
+          #onConfirm(): void
+        }
+
+        class CostDistributionCard <<Component>> {
+          -translate: TranslateService
+          +ledger: InputSignal<CampaignLedger | null>
+          #language: Signal
+          #categories: Signal
+          #since: Signal
+          #chartData: Signal<ChartConfiguration<''>[''] | null>
+          #chartOptions: ChartConfiguration<''>['']
+        }
+
+        class CostPerHectareCard <<Component>> {
+          +ledger: InputSignal<CampaignLedger>
+          +areaHectares: InputSignal<number>
+          #icons
+          #report: Signal
+        }
+
+        class ExpenseCategoryFilter <<Component>> {
+          +selected: InputSignal<ExpenseCategory | null>
+          +selectedChange: OutputEmitterRef<ExpenseCategory | null>
+          #categories
+          #icons
+          #onChange(value: ExpenseCategory | '' | undefined)
+        }
+
+        class ExpenseList <<Component>> {
+          +entries: InputSignal<ExpenseEntry[]>
+          #columns: Array
+          #iconOf(entry: ExpenseEntry): string
+        }
+
+        class FieldExpenseForm <<Component>> {
+          -fb
+          +category: InputSignal<ExpenseCategory>
+          +saving: InputSignal
+          +submitted: OutputEmitterRef<FieldExpenseData>
+          +cancel: OutputEmitterRef<void>
+          #categories
+          #activities
+          #inputForm
+          #laborForm
+          #freightForm
+          -inputValue: Signal
+          -laborValue: Signal
+          -freightValue: Signal
+          #total: Signal
+          #onSubmit()
+        }
+
+        class LedgerSummaryCards <<Component>> {
+          +ledger: InputSignal<CampaignLedger>
+          #categories: Signal
+        }
+
+        class NdviChartCard <<Component>> {
+          -translate: TranslateService
+          +observations: InputSignal<SatelliteObservation[]>
+          +sowingDate: InputSignal<Date | null>
+          +loading: InputSignal
+          +error: InputSignal
+          +chartData: Signal<ChartConfiguration<''>['']>
+          +chartOptions: ChartConfiguration<''>['']
+        }
+
+        class OfflineSyncBanner <<Component>> {
+          +online: InputSignal<boolean>
+          +pending: InputSignal<number>
+          +syncing: InputSignal
+          +sync: OutputEmitterRef<void>
+        }
+
+        class PlotBoundaryMap <<Component>> {
+          -mapElement: Signal<ElementRef<HTMLDivElement>>
+          -map?: L.Map
+          -baseLayers: Record<MapLayer, L.Layer>
+          -drawingLayer
+          +coordinates: InputSignal<GeoCoordinate[]>
+          +status: InputSignal<PolygonStatus>
+          +vertexAdded: OutputEmitterRef<GeoCoordinate>
+          +layer: WritableSignal<MapLayer>
+          +searchMessage: WritableSignal<string | null>
+          #minimumVertices
+          +ngAfterViewInit(): void
+          +ngOnDestroy(): void
+          +fitTo(coordinates: GeoCoordinate[])
+          +onSearch(text: string)
+          +onUseMyLocation()
+        }
+
+        class PlotCadastreCard <<Component>> {
+          +plot: InputSignal<FieldPlot>
+          +campaign: InputSignal<CropCampaign>
+        }
+
+        class PlotCard <<Component>> {
+          +plot: InputSignal<FieldPlot>
+          +campaign: InputSignal<CropCampaign>
+          +position: InputSignal<number>
+          +viewOnDashboard: OutputEmitterRef<FieldPlot>
+          +viewMonitoring: OutputEmitterRef<FieldPlot>
+          +delineate: OutputEmitterRef<FieldPlot>
+          +viewDetail: OutputEmitterRef<FieldPlot>
+          +recordSoil: OutputEmitterRef<FieldPlot>
+        }
+
+        class PlotPolygonViewer <<Component>> {
+          -mapElement: Signal<ElementRef<HTMLDivElement>>
+          -map?: L.Map
+          -polygonLayer
+          +coordinates: InputSignal<GeoCoordinate[]>
+          +ngAfterViewInit(): void
+          +ngOnDestroy(): void
+        }
+
+        class PlotQuotaSummary <<Component>> {
+          +showRefresh: InputSignal
+          +store: FarmingStore
+          -subscriptions: SubscriptionsStore
+          #checkingPlan: Signal
+          +refresh(): void
+        }
+
+        interface PlotRegistrationData {
+          +name: string
+          +region: string
+          +cropType: CropType
+          +seedVariety: string
+          +customVariety: boolean
+          +sowingDate: Date
+          +declaredAreaHectares: number
+        }
+
+        class PlotRegistrationForm <<Component>> {
+          #store: FarmingStore
+          -fb: FormBuilder
+          #cropTypes
+          +saving: InputSignal
+          +submitted: OutputEmitterRef<PlotRegistrationData>
+          +cancel: OutputEmitterRef<void>
+          +form
+          -cropType: Signal
+          -varietyText: Signal
+          +varieties: Signal
+          +onSubmit()
+        }
+
+        enum PlotSavedDialogResult {
+          crop-health
+          plots
+        }
+
+        interface PlotSavedDialogData {
+          +plot: FieldPlot
+          +seedVariety?: string
+          +plotCount: number
+          +plotQuota: number
+        }
+
+        class PlotSavedDialog <<Component>> {
+          #data
+        }
+
+        class PlotSlotCard <<Component>> {
+          +position: InputSignal<number>
+          +register: OutputEmitterRef<void>
+        }
+
+        class RegistrationSteps <<Component>> {
+          +current: InputSignal<1 | 2>
+          #steps: Array
+        }
+
+        class SoilBaselineCard <<Component>> {
+          +soilBaseline: InputSignal<SoilBaseline | null>
+          +cropType: InputSignal<CropType>
+          +recordLink: InputSignal<string | unknown[]>
+          #needsLiming(soil: SoilBaseline, cropType: CropType): boolean
+          #isLowInOrganicMatter(soil: SoilBaseline): boolean
+        }
+
+        interface SoilBaselineData {
+          +ph: number
+          +texture: SoilTexture
+          +organicMatterPercentage: number
+          +recordedAt: Date
+        }
+
+        class SoilBaselineForm <<Component>> {
+          -fb
+          +current: InputSignal<SoilBaseline | null>
+          +saving: InputSignal
+          +submitted: OutputEmitterRef<SoilBaselineData>
+          +cancel: OutputEmitterRef<void>
+          #textures
+          #today
+          #form
+          #onSubmit()
+        }
+      }
+
+      package "views" {
+        class CampaignFinances <<Component>> {
+          -store: FarmingStore
+          +loading
+          +error
+          +plot
+          +campaign
+          +ledger
+          +online
+          +pendingExpenseCount
+          +syncing
+          #breadcrumbs: Breadcrumb[]
+          #expenseLinks: Array
+          +categoryFilter: WritableSignal<ExpenseCategory | null>
+          +expenseHistory: Signal
+          +subtitleParams: Signal
+          +onSync()
+          +onExpectedYieldChange(expectedYield: number)
+        }
+
+        class CampaignHistory <<Component>> {
+          -store: FarmingStore
+          -dialog: MatDialog
+          +loading
+          +error
+          +plot
+          +campaigns
+          +summaries: Signal
+          +hasCampaignInProgress
+          +editId: WritableSignal<number | null>
+          +editingCampaign: Signal
+          #breadcrumbs: Breadcrumb[]
+          +subtitleParams: Signal
+          +onEdit(summary: CampaignSummary): void
+          +onSave(data: CampaignFormData): void
+          +onClose(summary: CampaignSummary): void
+          +onExport(summary: CampaignSummary): void
+        }
+
+        class CampaignStart <<Component>> {
+          -router: Router
+          -store: FarmingStore
+          +loading
+          +error
+          +plot
+          +hasCampaignInProgress
+          #breadcrumbs: Breadcrumb[]
+          +previousCropType: Signal
+          +onStart(data: CampaignFormData)
+          +onCancel()
+        }
+
+        class CostReports <<Component>> {
+          -store: FarmingStore
+          +loading
+          +error
+          +plot
+          +campaign
+          +ledger
+          #breadcrumbs: Breadcrumb[]
+          +subtitleParams: Signal
+          +onActualYieldChange(actualYield: number)
+          +onExport()
+        }
+
+        class FieldExpense <<Component>> {
+          -router: Router
+          -store: FarmingStore
+          +category: InputSignal<ExpenseCategory>
+          +loading
+          +error
+          +plot
+          +ledger
+          +online
+          +pendingExpenseCount
+          +syncing
+          #breadcrumbs: Breadcrumb[]
+          #tabs: Array
+          #icons
+          +canRecord: Signal
+          +onSync()
+          +onRecord(data: FieldExpenseData)
+          +onCancel()
+        }
+
+        class MyPlotDashboard <<Component>> {
+          -store: FarmingStore
+          -session: IamStore
+          -cropStore: CropStore
+          +loading
+          +error
+          +plots
+          +plot
+          +campaign
+          +ledger
+          +observations: Signal
+          +latestObservation: Signal
+          +observationsLoading
+          +observationsError: Signal
+          #breadcrumbs: Breadcrumb[]
+          +userName: Signal
+          +greetingKey: Signal
+          +plotSummary: Signal
+          +retry(): void
+        }
+
+        class PlotBoundary <<Component>> {
+          -route: ActivatedRoute
+          -router: Router
+          -dialog: MatDialog
+          -farmingStore: FarmingStore
+          -boundaryMap
+          -loadedPlotId: number | null
+          +loading
+          +error
+          +plotId: number
+          +plot: Signal
+          +campaign: Signal
+          +plotTitle: Signal
+          #breadcrumbs: Breadcrumb[]
+          +markedCoordinates: WritableSignal<GeoCoordinate[]>
+          +areaHectares: Signal
+          +polygonStatus: Signal<PolygonStatus>
+          +onAddVertex(coordinate: GeoCoordinate)
+          +onUndo()
+          +onClear()
+          +onSavePlot()
+        }
+
+        class PlotDetail <<Component>> {
+          -router: Router
+          -store: FarmingStore
+          +id: InputSignal
+          +loading
+          +plotsLoading
+          +error
+          +plot: Signal
+          +campaign: Signal
+          #breadcrumbs: Breadcrumb[]
+          +onViewOnDashboard()
+        }
+
+        class PlotRegistration <<Component>> {
+          -router: Router
+          -farmingStore: FarmingStore
+          +loading
+          +error
+          +canRegisterPlot
+          +plotQuotaReady
+          +plotQuotaReached
+          +registrationIncomplete
+          +plotQuota
+          +slotNumber: Signal
+          #breadcrumbs: Breadcrumb[]
+          +onRegister(data: PlotRegistrationData)
+          +onCancel()
+        }
+
+        class RegisteredPlots <<Component>> {
+          -farmingStore: FarmingStore
+          -router: Router
+          +plots: Signal<FieldPlot[]>
+          +loading
+          +error
+          +plotCount
+          +plotQuota
+          +canRegisterPlot
+          +plotQuotaReady
+          +plotQuotaReached
+          +registrationIncomplete
+          #breadcrumbs: Breadcrumb[]
+          +freeSlots: Signal<number[]>
+          +campaigns: Signal
+          +onRegisterNewPlot()
+          +onSelectPlot(plot: FieldPlot)
+          +onViewMonitoring(plot: FieldPlot)
+          +onDelineate(plot: FieldPlot)
+          +onViewDetail(plot: FieldPlot)
+          +onRecordSoil(plot: FieldPlot)
+        }
+
+        class SoilAnalysis <<Component>> {
+          -router: Router
+          -store: FarmingStore
+          +id: InputSignal
+          +loading
+          +plotsLoading
+          +error
+          +plot: Signal
+          +breadcrumbs: Signal<Breadcrumb[]>
+          +onRecord(data: SoilBaselineData)
+          +onCancel()
+        }
+      }
+    }
+  }
+
+  ' ==========================================
+  ' REFERENCED FROM OTHER BOUNDED CONTEXTS
+  ' ==========================================
+  package "crop" {
+    package "domain.model" {
+      package "entities" {
+        class SatelliteObservation <<Entity>>
+      }
+    }
+
+    package "application" {
+      class CropStore <<Store>>
+    }
+  }
+
+  package "iam" {
+    package "application" {
+      class IamStore <<Store>>
+    }
+  }
+
+  package "profiles" {
+    package "presentation" {
+      package "components" {
+        class FarmerAdvisoryPanel <<Component>>
+      }
+    }
+  }
+
+  package "shared" {
+    package "domain.model" {
+      class BaseEntity
+
+      class Money
+    }
+
+    package "infrastructure" {
+      abstract class BaseApi
+
+      interface BaseResource
+
+      interface BaseResponse
+
+      class FileDownloader
+    }
+
+    package "presentation" {
+      package "components" {
+        interface Breadcrumb
+
+        class MessageCard <<Component>>
+
+        class PageHeader <<Component>>
+      }
+    }
+  }
+
+  package "subscriptions" {
+    package "domain.model" {
+      package "entities" {
+        class Subscription <<Entity>>
+      }
+    }
+
+    package "application" {
+      class SubscriptionsStore <<Store>>
+    }
+  }
+}
+
+' Relationships
+CropCampaignSetup --> StartCropCampaignCommand : references
+CropCampaignSetup --> SelectCropTypeCommand : references
+CropCampaignSetup --> SpecifySeedVarietyCommand : references
+CropCampaignSetup --> RecordSowingDateCommand : references
+FarmingStore --> FarmingApi : uses
+FarmingStore --> IamStore : uses
+FarmingStore --> OfflineSync : manages
+FarmingStore --> PendingExpenseAssembler : uses
+FarmingStore --> SubscriptionsStore : uses
+FarmingStore --> FileDownloader : manages
+FarmingStore --> CostReportPdf : manages
+FarmingStore --> FieldPlot : manages
+FarmingStore --> CropCampaign : manages
+FarmingStore --> CampaignLedger : manages
+FarmingStore --> Subscription : manages
+FarmingStore ..> RegisterFieldPlotCommand : sends
+FarmingStore ..> DelineatePlotBoundaryCommand : sends
+FarmingStore ..> RecordSoilBaselineCommand : sends
+FarmingStore ..> CloseCropCampaignCommand : sends
+FarmingStore ..> SetExpectedYieldCommand : sends
+FarmingStore ..> RecordActualYieldCommand : sends
+FarmingStore ..> ExportCampaignCostReportCommand : sends
+DelineatePlotBoundaryCommand --> GeoCoordinate : references
+RecordActualYieldCommand --> YieldUnit : has
+RecordSoilBaselineCommand --> SoilTexture : has
+SelectCropTypeCommand --> CropType : has
+SetExpectedYieldCommand --> YieldUnit : has
+CampaignLedger --|> BaseEntity : extends
+CampaignLedger --> ExpenseEntry : references
+CampaignLedger --> YieldUnit : has
+CampaignSummary --> CropType : has
+CropCampaign --|> BaseEntity : extends
+CropCampaign --> CropType : has
+CropCampaign --> CampaignStatus : has
+ExpenseEntry --|> BaseEntity : extends
+ExpenseEntry --> ExpenseCategory : has
+ExpenseEntry --> Money : references
+SoilBaseline --> SoilTexture : has
+FieldPlot --|> BaseEntity : extends
+FieldPlot --> PlotStatus : has
+FieldPlot --> GeoCoordinate : references
+FieldPlot --> SoilBaseline : references
+FarmingApi --|> BaseApi : extends
+FarmingApi --> FieldPlotsApiEndpoint : delegates to
+FarmingApi --> CropCampaignsApiEndpoint : delegates to
+FarmingApi --> CampaignLedgersApiEndpoint : delegates to
+FarmingApi ..> RecordInputExpenseCommand : sends
+FarmingApi ..> RecordDailyLaborExpenseCommand : sends
+FarmingApi ..> RecordFieldFreightExpenseCommand : sends
+CampaignLedgerAssembler --> CampaignLedger : builds
+CampaignLedgerAssembler ..> CampaignLedgerResource : converts
+CampaignLedgerAssembler ..> CampaignLedgersResponse : converts
+CampaignLedgerAssembler ..> RecordDailyLaborExpenseCommand : converts
+CampaignLedgerAssembler ..> RecordDailyLaborExpenseRequest : converts
+CampaignLedgerAssembler ..> RecordFieldFreightExpenseCommand : converts
+CampaignLedgerAssembler ..> RecordFieldFreightExpenseRequest : converts
+CampaignLedgerAssembler ..> RecordInputExpenseCommand : converts
+CampaignLedgerAssembler ..> RecordInputExpenseRequest : converts
+CropCampaignAssembler --> CropCampaign : builds
+CropCampaignAssembler ..> CropCampaignResource : converts
+CropCampaignAssembler ..> CropCampaignsResponse : converts
+FieldPlotAssembler --> FieldPlot : builds
+FieldPlotAssembler ..> FieldPlotResource : converts
+FieldPlotAssembler ..> FieldPlotsResponse : converts
+OfflineSync --> PendingOperation : references
+PendingOperation --> PendingOperationType : has
+ExpenseEntryResource --|> BaseResource : extends
+CampaignLedgerResource --|> BaseResource : extends
+CampaignLedgerResource --> ExpenseEntryResource : references
+CampaignLedgersResponse --|> BaseResponse : extends
+CampaignLedgersResponse --> CampaignLedgerResource : references
+CropCampaignResource --|> BaseResource : extends
+CropCampaignsResponse --|> BaseResponse : extends
+CropCampaignsResponse --> CropCampaignResource : references
+FieldPlotResource --|> BaseResource : extends
+FieldPlotResource --> GeoCoordinateResource : references
+FieldPlotResource --> SoilBaselineResource : references
+FieldPlotsResponse --|> BaseResponse : extends
+FieldPlotsResponse --> FieldPlotResource : references
+ActualYieldCard --> CampaignLedger : uses
+BoundarySummaryPanel --> FieldPlot : uses
+BoundarySummaryPanel --> CropCampaign : uses
+BoundarySummaryPanel --> GeoCoordinate : uses
+BoundarySummaryPanel --> PolygonStatus : has
+BreakevenPanel --> CampaignLedger : uses
+BreakevenReportCard --> CampaignLedger : uses
+CampaignFormData --> CropType : has
+CampaignForm --> FarmingStore : uses
+CampaignForm --> CropType : has
+CampaignForm --> CropCampaign : uses
+CampaignForm --> CampaignFormData : uses
+CampaignKpiCards --> CropCampaign : uses
+CampaignKpiCards --> CampaignLedger : uses
+CampaignKpiCards --> SatelliteObservation : uses
+CampaignSummaryViewModel --> CropType : has
+CampaignSummaryViewModel --> CampaignStatus : has
+CampaignSummaryViewModel --> Money : references
+CampaignSummaryViewModel --> YieldUnit : has
+CampaignSummaryCard --> CampaignSummary : uses
+CostDistributionCard --> CampaignLedger : uses
+CostPerHectareCard --> CampaignLedger : uses
+ExpenseCategoryFilter --> ExpenseCategory : has
+ExpenseList --> ExpenseEntry : uses
+FieldExpenseForm --> ExpenseCategory : has
+LedgerSummaryCards --> CampaignLedger : uses
+NdviChartCard --> SatelliteObservation : uses
+PlotBoundaryMap --> GeoCoordinate : uses
+PlotBoundaryMap --> PolygonStatus : has
+PlotCadastreCard --> FieldPlot : uses
+PlotCadastreCard --> CropCampaign : uses
+PlotCard --> FieldPlot : uses
+PlotCard --> CropCampaign : uses
+PlotPolygonViewer --> GeoCoordinate : uses
+PlotQuotaSummary --> FarmingStore : uses
+PlotQuotaSummary --> SubscriptionsStore : uses
+PlotRegistrationData --> CropType : has
+PlotRegistrationForm --> FarmingStore : uses
+PlotRegistrationForm --> PlotRegistrationData : uses
+PlotSavedDialogData --> FieldPlot : references
+SoilBaselineCard --> SoilBaseline : uses
+SoilBaselineCard --> CropType : has
+SoilBaselineData --> SoilTexture : has
+SoilBaselineForm --> SoilBaseline : uses
+SoilBaselineForm --> SoilBaselineData : uses
+CampaignFinances --> FarmingStore : uses
+CampaignFinances --> Breadcrumb : uses
+CampaignFinances --> ExpenseCategory : has
+CampaignFinances --> PageHeader : contains
+CampaignFinances --> MessageCard : contains
+CampaignFinances --> LedgerSummaryCards : contains
+CampaignFinances --> ExpenseList : contains
+CampaignFinances --> ExpenseCategoryFilter : contains
+CampaignFinances --> BreakevenPanel : contains
+CampaignFinances --> OfflineSyncBanner : contains
+CampaignHistory --> FarmingStore : uses
+CampaignHistory --> Breadcrumb : uses
+CampaignHistory --> PageHeader : contains
+CampaignHistory --> MessageCard : contains
+CampaignHistory --> CampaignSummaryCard : contains
+CampaignHistory --> CampaignForm : contains
+CampaignStart --> FarmingStore : uses
+CampaignStart --> Breadcrumb : uses
+CampaignStart --> PageHeader : contains
+CampaignStart --> MessageCard : contains
+CampaignStart --> CampaignForm : contains
+CostReports --> FarmingStore : uses
+CostReports --> Breadcrumb : uses
+CostReports --> PageHeader : contains
+CostReports --> MessageCard : contains
+CostReports --> BreakevenReportCard : contains
+CostReports --> CostPerHectareCard : contains
+CostReports --> ActualYieldCard : contains
+FieldExpense --> FarmingStore : uses
+FieldExpense --> ExpenseCategory : has
+FieldExpense --> Breadcrumb : uses
+FieldExpense --> PageHeader : contains
+FieldExpense --> MessageCard : contains
+FieldExpense --> FieldExpenseForm : contains
+FieldExpense --> OfflineSyncBanner : contains
+MyPlotDashboard --> FarmingStore : uses
+MyPlotDashboard --> IamStore : uses
+MyPlotDashboard --> CropStore : uses
+MyPlotDashboard --> Breadcrumb : uses
+MyPlotDashboard --> PageHeader : contains
+MyPlotDashboard --> MessageCard : contains
+MyPlotDashboard --> CampaignKpiCards : contains
+MyPlotDashboard --> NdviChartCard : contains
+MyPlotDashboard --> CostDistributionCard : contains
+PlotBoundary --> FarmingStore : uses
+PlotBoundary --> Breadcrumb : uses
+PlotBoundary --> GeoCoordinate : uses
+PlotBoundary --> PolygonStatus : has
+PlotBoundary --> PageHeader : contains
+PlotBoundary --> MessageCard : contains
+PlotBoundary --> RegistrationSteps : contains
+PlotBoundary --> PlotBoundaryMap : contains
+PlotBoundary --> BoundarySummaryPanel : contains
+PlotDetail --> FarmingStore : uses
+PlotDetail --> Breadcrumb : uses
+PlotDetail --> PageHeader : contains
+PlotDetail --> MessageCard : contains
+PlotDetail --> PlotPolygonViewer : contains
+PlotDetail --> PlotCadastreCard : contains
+PlotDetail --> SoilBaselineCard : contains
+PlotDetail --> FarmerAdvisoryPanel : contains
+PlotRegistration --> FarmingStore : uses
+PlotRegistration --> Breadcrumb : uses
+PlotRegistration --> PageHeader : contains
+PlotRegistration --> MessageCard : contains
+PlotRegistration --> RegistrationSteps : contains
+PlotRegistration --> PlotRegistrationForm : contains
+RegisteredPlots --> FarmingStore : uses
+RegisteredPlots --> FieldPlot : uses
+RegisteredPlots --> Breadcrumb : uses
+RegisteredPlots --> PlotQuotaSummary : contains
+RegisteredPlots --> PageHeader : contains
+RegisteredPlots --> MessageCard : contains
+RegisteredPlots --> PlotCard : contains
+RegisteredPlots --> PlotSlotCard : contains
+SoilAnalysis --> FarmingStore : uses
+SoilAnalysis --> Breadcrumb : uses
+SoilAnalysis --> PageHeader : contains
+SoilAnalysis --> MessageCard : contains
+SoilAnalysis --> SoilBaselineForm : contains
+CampaignLedgersApiEndpoint --> CampaignLedgerAssembler : uses
+CropCampaignsApiEndpoint --> CropCampaignAssembler : uses
+FieldPlotsApiEndpoint --> FieldPlotAssembler : uses
+
+@enduml

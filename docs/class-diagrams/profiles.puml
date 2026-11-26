@@ -1,0 +1,692 @@
+@startuml
+' SumaqAgro Web Application - Profiles Bounded Context - Domain-Driven Design Class Diagram
+' Generated from the Angular source code in src/app/profiles
+
+set separator none
+hide empty members
+
+package "app" {
+
+  ' ==========================================
+  ' PROFILES BOUNDED CONTEXT
+  ' ==========================================
+  package "profiles" {
+    package "domain.model" {
+      package "commands" {
+        class UpdateCooperativeCommand {
+          +legalName: string
+          +region: string
+          +institutionalEmail: string
+          +legalRepresentative: string
+          +ruc: string
+          +headquartersAddress: string
+          +switchboardPhone: string
+        }
+
+        class UpdateFarmerAccountCommand {
+          +firstName: string
+          +lastName: string
+          +phoneNumber: string
+          +dni: string
+        }
+      }
+
+      package "entities" {
+        interface AdvisorSummary {
+          +userId?: number
+          +name: string
+        }
+
+        enum InvitationStatus {
+          PENDING
+          ACCEPTED
+          EXPIRED
+        }
+
+        class AgronomistInvitation <<Entity>> {
+          +email: string
+          +status: InvitationStatus
+          +sentAt: Date
+          +agronomistUserId: number | null
+          +accepted: boolean
+        }
+
+        interface MemberPlot {
+          +id: number
+          +name: string
+          +region: string
+          +coordinates: string
+          +campaignId: number
+          +variety: string
+          +cropType: '' | ''
+        }
+
+        class CooperativeMember <<Entity>> {
+          +userId: number | null
+          +dni: string
+          +phone: string
+          +community: string
+          +plots: MemberPlot[]
+          -_cooperativeId: number
+          -_fullName: string
+          -_active: boolean
+          +cooperativeId: number
+          +fullName: string
+          +name: string
+          +active: boolean
+        }
+
+        class Cooperative <<Entity>> {
+          -_directorUserId: number
+          -_legalName: string
+          -_region: string
+          -_institutionalEmail: string
+          -_legalRepresentative: string
+          -_ruc: string
+          -_headquartersAddress: string
+          -_switchboardPhone: string
+          +directorUserId: number
+          +legalName: string
+          +region: string
+          +institutionalEmail: string
+          +legalRepresentative: string
+          +ruc: string
+          +headquartersAddress: string
+          +switchboardPhone: string
+          +updateInstitutionalData(data: (...)): void
+        }
+
+        class FarmerProfile <<Entity>> {
+          -_userId: number
+          -_phoneNumber: string
+          -_email: string
+          -_firstName: string
+          -_lastName: string
+          -_dni: string
+          +dni: string
+          +firstName: string
+          +lastName: string
+          +fullName: string
+          +userId: number
+          +phoneNumber: string
+          +email: string
+          +updateDni(value: string): void
+          +updateName(firstName: string, lastName: string): void
+          +updatePhoneNumber(value: string): void
+        }
+
+        interface MemberCandidate {
+          +userId: number
+          +email: string
+          +firstName: string
+          +lastName: string
+          +dni: string
+          +phoneNumber: string
+          +alreadyMember: boolean
+        }
+
+        interface AdvisorAssignmentHistory {
+          +advisorUserId: number
+          +assignedAt: string
+          +endedAt: string
+        }
+
+        interface PlotAdvisorAssignment {
+          +id: number
+          +cooperativeId: number
+          +plotId: number
+          +producerUserId: number
+          +advisorUserId: number
+          +status: '' | ''
+          +assignedAt: string
+          +history: AdvisorAssignmentHistory[]
+        }
+
+        interface PlotResponsibility {
+          +plotId: number
+          +producerUserId: number
+          +advisorUserId: number
+          +status: '' | ''
+        }
+
+        class TechnicalAdvisor <<Entity>> {
+          -_cooperativeId: number
+          +userId?: number
+          -_name: string
+          -_cipCode: string
+          -_phone: string
+          -_assignedPlotsCount: number
+          +cooperativeId: number
+          +name: string
+          +cipCode: string
+          +phone: string
+          +assignedPlotsCount: number
+        }
+      }
+    }
+
+    package "infrastructure" {
+      class ProfilesApi {
+        -farmerProfilesEndpoint: FarmerProfilesApiEndpoint
+        -cooperativesEndpoint: CooperativesApiEndpoint
+        -cooperativeMembersEndpoint: CooperativeMembersApiEndpoint
+        -plotAdvisorAssignmentsEndpoint: PlotAdvisorAssignmentsApiEndpoint
+        -cooperativeByDirector: Map
+        +getFarmerProfile(userId: number): Observable<FarmerProfile>
+        +updateFarmerProfile(profile: FarmerProfile): Observable<FarmerProfile>
+        +getCooperativeByDirector(userId: number): Observable<Cooperative | null>
+        +registerCooperative(directorUserId: number, legalName: string, ruc: string, region: string): Observable<unknown>
+        +updateCooperative(cooperative: Cooperative): Observable<Cooperative>
+        +addCooperativeMember(cooperativeId: number, member: CooperativeMemberDetails): Observable<CooperativeMember>
+        +getCooperativeMembers(cooperativeId: number): Observable<CooperativeMember[]>
+        +getMembershipsByUser(userId: number): Observable<CooperativeMember[]>
+        +inviteAgronomist(cooperativeId: number, email: string): Observable<AgronomistInvitation>
+        +getInvitations(cooperativeId: number): Observable<AgronomistInvitation[]>
+        +findMemberCandidate(cooperativeId: number, email: string): Observable<MemberCandidate | null>
+        +linkMemberAccount(cooperativeId: number, memberId: number, email: string): Observable<CooperativeMember>
+        +getAssignmentsByCooperative(cooperativeId: number): Observable<PlotAdvisorAssignment[]>
+        +getAssignmentsByProducer(userId: number): Observable<PlotAdvisorAssignment[]>
+        +getAssignmentsByAdvisor(userId: number): Observable<PlotAdvisorAssignment[]>
+        +getAssignmentByPlot(plotId: number): Observable<PlotAdvisorAssignment | null>
+        +assign(cooperativeId: number, plotId: number, advisorUserId: number): Observable<PlotAdvisorAssignment>
+        +reassign(assignmentId: number, advisorUserId: number): Observable<PlotAdvisorAssignment>
+      }
+
+      package "assemblers" {
+        class AgronomistInvitationAssembler <<Assembler>> {
+          +toEntityFromResource(resource: AgronomistInvitationResource): AgronomistInvitation
+        }
+
+        class CooperativeMemberAssembler <<Assembler>> {
+          +toEntityFromResource(resource: CooperativeMemberResource): CooperativeMember
+          +toResourceFromEntity(entity: CooperativeMember): CooperativeMemberResource
+          +toEntitiesFromResponse(response: CooperativeMembersResponse): CooperativeMember[]
+        }
+
+        class CooperativeAssembler <<Assembler>> {
+          +toEntityFromResource(resource: CooperativeResource): Cooperative
+          +toResourceFromEntity(entity: Cooperative): CooperativeResource
+          +toEntitiesFromResponse(response: CooperativesResponse): Cooperative[]
+        }
+
+        class FarmerProfileAssembler <<Assembler>> {
+          +toEntityFromResource(resource: FarmerProfileResource): FarmerProfile
+        }
+
+        class MemberCandidateAssembler <<Assembler>> {
+          +toEntityFromResource(resource: MemberCandidateResource): MemberCandidate
+        }
+
+        class PlotAdvisorAssignmentAssembler <<Assembler>> {
+          +{static} toEntity(resource: PlotAdvisorAssignmentResource): PlotAdvisorAssignment
+        }
+      }
+
+      package "endpoints" {
+        class CooperativeMembersApiEndpoint {
+          +add(cooperativeId: number, member: CooperativeMemberDetails): Observable<CooperativeMember>
+          +linkAccount(cooperativeId: number, memberId: number, email: string): Observable<CooperativeMember>
+          +getByCooperative(cooperativeId: number): Observable<CooperativeMember[]>
+          +getByUser(userId: number): Observable<CooperativeMember[]>
+        }
+
+        class CooperativesApiEndpoint {
+          -invitationAssembler: AgronomistInvitationAssembler
+          -candidateAssembler: MemberCandidateAssembler
+          +register(directorUserId: number, legalName: string, ruc: string, region: string): Observable<unknown>
+          +update(cooperative: Cooperative, id: number | string): Observable<Cooperative>
+          +inviteAgronomist(cooperativeId: number, email: string): Observable<AgronomistInvitation>
+          +getInvitations(cooperativeId: number): Observable<AgronomistInvitation[]>
+          +findMemberCandidate(cooperativeId: number, email: string): Observable<MemberCandidate | null>
+          +getByDirector(userId: number): Observable<Cooperative | null>
+        }
+
+        class FarmerProfilesApiEndpoint {
+          -url
+          -assembler: FarmerProfileAssembler
+          +getByUser(userId: number): Observable<FarmerProfile>
+          +update(profile: FarmerProfile): Observable<FarmerProfile>
+        }
+
+        class PlotAdvisorAssignmentsApiEndpoint {
+          -url: string
+          +getByProducer(userId: number): Observable<PlotAdvisorAssignment[]>
+          +getByAdvisor(userId: number): Observable<PlotAdvisorAssignment[]>
+          +getByPlot(plotId: number): Observable<PlotAdvisorAssignment | null>
+          +getByCooperative(cooperativeId: number): Observable<PlotAdvisorAssignment[]>
+          +assign(cooperativeId: number, plotId: number, agronomistUserId: number): Observable<PlotAdvisorAssignment>
+          +reassign(assignmentId: number, agronomistUserId: number): Observable<PlotAdvisorAssignment>
+        }
+      }
+
+      package "responses" {
+        class AgronomistInvitationResource <<Resource>> {
+          +id: number
+          +cooperativeId: number
+          +email: string
+          +status: InvitationStatus
+          +sentAt: string
+          +agronomistUserId: number | null
+        }
+
+        class CooperativeMemberResource <<Resource>> {
+          +id: number
+          +cooperativeId: number
+          +fullName: string
+          +active: boolean
+          +dni?: string
+          +phone?: string
+          +community?: string
+          +userId?: number | null
+          +plots?: MemberPlot[]
+        }
+
+        class CooperativeMemberDetails <<Resource>> {
+          +firstName: string
+          +lastName: string
+          +dni: string
+          +community: string
+          +email?: string
+        }
+
+        class CooperativeMembersResponse <<Response>> {
+          +members: CooperativeMemberResource[]
+        }
+
+        class CooperativeResource <<Resource>> {
+          +id: number
+          +managerUserId: number
+          +businessName: string
+          +region: string
+          +institutionalEmail: string | null
+          +legalRepresentative: string | null
+          +ruc: string
+          +headquartersAddress: string | null
+          +switchboardPhone: string | null
+        }
+
+        class CooperativesResponse <<Response>> {
+          +cooperatives: CooperativeResource[]
+        }
+
+        class FarmerProfileResource <<Resource>> {
+          +id: number
+          +userId: number
+          +firstName?: string
+          +lastName?: string
+          +phoneNumber: string | null
+          +email: string | null
+          +dni?: string | null
+        }
+
+        class MemberCandidateResource <<Resource>> {
+          +userId: number
+          +email: string
+          +firstName: string
+          +lastName: string
+          +dni: string | null
+          +phoneNumber: string | null
+          +alreadyMember: boolean
+        }
+
+        class AgronomistAssignmentHistoryResource <<Resource>> {
+          +agronomistUserId: number
+          +assignedAt: string
+          +endedAt: string
+        }
+
+        class PlotAdvisorAssignmentResource <<Resource>> {
+          +id: number
+          +cooperativeId: number
+          +plotId: number
+          +producerUserId: number
+          +agronomistUserId: number
+          +status: '' | ''
+          +assignedAt: string
+          +history: AgronomistAssignmentHistoryResource[]
+        }
+      }
+    }
+
+    package "application" {
+      interface TechnicalTeamMember {
+        +invitation: AgronomistInvitation
+        +name: string | null
+        +assignedPlotsCount: number
+      }
+
+      class ProfilesStore <<Store>> {
+        -injector: Injector
+        -profilesApi: ProfilesApi
+        -session: IamStore
+        -profileSignal: WritableSignal<FarmerProfile | null>
+        -cooperativeSignal: WritableSignal<Cooperative | null>
+        -membersSignal: WritableSignal<CooperativeMember[]>
+        -technicalAdvisorsSignal: WritableSignal<TechnicalAdvisor[]>
+        -invitationsSignal: WritableSignal<AgronomistInvitation[]>
+        -teamNamesSignal: WritableSignal<ReadonlyMap<number, string>>
+        -loadingSignal: WritableSignal<boolean>
+        -savingSignal: WritableSignal<boolean>
+        -errorSignal: WritableSignal<string | null>
+        -contactSavedSignal: WritableSignal<boolean>
+        +contactSaved: Signal<boolean>
+        +profile: Signal<FarmerProfile | null>
+        +cooperative: Signal<Cooperative | null>
+        +members: Signal<CooperativeMember[]>
+        +technicalAdvisors: Signal<TechnicalAdvisor[]>
+        +technicalTeam: Signal<TechnicalTeamMember[]>
+        +loading: Signal<boolean>
+        +saving: Signal<boolean>
+        +error: Signal<string | null>
+        +activeMemberCount: Signal
+        -directorScoped: Signal
+        -advisoryParticipant: WritableSignal<SessionParticipant | null>
+        -advisorCatalogue: WritableSignal<TechnicalAdvisor[]>
+        -advisoryAssignments: WritableSignal<PlotAdvisorAssignment[]>
+        -advisoryLoadingSignal: WritableSignal<boolean>
+        -advisoryErrorSignal: WritableSignal<string | null>
+        -advisoryMemberOfCooperative: WritableSignal<boolean>
+        -advisoryRequests: Subscription
+        -advisoryRevision: number
+        -advisoryScoped: Signal
+        +advisors: Signal
+        +assignments: Signal
+        +advisoryLoading: Signal
+        +advisoryError: Signal
+        +advisorAssignedByDirector: Signal
+        +clearContactFeedback(): void
+        +loadFarmerProfile(userId: number): void
+        +saveAccount(command: UpdateFarmerAccountCommand): void
+        +loadInstitutionalDashboard(directorUserId: number): void
+        +inviteAgronomist(email: string): Observable<AgronomistInvitation>
+        +technicalTeamOf(cooperativeId: number): Observable<AdvisorSummary[]>
+        +findMemberCandidate(cooperativeId: number, email: string): Observable<MemberCandidate | null>
+        +addMember(cooperativeId: number, details: CooperativeMemberDetails): Observable<CooperativeMember>
+        +linkMemberAccount(cooperativeId: number, memberId: number, email: string): Observable<CooperativeMember>
+        +saveCooperative(command: UpdateCooperativeCommand): void
+        +advisorByUser(userId: number): Observable<AdvisorSummary | null>
+        +cooperativeByDirector(userId: number): Observable<
+        +membershipsByUser(userId: number): Observable<CooperativeMember[]>
+        +cooperativeMembers(cooperativeId: number): Observable<CooperativeMember[]>
+        +cooperativeScope(cooperativeId: number): Observable<
+        +responsibilitiesByAdvisor(userId: number): Observable<PlotResponsibility[]>
+        +responsibilityByPlot(plotId: number): Observable<PlotResponsibility | null>
+        +assignPlotAdvisor(cooperativeId: number, plotId: number, producerUserId: number, advisorUserId: number): Observable<PlotResponsibility>
+        +reloadAdvisory(): void
+        +assignmentFor(plotId: number): PlotAdvisorAssignment | null
+        +advisorFor(plotId: number): TechnicalAdvisor | null
+      }
+    }
+
+    package "presentation" {
+      package "components" {
+        class FarmerAdvisoryPanel <<Component>> {
+          +plotId: InputSignal<number>
+          +owned: InputSignal
+          +store: ProfilesStore
+          +advisor: Signal
+          +assignment: Signal
+        }
+
+        class "PlotAdvisorAssignment" as PlotAdvisorAssignmentComponent <<Component>> {
+          +cooperativeId: InputSignal<number>
+          +plotId: InputSignal<number>
+          +producerUserId: InputSignal<number>
+          -store: ProfilesStore
+          -destroyRef: DestroyRef
+          #responsibility: WritableSignal<PlotResponsibility | null>
+          #loading: WritableSignal<boolean>
+          #saving: WritableSignal<boolean>
+          #error: WritableSignal<string | null>
+          #selected: WritableSignal<number | null>
+          #advisorName: WritableSignal<string | null>
+          #team: WritableSignal<AdvisorSummary[]>
+          #validId(): boolean
+          #assign(): void
+        }
+      }
+
+      package "views" {
+        class CooperativeMembers <<Component>> {
+          #dossierBreadcrumbs: Breadcrumb[]
+          -api: ProfilesApi
+          -store: ProfilesStore
+          -session: IamStore
+          -refresh: WritableSignal<number>
+          -request: Signal
+          -destroyRef: DestroyRef
+          #adding: WritableSignal<boolean>
+          #saving: WritableSignal<boolean>
+          #error: WritableSignal<string>
+          -router: Router
+          -route: ActivatedRoute
+          -location: Location
+          #memberId: Signal
+          #form
+          #candidate: WritableSignal<MemberCandidate | null>
+          #lookupResult: WritableSignal<'' | '' | '' | '' | null>
+          #lookingUp: WritableSignal<boolean>
+          #linkEmail: FormControl
+          #linking: WritableSignal<boolean>
+          #linkError: WritableSignal<string>
+          #query: WritableSignal
+          #state: Signal
+          #selected: Signal
+          #columns: string[]
+          #statusFilter: WritableSignal<'' | '' | ''>
+          #filters: Array
+          #stats: Signal
+          -fields: FarmingStore
+          #memberPlots: Signal
+          #visibleMembers: Signal
+          #closeForm(): void
+          #lookUp(): void
+          #linkAccount(memberId: number, cooperativeId: number): void
+          #search(value: string): void
+          #initials(name: string): string
+          #save(): void
+          #retry(): void
+        }
+
+        class CooperativeRegistration <<Component>> {
+          #breadcrumbs: Breadcrumb[]
+          -api: ProfilesApi
+          -session: IamStore
+          -router: Router
+          -destroyRef: DestroyRef
+          #saving: WritableSignal<boolean>
+          #error: WritableSignal<string>
+          #form
+          #submit(): void
+        }
+
+        enum SettingsTab {
+          cooperative
+          technical-team
+        }
+
+        class CooperativeSettings <<Component>> {
+          -store: ProfilesStore
+          -session: IamStore
+          +activeTab: WritableSignal<SettingsTab>
+          +cooperative
+          +technicalTeam
+          +loading
+          +saving
+          +error
+          +invitationEmail: FormControl
+          +invitationBusy: WritableSignal<boolean>
+          +invitationFeedback: WritableSignal<string>
+          +form: FormGroup
+          +selectTab(tab: SettingsTab): void
+          +saveCooperative(): void
+          +invite(): void
+        }
+
+        class FarmerSettings <<Component>> {
+          -store: ProfilesStore
+          -snackBar: MatSnackBar
+          +session: IamStore
+          +translate: TranslateService
+          +tab: WritableSignal<'' | ''>
+          +experience: Signal
+          +isFarmer: Signal
+          +search: WritableSignal<string>
+          +editing: WritableSignal<boolean>
+          +guideIds: Array
+          +faqs: Array
+          +destinations: Record<string, string>
+          +icons: Record<string, string>
+          +filteredGuides: Signal
+          +profile
+          +loading
+          +saving
+          +error
+          +contactForm: FormGroup
+          +startEditing(): void
+          +cancelEditing(): void
+          +saveContact(): void
+        }
+
+        class InstitutionalDashboard <<Component>> {
+          -store: ProfilesStore
+          +cooperative
+          +activeMembers
+          +advisors
+          +loading
+          +error
+        }
+      }
+    }
+  }
+
+  ' ==========================================
+  ' REFERENCED FROM OTHER BOUNDED CONTEXTS
+  ' ==========================================
+  package "farming" {
+    package "application" {
+      class FarmingStore <<Store>>
+    }
+  }
+
+  package "iam" {
+    package "application" {
+      class IamStore <<Store>>
+
+      interface SessionParticipant
+    }
+  }
+
+  package "shared" {
+    package "domain.model" {
+      class BaseEntity
+    }
+
+    package "infrastructure" {
+      abstract class BaseApi
+
+      interface BaseResource
+
+      interface BaseResponse
+
+      abstract class ErrorHandlingEnabledBaseType
+    }
+
+    package "presentation" {
+      package "components" {
+        interface Breadcrumb
+
+        class PageHeader <<Component>>
+      }
+    }
+  }
+
+  package "subscriptions" {
+    package "domain.model" {
+      package "entities" {
+        class Subscription <<Entity>>
+      }
+    }
+  }
+}
+
+' Relationships
+TechnicalTeamMember --> AgronomistInvitation : references
+ProfilesStore --> ProfilesApi : uses
+ProfilesStore --> IamStore : uses
+ProfilesStore --> FarmerProfile : manages
+ProfilesStore --> Cooperative : manages
+ProfilesStore --> CooperativeMember : manages
+ProfilesStore --> TechnicalAdvisor : manages
+ProfilesStore --> AgronomistInvitation : manages
+ProfilesStore --> TechnicalTeamMember : manages
+ProfilesStore --> SessionParticipant : manages
+ProfilesStore --> PlotAdvisorAssignment : manages
+ProfilesStore --> Subscription : manages
+ProfilesStore ..> UpdateFarmerAccountCommand : sends
+ProfilesStore ..> UpdateCooperativeCommand : sends
+AgronomistInvitation --|> BaseEntity : extends
+AgronomistInvitation --> InvitationStatus : has
+CooperativeMember --|> BaseEntity : extends
+CooperativeMember --> MemberPlot : references
+Cooperative --|> BaseEntity : extends
+FarmerProfile --|> BaseEntity : extends
+PlotAdvisorAssignment --> AdvisorAssignmentHistory : references
+TechnicalAdvisor --|> BaseEntity : extends
+ProfilesApi --|> BaseApi : extends
+ProfilesApi --> FarmerProfilesApiEndpoint : delegates to
+ProfilesApi --> CooperativesApiEndpoint : delegates to
+ProfilesApi --> CooperativeMembersApiEndpoint : delegates to
+ProfilesApi --> PlotAdvisorAssignmentsApiEndpoint : delegates to
+AgronomistInvitationAssembler --> AgronomistInvitation : builds
+AgronomistInvitationAssembler ..> AgronomistInvitationResource : converts
+CooperativeMemberAssembler --> CooperativeMember : builds
+CooperativeMemberAssembler ..> CooperativeMemberResource : converts
+CooperativeMemberAssembler ..> CooperativeMembersResponse : converts
+CooperativeAssembler --> Cooperative : builds
+CooperativeAssembler ..> CooperativeResource : converts
+CooperativeAssembler ..> CooperativesResponse : converts
+FarmerProfileAssembler --> FarmerProfile : builds
+FarmerProfileAssembler ..> FarmerProfileResource : converts
+MemberCandidateAssembler ..> MemberCandidateResource : converts
+PlotAdvisorAssignmentAssembler ..> PlotAdvisorAssignmentResource : converts
+CooperativesApiEndpoint --> AgronomistInvitationAssembler : uses
+CooperativesApiEndpoint --> MemberCandidateAssembler : uses
+FarmerProfilesApiEndpoint --|> ErrorHandlingEnabledBaseType : extends
+FarmerProfilesApiEndpoint --> FarmerProfileAssembler : uses
+AgronomistInvitationResource --> InvitationStatus : has
+CooperativeMemberResource --|> BaseResource : extends
+CooperativeMemberResource --> MemberPlot : references
+CooperativeMembersResponse --|> BaseResponse : extends
+CooperativeMembersResponse --> CooperativeMemberResource : references
+CooperativeResource --|> BaseResource : extends
+CooperativesResponse --|> BaseResponse : extends
+CooperativesResponse --> CooperativeResource : references
+PlotAdvisorAssignmentResource --> AgronomistAssignmentHistoryResource : references
+FarmerAdvisoryPanel --> ProfilesStore : uses
+PlotAdvisorAssignmentComponent --> ProfilesStore : uses
+PlotAdvisorAssignmentComponent --> PlotResponsibility : uses
+PlotAdvisorAssignmentComponent --> AdvisorSummary : uses
+CooperativeMembers --> Breadcrumb : uses
+CooperativeMembers --> ProfilesApi : uses
+CooperativeMembers --> ProfilesStore : uses
+CooperativeMembers --> IamStore : uses
+CooperativeMembers --> MemberCandidate : uses
+CooperativeMembers --> FarmingStore : uses
+CooperativeMembers --> PageHeader : contains
+CooperativeMembers --> PlotAdvisorAssignmentComponent : contains
+CooperativeRegistration --> Breadcrumb : uses
+CooperativeRegistration --> ProfilesApi : uses
+CooperativeRegistration --> IamStore : uses
+CooperativeRegistration --> PageHeader : contains
+CooperativeSettings --> ProfilesStore : uses
+CooperativeSettings --> IamStore : uses
+CooperativeSettings --> SettingsTab : has
+FarmerSettings --> ProfilesStore : uses
+FarmerSettings --> IamStore : uses
+InstitutionalDashboard --> ProfilesStore : uses
+CooperativeMembersApiEndpoint --> CooperativeMemberAssembler : uses
+CooperativesApiEndpoint --> CooperativeAssembler : uses
+PlotAdvisorAssignmentsApiEndpoint --> PlotAdvisorAssignmentAssembler : uses
+
+@enduml

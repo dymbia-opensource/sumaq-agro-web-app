@@ -1,0 +1,475 @@
+@startuml
+' SumaqAgro Web Application - Subscriptions and Payments Bounded Context - Domain-Driven Design Class Diagram
+' Generated from the Angular source code in src/app/subscriptions
+
+set separator none
+hide empty members
+
+package "app" {
+
+  ' ==========================================
+  ' SUBSCRIPTIONS AND PAYMENTS BOUNDED CONTEXT
+  ' ==========================================
+  package "subscriptions" {
+    package "domain.model" {
+      package "commands" {
+        class CancelSubscriptionCommand {
+          +subscriptionId: number
+        }
+
+        class ConfirmPaymentCommand {
+          +paymentId: string
+        }
+
+        class SelectSubscriptionPlanCommand {
+          +userId: number
+          +planCode: PlanCode
+          +billingCycle: BillingCycle
+        }
+
+        class StartPaymentCheckoutCommand {
+          +planCode: PlanCode
+          +billingCycle: BillingCycle
+        }
+      }
+
+      package "entities" {
+        enum BillingCycle {
+          MONTHLY
+          ANNUAL
+        }
+
+        class PaymentCheckout <<ValueObject>> {
+          +reference: string
+          +amount: Money
+          +checkoutUrl: string
+          +sandboxCheckoutUrl: string | null
+        }
+
+        enum PaymentStatus {
+          PENDING
+          COMPLETED
+          REJECTED
+        }
+
+        class Payment <<Entity>> {
+          +reference: string
+          +planCode: PlanCode
+          +amount: Money
+          +status: PaymentStatus
+          +attemptedAt: Date
+          +isCompleted(): boolean
+        }
+
+        enum PlanCode {
+          SEED
+          COOPERATIVE_PRO
+          TECHNICAL_ADVISOR
+        }
+
+        class Plan <<Entity>> {
+          -_code: PlanCode
+          -_monthlyPrice: Money
+          -_annualPrice: Money
+          -_plotQuota: number
+          -_features: string[]
+          +code: PlanCode
+          +monthlyPrice: Money
+          +annualPrice: Money
+          +plotQuota: number
+          +features: string[]
+          +priceFor(cycle: BillingCycle): Money
+          +annualSavings(): Money
+        }
+
+        enum SubscriptionSegment {
+          INDEPENDENT_FARMER
+          COOPERATIVE
+          TECHNICAL_ADVISOR
+        }
+
+        enum SubscriptionStatus {
+          ACTIVE
+          CANCELLED
+        }
+
+        class Subscription <<Entity>> {
+          +planCode: PlanCode
+          +status: SubscriptionStatus
+          +billingCycle: BillingCycle
+          +startDate: Date
+          +endDate: Date
+          +plan: Plan | null
+          +autoRenew: boolean
+          +hasAccess(today: Date): boolean
+          +isExpired(today: Date): boolean
+        }
+      }
+    }
+
+    package "infrastructure" {
+      class activeSubscriptionGuard <<Guard>> {
+        +canActivateChild(): boolean | UrlTree
+      }
+
+      class SubscriptionsApi {
+        -http: HttpClient
+        -plansEndpoint: PlansApiEndpoint
+        -subscriptionsEndpoint: SubscriptionsApiEndpoint
+        -paymentsEndpoint: PaymentsApiEndpoint
+        +getPlans()
+        +getMySubscription()
+        +getMyPayments()
+        +cancelMySubscription()
+        +startPaymentCheckout(command: StartPaymentCheckoutCommand)
+        +confirmPayment(command: ConfirmPaymentCommand)
+        +submitCheckout(planCode: PlanCode, billingCycle: BillingCycle, outcome: PaymentStatus.COMPLETED | PaymentStatus.REJECTED)
+        +buildReceipt(payment: Payment): ExportedFile
+      }
+
+      package "assemblers" {
+        class PaymentCheckoutAssembler <<Assembler>> {
+          +toEntityFromResource(resource: PaymentCheckoutResource): PaymentCheckout
+          +toStartRequestFromCommand(command: StartPaymentCheckoutCommand): StartPaymentCheckoutRequest
+          +toConfirmRequestFromCommand(command: ConfirmPaymentCommand): ConfirmPaymentRequest
+        }
+
+        class PaymentAssembler <<Assembler>> {
+          +toEntityFromResource(resource: PaymentResource): Payment
+        }
+
+        class PlanAssembler <<Assembler>> {
+          +toEntityFromResource(resource: PlanResource): Plan
+        }
+
+        class SubscriptionAssembler <<Assembler>> {
+          +toEntityFromResource(resource: SubscriptionResource): Subscription
+        }
+      }
+
+      package "endpoints" {
+        class PaymentsApiEndpoint {
+          -url
+          -assembler: PaymentAssembler
+          +getAll()
+        }
+
+        class PlansApiEndpoint {
+          -url
+          -assembler: PlanAssembler
+          +getAll()
+        }
+
+        class SubscriptionsApiEndpoint {
+          -url
+          -assembler: SubscriptionAssembler
+          -paymentAssembler: PaymentAssembler
+          -checkoutAssembler: PaymentCheckoutAssembler
+          +getMine()
+          +cancel()
+          +startCheckoutSession(command: StartPaymentCheckoutCommand)
+          +confirmPayment(command: ConfirmPaymentCommand)
+          +checkout(planCode: PlanCode, billingCycle: BillingCycle, simulatedOutcome: PaymentStatus.COMPLETED | PaymentStatus.REJECTED)
+        }
+      }
+
+      package "requests" {
+        class ConfirmPaymentRequest <<Request>> {
+          +paymentId: string
+        }
+
+        class StartPaymentCheckoutRequest <<Request>> {
+          +planCode: PlanCode
+          +billingCycle: BillingCycle
+        }
+      }
+
+      package "responses" {
+        class PaymentCheckoutResource <<Resource>> {
+          +reference: string
+          +amount: number
+          +currency: string
+          +checkoutUrl: string
+          +sandboxCheckoutUrl: string | null
+        }
+
+        class PaymentResource <<Resource>> {
+          +reference: string
+          +subscriptionId: number | null
+          +planCode: PlanCode
+          +billingCycle: BillingCycle
+          +amount: number
+          +currency: string
+          +status: PaymentStatus
+          +attemptedAt: string
+        }
+
+        class PlanResource <<Resource>> {
+          +code: PlanCode
+          +monthlyPrice: number
+          +annualPrice: number
+          +currency: string
+          +registeredPlotLimit: number
+          +producerLimit: number
+          +supervisedPlotLimit: number
+        }
+
+        class SubscriptionResource <<Resource>> {
+          +id: number
+          +planCode: PlanCode
+          +billingCycle: BillingCycle
+          +status: SubscriptionStatus
+          +startDate: string
+          +endDate: string
+        }
+      }
+    }
+
+    package "application" {
+      class SubscriptionsStore <<Store>> {
+        -destroyRef: DestroyRef
+        -subscriptionsApi: SubscriptionsApi
+        -fileDownloader: FileDownloader
+        -iam: IamStore
+        -subscriptionRequest: number
+        -loadedUserId: number | null
+        -plansSignal: WritableSignal<Plan[]>
+        -subscriptionSignal: WritableSignal<Subscription | null>
+        -paymentsSignal: WritableSignal<Payment[]>
+        -billingCycleSignal: WritableSignal<BillingCycle>
+        -selectedPlanSignal: WritableSignal<Plan | null>
+        -paymentResultSignal: WritableSignal<PaymentResult | null>
+        -loadedSignal: WritableSignal<boolean>
+        -loadingSignal: WritableSignal<boolean>
+        -processingSignal: WritableSignal<boolean>
+        -errorSignal: WritableSignal<string | null>
+        +plans: Signal<Plan[]>
+        +subscription: Signal<Subscription | null>
+        +payments: Signal<Payment[]>
+        +billingCycle: Signal<BillingCycle>
+        +selectedPlan: Signal<Plan | null>
+        +paymentResult: Signal<PaymentResult | null>
+        +loading: Signal<boolean>
+        +processing: Signal<boolean>
+        +error: Signal<string | null>
+        +hasActivePlan: Signal
+        +currentPlan: Signal<Plan | null>
+        +plotQuota: Signal
+        +plotQuotaReady: Signal<boolean>
+        +checkoutAmount: Signal
+        +loadPlans(): void
+        +loadMySubscription(userId: number): void
+        +selectPlan(command: SelectSubscriptionPlanCommand, segment: SubscriptionSegment): boolean
+        +toggleBillingCycle(): void
+        +startPaymentCheckout(onReady: (checkout: PaymentCheckout) => void): void
+        +confirmPayment(paymentId: string | null): void
+        +submitPayment(outcome: PaymentStatus.COMPLETED | PaymentStatus.REJECTED, userId: number): void
+        +cancelSubscription(command: CancelSubscriptionCommand): void
+        +downloadReceipt(reference: string): void
+        +resetCheckout(): void
+      }
+    }
+
+    package "presentation" {
+      package "components" {
+        class PlanCard <<Component>> {
+          #billingCycles
+          +plan: InputSignal<Plan>
+          +cycle: InputSignal<BillingCycle>
+          +current: InputSignal
+          +selected: InputSignal
+          +disabled: InputSignal
+          +choose: OutputEmitterRef<Plan>
+        }
+
+        class SubscriptionsShell <<Component>> {
+          -session: IamStore
+          -router: Router
+          #userName: Signal
+          #signOut(): void
+        }
+      }
+
+      package "views" {
+        class BillingHistory <<Component>> {
+          -store: SubscriptionsStore
+          -iamStore: IamStore
+          +subscription
+          +payments
+          +loading
+          +processing
+          +error
+          +confirmingCancellation: WritableSignal<boolean>
+          #paymentStatuses
+          #state: Signal<PeriodState | null>
+          #endDateLabel: Signal
+          #periodProgress: Signal<number | null>
+          +onCancelSubscription(): void
+          +onDownloadReceipt(reference: string): void
+        }
+
+        class Checkout <<Component>> {
+          -router: Router
+          -document: DOCUMENT
+          -store: SubscriptionsStore
+          -iamStore: IamStore
+          #dashboardRoute: Signal
+          +selectedPlan
+          +cycle
+          +amount
+          +paymentResult
+          +processing
+          +error
+          #paymentStatuses
+          #demoPaymentsEnabled
+          +onPayWithMercadoPago(): void
+          +onPay(status: PaymentStatus.COMPLETED | PaymentStatus.REJECTED): void
+          +onReturnToCatalog(): void
+        }
+
+        class PaymentResult <<Component>> {
+          -route: ActivatedRoute
+          -store: SubscriptionsStore
+          -iamStore: IamStore
+          +result
+          +processing
+          +error
+          #paymentStatuses
+          #dashboardRoute: Signal
+          +ngOnInit(): void
+        }
+
+        class PlansCatalog <<Component>> {
+          -router: Router
+          -store: SubscriptionsStore
+          -iamStore: IamStore
+          +plans: Signal
+          +subscription
+          +selectedPlan
+          +currentUserId: Signal
+          +cycle
+          +loading
+          +error
+          #accessCheckFailed: Signal
+          #cycles
+          #hasAnnualSavings: Signal
+          +onCycleChange(cycle: BillingCycle): void
+          +onSelectPlan(plan: Plan): void
+        }
+      }
+    }
+  }
+
+  ' ==========================================
+  ' REFERENCED FROM OTHER BOUNDED CONTEXTS
+  ' ==========================================
+  package "iam" {
+    package "application" {
+      class IamStore <<Store>>
+    }
+  }
+
+  package "shared" {
+    package "domain.model" {
+      class BaseEntity
+
+      class Money
+    }
+
+    package "infrastructure" {
+      abstract class BaseApi
+
+      class FileDownloader
+    }
+
+    package "presentation" {
+      package "components" {
+        class LanguageSwitcher <<Component>>
+
+        class MessageCard <<Component>>
+
+        class PageHeader <<Component>>
+      }
+    }
+  }
+}
+
+' Relationships
+SubscriptionsStore --> SubscriptionsApi : uses
+SubscriptionsStore --> FileDownloader : manages
+SubscriptionsStore --> IamStore : uses
+SubscriptionsStore --> Plan : manages
+SubscriptionsStore --> Subscription : manages
+SubscriptionsStore --> Payment : manages
+SubscriptionsStore --> BillingCycle : has
+SubscriptionsStore --> PaymentResult : manages
+SubscriptionsStore ..> SelectSubscriptionPlanCommand : sends
+SubscriptionsStore ..> CancelSubscriptionCommand : sends
+SelectSubscriptionPlanCommand --> PlanCode : has
+SelectSubscriptionPlanCommand --> BillingCycle : has
+StartPaymentCheckoutCommand --> PlanCode : has
+StartPaymentCheckoutCommand --> BillingCycle : has
+PaymentCheckout --> Money : references
+Payment --> PlanCode : has
+Payment --> Money : references
+Payment --> PaymentStatus : has
+Plan --> PlanCode : has
+Plan --> Money : references
+Subscription --|> BaseEntity : extends
+Subscription --> PlanCode : has
+Subscription --> SubscriptionStatus : has
+Subscription --> BillingCycle : has
+Subscription --> Plan : references
+activeSubscriptionGuard --> IamStore : uses
+activeSubscriptionGuard --> SubscriptionsApi : uses
+SubscriptionsApi --|> BaseApi : extends
+SubscriptionsApi --> PlansApiEndpoint : delegates to
+SubscriptionsApi --> SubscriptionsApiEndpoint : delegates to
+SubscriptionsApi --> PaymentsApiEndpoint : delegates to
+SubscriptionsApi ..> StartPaymentCheckoutCommand : sends
+SubscriptionsApi ..> ConfirmPaymentCommand : sends
+PaymentCheckoutAssembler ..> ConfirmPaymentCommand : converts
+PaymentCheckoutAssembler ..> ConfirmPaymentRequest : converts
+PaymentCheckoutAssembler --> PaymentCheckout : builds
+PaymentCheckoutAssembler ..> PaymentCheckoutResource : converts
+PaymentCheckoutAssembler ..> StartPaymentCheckoutCommand : converts
+PaymentCheckoutAssembler ..> StartPaymentCheckoutRequest : converts
+PaymentAssembler --> Payment : builds
+PaymentAssembler ..> PaymentResource : converts
+PlanAssembler --> Plan : builds
+PlanAssembler ..> PlanResource : converts
+SubscriptionAssembler --> Subscription : builds
+SubscriptionAssembler ..> SubscriptionResource : converts
+PaymentsApiEndpoint --> PaymentAssembler : uses
+PlansApiEndpoint --> PlanAssembler : uses
+SubscriptionsApiEndpoint --> SubscriptionAssembler : uses
+SubscriptionsApiEndpoint --> PaymentAssembler : uses
+SubscriptionsApiEndpoint --> PaymentCheckoutAssembler : uses
+StartPaymentCheckoutRequest --> PlanCode : has
+StartPaymentCheckoutRequest --> BillingCycle : has
+PaymentResource --> PlanCode : has
+PaymentResource --> BillingCycle : has
+PaymentResource --> PaymentStatus : has
+PlanResource --> PlanCode : has
+SubscriptionResource --> PlanCode : has
+SubscriptionResource --> BillingCycle : has
+SubscriptionResource --> SubscriptionStatus : has
+PlanCard --> Plan : uses
+PlanCard --> BillingCycle : has
+SubscriptionsShell --> IamStore : uses
+SubscriptionsShell --> LanguageSwitcher : contains
+BillingHistory --> SubscriptionsStore : uses
+BillingHistory --> IamStore : uses
+BillingHistory --> MessageCard : contains
+BillingHistory --> PageHeader : contains
+Checkout --> SubscriptionsStore : uses
+Checkout --> IamStore : uses
+Checkout --> MessageCard : contains
+PaymentResult --> SubscriptionsStore : uses
+PaymentResult --> IamStore : uses
+PlansCatalog --> SubscriptionsStore : uses
+PlansCatalog --> IamStore : uses
+PlansCatalog --> MessageCard : contains
+PlansCatalog --> PlanCard : contains
+
+@enduml

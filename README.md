@@ -82,7 +82,11 @@ Each folder in `src/app` is a *bounded context* with four layers: `domain`, `app
 
 ```
 sumaq-agro-web-app/
-├── docs/                                  # Frontend architecture and PlantUML diagrams
+├── docs/                                  # Architectural and requirement documentation
+│   ├── adrs.md                            # Architectural Decision Records (ADRs)
+│   ├── class-diagrams/                    # PlantUML class diagram of each bounded context
+│   ├── frontend-architecture.md           # Layer and test organization
+│   └── user-stories.md                    # Functional user stories & Requirements Traceability Matrix (RTM)
 ├── public/                                # Copied unchanged into the build
 │   ├── i18n/
 │   │   ├── es/                            # shared.json + one file per bounded context
@@ -132,6 +136,15 @@ sumaq-agro-web-app/
 ```
 
 A new *bounded context* creates its folder with the same layers, adds its `*.routes.ts` to `app.routes.ts`, and adds its translation file to `public/i18n/{es,en}/` and to `TRANSLATION_FILES` in `app.config.ts`.
+
+## Documentation
+
+- **User Stories & Requirements Traceability**: [`docs/user-stories.md`](docs/user-stories.md) - Functional requirement specifications and RTM mapping.
+- **Class Diagrams**: [`docs/class-diagrams/`](docs/class-diagrams/) - PlantUML model of each bounded context: entities, commands, assemblers, endpoints, stores, and components.
+- **Architectural Decision Records (ADRs)**: [`docs/adrs.md`](docs/adrs.md) - Key architectural and technology choices.
+- **Frontend Architecture**: [`docs/frontend-architecture.md`](docs/frontend-architecture.md) - Layer and test organization.
+- **Contributing Guidelines**: [`CONTRIBUTING.md`](CONTRIBUTING.md)
+- **Changelog**: [`CHANGELOG.md`](CHANGELOG.md)
 
 ## How we work
 
