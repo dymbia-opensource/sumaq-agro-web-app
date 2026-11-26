@@ -3,6 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
 import { IssueTechnicalPrescriptionCommand } from '../domain/model/commands/issue-technical-prescription.command';
 import { RecordPestReportCommand } from '../domain/model/commands/record-pest-report.command';
+import { RequestSatelliteObservationImportCommand } from '../domain/model/commands/request-satellite-observation-import.command';
 import { ScheduleFieldInspectionCommand } from '../domain/model/commands/schedule-field-inspection.command';
 import { PestReport } from '../domain/model/entities/pest-report.entity';
 import { RegionalBulletin } from '../domain/model/entities/regional-bulletin';
@@ -25,6 +26,8 @@ export class CropApi {
   private readonly bulletinsUrl = environment.platformProviderApiBaseUrl + '/regional-bulletins';
 
   getObservationsByPlot = (plotId: number) => this.observations.getByPlot(plotId);
+  requestObservationImport = (command: RequestSatelliteObservationImportCommand) =>
+    this.observations.requestImport(command);
   importObservation = (plotId: number, start: string, end: string) =>
     this.observations.importLatest(plotId, start, end);
 
