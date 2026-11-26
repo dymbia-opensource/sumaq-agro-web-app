@@ -81,3 +81,13 @@ pre {
     padding: 16px;
   }
 }
+
+/* Leaflet creates SVG paths outside Angular's scoped styles.
+   Keep keyboard focus visible on the boundary itself, instead of its rectangular box. */
+.crop-health-map path.crop-health-boundary:focus {
+  outline: none;
+}
+.crop-health-map path.crop-health-boundary:focus-visible {
+  stroke: #b45309;
+  stroke-width: 5;
+}

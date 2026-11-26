@@ -105,7 +105,10 @@
       "assessment-partial": "The evaluation was saved but closure was not confirmed. Retry the same draft to synchronize without duplicating it.",
       "save-assessment": "Could not save the evaluation. Your draft is preserved for retry.",
       "import-forecasts": "We could not import the forecast of the plot.",
-      "no-forecast-available": "AgroMonitoring has no forecast for this plot yet."
+      "no-forecast-available": "AgroMonitoring has no forecast for this plot yet.",
+      "imagery-load": "Could not load satellite imagery. Recorded values remain available.",
+      "imagery-mismatch": "The imagery does not match the selected capture.",
+      "imagery-tiles": "Some image tiles could not be loaded. Retry to complete the layer."
     },
     "no-inspections": "No inspections",
     "no-prescriptions": "No prescriptions",
@@ -238,6 +241,23 @@
       "evaluation-saved": "Evaluation saved. The case status reflects the recorded conclusion."
     },
     "plot-selector": "Plot selector",
-    "import-forecast": "Import 5-day forecast"
+    "import-forecast": "Import 5-day forecast",
+    "raster": {
+      "opacity": "Opacity",
+      "loading": "Loading original satellite imagery…",
+      "retry": "Retry layer",
+      "unavailable": "No image is available for this capture and index. Recorded values and the boundary remain visible.",
+      "legend": "Satellite index legend",
+      "original": "Original imagery",
+      "mean": "Plot mean",
+      "ndvi-scale": "Indicative NDVI scale, from light shades to dark green",
+      "low-vigor": "Light shades · Lower vigor",
+      "high-vigor": "Dark green · Higher vigor",
+      "cloud-warning": "High cloud coverage in this capture: interpret the indices with caution.",
+      "layer-error": "Could not load the layer.",
+      "partial": "Layer partially loaded.",
+      "loading-short": "Loading layer…",
+      "no-layer": "No image for"
+    }
   }
 }
