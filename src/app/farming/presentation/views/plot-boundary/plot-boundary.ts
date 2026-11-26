@@ -150,6 +150,9 @@ export class PlotBoundary {
       })
       .afterClosed()
       .subscribe((result) => {
+        if (result === 'crop-health') {
+          this.farmingStore.selectPlotId(Number(plot.id));
+        }
         const route = result === 'crop-health' ? '/monitoring' : '/plots';
         this.router.navigate([route]).then();
       });

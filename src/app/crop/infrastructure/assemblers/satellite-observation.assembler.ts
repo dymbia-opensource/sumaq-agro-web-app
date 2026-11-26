@@ -1,4 +1,6 @@
 import { BaseAssembler } from '../../../shared/infrastructure/base-assembler';
+import { RequestSatelliteObservationImportCommand } from '../../domain/model/commands/request-satellite-observation-import.command';
+import { RequestSatelliteObservationImportRequest } from '../requests/request-satellite-observation-import.request';
 import { SatelliteObservation } from '../../domain/model/entities/satellite-observation.entity';
 import {
   SatelliteObservationResource,
@@ -10,6 +12,12 @@ export class SatelliteObservationAssembler implements BaseAssembler<
   SatelliteObservationResource,
   SatelliteObservationsResponse
 > {
+  toRequestFromCommand(
+    command: RequestSatelliteObservationImportCommand,
+  ): RequestSatelliteObservationImportRequest {
+    return { plotId: command.plotId };
+  }
+
   toEntityFromResource(resource: SatelliteObservationResource): SatelliteObservation {
     return new SatelliteObservation({
       id: resource.id,

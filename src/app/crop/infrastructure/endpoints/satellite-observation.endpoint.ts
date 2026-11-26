@@ -3,6 +3,7 @@ import { catchError, map, Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { BaseApiEndpoint } from '../../../shared/infrastructure/base-api-endpoint';
 import { SatelliteObservation } from '../../domain/model/entities/satellite-observation.entity';
+import { RequestSatelliteObservationImportCommand } from '../../domain/model/commands/request-satellite-observation-import.command';
 import { SatelliteObservationAssembler } from '../assemblers/satellite-observation.assembler';
 import {
   SatelliteObservationResource,
@@ -46,6 +47,17 @@ export class SatelliteObservationsApiEndpoint extends BaseApiEndpoint<
         catchError(this.handleError('Failed to fetch satellite observations')),
       );
   }
+  /**
+   * Searches the configured archive and returns the persisted capture with its original date.
+   * HTTP errors reach the store so it can distinguish missing captures and provider failures.
+   */
+  requestImport(command: RequestSatelliteObservationImportCommand): Observable<SatelliteObservation> {
+    const request = this.assembler.toRequestFromCommand(command);
+    return this.http
+      .post<SatelliteObservationResource>(this.endpointUrl + '/imports/latest', request)
+      .pipe(map((resource) => this.assembler.toEntityFromResource(resource)));
+  }
+
   importLatest(plotId: number, start: string, end: string): Observable<SatelliteObservation> {
     return this.http
       .post<SatelliteObservationResource>(this.endpointUrl + '/imports', { plotId, start, end })
