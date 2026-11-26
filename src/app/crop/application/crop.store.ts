@@ -1,5 +1,13 @@
-import { HttpErrorResponse } from '@angular/common/http';
-import { computed, DestroyRef, effect, inject, Injectable, signal, untracked } from '@angular/core';
+import { HttpErrorResponse } from "@angular/common/http";
+import {
+  computed,
+  DestroyRef,
+  effect,
+  inject,
+  Injectable,
+  signal,
+  untracked,
+} from "@angular/core";
 import {
   catchError,
   Observable,
@@ -11,29 +19,30 @@ import {
   retry,
   switchMap,
   throwError,
-} from 'rxjs';
-import { IamStore } from '../../iam/application/iam.store';
-import { SessionParticipant } from '../../iam/application/iam.store';
-import { FarmingStore } from '../../farming/application/farming.store';
-import { PlotSummary } from '../../farming/domain/model/entities/plot-summary';
-import { ProfilesStore } from '../../profiles/application/profiles.store';
-import { AdvisorSummary } from '../../profiles/domain/model/entities/advisor-summary';
-import { CropApi } from '../infrastructure/crop-api';
-import { RecordPestReportCommand } from '../domain/model/commands/record-pest-report.command';
-import { ScheduleFieldInspectionCommand } from '../domain/model/commands/schedule-field-inspection.command';
-import { IssueTechnicalPrescriptionCommand } from '../domain/model/commands/issue-technical-prescription.command';
-import { AgroclimaticAlert } from '../domain/model/entities/agroclimatic-alert.entity';
-import { ClimateForecast } from '../domain/model/entities/climate-forecast.entity';
-import { PestReport } from '../domain/model/entities/pest-report.entity';
-import { FieldInspection } from '../domain/model/entities/field-inspection.entity';
-import { SatelliteObservation } from '../domain/model/entities/satellite-observation.entity';
-import { TechnicalPrescription } from '../domain/model/entities/technical-prescription.entity';
-import { todayInLima } from '../../shared/infrastructure/api-date';
-import { RegionalBulletin } from '../domain/model/entities/regional-bulletin';
-import { requireDate, requireText } from '../domain/model/validation';
+} from "rxjs";
+import { IamStore } from "../../iam/application/iam.store";
+import { SessionParticipant } from "../../iam/application/iam.store";
+import { FarmingStore } from "../../farming/application/farming.store";
+import { PlotSummary } from "../../farming/domain/model/entities/plot-summary";
+import { ProfilesStore } from "../../profiles/application/profiles.store";
+import { AdvisorSummary } from "../../profiles/domain/model/entities/advisor-summary";
+import { CropApi } from "../infrastructure/crop-api";
+import { RequestSatelliteObservationImportCommand } from "../domain/model/commands/request-satellite-observation-import.command";
+import { RecordPestReportCommand } from "../domain/model/commands/record-pest-report.command";
+import { ScheduleFieldInspectionCommand } from "../domain/model/commands/schedule-field-inspection.command";
+import { IssueTechnicalPrescriptionCommand } from "../domain/model/commands/issue-technical-prescription.command";
+import { AgroclimaticAlert } from "../domain/model/entities/agroclimatic-alert.entity";
+import { ClimateForecast } from "../domain/model/entities/climate-forecast.entity";
+import { PestReport } from "../domain/model/entities/pest-report.entity";
+import { FieldInspection } from "../domain/model/entities/field-inspection.entity";
+import { SatelliteObservation } from "../domain/model/entities/satellite-observation.entity";
+import { TechnicalPrescription } from "../domain/model/entities/technical-prescription.entity";
+import { todayInLima } from "../../shared/infrastructure/api-date";
+import { RegionalBulletin } from "../domain/model/entities/regional-bulletin";
+import { requireDate, requireText } from "../domain/model/validation";
 
 /** Coordinates scoped data and participant permissions. Production authorization belongs to the API. */
-@Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: "root" })
 export class CropStore {
   private readonly api = inject(CropApi);
   private readonly profiles = inject(ProfilesStore);
@@ -60,17 +69,32 @@ export class CropStore {
   private readonly requestedNames = new Set<number>();
 
   readonly activeUser = this.session.activeUser;
-  readonly scopeReady = computed(() => this.ready() && this.scopeUser() === this.activeUser());
-  readonly plots = computed(() => (this.scopeReady() ? this.plotsSignal() : []));
+  readonly scopeReady = computed(
+    () => this.ready() && this.scopeUser() === this.activeUser(),
+  );
+  readonly plots = computed(() =>
+    this.scopeReady() ? this.plotsSignal() : [],
+  );
   readonly selectedPlot = computed(() =>
     this.plots().find((plot) => plot.id === this.farming.selectedPlotId()),
   );
   readonly observations = computed(() =>
     this.scopeReady()
-      ? this.observationsSignal().filter((item) => item.plotId === this.selectedPlot()?.id)
+      ? this.observationsSignal().filter(
+          (item) => item.plotId === this.selectedPlot()?.id,
+        )
       : [],
   );
-  readonly latestObservation = computed(() => this.observations()[0] ?? null);
+  readonly latestObservation = computed(() => {
+    const observations = this.observations();
+    return (
+      observations.find(
+        (item) => item.ndviMean !== null && item.ndwiMean !== null,
+      ) ??
+      observations[0] ??
+      null
+    );
+  });
   readonly pestReports = computed(() =>
     this.scopeReady()
       ? this.reportsSignal().filter(
@@ -82,81 +106,120 @@ export class CropStore {
   );
   readonly alerts = computed(() =>
     this.scopeReady()
-      ? this.alertsSignal().filter((item) => item.region === this.selectedPlot()?.region)
+      ? this.alertsSignal().filter(
+          (item) => item.region === this.selectedPlot()?.region,
+        )
       : [],
   );
   readonly forecasts = computed(() =>
-    this.forecastsSignal().filter((item) => item.region === this.selectedPlot()?.region),
+    this.forecastsSignal().filter(
+      (item) => item.region === this.selectedPlot()?.region,
+    ),
   );
   readonly bulletins = computed(() =>
-    this.bulletinsSignal().filter((item) => item.region === this.selectedPlot()?.region),
+    this.bulletinsSignal().filter(
+      (item) => item.region === this.selectedPlot()?.region,
+    ),
   );
   readonly inspections = computed(() =>
     this.scopeReady()
       ? this.inspectionsSignal().filter((inspection) =>
-          this.pestReports().some((report) => report.id === inspection.reportId),
+          this.pestReports().some(
+            (report) => report.id === inspection.reportId,
+          ),
         )
       : [],
   );
   readonly prescriptions = computed(() =>
     this.scopeReady()
       ? this.prescriptionsSignal().filter((prescription) =>
-          this.pestReports().some((report) => report.id === prescription.reportId),
+          this.pestReports().some(
+            (report) => report.id === prescription.reportId,
+          ),
         )
       : [],
   );
-  readonly advisors = computed(() => (this.scopeReady() ? this.advisorsSignal() : []));
-  readonly currentAdvisor = computed(() => (this.scopeReady() ? this.advisorSignal() : null));
-  readonly canReport = computed(() => this.activeUser()?.experience === 'FARMER');
+  readonly advisors = computed(() =>
+    this.scopeReady() ? this.advisorsSignal() : [],
+  );
+  readonly currentAdvisor = computed(() =>
+    this.scopeReady() ? this.advisorSignal() : null,
+  );
+  readonly canReport = computed(
+    () => this.activeUser()?.experience === "FARMER",
+  );
   readonly canSchedule = computed(() =>
-    ['AGRONOMIST', 'COOPERATIVE_DIRECTOR'].includes(this.activeUser()?.experience ?? ''),
+    ["AGRONOMIST", "COOPERATIVE_DIRECTOR"].includes(
+      this.activeUser()?.experience ?? "",
+    ),
   );
   readonly canPrescribe = computed(
     () =>
-      this.activeUser()?.experience === 'AGRONOMIST' &&
+      this.activeUser()?.experience === "AGRONOMIST" &&
       this.currentAdvisor()?.userId === this.activeUser()?.id,
   );
-  readonly saving = computed(() => !!this.busy()['write']);
+  readonly saving = computed(() => !!this.busy()["write"]);
   readonly loading = computed(() =>
-    Object.entries(this.busy()).some(([key, value]) => key !== 'write' && value),
+    Object.entries(this.busy()).some(
+      ([key, value]) => key !== "write" && value,
+    ),
   );
-  readonly scopeLoading = computed(() => !!this.busy()['scope']);
-  readonly clinicalLoading = computed(() => !!this.busy()['clinical'] || this.scopeLoading());
+  readonly scopeLoading = computed(() => !!this.busy()["scope"]);
+  readonly clinicalLoading = computed(
+    () => !!this.busy()["clinical"] || this.scopeLoading(),
+  );
   readonly observationsLoading = computed(
-    () => !!this.busy()['observations'] || this.scopeLoading(),
+    () => !!this.busy()["observations"] || this.scopeLoading(),
   );
-  readonly alertsLoading = computed(() => !!this.busy()['alerts'] || this.scopeLoading());
-  readonly scopeError = computed(() => this.errors()['scope'] ?? null);
-  readonly clinicalError = computed(() => this.scopeError() ?? this.errors()['clinical'] ?? null);
+  readonly alertsLoading = computed(
+    () => !!this.busy()["alerts"] || this.scopeLoading(),
+  );
+  readonly scopeError = computed(() => this.errors()["scope"] ?? null);
+  readonly clinicalError = computed(
+    () => this.scopeError() ?? this.errors()["clinical"] ?? null,
+  );
   readonly observationsError = computed(
-    () => this.scopeError() ?? this.errors()['observations'] ?? null,
+    () => this.scopeError() ?? this.errors()["observations"] ?? null,
   );
-  readonly alertsError = computed(() => this.scopeError() ?? this.errors()['alerts'] ?? null);
-  readonly forecastsLoading = computed(() => !!this.busy()['forecasts']);
-  readonly forecastsError = computed(() => this.errors()['forecasts'] ?? null);
-  readonly bulletinsLoading = computed(() => !!this.busy()['bulletins']);
-  readonly bulletinsError = computed(() => this.errors()['bulletins'] ?? null);
-  readonly importingObservation = computed(() => !!this.busy()['satellite-import']);
-  readonly importError = computed(() => this.errors()['satellite-import'] ?? null);
-  readonly importingForecast = computed(() => !!this.busy()['forecast-import']);
-  readonly forecastImportError = computed(() => this.errors()['forecast-import'] ?? null);
-  readonly writeError = computed(() => this.errors()['write'] ?? null);
-  readonly error = computed(() => Object.values(this.errors()).find((value) => value) ?? null);
+  readonly alertsError = computed(
+    () => this.scopeError() ?? this.errors()["alerts"] ?? null,
+  );
+  readonly forecastsLoading = computed(() => !!this.busy()["forecasts"]);
+  readonly forecastsError = computed(() => this.errors()["forecasts"] ?? null);
+  readonly bulletinsLoading = computed(() => !!this.busy()["bulletins"]);
+  readonly bulletinsError = computed(() => this.errors()["bulletins"] ?? null);
+  readonly importingObservation = computed(
+    () => !!this.busy()["satellite-import"],
+  );
+  readonly importError = computed(
+    () => this.errors()["satellite-import"] ?? null,
+  );
+  readonly importingForecast = computed(() => !!this.busy()["forecast-import"]);
+  readonly forecastImportError = computed(
+    () => this.errors()["forecast-import"] ?? null,
+  );
+  readonly writeError = computed(() => this.errors()["write"] ?? null);
+  readonly error = computed(
+    () => Object.values(this.errors()).find((value) => value) ?? null,
+  );
   readonly pendingPestReportsCount = computed(
-    () => this.pestReports().filter((report) => report.status === 'PENDING').length,
+    () =>
+      this.pestReports().filter((report) => report.status === "PENDING").length,
   );
   readonly treatableReports = computed(() =>
     this.pestReports().filter(
       (report) =>
-        report.status === 'INSPECTED' &&
+        report.status === "INSPECTED" &&
         !this.prescriptions().some((rx) => rx.reportId === report.id),
     ),
   );
   readonly schedulableReports = computed(() =>
     this.pestReports().filter(
       (report) =>
-        report.status === 'PENDING' &&
-        !this.inspections().some((inspection) => inspection.reportId === report.id),
+        report.status === "PENDING" &&
+        !this.inspections().some(
+          (inspection) => inspection.reportId === report.id,
+        ),
     ),
   );
 
@@ -178,7 +241,9 @@ export class CropStore {
         ...this.plots().map((plot) => plot.ownerUserId),
         ...this.pestReports().map((report) => report.reporterId),
         ...this.inspections().map((inspection) => inspection.inspectorUserId),
-        ...this.prescriptions().map((prescription) => prescription.agronomistId),
+        ...this.prescriptions().map(
+          (prescription) => prescription.agronomistId,
+        ),
       ];
       untracked(() => this.loadNames(ids));
     });
@@ -187,11 +252,14 @@ export class CropStore {
   /** Looks up the names that are not known yet. */
   private loadNames(ids: readonly (number | null | undefined)[]): void {
     for (const id of new Set(ids)) {
-      if (typeof id !== 'number' || id <= 0 || this.requestedNames.has(id)) continue;
+      if (typeof id !== "number" || id <= 0 || this.requestedNames.has(id))
+        continue;
       this.requestedNames.add(id);
       this.profiles.advisorByUser(id).subscribe((summary) => {
         if (summary?.name)
-          this.namesSignal.update((names) => new Map(names).set(id, summary.name));
+          this.namesSignal.update((names) =>
+            new Map(names).set(id, summary.name),
+          );
       });
     }
   }
@@ -201,7 +269,7 @@ export class CropStore {
     if (!user) return;
     this.scopeUser.set(user);
     const result =
-      user.experience === 'FARMER'
+      user.experience === "FARMER"
         ? this.farming.plotSummariesByOwner(user.id).pipe(
             map((plots) => ({
               plots,
@@ -209,14 +277,16 @@ export class CropStore {
               advisor: null as AdvisorSummary | null,
             })),
           )
-        : user.experience === 'AGRONOMIST'
+        : user.experience === "AGRONOMIST"
           ? this.profiles
               .advisorByUser(user.id)
               .pipe(
                 switchMap((advisor) =>
                   advisor
                     ? this.advisorScope(advisor, user.id)
-                    : throwError(() => new Error('crop.errors.advisor-not-assigned')),
+                    : throwError(
+                        () => new Error("crop.errors.advisor-not-assigned"),
+                      ),
                 ),
               )
           : this.profiles
@@ -225,11 +295,11 @@ export class CropStore {
                 switchMap((cooperative) =>
                   cooperative
                     ? this.cooperativeScope(cooperative.id as number, null)
-                    : throwError(() => new Error('crop.errors.no-cooperative')),
+                    : throwError(() => new Error("crop.errors.no-cooperative")),
                 ),
               );
     this.read(
-      'scope',
+      "scope",
       result.pipe(retry(2)),
       (data) => {
         this.plotsSignal.set(data.plots);
@@ -237,10 +307,12 @@ export class CropStore {
         this.advisorSignal.set(data.advisor);
         this.ready.set(true);
         const selected =
-          data.plots.find((plot) => plot.id === this.farming.selectedPlotId()) ?? data.plots[0];
+          data.plots.find(
+            (plot) => plot.id === this.farming.selectedPlotId(),
+          ) ?? data.plots[0];
         this.farming.selectPlotId(selected?.id ?? null);
       },
-      'crop.errors.load-plots',
+      "crop.errors.load-plots",
     );
   }
 
@@ -249,10 +321,10 @@ export class CropStore {
     return this.profiles.responsibilitiesByAdvisor(userId).pipe(
       switchMap((records) => {
         const active = records.filter(
-          (item) => item.advisorUserId === userId && item.status === 'ACTIVE',
+          (item) => item.advisorUserId === userId && item.status === "ACTIVE",
         );
         if (new Set(active.map((item) => item.plotId)).size !== active.length)
-          throw new Error('crop.errors.assignment-conflict');
+          throw new Error("crop.errors.assignment-conflict");
         return (
           active.length
             ? this.farming.plotSummariesByIds(active.map((item) => item.plotId))
@@ -261,7 +333,9 @@ export class CropStore {
           map((plots) => ({
             plots: plots.filter((plot) =>
               active.some(
-                (item) => item.plotId === plot.id && item.producerUserId === plot.ownerUserId,
+                (item) =>
+                  item.plotId === plot.id &&
+                  item.producerUserId === plot.ownerUserId,
               ),
             ),
             advisors: [advisor],
@@ -273,10 +347,13 @@ export class CropStore {
   }
 
   /** Rechecks the current grant before each professional write, including partial-write retries. */
-  private withResponsibility<T>(reportId: number, operation: () => Observable<T>): Observable<T> {
+  private withResponsibility<T>(
+    reportId: number,
+    operation: () => Observable<T>,
+  ): Observable<T> {
     const user = this.activeUser();
     const report = this.report(reportId);
-    if (user?.experience !== 'AGRONOMIST') return defer(operation);
+    if (user?.experience !== "AGRONOMIST") return defer(operation);
     return this.profiles.responsibilityByPlot(report.plotId).pipe(
       switchMap((assignment) => {
         const plot = this.plots().find((item) => item.id === report.plotId);
@@ -284,12 +361,14 @@ export class CropStore {
           user !== this.activeUser() ||
           !this.scopeReady() ||
           !plot ||
-          assignment?.status !== 'ACTIVE' ||
+          assignment?.status !== "ACTIVE" ||
           assignment.advisorUserId !== user.id ||
           assignment.producerUserId !== plot.ownerUserId ||
           report.reporterId !== plot.ownerUserId
         ) {
-          this.plotsSignal.update((items) => items.filter((item) => item.id !== report.plotId));
+          this.plotsSignal.update((items) =>
+            items.filter((item) => item.id !== report.plotId),
+          );
           this.denied();
         }
         return defer(operation);
@@ -304,7 +383,10 @@ export class CropStore {
     return this.namesSignal().get(userId) ?? `#${userId}`;
   }
 
-  private cooperativeScope(cooperativeId: number, advisor: AdvisorSummary | null) {
+  private cooperativeScope(
+    cooperativeId: number,
+    advisor: AdvisorSummary | null,
+  ) {
     return this.profiles.cooperativeScope(cooperativeId).pipe(
       switchMap(({ plotIds, advisors }) => {
         const plots = plotIds.length
@@ -328,40 +410,52 @@ export class CropStore {
 
   /** Shared selection changes invalidate pending reads, including changes from another context. */
   private clearPlotData(): void {
-    this.requests.get('observations')?.unsubscribe();
-    this.requests.get('alerts')?.unsubscribe();
-    for (const key of ['forecasts', 'bulletins', 'satellite-import', 'forecast-import']) {
+    this.requests.get("observations")?.unsubscribe();
+    this.requests.get("alerts")?.unsubscribe();
+    for (const key of [
+      "forecasts",
+      "bulletins",
+      "satellite-import",
+      "forecast-import",
+    ]) {
       this.requests.get(key)?.unsubscribe();
       this.setBusy(key, false);
       this.setError(key, null);
     }
     this.forecastsSignal.set([]);
     this.bulletinsSignal.set([]);
-    this.setBusy('observations', false);
-    this.setBusy('alerts', false);
+    this.setBusy("observations", false);
+    this.setBusy("alerts", false);
     this.observationsSignal.set([]);
     this.alertsSignal.set([]);
-    this.setError('observations', null);
-    this.setError('alerts', null);
+    this.setError("observations", null);
+    this.setError("alerts", null);
   }
 
-  loadObservations(plotId: number): void {
-    this.observationsSignal.set([]);
-    if (!this.plots().some((plot) => plot.id === plotId && plot.hasPolygon)) return;
+  /** Reads saved captures; the health view can request the archive when indices are missing. */
+  loadObservations(plotId: number, importIfMissing = false): void {
+    if (!this.plots().some((plot) => plot.id === plotId && plot.hasPolygon))
+      return;
     this.read(
-      'observations',
+      "observations",
       this.api.getObservationsByPlot(plotId).pipe(retry(2)),
       (data) => {
         const plot = this.plots().find((plot) => plot.id === plotId);
-        if (!plot) return;
+        if (!plot || this.selectedPlot()?.id !== plotId) return;
         if (data.some((observation) => observation.plotId !== plotId)) {
-          throw new Error('crop.errors.invalid-data');
+          throw new Error("crop.errors.invalid-data");
         }
         this.observationsSignal.set(
           [...data].sort((a, b) => Date.parse(b.date) - Date.parse(a.date)),
         );
+        if (
+          importIfMissing &&
+          !data.some((item) => item.ndviMean !== null && item.ndwiMean !== null)
+        ) {
+          this.importLatestObservation();
+        }
       },
-      'crop.errors.load-observations',
+      "crop.errors.load-observations",
     );
   }
 
@@ -369,40 +463,57 @@ export class CropStore {
     this.alertsSignal.set([]);
     if (!this.plots().some((plot) => plot.region === region)) return;
     this.read(
-      'alerts',
+      "alerts",
       this.api.getAlertsByRegion(region).pipe(retry(2)),
-      (data) => this.alertsSignal.set(data.filter((alert) => alert.region === region)),
-      'crop.errors.load-alerts',
+      (data) =>
+        this.alertsSignal.set(data.filter((alert) => alert.region === region)),
+      "crop.errors.load-alerts",
     );
   }
 
   canImportObservation(): boolean {
     const plot = this.selectedPlot();
-    return this.scopeReady() && !!plot?.hasPolygon && plot.ownerUserId === this.activeUser()?.id;
+    return (
+      this.scopeReady() &&
+      !!plot?.hasPolygon &&
+      plot.ownerUserId === this.activeUser()?.id
+    );
   }
 
   importLatestObservation(): void {
     const plot = this.selectedPlot();
-    if (!plot || !this.canImportObservation() || this.importingObservation()) return;
-    const now = new Date();
-    const from = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    if (!plot || !this.canImportObservation() || this.importingObservation())
+      return;
     this.read(
-      'satellite-import',
+      "satellite-import",
       this.api
-        .importObservation(plot.id, from.toISOString(), now.toISOString())
+        .requestObservationImport(
+          new RequestSatelliteObservationImportCommand({ plotId: plot.id }),
+        )
         .pipe(
           catchError((error: unknown) =>
             throwError(() =>
               error instanceof HttpErrorResponse &&
               error.status === 404 &&
-              error.error?.code === 'SATELLITEOBSERVATION_NOT_FOUND'
-                ? new Error('crop.errors.no-satellite-in-range')
+              error.error?.code === "SATELLITEOBSERVATION_NOT_FOUND"
+                ? new Error("crop.errors.no-satellite-in-range")
                 : error,
             ),
           ),
         ),
-      () => this.loadObservations(plot.id),
-      'crop.errors.import-observations',
+      (observation) => {
+        if (this.selectedPlot()?.id !== plot.id) return;
+        if (observation.plotId !== plot.id)
+          throw new Error("crop.errors.invalid-data");
+        // The API has already persisted this capture. Keep its original date and existing history.
+        this.observationsSignal.update((items) =>
+          [
+            ...items.filter((item) => item.id !== observation.id),
+            observation,
+          ].sort((a, b) => Date.parse(b.date) - Date.parse(a.date)),
+        );
+      },
+      "crop.errors.import-observations",
     );
   }
 
@@ -420,19 +531,24 @@ export class CropStore {
     const plot = this.selectedPlot();
     if (!plot || !this.canImportForecast() || this.importingForecast()) return;
     this.read(
-      'forecast-import',
-      this.api.importForecasts(plot.id).pipe(
-        catchError((error: unknown) =>
-          throwError(() =>
-            error instanceof HttpErrorResponse && error.status === 404
-              ? new Error('crop.errors.no-forecast-available')
-              : error,
+      "forecast-import",
+      this.api
+        .importForecasts(plot.id)
+        .pipe(
+          catchError((error: unknown) =>
+            throwError(() =>
+              error instanceof HttpErrorResponse && error.status === 404
+                ? new Error("crop.errors.no-forecast-available")
+                : error,
+            ),
           ),
         ),
-      ),
       (imported) => {
         const others = this.forecastsSignal().filter(
-          (item) => !imported.some((forecast) => forecast.forecastDate === item.forecastDate),
+          (item) =>
+            !imported.some(
+              (forecast) => forecast.forecastDate === item.forecastDate,
+            ),
         );
         this.forecastsSignal.set(
           [...others, ...imported].sort(
@@ -441,7 +557,7 @@ export class CropStore {
         );
         this.loadAlerts(plot.region);
       },
-      'crop.errors.import-forecasts',
+      "crop.errors.import-forecasts",
     );
   }
 
@@ -449,26 +565,30 @@ export class CropStore {
     this.loadAlerts(region);
     if (!this.plots().some((plot) => plot.region === region)) return;
     this.read(
-      'forecasts',
+      "forecasts",
       this.api.getForecastsByRegion(region),
       (items) =>
         this.forecastsSignal.set(
-          [...items].sort((a, b) => Date.parse(a.forecastDate) - Date.parse(b.forecastDate)),
+          [...items].sort(
+            (a, b) => Date.parse(a.forecastDate) - Date.parse(b.forecastDate),
+          ),
         ),
-      'crop.errors.load-forecasts',
+      "crop.errors.load-forecasts",
     );
     this.loadBulletins(region);
   }
 
   private loadBulletins(region: string): void {
     this.read(
-      'bulletins',
+      "bulletins",
       this.api.getBulletinsByRegion(region),
       (items) =>
         this.bulletinsSignal.set(
-          [...items].sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt)),
+          [...items].sort(
+            (a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt),
+          ),
         ),
-      'crop.errors.load-bulletins',
+      "crop.errors.load-bulletins",
     );
   }
 
@@ -477,7 +597,8 @@ export class CropStore {
     const agronomistId = this.activeUser()?.id;
     this.mutate(
       () => {
-        if (!this.canPrescribe() || !plot || agronomistId === undefined) this.denied();
+        if (!this.canPrescribe() || !plot || agronomistId === undefined)
+          this.denied();
         requireText(title);
         requireText(content);
         return this.api.publishBulletin({
@@ -488,11 +609,12 @@ export class CropStore {
         });
       },
       () => {
-        if (this.selectedPlot()?.region === plot?.region) this.loadBulletins(plot!.region);
+        if (this.selectedPlot()?.region === plot?.region)
+          this.loadBulletins(plot!.region);
       },
       onSaved,
       () => {},
-      'crop.errors.save-bulletin',
+      "crop.errors.save-bulletin",
     );
   }
 
@@ -513,7 +635,8 @@ export class CropStore {
                     (report) =>
                       report.plotId === plot.id &&
                       report.reporterId === plot.ownerUserId &&
-                      (!this.canReport() || report.reporterId === this.activeUser()?.id),
+                      (!this.canReport() ||
+                        report.reporterId === this.activeUser()?.id),
                   )
                   .map((report) => this.withPlotName(report, plot.name));
                 const ids = new Set(reports.map((report) => report.id));
@@ -532,19 +655,25 @@ export class CropStore {
         )
       : of([]);
     this.read(
-      'clinical',
+      "clinical",
       data,
       (groups) => {
         this.reportsSignal.set(groups.flatMap((item) => item.reports));
         this.inspectionsSignal.set(groups.flatMap((item) => item.inspections));
-        this.prescriptionsSignal.set(groups.flatMap((item) => item.prescriptions));
+        this.prescriptionsSignal.set(
+          groups.flatMap((item) => item.prescriptions),
+        );
         onLoaded?.();
       },
-      'crop.errors.load-workflow',
+      "crop.errors.load-workflow",
     );
   }
 
-  recordReport(command: RecordPestReportCommand, onSaved: () => void, onFailure: () => void): void {
+  recordReport(
+    command: RecordPestReportCommand,
+    onSaved: () => void,
+    onFailure: () => void,
+  ): void {
     this.mutate(
       () => {
         const user = this.activeUser();
@@ -565,7 +694,7 @@ export class CropStore {
       (report) => this.reportsSignal.update((items) => [...items, report]),
       onSaved,
       onFailure,
-      'crop.errors.save-report',
+      "crop.errors.save-report",
     );
   }
 
@@ -577,34 +706,44 @@ export class CropStore {
     this.mutate(
       () => {
         if (!this.canSchedule()) this.denied();
-        if (this.report(command.reportId).status !== 'PENDING')
-          throw new Error('crop.errors.invalid-transition');
+        if (this.report(command.reportId).status !== "PENDING")
+          throw new Error("crop.errors.invalid-transition");
         requireDate(command.scheduledAt);
         if (Date.parse(command.scheduledAt) <= Date.now())
-          throw new Error('crop.errors.future-visit');
-        if (this.inspections().some((item) => item.reportId === command.reportId))
-          throw new Error('crop.errors.visit-already-scheduled');
+          throw new Error("crop.errors.future-visit");
+        if (
+          this.inspections().some((item) => item.reportId === command.reportId)
+        )
+          throw new Error("crop.errors.visit-already-scheduled");
         const report = this.report(command.reportId);
         return this.profiles.responsibilityByPlot(report.plotId).pipe(
           switchMap((assignment) => {
             const user = this.activeUser();
             if (
               !assignment ||
-              assignment.status !== 'ACTIVE' ||
+              assignment.status !== "ACTIVE" ||
               assignment.producerUserId !== report.reporterId
             ) {
-              throw new Error('crop.errors.assign-before-visit');
+              throw new Error("crop.errors.assign-before-visit");
             }
-            if (!user || (user.experience === 'AGRONOMIST' && assignment.advisorUserId !== user.id))
+            if (
+              !user ||
+              (user.experience === "AGRONOMIST" &&
+                assignment.advisorUserId !== user.id)
+            )
               this.denied();
-            return this.api.scheduleInspection(command, assignment.advisorUserId);
+            return this.api.scheduleInspection(
+              command,
+              assignment.advisorUserId,
+            );
           }),
         );
       },
-      (inspection) => this.inspectionsSignal.update((items) => [...items, inspection]),
+      (inspection) =>
+        this.inspectionsSignal.update((items) => [...items, inspection]),
       onSaved,
       onFailure,
-      'crop.errors.save-inspection',
+      "crop.errors.save-inspection",
     );
   }
 
@@ -620,7 +759,7 @@ export class CropStore {
         if (!inspection || !this.canComplete(inspection)) this.denied();
         requireText(findings, 10);
         if (Date.parse(inspection.scheduledAt) > Date.now())
-          throw new Error('crop.errors.visit-not-due');
+          throw new Error("crop.errors.visit-not-due");
         return this.withResponsibility(inspection.reportId, () =>
           this.api.completeInspection(id, findings.trim()),
         );
@@ -632,25 +771,27 @@ export class CropStore {
         const plot = this.plots().find((item) => item.id === inspection.plotId);
         if (plot) {
           this.read(
-            'inspection-report',
+            "inspection-report",
             this.api.getPestReport(inspection.reportId),
             (report) => {
-              if (report.plotId !== plot.id || report.status === 'PENDING') {
-                throw new Error('crop.errors.inspection-status-partial');
+              if (report.plotId !== plot.id || report.status === "PENDING") {
+                throw new Error("crop.errors.inspection-status-partial");
               }
               this.replaceReport(this.withPlotName(report, plot.name));
             },
-            'crop.errors.inspection-status-partial',
+            "crop.errors.inspection-status-partial",
           );
         }
       },
       onSaved,
       onFailure,
-      'crop.errors.complete-inspection',
+      "crop.errors.complete-inspection",
     );
   }
 
-  readonly inspectionReportError = computed(() => this.errors()['inspection-report'] ?? null);
+  readonly inspectionReportError = computed(
+    () => this.errors()["inspection-report"] ?? null,
+  );
 
   issuePrescription(
     command: IssueTechnicalPrescriptionCommand,
@@ -659,24 +800,33 @@ export class CropStore {
   ): void {
     this.mutate(
       () => {
-        if (!this.canPrescribe() || command.agronomistId !== this.activeUser()?.id) this.denied();
-        if (this.report(command.reportId).status !== 'INSPECTED')
-          throw new Error('crop.errors.inspection-required');
+        if (
+          !this.canPrescribe() ||
+          command.agronomistId !== this.activeUser()?.id
+        )
+          this.denied();
+        if (this.report(command.reportId).status !== "INSPECTED")
+          throw new Error("crop.errors.inspection-required");
         requireDate(command.applicationDate);
         if (command.applicationDate < todayInLima())
-          throw new Error('crop.errors.past-application');
+          throw new Error("crop.errors.past-application");
         requireText(command.product);
         requireText(command.dosage);
         requireText(command.instructions);
-        if (this.prescriptions().some((rx) => rx.reportId === command.reportId)) {
-          throw new Error('crop.errors.invalid-transition');
+        if (
+          this.prescriptions().some((rx) => rx.reportId === command.reportId)
+        ) {
+          throw new Error("crop.errors.invalid-transition");
         }
-        return this.withResponsibility(command.reportId, () => this.api.issuePrescription(command));
+        return this.withResponsibility(command.reportId, () =>
+          this.api.issuePrescription(command),
+        );
       },
-      (prescription) => this.prescriptionsSignal.update((items) => [...items, prescription]),
+      (prescription) =>
+        this.prescriptionsSignal.update((items) => [...items, prescription]),
       onSaved,
       onFailure,
-      'crop.errors.save-prescription',
+      "crop.errors.save-prescription",
     );
   }
 
@@ -684,7 +834,7 @@ export class CropStore {
     const user = this.activeUser();
     return (
       this.canReport() &&
-      prescription.status === 'ISSUED' &&
+      prescription.status === "ISSUED" &&
       this.pestReports().some(
         (report) =>
           report.id === prescription.reportId &&
@@ -698,14 +848,17 @@ export class CropStore {
     this.mutate(
       () => {
         const prescription = this.prescriptions().find((rx) => rx.id === id);
-        if (!prescription || !this.canApplyPrescription(prescription)) this.denied();
+        if (!prescription || !this.canApplyPrescription(prescription))
+          this.denied();
         return this.api.applyPrescription(id);
       },
       (saved) =>
-        this.prescriptionsSignal.update((items) => items.map((rx) => (rx.id === id ? saved : rx))),
+        this.prescriptionsSignal.update((items) =>
+          items.map((rx) => (rx.id === id ? saved : rx)),
+        ),
       onSaved,
       () => {},
-      'crop.errors.apply-prescription',
+      "crop.errors.apply-prescription",
     );
   }
 
@@ -717,7 +870,7 @@ export class CropStore {
       !this.clinicalError() &&
       !!report &&
       report.reporterId === this.activeUser()?.id &&
-      report.status === 'PENDING' &&
+      report.status === "PENDING" &&
       !this.inspections().some((item) => item.reportId === id) &&
       !this.prescriptions().some((item) => item.reportId === id)
     );
@@ -729,32 +882,41 @@ export class CropStore {
         if (!this.canDeleteReport(id)) this.denied();
         return this.api.deleteReport(id);
       },
-      () => this.reportsSignal.update((items) => items.filter((item) => item.id !== id)),
+      () =>
+        this.reportsSignal.update((items) =>
+          items.filter((item) => item.id !== id),
+        ),
       onSaved,
       onFailure,
-      'crop.errors.delete-report',
+      "crop.errors.delete-report",
     );
   }
   clearError(): void {
-    this.setError('write', null);
+    this.setError("write", null);
   }
   reportLabel(id: number): string {
-    const reports = [...this.pestReports()].sort((a, b) => Number(a.id) - Number(b.id));
+    const reports = [...this.pestReports()].sort(
+      (a, b) => Number(a.id) - Number(b.id),
+    );
     const index = reports.findIndex((item) => Number(item.id) === id);
-    return index >= 0 ? '#' + (index + 1) + ' · ' + reports[index].plotName : '#' + id;
+    return index >= 0
+      ? "#" + (index + 1) + " · " + reports[index].plotName
+      : "#" + id;
   }
   advisorName(id: number): string {
     return (
       this.advisors().find((item) => item.userId === id)?.name ||
-      (this.session.activeUser()?.id === id ? this.session.activeUser()?.displayName : undefined) ||
+      (this.session.activeUser()?.id === id
+        ? this.session.activeUser()?.displayName
+        : undefined) ||
       this.namesSignal().get(id) ||
-      '#' + id
+      "#" + id
     );
   }
   canComplete(inspection: FieldInspection): boolean {
     return (
       this.canPrescribe() &&
-      inspection.status === 'SCHEDULED' &&
+      inspection.status === "SCHEDULED" &&
       inspection.inspectorUserId === this.activeUser()?.id
     );
   }
@@ -783,7 +945,7 @@ export class CropStore {
     );
   }
   private denied(): never {
-    throw new Error('crop.errors.not-authorized');
+    throw new Error("crop.errors.not-authorized");
   }
   private setBusy(key: string, value: boolean): void {
     this.busy.update((items) => ({ ...items, [key]: value }));
@@ -792,10 +954,14 @@ export class CropStore {
     this.errors.update((items) => ({ ...items, [key]: value }));
   }
   private message(error: unknown, fallback: string): string {
-    if (error instanceof Error && error.message.startsWith('crop.errors.')) return error.message;
-    if (error instanceof HttpErrorResponse && [400, 409, 422].includes(error.status)) {
+    if (error instanceof Error && error.message.startsWith("crop.errors."))
+      return error.message;
+    if (
+      error instanceof HttpErrorResponse &&
+      [400, 409, 422].includes(error.status)
+    ) {
       const detail = error.error?.details || error.error?.detail;
-      if (typeof detail === 'string' && detail.trim()) return detail;
+      if (typeof detail === "string" && detail.trim()) return detail;
     }
     return fallback;
   }
@@ -848,23 +1014,26 @@ export class CropStore {
     try {
       if (!this.scopeReady()) this.denied();
       const operation = source();
-      this.setBusy('write', true);
+      this.setBusy("write", true);
       this.requests.set(
-        'write',
+        "write",
         operation.subscribe({
           next: (data) => {
             if (epoch === this.epoch && participant === this.activeUser()) {
               update(data);
-              this.setBusy('write', false);
+              this.setBusy("write", false);
               onSaved();
             }
           },
           error: (error) => {
             if (epoch === this.epoch && participant === this.activeUser()) {
-              this.setBusy('write', false);
+              this.setBusy("write", false);
               this.setError(
-                'write',
-                this.message(error, typeof fallback === 'string' ? fallback : fallback()),
+                "write",
+                this.message(
+                  error,
+                  typeof fallback === "string" ? fallback : fallback(),
+                ),
               );
               onFailure();
             }
@@ -872,10 +1041,13 @@ export class CropStore {
         }),
       );
     } catch (error) {
-      this.setBusy('write', false);
+      this.setBusy("write", false);
       this.setError(
-        'write',
-        this.message(error, typeof fallback === 'string' ? fallback : fallback()),
+        "write",
+        this.message(
+          error,
+          typeof fallback === "string" ? fallback : fallback(),
+        ),
       );
       onFailure();
     }
