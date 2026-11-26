@@ -1,0 +1,359 @@
+@startuml
+' SumaqAgro Web Application - IAM (Identity and Access Management) Bounded Context - Domain-Driven Design Class Diagram
+' Generated from the Angular source code in src/app/iam
+
+set separator none
+hide empty members
+
+package "app" {
+
+  ' ==========================================
+  ' IAM (IDENTITY AND ACCESS MANAGEMENT) BOUNDED CONTEXT
+  ' ==========================================
+  package "iam" {
+    package "domain.model" {
+      package "commands" {
+        class RequestPasswordResetCommand {
+          +email: string
+        }
+
+        class ResetPasswordCommand {
+          +token: string
+          +newPassword: string
+        }
+
+        class SignInCommand {
+          +email: string
+          +password: string
+        }
+
+        class SignUpCommand {
+          +firstName: string
+          +lastName: string
+          +email: string
+          +password: string
+          +role: UserRole
+        }
+      }
+
+      package "entities" {
+        enum UserRole {
+          FARMER
+          COOPERATIVE_DIRECTOR
+          AGRONOMIST
+        }
+
+        class User <<Entity>> {
+          -_email: string
+          -_fullName: string
+          -_roles: UserRole[]
+          +email: string
+          +fullName: string
+          +roles: UserRole[]
+          +hasRole(role: UserRole): boolean
+        }
+      }
+    }
+
+    package "infrastructure" {
+      class IamApi {
+        -http: HttpClient
+        -signUpEndpoint: SignUpApiEndpoint
+        -signInEndpoint: SignInApiEndpoint
+        -passwordRecoveryEndpoint: PasswordRecoveryApiEndpoint
+        +signUp(signUpCommand: SignUpCommand): Observable<SignUpResource>
+        +signIn(signInCommand: SignInCommand): Observable<SignInResource>
+        +requestPasswordReset(command: RequestPasswordResetCommand): Observable<void>
+        +resetPassword(command: ResetPasswordCommand): Observable<void>
+      }
+
+      class iamGuard <<Guard>> {
+        +canActivate(): boolean | UrlTree
+      }
+
+      class iamInterceptor <<Interceptor>> {
+        +intercept(): Observable<HttpEvent>
+      }
+
+      package "assemblers" {
+        class PasswordRecoveryAssembler <<Assembler>> {
+          +toRecoveryRequestFromCommand(command: RequestPasswordResetCommand): PasswordRecoveryRequest
+          +toResetRequestFromCommand(command: ResetPasswordCommand): PasswordResetRequest
+        }
+
+        class SignInAssembler <<Assembler>> {
+          +toResourceFromResponse(response: SignInResponse): SignInResource
+          +toEntityFromResource(resource: SignInResource): User
+          +toRequestFromCommand(command: SignInCommand): SignInRequest
+        }
+
+        class SignUpAssembler <<Assembler>> {
+          +toResourceFromResponse(response: SignUpResponse): SignUpResource
+          +toRequestFromCommand(command: SignUpCommand): SignUpRequest
+        }
+
+        class UserRoleAssembler <<Assembler>> {
+          +{static} toRoleFromResource(role: string): UserRole
+          +{static} toResourceFromRole(role: UserRole): string
+        }
+      }
+
+      package "endpoints" {
+        class PasswordRecoveryApiEndpoint {
+          +requestReset(command: RequestPasswordResetCommand): Observable<void>
+          +reset(command: ResetPasswordCommand): Observable<void>
+        }
+
+        class SignInApiEndpoint {
+          +signIn(signInCommand: SignInCommand): Observable<SignInResource>
+        }
+
+        class SignUpApiEndpoint {
+          +signUp(signUpCommand: SignUpCommand): Observable<SignUpResource>
+        }
+      }
+
+      package "requests" {
+        class PasswordRecoveryRequest <<Request>> {
+          +email: string
+        }
+
+        class PasswordResetRequest <<Request>> {
+          +token: string
+          +newPassword: string
+        }
+
+        class SignInRequest <<Request>> {
+          +email: string
+          +password: string
+        }
+
+        class SignUpRequest <<Request>> {
+          +email: string
+          +password: string
+          +roles: string[]
+          +profile: ( firstName: string; lastName: string; )
+        }
+      }
+
+      package "responses" {
+        class SignInResource <<Resource>> {
+          +id: number
+          +email: string
+          +roles: string[]
+          +token: string
+          +fullName: string | null
+        }
+
+        class SignInResponse <<Response>> {
+        }
+
+        class SignUpResource <<Resource>> {
+          +id: number
+          +email: string
+          +roles: string[]
+        }
+
+        class SignUpResponse <<Response>> {
+        }
+      }
+    }
+
+    package "application" {
+      enum IamError {
+        INVALID_CREDENTIALS
+        REGISTRATION_CONFLICT
+        ACCESS_DENIED
+        CONNECTION_ERROR
+        UNEXPECTED_ERROR
+      }
+
+      enum PasswordRecoveryError {
+        INVALID_LINK
+        RATE_LIMITED
+        CONNECTION_ERROR
+        REQUEST_REJECTED
+        UNEXPECTED_ERROR
+      }
+
+      interface SessionParticipant {
+        +id: number
+        +displayName: string
+        +experience: UserRole
+        +initialRoute: string
+      }
+
+      class IamStore <<Store>> {
+        -iamApi: IamApi
+        -assembler: SignInAssembler
+        -currentUserSignal: WritableSignal<User | null>
+        -currentTokenSignal: WritableSignal<string | null>
+        -loadingSignal: WritableSignal<boolean>
+        -errorSignal: WritableSignal<IamError | null>
+        -registrationCompletedSignal: WritableSignal<boolean>
+        -recoveryLoadingSignal: WritableSignal<boolean>
+        -recoveryCompletedSignal: WritableSignal<boolean>
+        -recoveryErrorSignal: WritableSignal<PasswordRecoveryError | null>
+        +currentUser: Signal<User | null>
+        +currentToken: Signal<string | null>
+        +isSignedIn: Signal
+        +isLoading: Signal<boolean>
+        +error: Signal<IamError | null>
+        +registrationCompleted: Signal<boolean>
+        +passwordRecoveryLoading: Signal<boolean>
+        +passwordRecoveryCompleted: Signal<boolean>
+        +passwordRecoveryError: Signal<PasswordRecoveryError | null>
+        -signedOutOnPurposeSignal: WritableSignal<boolean>
+        +signedOutOnPurpose: Signal<boolean>
+        +activeUser: Signal<SessionParticipant | null>
+        +hasActiveUser: Signal
+        +signIn(signInCommand: SignInCommand, onSignedIn: (...) => void, returnUrl: string | null): void
+        +signUp(signUpCommand: SignUpCommand): void
+        +signOut(): void
+        +checkSessionExpiration(): void
+        +clearFeedback(): void
+        +requestPasswordReset(command: RequestPasswordResetCommand): void
+        +resetPassword(command: ResetPasswordCommand): void
+        +clearPasswordRecovery(): void
+      }
+    }
+
+    package "presentation" {
+      package "components" {
+        class AuthLayout <<Component>> {
+          +compact: InputSignal
+          +imageSrc: InputSignal
+          +imagePosition: InputSignal
+          +showLanguageSwitcher: InputSignal
+        }
+      }
+
+      package "views" {
+        class ForgotPasswordForm <<Component>> {
+          #store: IamStore
+          #form: FormGroup
+          #submit(): void
+        }
+
+        class ResetPasswordForm <<Component>> {
+          #store: IamStore
+          #hidePassword: WritableSignal<boolean>
+          #hideConfirmation: WritableSignal<boolean>
+          -token: Signal
+          #invalidLink: Signal
+          #form: FormGroup
+          -formDirective
+          #submit(): void
+        }
+
+        class SignInForm <<Component>> {
+          #store: IamStore
+          #hidePassword: WritableSignal<boolean>
+          -router: Router
+          -route: ActivatedRoute
+          #fieldErrorMatcher: ErrorStateMatcher
+          #form: FormGroup
+          #togglePassword(): void
+          #submit(): void
+        }
+
+        class SignUpForm <<Component>> {
+          #store: IamStore
+          #hidePassword: WritableSignal<boolean>
+          #hideConfirmPassword: WritableSignal<boolean>
+          #fieldErrorMatcher: ErrorStateMatcher
+          #confirmationErrorMatcher: ErrorStateMatcher
+          #roles: UserRole[]
+          #form: FormGroup
+          #invitationToken
+          #togglePassword(): void
+          #toggleConfirmPassword(): void
+          #submit(): void
+        }
+      }
+    }
+  }
+
+  ' ==========================================
+  ' REFERENCED FROM OTHER BOUNDED CONTEXTS
+  ' ==========================================
+  package "shared" {
+    package "domain.model" {
+      class BaseEntity
+    }
+
+    package "infrastructure" {
+      abstract class BaseApi
+
+      interface BaseResource
+
+      interface BaseResponse
+    }
+
+    package "presentation" {
+      package "components" {
+        class LanguageSwitcher <<Component>>
+      }
+    }
+  }
+}
+
+' Relationships
+SessionParticipant --> UserRole : has
+IamStore --> IamApi : uses
+IamStore --> SignInAssembler : uses
+IamStore --> User : manages
+IamStore --> IamError : has
+IamStore --> PasswordRecoveryError : has
+IamStore --> SessionParticipant : manages
+IamStore ..> SignInCommand : sends
+IamStore ..> SignUpCommand : sends
+IamStore ..> RequestPasswordResetCommand : sends
+IamStore ..> ResetPasswordCommand : sends
+SignUpCommand --> UserRole : has
+User --|> BaseEntity : extends
+User --> UserRole : has
+IamApi --|> BaseApi : extends
+IamApi --> SignUpApiEndpoint : delegates to
+IamApi --> SignInApiEndpoint : delegates to
+IamApi --> PasswordRecoveryApiEndpoint : delegates to
+IamApi ..> SignUpCommand : sends
+IamApi ..> SignInCommand : sends
+IamApi ..> RequestPasswordResetCommand : sends
+IamApi ..> ResetPasswordCommand : sends
+iamGuard --> IamStore : uses
+iamInterceptor --> IamStore : uses
+PasswordRecoveryAssembler ..> PasswordRecoveryRequest : converts
+PasswordRecoveryAssembler ..> PasswordResetRequest : converts
+PasswordRecoveryAssembler ..> RequestPasswordResetCommand : converts
+PasswordRecoveryAssembler ..> ResetPasswordCommand : converts
+SignInAssembler ..> SignInCommand : converts
+SignInAssembler ..> SignInRequest : converts
+SignInAssembler ..> SignInResource : converts
+SignInAssembler ..> SignInResponse : converts
+SignInAssembler --> User : builds
+SignUpAssembler ..> SignUpCommand : converts
+SignUpAssembler ..> SignUpRequest : converts
+SignUpAssembler ..> SignUpResource : converts
+SignUpAssembler ..> SignUpResponse : converts
+SignInResource --|> BaseResource : extends
+SignInResponse --|> BaseResponse : extends
+SignInResponse --|> SignInResource : extends
+SignUpResource --|> BaseResource : extends
+SignUpResponse --|> BaseResponse : extends
+SignUpResponse --|> SignUpResource : extends
+AuthLayout --> LanguageSwitcher : contains
+ForgotPasswordForm --> IamStore : uses
+ForgotPasswordForm --> AuthLayout : contains
+ResetPasswordForm --> IamStore : uses
+ResetPasswordForm --> AuthLayout : contains
+SignInForm --> IamStore : uses
+SignInForm --> AuthLayout : contains
+SignUpForm --> IamStore : uses
+SignUpForm --> UserRole : has
+SignUpForm --> AuthLayout : contains
+PasswordRecoveryApiEndpoint --> PasswordRecoveryAssembler : uses
+SignInApiEndpoint --> SignInAssembler : uses
+SignUpApiEndpoint --> SignUpAssembler : uses
+
+@enduml

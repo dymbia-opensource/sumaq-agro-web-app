@@ -1,0 +1,217 @@
+@startuml
+' SumaqAgro Web Application - Shared Bounded Context - Domain-Driven Design Class Diagram
+' Generated from the Angular source code in src/app/shared
+
+set separator none
+hide empty members
+
+package "app" {
+
+  ' ==========================================
+  ' SHARED BOUNDED CONTEXT
+  ' ==========================================
+  package "shared" {
+    package "domain.model" {
+      class BaseEntity {
+        #_id: number | string
+        +id: number | string
+      }
+
+      class Money {
+        -_amount: number
+        -_currency: string
+        +amount: number
+        +currency: string
+        +add(other: Money): Money
+        +multiply(factor: number): Money
+        +format(locale: string): string
+      }
+    }
+
+    package "infrastructure" {
+      abstract class BaseApiEndpoint<TEntity, TResource, TResponse, TAssembler> {
+        +getAll(): Observable<TEntity[]>
+        #getAllBy(filters: Record<string, string | number | boolean>, operation): Observable<TEntity[]>
+        +getById(id: number | string): Observable<TEntity>
+        +create(entity: TEntity): Observable<TEntity>
+        +update(entity: TEntity, id: number | string): Observable<TEntity>
+        +delete(id: number | string): Observable<void>
+        #toEntities(response: TResponse | TResource[]): TEntity[]
+      }
+
+      abstract class BaseApi {
+      }
+
+      interface BaseAssembler<TEntity, TResource, TResponse> {
+        +toEntityFromResource(resource: TResource): TEntity
+        +toResourceFromEntity(entity: TEntity): TResource
+        +toEntitiesFromResponse(response: TResponse): TEntity[]
+      }
+
+      interface BaseResource {
+        +id: number | string
+      }
+
+      interface BaseResponse {
+      }
+
+      abstract class ErrorHandlingEnabledBaseType {
+        #handleError(operation: string): (error: HttpErrorResponse) => Observable<never>
+      }
+
+      interface ExportedFile {
+        +fileName: string
+        +content: Blob
+      }
+
+      class FileDownloader {
+        -document: DOCUMENT
+        +save(file: ExportedFile): void
+      }
+
+      interface NavigationOption {
+        +link: string
+        +label: string
+        +icon: string
+        +covers?: string[]
+      }
+
+      interface NavigationSection {
+        +title: string
+        +options: NavigationOption[]
+      }
+
+      class roleGuard <<Guard>> {
+        +canActivateChild(): boolean | UrlTree
+      }
+
+      class TranslatedTitleStrategy {
+        -title: Title
+        -translate: TranslateService
+        -pageKey: string | null
+        +updateTitle(snapshot: RouterStateSnapshot): void
+      }
+    }
+
+    package "presentation" {
+      package "components" {
+        class LanguageSwitcher <<Component>> {
+          -translate: TranslateService
+          +languages: string[]
+          +currentLang
+          +useLanguage(language: string): void
+        }
+
+        class LayoutStore <<Store>> {
+          +isHandset: Signal
+          +isOnline: Signal
+          -sidebarOpenedSignal: WritableSignal<boolean>
+          +sidebarOpened: Signal<boolean>
+          +toggleSidebar(): void
+          +setSidebarOpened(opened: boolean): void
+          +closeSidebarOnHandset(): void
+        }
+
+        class Layout <<Component>> {
+          #layout: LayoutStore
+          -iamStore: IamStore
+          -router: Router
+        }
+
+        class LeftSidebar <<Component>> {
+          #layout: LayoutStore
+          -session: IamStore
+          -router: Router
+          -url: Signal
+          #activeLink: Signal
+          +sections: Signal
+          #signOut(): void
+        }
+
+        class MessageCard <<Component>> {
+          +icon: InputSignal
+          +message: InputSignal<string>
+          +alert: InputSignal
+        }
+
+        interface Breadcrumb {
+          +label: string
+          +link?: string
+        }
+
+        class PageHeader <<Component>> {
+          -session: IamStore
+          -path
+          +breadcrumbs: InputSignal<Breadcrumb[]>
+          +title: InputSignal<string>
+          +subtitle: InputSignal<string>
+          +compact: InputSignal
+          #trail: Signal<Breadcrumb[]>
+        }
+
+        class Toolbar <<Component>> {
+          #layout: LayoutStore
+          -session: IamStore
+          -crop: CropStore
+          -router: Router
+          #query: WritableSignal<string>
+          #searchLoading
+          #plotMatches: Signal
+          +userName: Signal
+          #settingsRoute: Signal
+          #openPlot(plotId: number, input: HTMLInputElement): void
+          #signOut(): void
+        }
+      }
+
+      package "views" {
+        class PageNotFound <<Component>> {
+          -router: Router
+          +invalidPath
+          +navigateToHome(): void
+        }
+      }
+    }
+  }
+
+  ' ==========================================
+  ' REFERENCED FROM OTHER BOUNDED CONTEXTS
+  ' ==========================================
+  package "crop" {
+    package "application" {
+      class CropStore <<Store>>
+    }
+  }
+
+  package "iam" {
+    package "application" {
+      class IamStore <<Store>>
+    }
+  }
+
+  ' Root Application
+  class App <<Component>> {
+  }
+}
+
+' Relationships
+BaseApiEndpoint --|> BaseApi : extends
+BaseApi --|> ErrorHandlingEnabledBaseType : extends
+NavigationSection --> NavigationOption : references
+roleGuard --> IamStore : uses
+Layout --> LayoutStore : uses
+Layout --> IamStore : uses
+Layout --> LeftSidebar : contains
+Layout --> Toolbar : contains
+LeftSidebar --> LayoutStore : uses
+LeftSidebar --> IamStore : uses
+LeftSidebar --> LanguageSwitcher : contains
+PageHeader --> IamStore : uses
+PageHeader --> Breadcrumb : uses
+Toolbar --> LayoutStore : uses
+Toolbar --> IamStore : uses
+Toolbar --> CropStore : uses
+BaseApiEndpoint --> BaseAssembler : uses
+App --> Layout : renders
+
+@enduml

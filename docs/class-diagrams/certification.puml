@@ -1,0 +1,490 @@
+@startuml
+' SumaqAgro Web Application - Harvest Certification Bounded Context - Domain-Driven Design Class Diagram
+' Generated from the Angular source code in src/app/certification
+
+set separator none
+hide empty members
+
+package "app" {
+
+  ' ==========================================
+  ' HARVEST CERTIFICATION BOUNDED CONTEXT
+  ' ==========================================
+  package "certification" {
+    package "domain.model" {
+      package "commands" {
+        class ExtractRepresentativeSampleCommand {
+          +batchId: number
+          +sampleIdentifier: string
+          +sampleWeightKg: number
+        }
+
+        class GradePotatoCalibersCommand {
+          +batchId: number
+          +firstPercentage: number
+          +secondPercentage: number
+          +thirdPercentage: number
+          +pestDamagePercentage: number
+        }
+
+        class IssueQualityCertificateCommand {
+          +certificateNumber: string
+          +harvestBatchId: number
+          +issuedByUserId: number
+        }
+
+        class PerformCoffeeCuppingCommand {
+          +batchId: number
+          +aroma: number
+          +flavor: number
+          +acidity: number
+          +body: number
+          +totalScore: number
+          +fermentDefect: boolean
+        }
+
+        class RegisterHarvestBatchCommand {
+          +batchCode: string
+          +cooperativeId: number
+          +memberId: number
+          +plotId: number
+          +cropType: HarvestCropType
+          +harvestedOn: string
+        }
+
+        class RevokeQualityCertificateCommand {
+          +certificateId: number
+        }
+
+        class VerifyCertificateCommand {
+          +number: string
+          +hash: string
+        }
+
+        class WeighDeliveredBatchCommand {
+          +batchId: number
+          +grossWeightKg: number
+          +tareKg: number
+        }
+      }
+
+      package "entities" {
+        interface BatchEntry {
+          +batch: HarvestBatch
+          +certificate: QualityCertificate | null
+        }
+
+        class HarvestBatch <<Entity>> {
+          +batchCode: string
+          +cooperativeId: number
+          +memberId: number
+          +plotId: number
+          +cropType: HarvestCropType
+          +harvestedOn: string
+          +status: BatchStatus
+          +netWeightKg: number | null
+          +sampleIdentifier: string | null
+          +sampleWeightKg: number | null
+          +qualityScore: number | null
+          +qualityCategory: QualityCategory | null
+          +batchId: number
+          +isWeighed: boolean
+          +isSampled: boolean
+          +canBeCertified: boolean
+          +withStatus(status: BatchStatus): HarvestBatch
+        }
+
+        class PublicTraceabilityRecord <<Entity>> {
+          +certificateNumber: string
+          +status: CertificateStatus
+          +authentic: boolean
+          +batchCode: string | null
+          +cropType: HarvestCropType | null
+          +qualityCategory: QualityCategory | null
+          +qualityScore: number | null
+          +plotName: string | null
+          +region: string | null
+          +seedVariety: string | null
+          +isValid: boolean
+        }
+
+        class QualityCertificate <<Entity>> {
+          +certificateNumber: string
+          +harvestBatchId: number
+          +qualityCategory: QualityCategory
+          +certificateHash: string
+          +issuedByUserId: number
+          +issuedAt: Date
+          +status: CertificateStatus
+          +certificateId: number
+          +isActive: boolean
+        }
+      }
+    }
+
+    package "infrastructure" {
+      class CertificationApi {
+        -http: HttpClient
+        -batches: HarvestBatchesApiEndpoint
+        -certificates: QualityCertificatesApiEndpoint
+        -traceability: PublicTraceabilityApiEndpoint
+        +getBatchesByCooperative(cooperativeId: number)
+        +getBatch(batchId: number)
+        +registerBatch(command: RegisterHarvestBatchCommand)
+        +weighBatch(command: WeighDeliveredBatchCommand)
+        +extractSample(command: ExtractRepresentativeSampleCommand)
+        +gradePotato(command: GradePotatoCalibersCommand)
+        +cupCoffee(command: PerformCoffeeCuppingCommand)
+        +issueCertificate(command: IssueQualityCertificateCommand)
+        +getCertificateByNumber(certificateNumber: string)
+        +revokeCertificate(command: RevokeQualityCertificateCommand)
+        +getCertificateDocument(certificateId: number)
+        +verifyCertificate(command: VerifyCertificateCommand)
+      }
+
+      package "assemblers" {
+        class HarvestBatchAssembler <<Assembler>> {
+          -certificates: QualityCertificateAssembler
+          +toEntityFromResource(resource: HarvestBatchResource): HarvestBatch
+          +toEntryFromResource(resource: BatchEntryResource): BatchEntry
+          +toRegisterRequestFromCommand(command: RegisterHarvestBatchCommand): RegisterHarvestBatchRequest
+          +toWeighRequestFromCommand(command: WeighDeliveredBatchCommand): WeighHarvestBatchRequest
+          +toSampleRequestFromCommand(command: ExtractRepresentativeSampleCommand): ExtractRepresentativeSampleRequest
+          +toPotatoRequestFromCommand(command: GradePotatoCalibersCommand): GradePotatoCalibersRequest
+          +toCoffeeRequestFromCommand(command: PerformCoffeeCuppingCommand): CupCoffeeRequest
+        }
+
+        class PublicTraceabilityAssembler <<Assembler>> {
+          +toEntityFromResource(resource: PublicTraceabilityResource): PublicTraceabilityRecord
+        }
+
+        class QualityCertificateAssembler <<Assembler>> {
+          +toEntityFromResource(resource: QualityCertificateResource): QualityCertificate
+          +toIssueRequestFromCommand(command: IssueQualityCertificateCommand): IssueQualityCertificateRequest
+        }
+      }
+
+      package "endpoints" {
+        class HarvestBatchesApiEndpoint {
+          -url: string
+          -assembler: HarvestBatchAssembler
+          +getByCooperative(cooperativeId: number): Observable<BatchEntry[]>
+          +getById(batchId: number): Observable<HarvestBatch>
+          +register(command: RegisterHarvestBatchCommand): Observable<HarvestBatch>
+          +weigh(command: WeighDeliveredBatchCommand): Observable<HarvestBatch>
+          +extractSample(command: ExtractRepresentativeSampleCommand): Observable<HarvestBatch>
+          +gradePotato(command: GradePotatoCalibersCommand): Observable<HarvestBatch>
+          +cupCoffee(command: PerformCoffeeCuppingCommand): Observable<HarvestBatch>
+        }
+
+        class PublicTraceabilityApiEndpoint {
+          -url: string
+          -assembler: PublicTraceabilityAssembler
+          +verify(command: VerifyCertificateCommand): Observable<PublicTraceabilityRecord>
+        }
+
+        class QualityCertificatesApiEndpoint {
+          -url: string
+          -assembler: QualityCertificateAssembler
+          +issue(command: IssueQualityCertificateCommand): Observable<QualityCertificate>
+          +getByNumber(certificateNumber: string): Observable<QualityCertificate>
+          +revoke(command: RevokeQualityCertificateCommand): Observable<QualityCertificate>
+          +document(certificateId: number): Observable<Blob>
+        }
+      }
+
+      package "requests" {
+        class CupCoffeeRequest <<Request>> {
+          +aroma: number
+          +flavor: number
+          +acidity: number
+          +body: number
+          +totalScore: number
+          +fermentDefect: boolean
+        }
+
+        class ExtractRepresentativeSampleRequest <<Request>> {
+          +sampleIdentifier: string
+          +sampleWeightKg: number
+        }
+
+        class GradePotatoCalibersRequest <<Request>> {
+          +firstPercentage: number
+          +secondPercentage: number
+          +thirdPercentage: number
+          +pestDamagePercentage: number
+        }
+
+        class IssueQualityCertificateRequest <<Request>> {
+          +certificateNumber: string
+          +harvestBatchId: number
+          +issuedByUserId: number
+        }
+
+        class RegisterHarvestBatchRequest <<Request>> {
+          +batchCode: string
+          +cooperativeId: number
+          +memberId: number
+          +plotId: number
+          +cropType: string
+          +harvestedOn: string
+        }
+
+        class WeighHarvestBatchRequest <<Request>> {
+          +grossWeightKg: number
+          +tareKg: number
+        }
+      }
+
+      package "responses" {
+        class HarvestBatchResource <<Resource>> {
+          +id: number
+          +batchCode: string
+          +cooperativeId: number
+          +memberId: number
+          +plotId: number
+          +cropType: string
+          +harvestedOn: string
+          +registeredAt: string
+          +status: string
+          +netWeightKg: number | null
+          +sampleIdentifier: string | null
+          +sampleWeightKg: number | null
+          +firstCaliberPercentage: number | null
+          +secondCaliberPercentage: number | null
+          +thirdCaliberPercentage: number | null
+          +pestDamagePercentage: number | null
+          +coffeeCuppingScore: number | null
+          +coffeeFermentDefect: boolean
+          +qualityScore: number | null
+          +qualityCategory: string | null
+        }
+
+        class BatchEntryResource <<Resource>> {
+          +batch: HarvestBatchResource
+          +certificate: QualityCertificateResource | null
+        }
+
+        class PublicTraceabilityResource <<Resource>> {
+          +certificateNumber: string
+          +status: string
+          +authentic: boolean
+          +batchCode: string | null
+          +cropType: string | null
+          +qualityCategory: string | null
+          +qualityScore: number | null
+          +plotName: string | null
+          +region: string | null
+          +seedVariety: string | null
+        }
+
+        class QualityCertificateResource <<Resource>> {
+          +id: number
+          +certificateNumber: string
+          +harvestBatchId: number
+          +qualityCategory: string
+          +certificateHash: string
+          +issuedByUserId: number
+          +issuedAt: string
+          +status: string
+        }
+      }
+    }
+
+    package "application" {
+      interface Verification {
+        +loading?: boolean
+        +record?: PublicTraceabilityRecord
+        +error?: string
+      }
+
+      interface PotatoGrading {
+        +firstPercentage: number
+        +secondPercentage: number
+        +thirdPercentage: number
+        +pestDamagePercentage: number
+      }
+
+      interface CoffeeCupping {
+        +aroma: number
+        +flavor: number
+        +acidity: number
+        +body: number
+        +totalScore: number
+        +fermentDefect: boolean
+      }
+
+      class CertificationStore <<Store>> {
+        -api: CertificationApi
+        -profiles: ProfilesStore
+        -iam: IamStore
+        -fileDownloader: FileDownloader
+        -destroyRef: DestroyRef
+        -refresh: Subject
+        -changes: WritableSignal
+        -busySignal: WritableSignal<boolean>
+        -errorSignal: WritableSignal<string>
+        -noticeSignal: WritableSignal<string>
+        -verificationSignal: WritableSignal<Verification>
+        +user
+        +busy: Signal<boolean>
+        +error: Signal<string>
+        +notice: Signal<string>
+        +verification: Signal<Verification>
+        -workspace: Signal
+        +state: Signal
+        +canManage: Signal
+        +entries: Signal
+        +reload(): void
+        +clearFeedback(): void
+        +registerBatch(values: (...), onRegistered: (batch: HarvestBatch) => void): void
+        +weighBatch(batchId: number, values: ( grossWeightKg: number; tareKg: number )): void
+        +extractSample(batchId: number, values: ( sampleIdentifier: string; sampleWeightKg: number )): void
+        +gradeBatch(batch: HarvestBatch, potato: PotatoGrading, coffee: CoffeeCupping): void
+        +issueCertificate(harvestBatchId: number, certificateNumber: string): void
+        +revokeCertificate(certificateId: number): void
+        +findCertificate(certificateNumber: string, onFound: (batchId: number) => void): void
+        +downloadCertificate(certificate: QualityCertificate): void
+        +verifyCertificate(number: string | null, hash: string | null): void
+      }
+    }
+
+    package "presentation" {
+      package "views" {
+        class HarvestCertificates <<Component>> {
+          #store: CertificationStore
+          -farming: FarmingStore
+          -memberChanges: Subject
+          #plots: Signal
+          #busy
+          #error
+          #notice
+          #selectedId: WritableSignal<number | null>
+          #selected: Signal
+          #registering: WritableSignal<boolean>
+          #crops
+          #breadcrumbs: Array
+          #coffeeFields: Array
+          #form
+          #weight
+          #sample
+          #potato
+          #coffee
+          #certificateNumber: string
+          #search: string
+          #confirmRevocation: boolean
+          #startRegistration(): void
+          #selectMember(id: number | null): void
+          #selectBatch(id: number): void
+          #register(): void
+          #weigh(batchId: number): void
+          #extractSample(batchId: number): void
+          #grade(batch: HarvestBatch): void
+          #issue(batchId: number): void
+          #lookup(): void
+          #revoke(certificateId: number): void
+          #download(certificate: QualityCertificate): void
+        }
+
+        class PublicTraceability <<Component>> {
+          -store: CertificationStore
+          #verification
+        }
+      }
+    }
+  }
+
+  ' ==========================================
+  ' REFERENCED FROM OTHER BOUNDED CONTEXTS
+  ' ==========================================
+  package "farming" {
+    package "application" {
+      class FarmingStore <<Store>>
+    }
+  }
+
+  package "iam" {
+    package "application" {
+      class IamStore <<Store>>
+    }
+  }
+
+  package "profiles" {
+    package "application" {
+      class ProfilesStore <<Store>>
+    }
+  }
+
+  package "shared" {
+    package "domain.model" {
+      class BaseEntity
+    }
+
+    package "infrastructure" {
+      abstract class BaseApi
+
+      class FileDownloader
+    }
+
+    package "presentation" {
+      package "components" {
+        class PageHeader <<Component>>
+      }
+    }
+  }
+}
+
+' Relationships
+Verification --> PublicTraceabilityRecord : references
+CertificationStore --> CertificationApi : uses
+CertificationStore --> ProfilesStore : uses
+CertificationStore --> IamStore : uses
+CertificationStore --> FileDownloader : manages
+CertificationStore --> Verification : manages
+BatchEntry --> HarvestBatch : references
+BatchEntry --> QualityCertificate : references
+HarvestBatch --|> BaseEntity : extends
+QualityCertificate --|> BaseEntity : extends
+CertificationApi --|> BaseApi : extends
+CertificationApi --> HarvestBatchesApiEndpoint : delegates to
+CertificationApi --> QualityCertificatesApiEndpoint : delegates to
+CertificationApi --> PublicTraceabilityApiEndpoint : delegates to
+CertificationApi ..> RegisterHarvestBatchCommand : sends
+CertificationApi ..> WeighDeliveredBatchCommand : sends
+CertificationApi ..> ExtractRepresentativeSampleCommand : sends
+CertificationApi ..> GradePotatoCalibersCommand : sends
+CertificationApi ..> PerformCoffeeCuppingCommand : sends
+CertificationApi ..> IssueQualityCertificateCommand : sends
+CertificationApi ..> RevokeQualityCertificateCommand : sends
+CertificationApi ..> VerifyCertificateCommand : sends
+HarvestBatchAssembler --> QualityCertificateAssembler : uses
+HarvestBatchAssembler ..> BatchEntryResource : converts
+HarvestBatchAssembler ..> CupCoffeeRequest : converts
+HarvestBatchAssembler ..> ExtractRepresentativeSampleCommand : converts
+HarvestBatchAssembler ..> ExtractRepresentativeSampleRequest : converts
+HarvestBatchAssembler ..> GradePotatoCalibersCommand : converts
+HarvestBatchAssembler ..> GradePotatoCalibersRequest : converts
+HarvestBatchAssembler --> HarvestBatch : builds
+HarvestBatchAssembler ..> HarvestBatchResource : converts
+HarvestBatchAssembler ..> PerformCoffeeCuppingCommand : converts
+HarvestBatchAssembler ..> RegisterHarvestBatchCommand : converts
+HarvestBatchAssembler ..> RegisterHarvestBatchRequest : converts
+HarvestBatchAssembler ..> WeighDeliveredBatchCommand : converts
+HarvestBatchAssembler ..> WeighHarvestBatchRequest : converts
+PublicTraceabilityAssembler --> PublicTraceabilityRecord : builds
+PublicTraceabilityAssembler ..> PublicTraceabilityResource : converts
+QualityCertificateAssembler ..> IssueQualityCertificateCommand : converts
+QualityCertificateAssembler ..> IssueQualityCertificateRequest : converts
+QualityCertificateAssembler --> QualityCertificate : builds
+QualityCertificateAssembler ..> QualityCertificateResource : converts
+HarvestBatchesApiEndpoint --> HarvestBatchAssembler : uses
+PublicTraceabilityApiEndpoint --> PublicTraceabilityAssembler : uses
+QualityCertificatesApiEndpoint --> QualityCertificateAssembler : uses
+BatchEntryResource --> HarvestBatchResource : references
+BatchEntryResource --> QualityCertificateResource : references
+HarvestCertificates --> CertificationStore : uses
+HarvestCertificates --> FarmingStore : uses
+HarvestCertificates --> PageHeader : contains
+PublicTraceability --> CertificationStore : uses
+
+@enduml
