@@ -1,5 +1,5 @@
-import { Router } from '@angular/router';
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { Router } from "@angular/router";
+import { DatePipe, DecimalPipe } from "@angular/common";
 import {
   afterRenderEffect,
   Component,
@@ -11,23 +11,23 @@ import {
   signal,
   untracked,
   viewChild,
-} from '@angular/core';
-import { MatButtonToggleModule } from '@angular/material/button-toggle';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatRadioModule } from '@angular/material/radio';
-import { FormsModule } from '@angular/forms';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { TranslateService, TranslatePipe } from '@ngx-translate/core';
-import { CropStore } from '../../../application/crop.store';
-import { CropPlotSelector } from '../../components/plot-selector/plot-selector';
-import { observationImage } from '../../../infrastructure/observation-image';
-import * as L from 'leaflet';
+} from "@angular/core";
+import { MatButtonToggleModule } from "@angular/material/button-toggle";
+import { MatButtonModule } from "@angular/material/button";
+import { MatCardModule } from "@angular/material/card";
+import { MatIconModule } from "@angular/material/icon";
+import { MatProgressBarModule } from "@angular/material/progress-bar";
+import { MatRadioModule } from "@angular/material/radio";
+import { FormsModule } from "@angular/forms";
+import { MatSnackBar } from "@angular/material/snack-bar";
+import { TranslateService, TranslatePipe } from "@ngx-translate/core";
+import { CropStore } from "../../../application/crop.store";
+import { CropPlotSelector } from "../../components/plot-selector/plot-selector";
+import { observationImage } from "../../../infrastructure/observation-image";
+import * as L from "leaflet";
 
 @Component({
-  selector: 'app-crop-health',
+  selector: "app-crop-health",
   imports: [
     DatePipe,
     DecimalPipe,
@@ -41,8 +41,8 @@ import * as L from 'leaflet';
     MatButtonToggleModule,
     CropPlotSelector,
   ],
-  templateUrl: './crop-health.html',
-  styleUrl: './crop-health.css',
+  templateUrl: "./crop-health.html",
+  styleUrl: "./crop-health.css",
 })
 export class CropHealth implements AfterViewInit, OnDestroy {
   readonly store = inject(CropStore);
@@ -50,38 +50,39 @@ export class CropHealth implements AfterViewInit, OnDestroy {
   private readonly translate = inject(TranslateService);
   private readonly snackBar = inject(MatSnackBar);
   readonly exportingImage = signal(false);
-  private readonly mapContainer = viewChild.required<ElementRef<HTMLDivElement>>('mapContainer');
+  private readonly mapContainer =
+    viewChild.required<ElementRef<HTMLDivElement>>("mapContainer");
   private readonly mapReady = signal(false);
   private map?: L.Map;
   private sectorLayer?: L.LayerGroup;
   private readonly baseLayers = {
     satellite: L.layerGroup([
       L.tileLayer(
-        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
         {
           maxZoom: 19,
           maxNativeZoom: 17,
-          attribution: 'Tiles © Esri — Esri, Maxar, Earthstar Geographics',
+          attribution: "Tiles © Esri — Esri, Maxar, Earthstar Geographics",
         },
       ),
       L.tileLayer(
-        'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
+        "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
         { maxZoom: 19, maxNativeZoom: 17 },
       ),
     ]),
-    streets: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors',
+    streets: L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: "© OpenStreetMap contributors",
       maxZoom: 19,
     }),
   };
-  selectedBase: 'satellite' | 'streets' = 'satellite';
-  selectedLayer: 'ndvi' | 'ndwi' = 'ndvi';
+  selectedBase: "satellite" | "streets" = "satellite";
+  selectedLayer: "ndvi" | "ndwi" = "ndvi";
 
   constructor() {
     effect(() => {
       const plot = this.store.selectedPlot();
       untracked(() => {
-        if (plot) this.store.loadObservations(plot.id as number);
+        if (plot) this.store.loadObservations(plot.id as number, true);
       });
     });
     afterRenderEffect(() => {
@@ -90,10 +91,9 @@ export class CropHealth implements AfterViewInit, OnDestroy {
     });
   }
   ngAfterViewInit(): void {
-    this.map = L.map(this.mapContainer().nativeElement, { zoomSnap: 0.25 }).setView(
-      [-9.19, -75.015],
-      5,
-    );
+    this.map = L.map(this.mapContainer().nativeElement, {
+      zoomSnap: 0.25,
+    }).setView([-9.19, -75.015], 5);
     this.baseLayers[this.selectedBase].addTo(this.map);
     this.mapReady.set(true);
   }
@@ -111,12 +111,12 @@ export class CropHealth implements AfterViewInit, OnDestroy {
       this.map.setView([-9.19, -75.015], 5);
       return;
     }
-    const color = this.selectedLayer === 'ndvi' ? '#16803c' : '#0369a1';
+    const color = this.selectedLayer === "ndvi" ? "#16803c" : "#0369a1";
     const vertices = plot.boundary.map(
       (vertex) => [vertex.latitude, vertex.longitude] as L.LatLngTuple,
     );
     const outline = L.polygon(vertices, {
-      color: '#ffffff',
+      color: "#ffffff",
       weight: 7,
       opacity: 0.95,
       fill: false,
@@ -128,22 +128,25 @@ export class CropHealth implements AfterViewInit, OnDestroy {
       opacity: 1,
       fillColor: color,
       fillOpacity: 0.16,
-      lineJoin: 'round',
+      lineJoin: "round",
     });
-    const label = document.createElement('span');
-    label.textContent = plot.name + ' · ' + plot.areaHectares.toFixed(2) + ' ha';
+    const label = document.createElement("span");
+    label.textContent =
+      plot.name + " · " + plot.areaHectares.toFixed(2) + " ha";
     polygon.bindTooltip(label, { sticky: true });
     const corners = vertices.map((vertex) =>
       L.circleMarker(vertex, {
         radius: 4,
-        color: '#ffffff',
+        color: "#ffffff",
         weight: 2,
         fillColor: color,
         fillOpacity: 1,
         interactive: false,
       }),
     );
-    this.sectorLayer = L.layerGroup([outline, polygon, ...corners]).addTo(this.map);
+    this.sectorLayer = L.layerGroup([outline, polygon, ...corners]).addTo(
+      this.map,
+    );
     this.map.invalidateSize();
     this.map.fitBounds(polygon.getBounds(), { padding: [64, 64], maxZoom: 18 });
   }
@@ -159,7 +162,7 @@ export class CropHealth implements AfterViewInit, OnDestroy {
     this.drawSector();
   }
   consultAgronomist(): void {
-    void this.router.navigate(['/pest-reports']);
+    void this.router.navigate(["/pest-reports"]);
   }
   async downloadImage(): Promise<void> {
     const plot = this.store.selectedPlot();
@@ -175,35 +178,43 @@ export class CropHealth implements AfterViewInit, OnDestroy {
     this.exportingImage.set(true);
     try {
       const keys: Record<string, string> = {
-        title: 'image-title',
-        plot: 'plot',
-        capture: 'capture-date',
-        area: 'plot-area',
-        source: 'observation-source',
-        clouds: 'cloud-coverage',
-        temperature: 'surface-temperature',
-        noData: 'no-data',
-        footer: 'image-footer',
+        title: "image-title",
+        plot: "plot",
+        capture: "capture-date",
+        area: "plot-area",
+        source: "observation-source",
+        clouds: "cloud-coverage",
+        temperature: "surface-temperature",
+        noData: "no-data",
+        footer: "image-footer",
       };
       const labels = Object.fromEntries(
-        Object.entries(keys).map(([key, value]) => [key, this.translate.instant('crop.' + value)]),
+        Object.entries(keys).map(([key, value]) => [
+          key,
+          this.translate.instant("crop." + value),
+        ]),
       );
       const blob = await observationImage(
         plot,
         observation,
         labels,
-        this.translate.getCurrentLang() === 'en' ? 'en-US' : 'es-PE',
+        this.translate.getCurrentLang() === "en" ? "en-US" : "es-PE",
       );
       const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = url;
-      link.download = 'sumaqagro-' + plot.id + '-' + observation.date.slice(0, 10) + '.png';
+      link.download =
+        "sumaqagro-" + plot.id + "-" + observation.date.slice(0, 10) + ".png";
       document.body.appendChild(link);
       link.click();
       link.remove();
       setTimeout(() => URL.revokeObjectURL(url), 0);
     } catch {
-      this.snackBar.open(this.translate.instant('crop.image-error'), undefined, { duration: 6000 });
+      this.snackBar.open(
+        this.translate.instant("crop.image-error"),
+        undefined,
+        { duration: 6000 },
+      );
     } finally {
       this.exportingImage.set(false);
     }
