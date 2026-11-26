@@ -1,0 +1,771 @@
+@startuml
+' SumaqAgro Web Application - Crop Health Bounded Context - Domain-Driven Design Class Diagram
+' Generated from the Angular source code in src/app/crop
+
+set separator none
+hide empty members
+
+package "app" {
+
+  ' ==========================================
+  ' CROP HEALTH BOUNDED CONTEXT
+  ' ==========================================
+  package "crop" {
+    package "domain.model" {
+      package "commands" {
+        class IssueAgroclimaticAlertCommand {
+          +title: string
+          +description: string
+          +severity: string
+          +region: string
+          +source?: string
+        }
+
+        class IssueTechnicalPrescriptionCommand {
+          +reportId: number
+          +agronomistId: number
+          +product: string
+          +dosage: string
+          +instructions: string
+          +applicationDate: string
+        }
+
+        class RecordClimateForecastCommand {
+          +region: string
+          +temperature: number
+          +rainChance: number
+          +forecastDate: string
+          +source?: string
+        }
+
+        class RecordPestReportCommand {
+          +plotId: number
+          +plotName: string
+          +reporterId: number
+          +description: string
+          +severity: string
+          +photo?: string
+          +clientSyncId?: string
+        }
+
+        class RecordSatelliteObservationCommand {
+          +plotId: number
+          +date: string
+          +ndviMean: number
+          +ndwiMean: number
+          +surfaceTempKelvin?: number
+          +cloudCoveragePercent?: number
+        }
+
+        class ScheduleFieldInspectionCommand {
+          +reportId: number
+          +scheduledAt: string
+        }
+      }
+
+      package "entities" {
+        interface AgroclimaticAlertProps {
+          +id?: number | string
+          +title: string
+          +description: string
+          +severity?: string
+          +region: string
+          +issuedAt?: string
+          +source?: string
+        }
+
+        class AgroclimaticAlert <<Entity>> {
+          -_title: string
+          -_description: string
+          -_severity: string
+          -_region: string
+          -_issuedAt: string
+          -_source: string
+          +title: string
+          +description: string
+          +severity: string
+          +region: string
+          +issuedAt: string
+          +source: string
+        }
+
+        interface ClimateForecastProps {
+          +id?: number | string
+          +region: string
+          +temperature: number
+          +rainChance: number
+          +forecastDate: string
+          +source?: string
+        }
+
+        class ClimateForecast <<Entity>> {
+          -_region: string
+          -_temperature: number
+          -_rainChance: number
+          -_forecastDate: string
+          -_source: string
+          +region: string
+          +temperature: number
+          +rainChance: number
+          +forecastDate: string
+          +source: string
+        }
+
+        interface FieldInspectionProps {
+          +id?: number | string
+          +reportId: number
+          +plotId: number
+          +scheduledAt: string
+          +notes?: string
+          +status?: '' | ''
+          +completedAt?: string | null
+          +inspectorUserId?: number | null
+        }
+
+        class FieldInspection <<Entity>> {
+          +plotId: number
+          -_reportId: number
+          -_scheduledAt: string
+          -_notes: string
+          -_status: '' | ''
+          -_completedAt: string | null
+          -_inspectorUserId: number | null
+          +reportId: number
+          +scheduledAt: string
+          +notes: string
+          +status: '' | ''
+          +completedAt: string | null
+          +inspectorUserId: number | null
+        }
+
+        interface PestReportProps {
+          +id?: number | string
+          +plotId: number
+          +plotName?: string
+          +reporterId: number
+          +description: string
+          +severity?: string
+          +status?: string
+          +photo?: string
+          +clientSyncId?: string
+        }
+
+        class PestReport <<Entity>> {
+          -_plotId: number
+          -_plotName: string
+          -_reporterId: number
+          -_description: string
+          -_severity: string
+          -_status: string
+          -_photo: string
+          -_clientSyncId: string
+          +plotId: number
+          +plotName: string
+          +reporterId: number
+          +description: string
+          +severity: string
+          +status: string
+          +photo: string
+          +clientSyncId: string
+          +markInspected(): void
+          +resolve(): void
+        }
+
+        interface RegionalBulletin {
+          +id: number
+          +agronomistId: number
+          +region: string
+          +title: string
+          +content: string
+          +publishedAt: string
+        }
+
+        class SatelliteObservation <<Entity>> {
+          +plotId: number
+          +date: string
+          +source: string
+          +ndviMean: number | null
+          +ndwiMean: number | null
+          +cloudCoveragePercent: number | null
+          +surfaceTempKelvin: number | null
+        }
+
+        interface TechnicalPrescriptionProps {
+          +id: number
+          +reportId: number
+          +plotId: number
+          +agronomistId: number
+          +product: string
+          +dosage: string
+          +instructions: string
+          +applicationDate: string
+          +status: '' | ''
+          +appliedAt: string | null
+        }
+
+        class TechnicalPrescription <<Entity>> {
+          +reportId: number
+          +plotId: number
+          +agronomistId: number
+          +product: string
+          +dosage: string
+          +instructions: string
+          +applicationDate: string
+          +status: '' | ''
+          +appliedAt: string | null
+        }
+      }
+    }
+
+    package "infrastructure" {
+      class CropApi {
+        -http: HttpClient
+        -alerts: AgroclimaticAlertsApiEndpoint
+        -forecasts: ClimateForecastsApiEndpoint
+        -reports: PestReportsApiEndpoint
+        -inspections: FieldInspectionsApiEndpoint
+        -observations: SatelliteObservationsApiEndpoint
+        -prescriptions: TechnicalPrescriptionsApiEndpoint
+        -bulletinsUrl
+        +getObservationsByPlot(plotId: number)
+        +importObservation(plotId: number, start: string, end: string)
+        +getPestReportsByPlot(plotId: number)
+        +getPestReport(id: number)
+        +recordReport(command: RecordPestReportCommand)
+        +deleteReport(id: number)
+        +getInspectionsByPlot(plotId: number)
+        +scheduleInspection(command: ScheduleFieldInspectionCommand, agronomistId: number)
+        +completeInspection(id: number, findings: string)
+        +getPrescriptionsByPlot(plotId: number)
+        +issuePrescription(command: IssueTechnicalPrescriptionCommand)
+        +applyPrescription(id: number)
+        +getAlertsByRegion(region: string)
+        +getForecastsByRegion(region: string)
+        +importForecasts(plotId: number)
+        +getBulletinsByRegion(region: string)
+        +publishBulletin(body: Omit<RegionalBulletin, '' | ''>)
+      }
+
+      package "assemblers" {
+        class AgroclimaticAlertAssembler <<Assembler>> {
+          +toEntityFromResource(resource: AgroclimaticAlertResource): AgroclimaticAlert
+          +toResourceFromEntity(entity: AgroclimaticAlert): AgroclimaticAlertResource
+          +toEntitiesFromResponse(response: AgroclimaticAlertsResponse): AgroclimaticAlert[]
+        }
+
+        class ClimateForecastAssembler <<Assembler>> {
+          +toEntityFromResource(resource: ClimateForecastResource): ClimateForecast
+          +toResourceFromEntity(entity: ClimateForecast): ClimateForecastResource
+          +toEntitiesFromResponse(response: ClimateForecastsResponse): ClimateForecast[]
+        }
+
+        class FieldInspectionAssembler <<Assembler>> {
+          +toEntityFromResource(resource: FieldInspectionResource): FieldInspection
+        }
+
+        class PestReportAssembler <<Assembler>> {
+          +toEntityFromResource(resource: PestReportResource, plotName): PestReport
+          +toResourceFromEntity(entity: PestReport): PestReportResource
+          +toEntitiesFromResponse(response: PestReportsResponse): PestReport[]
+        }
+
+        class SatelliteObservationAssembler <<Assembler>> {
+          +toEntityFromResource(resource: SatelliteObservationResource): SatelliteObservation
+          +toResourceFromEntity(entity: SatelliteObservation): SatelliteObservationResource
+          +toEntitiesFromResponse(response: SatelliteObservationsResponse): SatelliteObservation[]
+        }
+
+        class TechnicalPrescriptionAssembler <<Assembler>> {
+          +toEntityFromResource(resource: TechnicalPrescriptionResource): TechnicalPrescription
+        }
+      }
+
+      package "endpoints" {
+        class AgroclimaticAlertsApiEndpoint {
+          +getByRegion(region: string): Observable<AgroclimaticAlert[]>
+        }
+
+        class ClimateForecastsApiEndpoint {
+          +getByRegion(region: string): Observable<ClimateForecast[]>
+          +importForPlot(plotId: number): Observable<ClimateForecast[]>
+        }
+
+        class FieldInspectionsApiEndpoint {
+          -url
+          -assembler: FieldInspectionAssembler
+          +getByPlot(plotId: number)
+          +schedule(command: ScheduleFieldInspectionCommand, agronomistId: number)
+          +complete(id: number, findings: string)
+        }
+
+        class PestReportsApiEndpoint {
+          +getByPlot(plotId: number): Observable<PestReport[]>
+          +create(entity: PestReport): Observable<PestReport>
+        }
+
+        class SatelliteObservationsApiEndpoint {
+          +getByPlot(plotId: number): Observable<SatelliteObservation[]>
+          +importLatest(plotId: number, start: string, end: string): Observable<SatelliteObservation>
+        }
+
+        class TechnicalPrescriptionsApiEndpoint {
+          -url
+          -assembler: TechnicalPrescriptionAssembler
+          +getByPlot(plotId: number)
+          +issue(command: IssueTechnicalPrescriptionCommand)
+          +apply(id: number)
+        }
+      }
+
+      package "requests" {
+        class ImportClimateForecastRequest <<Request>> {
+          +plotId: number
+        }
+      }
+
+      package "responses" {
+        class AgroclimaticAlertResource <<Resource>> {
+          +id: number
+          +title: string
+          +description: string
+          +severity: string
+          +region: string
+          +issuedAt: string
+          +source: string
+        }
+
+        class AgroclimaticAlertsResponse <<Response>> {
+          +alerts: AgroclimaticAlertResource[]
+        }
+
+        class ClimateForecastResource <<Resource>> {
+          +id: number
+          +region: string
+          +temperatureCelsius: number
+          +rainChance: number
+          +forecastDate: string
+          +source: string
+        }
+
+        class ClimateForecastsResponse <<Response>> {
+          +forecasts: ClimateForecastResource[]
+        }
+
+        class FieldInspectionResource <<Resource>> {
+          +id: number
+          +pestReportId: number
+          +plotId: number
+          +agronomistId: number
+          +scheduledAt: string
+          +status: '' | ''
+          +findings: string | null
+          +completedAt: string | null
+        }
+
+        class PestReportResource <<Resource>> {
+          +id: number
+          +plotId: number
+          +plotName: string
+          +reporterId: number
+          +description: string
+          +severity: string
+          +status: string
+          +photo: string
+          +clientSyncId: string
+        }
+
+        class PestReportsResponse <<Response>> {
+          +reports: PestReportResource[]
+        }
+
+        class SatelliteObservationResource <<Resource>> {
+          +id: number
+          +plotId: number
+          +capturedAt: string
+          +source: string
+          +ndviMean: number | null
+          +ndwiMean: number | null
+          +surfaceTempKelvin: number | null
+          +cloudCoveragePercent: number | null
+        }
+
+        class SatelliteObservationsResponse <<Response>> {
+          +observations: SatelliteObservationResource[]
+        }
+      }
+    }
+
+    package "application" {
+      class CropStore <<Store>> {
+        -api: CropApi
+        -profiles: ProfilesStore
+        -farming: FarmingStore
+        -session: IamStore
+        -requests: Map
+        -busy: WritableSignal<Record<string, boolean>>
+        -errors: WritableSignal<Record<string, string | null>>
+        -plotsSignal: WritableSignal<PlotSummary[]>
+        -advisorSignal: WritableSignal<AdvisorSummary | null>
+        -advisorsSignal: WritableSignal<AdvisorSummary[]>
+        -scopeUser: WritableSignal<SessionParticipant | null>
+        -ready: WritableSignal<boolean>
+        -epoch: number
+        -observationsSignal: WritableSignal<SatelliteObservation[]>
+        -reportsSignal: WritableSignal<PestReport[]>
+        -alertsSignal: WritableSignal<AgroclimaticAlert[]>
+        -forecastsSignal: WritableSignal<ClimateForecast[]>
+        -bulletinsSignal: WritableSignal<RegionalBulletin[]>
+        -inspectionsSignal: WritableSignal<FieldInspection[]>
+        -prescriptionsSignal: WritableSignal<TechnicalPrescription[]>
+        -namesSignal: WritableSignal<ReadonlyMap<number, string>>
+        -requestedNames: Set
+        +activeUser
+        +scopeReady: Signal
+        +plots: Signal
+        +selectedPlot: Signal
+        +observations: Signal
+        +latestObservation: Signal
+        +pestReports: Signal
+        +alerts: Signal
+        +forecasts: Signal
+        +bulletins: Signal
+        +inspections: Signal
+        +prescriptions: Signal
+        +advisors: Signal
+        +currentAdvisor: Signal
+        +canReport: Signal
+        +canSchedule: Signal
+        +canPrescribe: Signal
+        +saving: Signal
+        +loading: Signal
+        +scopeLoading: Signal
+        +clinicalLoading: Signal
+        +observationsLoading: Signal
+        +alertsLoading: Signal
+        +scopeError: Signal
+        +clinicalError: Signal
+        +observationsError: Signal
+        +alertsError: Signal
+        +forecastsLoading: Signal
+        +forecastsError: Signal
+        +bulletinsLoading: Signal
+        +bulletinsError: Signal
+        +importingObservation: Signal
+        +importError: Signal
+        +importingForecast: Signal
+        +forecastImportError: Signal
+        +writeError: Signal
+        +error: Signal
+        +pendingPestReportsCount: Signal
+        +treatableReports: Signal
+        +schedulableReports: Signal
+        +inspectionReportError: Signal
+        +producerName(userId: number): string
+        +retryScope(): void
+        +selectPlot(plotId: number): void
+        +loadObservations(plotId: number): void
+        +loadAlerts(region: string): void
+        +canImportObservation(): boolean
+        +importLatestObservation(): void
+        +canImportForecast(): boolean
+        +importForecasts(): void
+        +loadRegionalData(region: string): void
+        +publishBulletin(title: string, content: string, onSaved: () => void): void
+        +loadClinicalData(onLoaded?: () => void): void
+        +recordReport(command: RecordPestReportCommand, onSaved: () => void, onFailure: () => void): void
+        +scheduleInspection(command: ScheduleFieldInspectionCommand, onSaved: () => void, onFailure: () => void): void
+        +completeInspection(id: number, findings: string, onSaved: () => void, onFailure: () => void): void
+        +issuePrescription(command: IssueTechnicalPrescriptionCommand, onSaved: () => void, onFailure: () => void): void
+        +canApplyPrescription(prescription: TechnicalPrescription): boolean
+        +applyPrescription(id: number, onSaved: () => void): void
+        +canDeleteReport(id: number): boolean
+        +deleteReport(id: number, onSaved: () => void, onFailure: () => void): void
+        +clearError(): void
+        +reportLabel(id: number): string
+        +advisorName(id: number): string
+        +canComplete(inspection: FieldInspection): boolean
+      }
+    }
+
+    package "presentation" {
+      package "components" {
+        class CropPlotSelector <<Component>> {
+          +plots: InputSignal<( id: number | string; name: string )[]>
+          +selectedPlotId: InputSignal<number | string | undefined>
+          +disabled: InputSignal
+          +plotSelected: OutputEmitterRef<number | string>
+        }
+      }
+
+      package "views" {
+        class AdvisorPlots <<Component>> {
+          +store: CropStore
+          +pending(plotId: number): number
+          +reload(): void
+        }
+
+        class AgriculturalAlerts <<Component>> {
+          +store: CropStore
+          #published: WritableSignal<boolean>
+          #bulletinForm: FormGroup
+          #publish(): void
+          #reloadAlerts(): void
+        }
+
+        class CropHealth <<Component>> {
+          +store: CropStore
+          -router: Router
+          -translate: TranslateService
+          -snackBar: MatSnackBar
+          +exportingImage: WritableSignal<boolean>
+          -mapContainer: Signal<ElementRef<HTMLDivElement>>
+          -mapReady: WritableSignal<boolean>
+          -map?: L.Map
+          -sectorLayer?: L.LayerGroup
+          -baseLayers
+          +selectedBase: '' | ''
+          +selectedLayer: '' | ''
+          +ngAfterViewInit(): void
+          +ngOnDestroy(): void
+          +onBaseLayerChange(): void
+          +onLayerChange(): void
+          +consultAgronomist(): void
+          +downloadImage(): Promise<void>
+        }
+
+        class DiagnosisInbox <<Component>> {
+          +store: CropStore
+          -route: ActivatedRoute
+          -snackBar: MatSnackBar
+          -translate: TranslateService
+          +deletingId: WritableSignal<number | null>
+          +plotFilter: WritableSignal<number>
+          +severityFilter: WritableSignal<string>
+          +statusFilter: WritableSignal<string>
+          +reports: Signal
+          +resetFilters(): void
+          +reload(): void
+          +remove(id: number): void
+        }
+
+        class FarmerCase <<Component>> {
+          -translate: TranslateService
+          +locale: Signal
+          +id: InputSignal
+          +store: CropStore
+          +loaded: WritableSignal<boolean>
+          +confirming: WritableSignal<number | null>
+          #breadcrumbs: Breadcrumb[]
+          +report: Signal
+          +inspections: Signal
+          +prescriptions: Signal
+          +reload(): void
+          +apply(id: number): void
+        }
+
+        class FieldInspections <<Component>> {
+          +reportId: InputSignal
+          #breadcrumbs: Signal<Breadcrumb[]>
+          -formDirective
+          -fb: NonNullableFormBuilder
+          +store: CropStore
+          +caseInspections: Signal
+          +saved: WritableSignal<boolean>
+          +savedMessage: WritableSignal<string>
+          +completionNotes: Record<number, string>
+          +inspectionForm
+          +onSubmit(): void
+          +complete(id: number): void
+        }
+
+        class PestReportForm <<Component>> {
+          #breadcrumbs: Breadcrumb[]
+          -fb: NonNullableFormBuilder
+          +store: CropStore
+          +plots
+          +loadingPlots
+          +optionsError
+          +saved: WritableSignal<boolean>
+          -formDirective
+          -snackBar: MatSnackBar
+          -translate: TranslateService
+          -router: Router
+          +reportForm
+          +onSubmit(): void
+        }
+
+        class PrescriptionForm <<Component>> {
+          +reportId: InputSignal
+          #breadcrumbs: Signal<Breadcrumb[]>
+          -formDirective
+          -fb: NonNullableFormBuilder
+          +store: CropStore
+          +saved: WritableSignal<boolean>
+          +prescriptionForm
+          +onSubmit(): void
+        }
+
+        class Prescriptions <<Component>> {
+          #breadcrumbs: Breadcrumb[]
+          +store: CropStore
+        }
+      }
+    }
+  }
+
+  ' ==========================================
+  ' REFERENCED FROM OTHER BOUNDED CONTEXTS
+  ' ==========================================
+  package "farming" {
+    package "domain.model" {
+      package "entities" {
+        interface PlotSummary
+      }
+    }
+
+    package "application" {
+      class FarmingStore <<Store>>
+    }
+  }
+
+  package "iam" {
+    package "application" {
+      class IamStore <<Store>>
+
+      interface SessionParticipant
+    }
+  }
+
+  package "profiles" {
+    package "domain.model" {
+      package "entities" {
+        interface AdvisorSummary
+      }
+    }
+
+    package "application" {
+      class ProfilesStore <<Store>>
+    }
+
+    package "presentation" {
+      package "components" {
+        class FarmerAdvisoryPanel <<Component>>
+      }
+    }
+  }
+
+  package "shared" {
+    package "domain.model" {
+      class BaseEntity
+    }
+
+    package "infrastructure" {
+      interface BaseResource
+
+      interface BaseResponse
+    }
+
+    package "presentation" {
+      package "components" {
+        interface Breadcrumb
+
+        class PageHeader <<Component>>
+      }
+    }
+  }
+}
+
+' Relationships
+CropStore --> CropApi : uses
+CropStore --> ProfilesStore : uses
+CropStore --> FarmingStore : uses
+CropStore --> IamStore : uses
+CropStore --> PlotSummary : manages
+CropStore --> AdvisorSummary : manages
+CropStore --> SessionParticipant : manages
+CropStore --> SatelliteObservation : manages
+CropStore --> PestReport : manages
+CropStore --> AgroclimaticAlert : manages
+CropStore --> ClimateForecast : manages
+CropStore --> RegionalBulletin : manages
+CropStore --> FieldInspection : manages
+CropStore --> TechnicalPrescription : manages
+CropStore ..> RecordPestReportCommand : sends
+CropStore ..> ScheduleFieldInspectionCommand : sends
+CropStore ..> IssueTechnicalPrescriptionCommand : sends
+AgroclimaticAlert --|> BaseEntity : extends
+ClimateForecast --|> BaseEntity : extends
+FieldInspection --|> BaseEntity : extends
+PestReport --|> BaseEntity : extends
+SatelliteObservation --|> BaseEntity : extends
+TechnicalPrescription --|> BaseEntity : extends
+CropApi --> AgroclimaticAlertsApiEndpoint : delegates to
+CropApi --> ClimateForecastsApiEndpoint : delegates to
+CropApi --> PestReportsApiEndpoint : delegates to
+CropApi --> FieldInspectionsApiEndpoint : delegates to
+CropApi --> SatelliteObservationsApiEndpoint : delegates to
+CropApi --> TechnicalPrescriptionsApiEndpoint : delegates to
+CropApi ..> RecordPestReportCommand : sends
+CropApi ..> ScheduleFieldInspectionCommand : sends
+CropApi ..> IssueTechnicalPrescriptionCommand : sends
+AgroclimaticAlertAssembler --> AgroclimaticAlert : builds
+AgroclimaticAlertAssembler ..> AgroclimaticAlertResource : converts
+AgroclimaticAlertAssembler ..> AgroclimaticAlertsResponse : converts
+ClimateForecastAssembler --> ClimateForecast : builds
+ClimateForecastAssembler ..> ClimateForecastResource : converts
+ClimateForecastAssembler ..> ClimateForecastsResponse : converts
+FieldInspectionAssembler --> FieldInspection : builds
+FieldInspectionAssembler ..> FieldInspectionResource : converts
+PestReportAssembler --> PestReport : builds
+PestReportAssembler ..> PestReportResource : converts
+PestReportAssembler ..> PestReportsResponse : converts
+SatelliteObservationAssembler --> SatelliteObservation : builds
+SatelliteObservationAssembler ..> SatelliteObservationResource : converts
+SatelliteObservationAssembler ..> SatelliteObservationsResponse : converts
+TechnicalPrescriptionAssembler --> TechnicalPrescription : builds
+FieldInspectionsApiEndpoint --> FieldInspectionAssembler : uses
+TechnicalPrescriptionsApiEndpoint --> TechnicalPrescriptionAssembler : uses
+AgroclimaticAlertResource --|> BaseResource : extends
+AgroclimaticAlertsResponse --|> BaseResponse : extends
+AgroclimaticAlertsResponse --> AgroclimaticAlertResource : references
+ClimateForecastResource --|> BaseResource : extends
+ClimateForecastsResponse --|> BaseResponse : extends
+ClimateForecastsResponse --> ClimateForecastResource : references
+PestReportResource --|> BaseResource : extends
+PestReportsResponse --|> BaseResponse : extends
+PestReportsResponse --> PestReportResource : references
+SatelliteObservationResource --|> BaseResource : extends
+SatelliteObservationsResponse --|> BaseResponse : extends
+SatelliteObservationsResponse --> SatelliteObservationResource : references
+AdvisorPlots --> CropStore : uses
+AdvisorPlots --> PageHeader : contains
+AgriculturalAlerts --> CropStore : uses
+AgriculturalAlerts --> CropPlotSelector : contains
+AgriculturalAlerts --> PageHeader : contains
+CropHealth --> CropStore : uses
+CropHealth --> CropPlotSelector : contains
+DiagnosisInbox --> CropStore : uses
+DiagnosisInbox --> FarmerAdvisoryPanel : contains
+DiagnosisInbox --> CropPlotSelector : contains
+DiagnosisInbox --> PageHeader : contains
+FarmerCase --> CropStore : uses
+FarmerCase --> Breadcrumb : uses
+FarmerCase --> PageHeader : contains
+FieldInspections --> Breadcrumb : uses
+FieldInspections --> CropStore : uses
+FieldInspections --> PageHeader : contains
+PestReportForm --> Breadcrumb : uses
+PestReportForm --> CropStore : uses
+PestReportForm --> PageHeader : contains
+PrescriptionForm --> Breadcrumb : uses
+PrescriptionForm --> CropStore : uses
+PrescriptionForm --> PageHeader : contains
+Prescriptions --> Breadcrumb : uses
+Prescriptions --> CropStore : uses
+Prescriptions --> PageHeader : contains
+AgroclimaticAlertsApiEndpoint --> AgroclimaticAlertAssembler : uses
+ClimateForecastsApiEndpoint --> ClimateForecastAssembler : uses
+PestReportsApiEndpoint --> PestReportAssembler : uses
+SatelliteObservationsApiEndpoint --> SatelliteObservationAssembler : uses
+
+@enduml
