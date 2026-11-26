@@ -57,7 +57,7 @@
   }
 }
 
-/* Mock map card */
+/* Satellite map card */
 .map-card {
   background: var(--mat-sys-surface-container-low);
   border-radius: 20px;
@@ -77,28 +77,6 @@
   background: var(--mat-sys-surface-container-highest);
   z-index: 1; /* Keep leaflet below material overlays */
 }
-
-/* Legend */
-.map-legend {
-  display: flex;
-  gap: 20px;
-  font: var(--mat-sys-label-medium);
-  color: var(--mat-sys-on-surface-variant);
-  margin-top: 16px;
-}
-
-.dot {
-  display: inline-block;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  margin-right: 6px;
-  vertical-align: middle;
-}
-
-.dot-critical { background: var(--mat-sys-error); }
-.dot-stress   { background: var(--mat-sys-primary); }
-.dot-optimum  { background: var(--mat-sys-surface-container-highest); border: 1px solid var(--mat-sys-outline); }
 
 /* Diagnosis sidebar */
 .diagnosis-aside {
@@ -128,9 +106,17 @@
   font: var(--mat-sys-body-large);
 }
 
-.metrics dt { color: var(--mat-sys-on-surface-variant); }
-.metrics dd { margin: 0; font-weight: 600; text-align: right; }
-.value-good { color: var(--mat-sys-primary); }
+.metrics dt {
+  color: var(--mat-sys-on-surface-variant);
+}
+.metrics dd {
+  margin: 0;
+  font-weight: 600;
+  text-align: right;
+}
+.value-good {
+  color: var(--mat-sys-primary);
+}
 
 /* Recommendation */
 .recommendation-box {
@@ -196,6 +182,102 @@ mat-card-actions {
 }
 
 @media (max-width: 600px) {
-  .map-card { padding: 12px; min-height: 420px; }
-  .mock-map { min-height: 360px; }
+  .map-card {
+    padding: 12px;
+    min-height: 420px;
+  }
+  .mock-map {
+    min-height: 360px;
+  }
 }
+
+.imagery-controls {
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 16px;
+  padding: 12px 18px;
+}
+.layers-bar {
+  flex-wrap: wrap;
+}
+.opacity-control {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font: var(--mat-sys-label-large);
+}
+.opacity-control input {
+  accent-color: var(--mat-sys-primary);
+  width: 120px;
+}
+.legend-heading,
+.legend-labels {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.raster-legend {
+  padding: 0 2px;
+}
+.legend-heading {
+  flex-wrap: wrap;
+  font: var(--mat-sys-label-large);
+  margin-bottom: 10px;
+}
+.ndvi-ramp {
+  height: 14px;
+  border-radius: 7px;
+  background: linear-gradient(
+    90deg,
+    #fffbd5,
+    #d9ef8b,
+    #91cf60,
+    #1a9850,
+    #006837
+  );
+}
+.legend-labels {
+  font: var(--mat-sys-body-small);
+  color: var(--mat-sys-on-surface-variant);
+}
+.legend-labels {
+  margin: 6px 0 10px;
+}
+.cloud-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px;
+  background: var(--mat-sys-surface-container);
+  border-radius: 10px;
+  font: var(--mat-sys-body-small);
+}
+.cloud-note mat-icon {
+  flex-shrink: 0;
+}
+@media (max-width: 600px) {
+  .opacity-control {
+    margin-left: 0;
+    flex-wrap: wrap;
+  }
+}
+
+/* A reserved status row keeps feedback outside the imagery without shifting the map. */
+.map-viewport {
+  position: relative;
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  isolation: isolate;
+}
+.map-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 48px;
+  font: var(--mat-sys-body-small);
+  color: var(--mat-sys-on-surface-variant);
+}
+.map-status button { flex-shrink: 0; }

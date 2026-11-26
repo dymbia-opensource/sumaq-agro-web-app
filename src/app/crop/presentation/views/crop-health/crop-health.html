@@ -42,17 +42,73 @@
 } @if (store.importError(); as error) {
 <p role="status">{{ error | translate }}</p>
 }
-<div class="layers-bar">
-  <span>{{ 'crop.layers' | translate }}</span>
-  <mat-radio-group [(ngModel)]="selectedLayer" (change)="onLayerChange()">
-    <mat-radio-button value="ndvi">NDVI</mat-radio-button>
-    <mat-radio-button value="ndwi">NDWI</mat-radio-button>
-  </mat-radio-group>
-</div>
-<p>{{ 'crop.map-boundary-note' | translate }}</p>
+<section class="imagery-controls" aria-label="Satellite imagery">
+  <div class="layers-bar">
+    <span>{{ 'crop.layers' | translate }}</span>
+    <mat-radio-group [(ngModel)]="selectedLayer" (change)="onLayerChange()">
+      <mat-radio-button value="ndvi">NDVI</mat-radio-button>
+      <mat-radio-button value="ndwi">NDWI</mat-radio-button>
+    </mat-radio-group>
+    <label class="opacity-control">
+      {{ 'crop.raster.opacity' | translate }} {{ opacity }}%
+      <input
+        type="range"
+        min="0"
+        max="100"
+        step="5"
+        [value]="opacity"
+        [disabled]="!imagery.available()"
+        [attr.aria-label]="'crop.raster.opacity' | translate"
+        (input)="onOpacityChange($any($event.target).value)"
+      />
+    </label>
+  </div>
+
+</section>
 <div class="content-grid">
   <div class="map-card">
-    <div #mapContainer class="mock-map"></div>
+    <div class="map-viewport">
+      <div #mapContainer class="mock-map crop-health-map"
+        [attr.aria-busy]="imagery.loading() || rasterLoading()"></div>
+    </div>
+    <div class="map-status" role="status" aria-live="polite">
+      @if (imagery.error() || rasterError()) {
+        <span>{{ (imagery.error() ? 'crop.raster.layer-error' : 'crop.raster.partial') | translate }}</span>
+        <button mat-button type="button" (click)="imagery.retry()">{{ 'crop.raster.retry' | translate }}</button>
+      } @else if (imagery.loading() || rasterLoading()) {
+        <span>{{ 'crop.raster.loading-short' | translate }}</span>
+      } @else if (imagery.metadata() && !imagery.available()) {
+        <span>{{ 'crop.raster.no-layer' | translate }} {{ imagery.index() }}</span>
+      }
+    </div>
+    @if (imagery.available()) {
+    <section
+      class="raster-legend"
+      [attr.aria-label]="'crop.raster.legend' | translate"
+    >
+      <div class="legend-heading">
+        <strong
+          >{{ imagery.index() }}</strong
+        >
+        <span
+          >{{ 'crop.raster.mean' | translate }}: {{ selectedMean === null ?
+          ('crop.no-data' | translate) : (selectedMean | number: '1.2-2')
+          }}</span
+        >
+      </div>
+      @if (imagery.index() === 'NDVI') {
+      <div
+        class="ndvi-ramp"
+        role="img"
+        [attr.aria-label]="'crop.raster.ndvi-scale' | translate"
+      ></div>
+      <div class="legend-labels">
+        <span>{{ 'crop.raster.low-vigor' | translate }}</span
+        ><span>{{ 'crop.raster.high-vigor' | translate }}</span>
+      </div>
+      }
+    </section>
+    }
     <div class="map-toolbar">
       <span class="boundary-legend"
         ><mat-icon>crop_free</mat-icon>{{ 'crop.plot-boundary' | translate
@@ -88,7 +144,14 @@
       </mat-card-header>
       <mat-card-content>
         @if ( !store.observationsLoading() && !store.observationsError() &&
-        store.latestObservation(); as observation ) {
+        store.latestObservation(); as observation ) { @if
+        (observation.cloudCoveragePercent !== null &&
+        observation.cloudCoveragePercent >= 50) {
+        <p class="cloud-note">
+          <mat-icon>cloud</mat-icon>{{ 'crop.raster.cloud-warning' | translate
+          }}
+        </p>
+        }
         <dl class="metrics">
           <dt>NDVI</dt>
           <dd>

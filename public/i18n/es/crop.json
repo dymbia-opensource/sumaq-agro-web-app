@@ -105,7 +105,10 @@
       "assessment-partial": "La evaluación se guardó, pero el cierre no se confirmó. Reintenta con el mismo borrador para sincronizar sin duplicarla.",
       "save-assessment": "No se pudo guardar la evaluación. Conservamos tu borrador para reintentar.",
       "import-forecasts": "No pudimos importar el pronóstico de la parcela.",
-      "no-forecast-available": "AgroMonitoring aún no tiene pronóstico para esta parcela."
+      "no-forecast-available": "AgroMonitoring aún no tiene pronóstico para esta parcela.",
+      "imagery-load": "No se pudo consultar la imagen satelital. Tus valores registrados se conservan.",
+      "imagery-mismatch": "La imagen no coincide con la captura seleccionada.",
+      "imagery-tiles": "No se pudieron cargar todos los mosaicos. Reintenta para completar la capa."
     },
     "no-inspections": "Sin inspecciones",
     "no-prescriptions": "Sin recetas",
@@ -238,6 +241,23 @@
       "evaluation-saved": "Evaluación guardada. El estado del caso refleja la conclusión registrada."
     },
     "plot-selector": "Selector de parcela",
-    "import-forecast": "Importar pronóstico de 5 días"
+    "import-forecast": "Importar pronóstico de 5 días",
+    "raster": {
+      "opacity": "Opacidad",
+      "loading": "Cargando imagen satelital real…",
+      "retry": "Reintentar capa",
+      "unavailable": "Esta captura no tiene imagen para el índice seleccionado. Se conservan los valores registrados y el contorno.",
+      "legend": "Leyenda del índice satelital",
+      "original": "Imagen original",
+      "mean": "Promedio de la parcela",
+      "ndvi-scale": "Escala orientativa de NDVI, de tonos claros a verde intenso",
+      "low-vigor": "Tonos claros · Menor vigor",
+      "high-vigor": "Verde intenso · Mayor vigor",
+      "cloud-warning": "Alta nubosidad en esta captura: interpreta los índices con cautela.",
+      "layer-error": "No se pudo cargar la capa.",
+      "partial": "Capa incompleta.",
+      "loading-short": "Cargando capa…",
+      "no-layer": "Sin imagen para"
+    }
   }
 }
