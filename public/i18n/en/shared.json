@@ -61,5 +61,13 @@
     "title": "Page not found",
     "message": "The path {{ path }} does not exist.",
     "go-home": "Go to home"
+  },
+  "footer": {
+    "rights": "All rights reserved.",
+    "legal": "Legal links",
+    "terms": "Terms of service",
+    "privacy": "Privacy policy",
+    "cookies": "Cookie policy",
+    "new-tab": "(opens in a new tab)"
   }
 }

@@ -10,12 +10,16 @@
   --mat-sidenav-container-shape: 0;
 }
 
-/* The content never scrolls sideways; menus open in an overlay, so nothing is cut. */
+/* The content never scrolls sideways; menus open in an overlay, so nothing is cut.
+   The column layout keeps the footer at the bottom on short pages. */
 .main-area {
+  display: flex;
+  flex-direction: column;
   overflow-x: hidden;
 }
 
 .content {
+  flex: 1 0 auto;
   padding: 8px 32px 32px;
 }
 

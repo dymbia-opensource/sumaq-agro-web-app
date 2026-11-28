@@ -4,6 +4,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { Router, RouterOutlet } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { IamStore } from '../../../../iam/application/iam.store';
+import { FooterContent } from '../../../../shared/presentation/components/footer-content/footer-content';
 import { LanguageSwitcher } from '../../../../shared/presentation/components/language-switcher/language-switcher';
 
 /**
@@ -12,10 +13,18 @@ import { LanguageSwitcher } from '../../../../shared/presentation/components/lan
  * @remarks
  * Shows a minimal header (brand, language, user, sign out) with no side menu,
  * so the user stays focused on activating a plan. It also shares the
- * subscription state between the catalog and the checkout.
+ * subscription state between the catalog and the checkout. The footer keeps the
+ * legal links visible while the user chooses and pays a plan.
  */
 @Component({
-  imports: [RouterOutlet, MatButtonModule, MatIconModule, TranslatePipe, LanguageSwitcher],
+  imports: [
+    RouterOutlet,
+    MatButtonModule,
+    MatIconModule,
+    TranslatePipe,
+    LanguageSwitcher,
+    FooterContent,
+  ],
   selector: 'app-subscriptions-shell',
   styleUrl: './subscriptions-shell.css',
   templateUrl: './subscriptions-shell.html',

@@ -7,6 +7,7 @@
 export const environment = {
   production: false,
   platformProviderApiBaseUrl: 'http://localhost:8080/api/v1',
+  landingPageUrl: 'https://sumaqagro-landing-page.pages.dev',
 
   // IAM
   platformProviderSignUpEndpointPath: '/users',

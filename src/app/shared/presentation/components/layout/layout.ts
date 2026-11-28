@@ -2,12 +2,13 @@ import { Component, effect, inject, untracked } from '@angular/core';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { Router, RouterOutlet } from '@angular/router';
 import { IamStore } from '../../../../iam/application/iam.store';
+import { FooterContent } from '../footer-content/footer-content';
 import { LeftSidebar } from '../left-sidebar/left-sidebar';
 import { Toolbar } from '../toolbar/toolbar';
 import { LayoutStore } from './layout.store';
 
 /**
- * Shell of the private pages: side menu, top bar and the routed content.
+ * Shell of the private pages: side menu, top bar, the routed content and the footer.
  *
  * @remarks
  * It is the parent route of every bounded context. The pages without menu
@@ -15,7 +16,7 @@ import { LayoutStore } from './layout.store';
  */
 @Component({
   selector: 'app-layout',
-  imports: [RouterOutlet, MatSidenavModule, LeftSidebar, Toolbar],
+  imports: [RouterOutlet, MatSidenavModule, LeftSidebar, Toolbar, FooterContent],
   templateUrl: './layout.html',
   styleUrl: './layout.css',
 })
