@@ -1,67 +1,70 @@
-import { DecimalPipe } from "@angular/common";
-import { Component, inject } from "@angular/core";
-import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { ActivatedRoute } from "@angular/router";
-import { TranslatePipe } from "@ngx-translate/core";
-import { CertificationStore } from "../../../application/certification.store";
+import { DecimalPipe } from '@angular/common';
+import { Component, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ActivatedRoute } from '@angular/router';
+import { TranslatePipe } from '@ngx-translate/core';
+import { FooterContent } from '../../../../shared/presentation/components/footer-content/footer-content';
+import { CertificationStore } from '../../../application/certification.store';
 
 /**
  * Public page of the QR code of a certificate (`/verify?number=...&hash=...`):
  * it tells whether the certificate is authentic and still valid.
+ *
+ * @remarks
+ * Anyone who scans the QR code opens it without signing in, so it also shows
+ * the legal links of the Landing Page.
  */
 @Component({
-  selector: "app-public-traceability",
-  imports: [DecimalPipe, TranslatePipe],
+  selector: 'app-public-traceability',
+  imports: [DecimalPipe, TranslatePipe, FooterContent],
   providers: [CertificationStore],
   template: `
     <article class="trace-card">
-      <p class="eyebrow">
-        SumaqAgro · {{ "certification.trace.public-verification" | translate }}
-      </p>
+      <p class="eyebrow">SumaqAgro · {{ 'certification.trace.public-verification' | translate }}</p>
       @let state = verification();
       @if (state.loading) {
-        <h1>{{ "certification.trace.verifying" | translate }}</h1>
+        <h1>{{ 'certification.trace.verifying' | translate }}</h1>
       } @else if (state.error) {
-        <h1>{{ "certification.trace.verification-failed" | translate }}</h1>
+        <h1>{{ 'certification.trace.verification-failed' | translate }}</h1>
         <p>{{ state.error | translate }}</p>
       } @else if (state.record; as result) {
-        @if (result.status === "REVOKED") {
-          <h1>{{ "certification.trace.revoked" | translate }}</h1>
-          <p>{{ "certification.trace.not-valid" | translate }}</p>
+        @if (result.status === 'REVOKED') {
+          <h1>{{ 'certification.trace.revoked' | translate }}</h1>
+          <p>{{ 'certification.trace.not-valid' | translate }}</p>
         } @else if (!result.authentic) {
-          <h1>{{ "certification.trace.verification-failed" | translate }}</h1>
-          <p>{{ "certification.workspace.invalid-hash" | translate }}</p>
+          <h1>{{ 'certification.trace.verification-failed' | translate }}</h1>
+          <p>{{ 'certification.workspace.invalid-hash' | translate }}</p>
         } @else {
-          <h1>{{ "certification.trace.registered" | translate }}</h1>
+          <h1>{{ 'certification.trace.registered' | translate }}</h1>
           <p class="status">
             {{ result.certificateNumber }} ·
-            {{ "certification.trace.active" | translate }}
+            {{ 'certification.trace.active' | translate }}
           </p>
           <dl>
-            <dt>{{ "certification.trace.batch" | translate }}</dt>
+            <dt>{{ 'certification.trace.batch' | translate }}</dt>
             <dd>{{ result.batchCode }}</dd>
-            <dt>{{ "certification.trace.product" | translate }}</dt>
+            <dt>{{ 'certification.trace.product' | translate }}</dt>
             <dd>
-              {{
-                "certification.workspace.cropType." + result.cropType
-                  | translate
-              }}
+              {{ 'certification.workspace.cropType.' + result.cropType | translate }}
               @if (result.seedVariety) {
                 · {{ result.seedVariety }}
               }
             </dd>
             @if (result.plotName || result.region) {
-              <dt>{{ "certification.trace.origin" | translate }}</dt>
+              <dt>{{ 'certification.trace.origin' | translate }}</dt>
               <dd>{{ result.plotName }} {{ result.region }}</dd>
             }
-            <dt>{{ "certification.trace.quality" | translate }}</dt>
+            <dt>{{ 'certification.trace.quality' | translate }}</dt>
             <dd>
-              {{ 'certification.quality-category.' + result.qualityCategory | translate }} · {{ result.qualityScore | number }}
+              {{ 'certification.quality-category.' + result.qualityCategory | translate }} ·
+              {{ result.qualityScore | number }}
             </dd>
           </dl>
         }
       }
     </article>
+
+    <app-footer-content class="trace-footer" />
   `,
   styles: [
     `
@@ -77,6 +80,10 @@ import { CertificationStore } from "../../../application/certification.store";
         border-radius: 18px;
         padding: clamp(20px, 4vw, 42px);
         box-shadow: 0 4px 18px #0002;
+      }
+
+      .trace-footer {
+        margin-top: 24px;
       }
 
       .eyebrow {
@@ -140,7 +147,7 @@ export class PublicTraceability {
     inject(ActivatedRoute)
       .queryParamMap.pipe(takeUntilDestroyed())
       .subscribe((params) =>
-        this.store.verifyCertificate(params.get("number"), params.get("hash")),
+        this.store.verifyCertificate(params.get('number'), params.get('hash')),
       );
   }
 }
