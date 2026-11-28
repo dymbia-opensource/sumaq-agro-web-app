@@ -2,6 +2,7 @@
 export const environment = {
   production: true,
   platformProviderApiBaseUrl: 'https://sumaq-agro-platform.onrender.com/api/v1',
+  landingPageUrl: 'https://sumaqagro-landing-page.pages.dev',
 
   // IAM
   platformProviderSignUpEndpointPath: '/users',
