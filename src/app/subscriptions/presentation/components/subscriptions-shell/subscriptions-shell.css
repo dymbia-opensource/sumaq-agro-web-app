@@ -4,6 +4,13 @@
   background: var(--mat-sys-surface-container-low);
 }
 
+/* Column layout: the footer stays at the bottom on short pages. */
+.shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
 .shell-header {
   display: flex;
   align-items: center;
@@ -39,6 +46,9 @@
 }
 
 .shell-main {
+  flex: 1 0 auto;
+  box-sizing: border-box;
+  width: 100%;
   max-width: 960px;
   margin: 0 auto;
   padding: 16px 24px 64px;
