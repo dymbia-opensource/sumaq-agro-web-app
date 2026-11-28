@@ -1,0 +1,20 @@
+<footer class="footer-content">
+  <p class="footer-copyright">
+    &copy; {{ currentYear }} SumaqAgro. {{ 'footer.rights' | translate }}
+  </p>
+
+  <nav class="footer-links" [attr.aria-label]="'footer.legal' | translate">
+    <a [href]="termsUrl" target="_blank" rel="noopener noreferrer">
+      {{ 'footer.terms' | translate }}
+      <span class="visually-hidden">{{ 'footer.new-tab' | translate }}</span>
+    </a>
+    <a [href]="privacyUrl" target="_blank" rel="noopener noreferrer">
+      {{ 'footer.privacy' | translate }}
+      <span class="visually-hidden">{{ 'footer.new-tab' | translate }}</span>
+    </a>
+    <a [href]="cookiesUrl" target="_blank" rel="noopener noreferrer">
+      {{ 'footer.cookies' | translate }}
+      <span class="visually-hidden">{{ 'footer.new-tab' | translate }}</span>
+    </a>
+  </nav>
+</footer>
